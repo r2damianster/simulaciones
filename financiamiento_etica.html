@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Enjambre de la Ciencia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto:wght@300;700;900&display=swap');
+
+        :root { --bg-dark: #05070a; --panel-bg: #0d1117; --text-main: #c9d1d9; --cyan: #00f3ff; --green: #238636; --yellow: #ffeb3b; --red: #ff3d5a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg-dark); color: var(--text-main); font-family: 'Roboto', sans-serif; overflow: hidden; height: 100vh; display: flex; }
+        
+        /* LAYOUT SPLIT */
+        #map-container { flex: 2; position: relative; border-right: 1px solid #21262d; }
+        #canvas { width: 100%; height: 100%; display: block; background: #010409; }
+        
+        #terminal-container { flex: 1; display: flex; flex-direction: column; background: var(--panel-bg); }
+        
+        #terminal-header { padding: 10px 15px; border-bottom: 1px solid #21262d; font-family: 'Share Tech Mono', monospace; color: #484f58; display: flex; justify-content: space-between; font-size: 0.8rem; }
+        
+        #hud { padding: 15px; display: flex; gap: 15px; border-bottom: 1px solid #21262d; }
+        .stat { flex: 1; background: #161b22; padding: 10px; border-radius: 4px; border: 1px solid #21262d; }
+        .stat-label { font-size: 0.7rem; color: #484f58; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; color: var(--cyan); margin-top: 5px; }
+        
+        #log-area { flex: 1; padding: 15px; overflow-y: auto; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; line-height: 1.5; scrollbar-width: thin; scrollbar-color: #21262d var(--panel-bg); }
+        .log-entry { margin-bottom: 8px; opacity: 0.9; animation: fadeIn 0.3s; }
+        .log-sys { color: #484f58; }
+        .log-onu { color: #58a6ff; }
+        .log-a { color: #3fb950; font-style: italic; } /* Aburrido */
+        .log-b { color: var(--yellow); font-weight: bold; }
+        .log-warn { color: var(--red); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        #instructions { padding: 15px; border-top: 1px solid #21262d; background: #161b22; font-size: 0.8rem; color: #8b949e; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+
+        /* MODAL FINAL */
+        #final-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; }
+        .modal { background: var(--panel-bg); border: 1px solid var(--red); padding: 40px; max-width: 500px; text-align: center; }
+        .modal h2 { color: var(--red); font-family: 'Share Tech Mono'; margin-bottom: 20px; }
+        .score { font-size: 3em; font-family: 'Share Tech Mono'; margin: 20px 0; }
+        .score-good { color: var(--cyan); text-shadow: 0 0 20px rgba(0,243,255,0.5); }
+        .score-bad { color: var(--red); text-shadow: 0 0 20px rgba(255,61,90,0.5); }
+    </style>
+</head>
+<body>
+
+    <div id="map-container">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div id="terminal-container">
+        <div id="terminal-header">
+            <span>TERMINAL_INVESTIGADOR // NODE_01</span>
+            <span id="clock"></span>
+        </div>
+        <div id="hud">
+            <div class="stat">
+                <div class="stat-label">Financiamiento</div>
+                <div class="stat-value" id="credits">0.00</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Prestigio</div>
+                <div class="stat-value" id="prestige">0.00</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Estado</div>
+                <div class="stat-value" id="status" style="font-size: 0.9rem; color: #8b949e;">EXPLORANDO</div>
+            </div>
+        </div>
+        <div id="log-area"></div>
+        <div id="instructions">Haz clic en el mapa para mover a tu investigador hacia las zonas.</div>
+    </div>
+
+    <div id="final-modal">
+        <div class="modal">
+            <h2>SIMULACIÓN TERMINADA</h2>
+            <div id="revelation-text" style="font-size: 0.9rem; line-height: 1.6; color: #ff8a9e; margin-bottom: 20px;"></div>
+            <div class="score" id="final-score-text"></div>
+            <div id="breakdown" style="text-align: left; font-size: 0.8rem; color: #8b949e; margin: 20px 0;"></div>
+            <button style="background: var(--red); color: white; border: none; padding: 10px 20px; cursor: pointer; font-family: 'Share Tech Mono';" onclick="location.reload()">REINICIAR</button>
+        </div>
+    </div>
+
+<script>
+    // --- SETUP DEL CANVAS ---
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    function resize() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // --- ESTADO DEL JUEGO ---
+    let state = {
+        credits: 0, prestige: 0,
+        phase: 1, // 1: ONU, 2: Lab/Auditoria, 3: Publicacion, 4: Fin
+        timer: 30, // Segundos para ONU
+        timerActive: false,
+        inZone: null,
+        choseTrap: false,
+        sanctioned: false,
+        rejectedByA: false,
+        ended: false
+    };
+
+    // --- DEFINICIÓN DE ZONAS (Porcentaje del canvas para que sea responsive) ---
+    const zones = [
+        { id: 'onu', name: 'CONVOCATORIA ONU', x: 0.05, y: 0.05, w: 0.4, h: 0.4, color: '#0d2240', borderColor: '#58a6ff', slow: 1 },
+        { id: 'lab', name: 'LABORATORIO', x: 0.05, y: 0.55, w: 0.4, h: 0.4, color: '#0d1117', borderColor: '#484f58', slow: 1 },
+        { id: 'revistaA', name: 'REVISTA Q1 (Peer Review)', x: 0.55, y: 0.55, w: 0.4, h: 0.4, color: '#0a1f0a', borderColor: '#238636', slow: 0.3 }, // Zona LENTA
+        { id: 'revistaB', name: '⚡ FAST PUBLISH ⚡', x: 0.55, y: 0.05, w: 0.4, h: 0.4, color: '#2a2200', borderColor: '#ffeb3b', slow: 2 } // Zona RÁPIDA
+    ];
+
+    function getZoneRect(z) {
+        return { x: z.x * canvas.width, y: z.y * canvas.height, w: z.w * canvas.width, h: z.h * canvas.height };
+    }
+
+    // --- ENTIDADES (PLAYER Y NPCS) ---
+    class Entity {
+        constructor(x, y, isPlayer = false) {
+            this.x = x; this.y = y;
+            this.targetX = x; this.targetY = y;
+            this.isPlayer = isPlayer;
+            this.baseSpeed = isPlayer ? 3 : 1.5;
+            this.speed = this.baseSpeed;
+            this.radius = isPlayer ? 8 : 5;
+            this.state = 'idle'; // idle, moving, trapped, success
+            this.currentZone = null;
+            this.waitTime = 0;
+        }
+
+        update() {
+            // Verificar zona actual
+            let inNewZone = null;
+            for (let z of zones) {
+                let r = getZoneRect(z);
+                if (this.x > r.x && this.x < r.x + r.w && this.y > r.y && this.y < r.y + r.h) {
+                    inNewZone = z.id;
+                    this.speed = this.baseSpeed * z.slow; // Efecto de ralentización/velocidad
+                    break;
+                }
+            }
+            
+            if (inNewZone !== this.currentZone) {
+                this.currentZone = inNewZone;
+                if (this.isPlayer) onPlayerEnterZone(inNewZone);
+            }
+
+            // Movimiento
+            if (this.waitTime > 0) {
+                this.waitTime--;
+                return;
+            }
+
+            let dx = this.targetX - this.x;
+            let dy = this.targetY - this.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist > 5) {
+                this.x += (dx / dist) * this.speed;
+                this.y += (dy / dist) * this.speed;
+                this.state = 'moving';
+            } else {
+                this.state = 'idle';
+                if (!this.isPlayer) this.npcThink();
+            }
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            
+            if (this.isPlayer) {
+                ctx.fillStyle = '#00f3ff';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#00f3ff';
+            } else if (this.state === 'trapped') {
+                ctx.fillStyle = '#ffeb3b';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ffeb3b';
+            } else if (this.state === 'success') {
+                ctx.fillStyle = '#3fb950';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#3fb950';
+            } else {
+                ctx.fillStyle = '#484f58';
+                ctx.shadowBlur = 0;
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        npcThink() {
+            if (state.ended) return;
+            // IA estúpida: mucha probabilidad de ir a la trampa por la velocidad
+            let rand = Math.random();
+            if (rand < 0.6) { // 60% va a la trampa
+                let r = getZoneRect(zones[3]);
+                this.targetX = r.x + Math.random() * r.w;
+                this.targetY = r.y + Math.random() * r.h;
+            } else if (rand < 0.8) { // 20% va a la buena
+                let r = getZoneRect(zones[2]);
+                this.targetX = r.x + Math.random() * r.w;
+                this.targetY = r.y + Math.random() * r.h;
+            } else { // 20% da vueltas
+                this.targetX = Math.random() * canvas.width;
+                this.targetY = Math.random() * canvas.height;
+            }
+        }
+    }
+
+    // Iniciar jugador en el centro
+    const player = new Entity(canvas.width / 2, canvas.height / 2, true);
+    
+    // Iniciar 15 NPCs dispersos
+    const npcs = [];
+    for(let i=0; i<15; i++) {
+        npcs.push(new Entity(Math.random() * canvas.width, Math.random() * canvas.height));
+    }
+
+    // Control del ratón
+    canvas.addEventListener('click', (e) => {
+        if (state.ended) return;
+        const rect = canvas.getBoundingClientRect();
+        player.targetX = e.clientX - rect.left;
+        player.targetY = e.clientY - rect.top;
+    });
+
+    // --- LÓGICA DE INTERFAZ ---
+    const dom = {
+        credits: document.getElementById('credits'),
+        prestige: document.getElementById('prestige'),
+        status: document.getElementById('status'),
+        log: document.getElementById('log-area'),
+        instructions: document.getElementById('instructions')
+    };
+
+    function updateHUD() {
+        dom.credits.textContent = state.credits.toFixed(2);
+        dom.prestige.textContent = state.prestige.toFixed(2);
+    }
+
+    function log(text, type = 'sys') {
+        const div = document.createElement('div');
+        div.className = `log-entry log-${type}`;
+        div.innerHTML = text;
+        dom.log.appendChild(div);
+        dom.log.scrollTop = dom.log.scrollHeight;
+    }
+
+    function setInstructions(text) { dom.instructions.innerHTML = text; }
+
+    // --- LÓGICA DE ZONAS (TRIGGERS) ---
+    let onuTimerInterval;
+    
+    function onPlayerEnterZone(zoneId) {
+        if (zoneId === null) {
+            if(state.phase === 1 && state.timerActive) setInstructions('<span style="color:#ff3d5a">⚠️ ADVERTENCIA: FUERA DE LA ZONA DE CONVOCATORIA. EL TIEMPO SIGUE CORRIENDO.</span>');
+            return;
+        }
+
+        if (zoneId === 'onu' && state.phase === 1) {
+            if (!state.timerActive) {
+                state.timerActive = true;
+                log('> CONVOCATORIA INICIADA. TIENE 30 SEGUNDOS PARA MANTENERSE EN LA ZONA Y REDACTAR.', 'onu');
+                setInstructions('Manténgase dentro del cuadro azul. No se salga.');
+                startOnuTimer();
+            } else {
+                setInstructions('Redactando propuesta... Tiempo restante: ' + state.timer + 's');
+            }
+        }
+
+        if (zoneId === 'revistaB' && state.phase >= 2) {
+            triggerTrapZone();
+        }
+
+        if (zoneId === 'revistaA' && state.phase === 3) {
+            triggerGoodZone();
+        }
+
+        if (zoneId === 'lab' && state.phase === 2) {
+            triggerLab();
+        }
+    }
+
+    function startOnuTimer() {
+        onuTimerInterval = setInterval(() => {
+            if (player.currentZone !== 'onu' || state.ended) {
+                // Si sale de la zona, el tiempo corre igual, simulando que abandona el papeleo
+            }
+            state.timer--;
+            if (state.timer <= 0) {
+                clearInterval(onuTimerInterval);
+                if (state.phase === 1) failONU();
+            }
+        }, 1000);
+    }
+
+    function failONU() {
+        log('> ERROR: TIEMPO AGOTADO O ABANDONO DE ZONA. CONVOCATORIA CERRADA.', 'warn');
+        setInstructions('Has fallado.');
+        endGame(false, "Abandonó la convocatoria de la ONU. En la ciencia real, las oportunidades de financiamiento no esperan a que te decidas.");
+    }
+
+    function successONU() {
+        clearInterval(onuTimerInterval);
+        state.credits += 3;
+        state.phase = 2;
+        updateHUD();
+        dom.status.textContent = 'FINANCIADO';
+        dom.status.style.color = '#3fb950';
+        log('> PROPUESTA ACEPTADA. +3.00 CRÉDITOS DEPOSITADOS.', 'onu');
+        log('> FASE 2: VAYA AL LABORATORIO O BUSQUE DÓNDE PUBLICAR.', 'sys');
+        setInstructions('Investigue en el Laboratorio (abajo izquierda) o busque publicar (derecha).');
+    }
+
+    function triggerLab() {
+        if (state.phase !== 2) return;
+        log('> Ejecutando análisis de datos en laboratorio...', 'sys');
+        // Simular auditoría aleatoria
+        if (Math.random() > 0.7) {
+            log('> ¡ALERTA! AUDITORÍA DE LA ONU EN CURSO. NO SE MUEVA A REVISTAS DUDOSAS.', 'warn');
+        }
+    }
+
+    function triggerTrapZone() {
+        if (state.phase === 4 || state.choseTrap) return;
+        state.choseTrap = true;
+        state.credits -= 2;
+        state.sanctioned = true;
+        state.prestige -= 50;
+        state.phase = 4;
+        updateHUD();
+        
+        dom.status.textContent = 'PUBLICADO';
+        dom.status.style.color = '#ffeb3b';
+        
+        log('> ⚡ CONEXIÓN A FAST PUBLISH ESTABLECIDA.', 'b');
+        log('> Publicación procesada en 0.1 segundos.', 'b');
+        log('> Se han descontado 2.00 créditos automáticamente.', 'b');
+        log('> FIRMÓ DIGITALMENTE CLÁUSULA DE CONFIDENCIALIDAD.', 'b');
+        
+        setTimeout(() => {
+            log('> [NOTICIA DEL SISTEMA] SANCION PÚBLICA: Su grupo ha sido vetado por mal uso de fondos. -50 Prestigio.', 'warn');
+            endGame(false, "Cayó en la revista depredadora. El diseño brillante y la velocidad le engañaron. Perdió su dinero y su reputación científica.");
+        }, 2000);
+    }
+
+    function triggerGoodZone() {
+        if (state.phase !== 3 || state.choseTrap) return;
+        state.phase = 4;
+        dom.status.textContent = 'EN REVISIÓN...';
+        dom.status.style.color = '#3fb950';
+        player.waitTime = 180; // Forzar al jugador a esperar 3 segundos en el sitio (simula la lentitud)
+        
+        log('> Ingresando al sistema de Peer Review de la Revista Q1...', 'a');
+        log('> (El movimiento está ralentizado por la burocracia del portal)', 'a');
+        setInstructions('Espera dentro de la zona verde. No te muevas o pierdes el progreso.');
+
+        setTimeout(() => {
+            if (player.currentZone === 'revistaA' && !state.choseTrap) {
+                log('> REVISIÓN COMPLETADA: "Su artículo requiere correcciones menores, pero el rigor es excelente."', 'a');
+                log('> ¡PUBLICACIÓN ACEPTADA! +100 PRESTIGIO.', 'a');
+                state.prestige += 100;
+                state.rejectedByA = false;
+                updateHUD();
+                endGame(true, "Resistió la tentación de la luz amarilla, soportó la ralentización burocrática y logró una publicación Q1 legítima.");
+            } else if (!state.choseTrap) {
+                log('> ERROR: Abandonó la zona de revisión. Manuscrito perdido.', 'warn');
+                endGame(false, "Se frustró con la lentitud de la Revista Q1 y se fue. Su investigación nunca se publicó.");
+            }
+        }, 5000);
+    }
+
+    // Forzar transición a fase 3
+    setTimeout(() => {
+        if (state.phase === 2 && !state.choseTrap && !state.ended) {
+            state.phase = 3;
+            log('> FASE 3: MANUSCRITO LISTO. DEBE ELEGIR REVISTA AHORA.', 'sys');
+            setInstructions('Zona Verde (Q1 - Lento) o Zona Amarilla (Express - Rápido).');
+            dom.status.textContent = 'ELECCIÓN CRÍTICA';
+            dom.status.style.color = '#d29922';
+        }
+    }, 15000); // A los 15 segundos se obliga a publicar
+
+    function endGame(win, msg) {
+        if(state.ended) return;
+        state.ended = true;
+        clearInterval(onuTimerInterval);
+        
+        document.getElementById('final-modal').style.display = 'flex';
+        document.getElementById('revelation-text').innerText = msg;
+        
+        let scoreClass = win ? 'score-good' : 'score-bad';
+        document.getElementById('final-score-text').innerHTML = `<span class="${scoreClass}">${state.prestige.toFixed(2)} PTS</span>`;
+        
+        document.getElementById('breakdown').innerHTML = `
+            Créditos sobrantes: ${state.credits.toFixed(2)}<br>
+            Publicación Q1: ${win ? '+100.00' : '+0.00'}<br>
+            Revista Depredadora: ${state.choseTrap ? '+10.00 (Ilusorio)' : '+0.00'}<br>
+            Sanción ONU: ${state.sanctioned ? '-50.00' : '+0.00'}
+        `;
+    }
+
+    // --- GAME LOOP PRINCIPAL ---
+    let frameCount = 0;
+
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Dibujar Grid de fondo
+        ctx.strokeStyle = '#21262d';
+        ctx.lineWidth = 1;
+        for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+        for(let i=0; i<canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
+
+        // Dibujar Zonas
+        for (let z of zones) {
+            let r = getZoneRect(z);
+            ctx.fillStyle = z.color;
+            ctx.fillRect(r.x, r.y, r.w, r.h);
+            ctx.strokeStyle = z.borderColor;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(r.x, r.y, r.w, r.h);
+
+            // Efecto Neón especial para Revista B (La trampa)
+            if (z.id === 'revistaB') {
+                ctx.shadowBlur = 20 + Math.sin(frameCount * 0.1) * 10;
+                ctx.shadowColor = '#ffeb3b';
+                ctx.strokeRect(r.x, r.y, r.w, r.h);
+                ctx.shadowBlur = 0;
+            }
+
+            // Texto de zona
+            ctx.fillStyle = z.borderColor;
+            ctx.font = '14px "Share Tech Mono"';
+            ctx.textAlign = 'center';
+            ctx.fillText(z.name, r.x + r.w/2, r.y + 20);
+        }
+
+        // Actualizar y dibujar NPCs
+        for (let npc of npcs) {
+            npc.update();
+            
+            // Lógica de comportamiento visual de NPCs
+            if (npc.currentZone === 'revistaB' && npc.state !== 'trapped') {
+                npc.state = 'trapped';
+                log('> Un compañero investigador publicó rápidamente en FAST PUBLISH.', 'b');
+            }
+            
+            npc.draw();
+        }
+
+        // Actualizar y dibujar Player
+        player.update();
+        player.draw();
+
+        // Check de éxito ONU (si pasa 3 segundos dentro de la zona sin salir)
+        if (state.phase === 1 && state.timerActive && player.currentZone === 'onu' && state.timer < 27) {
+             successONU();
+        }
+
+        frameCount++;
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Reloj
+    setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+    
+    // Inicio
+    log('> SISTEMA DE GESTIÓN DE INVESTIGACIÓN INICIADO.', 'sys');
+    log('> AVISO: La convocatoria de la ONU está abierta. Diríjase a la zona azul.', 'onu');
+    gameLoop();
+
+</script>
+</body>
+</html>

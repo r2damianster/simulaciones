@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio ACME - Investigación Conductual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #060d06;
+            --bg-card: #0c1a0c;
+            --bg-card-alt: #0f200f;
+            --fg: #b8e8b8;
+            --fg-bright: #00ff41;
+            --fg-dim: #4a7a4a;
+            --accent: #ffb800;
+            --danger: #ff3344;
+            --success: #00ff41;
+            --partial: #ffb800;
+            --na: #555;
+            --border: #1a3a1a;
+            --border-bright: #2a5a2a;
+            --pre-color: #ff4444;
+            --quasi-color: #ffaa00;
+            --pure-color: #00ff41;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--bg);
+            color: var(--fg);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Fondo de grilla */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Scanlines */
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.08) 2px,
+                rgba(0,0,0,0.08) 4px
+            );
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        #particles {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        main { position: relative; z-index: 2; }
+
+        /* Header */
+        .lab-header {
+            border-bottom: 2px solid var(--border-bright);
+            background: linear-gradient(180deg, rgba(0,255,65,0.05) 0%, transparent 100%);
+        }
+        .lab-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            color: var(--fg-bright);
+            text-shadow: 0 0 20px rgba(0,255,65,0.4), 0 0 60px rgba(0,255,65,0.1);
+            letter-spacing: 3px;
+        }
+        .lab-header .subtitle {
+            color: var(--fg-dim);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+        }
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Tipos de experimento badges */
+        .badge-pre {
+            background: rgba(255,68,68,0.15);
+            border: 1px solid var(--pre-color);
+            color: var(--pre-color);
+        }
+        .badge-quasi {
+            background: rgba(255,170,0,0.15);
+            border: 1px solid var(--quasi-color);
+            color: var(--quasi-color);
+        }
+        .badge-pure {
+            background: rgba(0,255,65,0.15);
+            border: 1px solid var(--pure-color);
+            color: var(--pure-color);
+        }
+
+        /* Tarjetas de experimento */
+        .exp-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        .exp-card:hover {
+            border-color: var(--border-bright);
+        }
+        .exp-card.pre-card { border-left: 4px solid var(--pre-color); }
+        .exp-card.quasi-card { border-left: 4px solid var(--quasi-color); }
+        .exp-card.pure-card { border-left: 4px solid var(--pure-color); }
+
+        /* Criterios */
+        .criterion {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 14px;
+            transition: all 0.3s;
+            cursor: default;
+            position: relative;
+        }
+        .criterion:hover {
+            border-color: var(--border-bright);
+            transform: translateX(4px);
+        }
+        .criterion .status-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .status-yes {
+            background: rgba(0,255,65,0.15);
+            color: var(--success);
+            border: 1px solid rgba(0,255,65,0.3);
+        }
+        .status-no {
+            background: rgba(255,51,68,0.15);
+            color: var(--danger);
+            border: 1px solid rgba(255,51,68,0.3);
+        }
+        .status-partial {
+            background: rgba(255,184,0,0.15);
+            color: var(--partial);
+            border: 1px solid rgba(255,184,0,0.3);
+        }
+        .status-na {
+            background: rgba(85,85,85,0.2);
+            color: var(--na);
+            border: 1px solid rgba(85,85,85,0.3);
+        }
+
+        /* Tooltip */
+        .criterion .tooltip-text {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #1a2a1a;
+            border: 1px solid var(--border-bright);
+            color: var(--fg);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            width: 280px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s;
+            z-index: 100;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .criterion .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--border-bright);
+        }
+        .criterion:hover .tooltip-text {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Botón ejecutar */
+        .btn-run {
+            font-family: 'Share Tech Mono', monospace;
+            background: rgba(0,255,65,0.08);
+            border: 1px solid rgba(0,255,65,0.3);
+            color: var(--fg-bright);
+            padding: 10px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-run:hover:not(:disabled) {
+            background: rgba(0,255,65,0.18);
+            border-color: var(--fg-bright);
+            box-shadow: 0 0 20px rgba(0,255,65,0.15);
+        }
+        .btn-run:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .btn-run.running {
+            animation: pulse-border 1s ease-in-out infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(0,255,65,0.3); }
+            50% { border-color: var(--fg-bright); }
+        }
+
+        /* Panel de resultados */
+        .results-panel {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            min-height: 80px;
+            overflow: hidden;
+        }
+        .result-line {
+            padding: 3px 14px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.3s;
+        }
+        .result-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .result-line.success { color: var(--success); }
+        .result-line.warning { color: var(--partial); }
+        .result-line.error { color: var(--danger); }
+        .result-line.info { color: var(--fg-dim); }
+
+        /* Barras de datos */
+        .data-bar-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 100px;
+            padding: 0 14px 8px;
+        }
+        .data-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+        }
+        .data-bar {
+            width: 100%;
+            max-width: 50px;
+            border-radius: 3px 3px 0 0;
+            transition: height 1s ease-out;
+            position: relative;
+        }
+        .data-bar-label {
+            font-size: 0.65rem;
+            color: var(--fg-dim);
+            text-align: center;
+            white-space: nowrap;
+        }
+        .data-bar-value {
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Callout boxes */
+        .callout {
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-size: 0.82rem;
+            line-height: 1.6;
+        }
+        .callout-warning {
+            background: rgba(255,170,0,0.08);
+            border: 1px solid rgba(255,170,0,0.3);
+            color: var(--partial);
+        }
+        .callout-success {
+            background: rgba(0,255,65,0.06);
+            border: 1px solid rgba(0,255,65,0.25);
+            color: var(--fg);
+        }
+        .callout-danger {
+            background: rgba(255,51,68,0.06);
+            border: 1px solid rgba(255,51,68,0.25);
+            color: #ff8888;
+        }
+
+        /* Tabla comparativa */
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.82rem;
+        }
+        .comparison-table th {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            padding: 14px 12px;
+            text-align: center;
+            border-bottom: 2px solid var(--border-bright);
+        }
+        .comparison-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+        .comparison-table .criterion-name {
+            text-align: left;
+            color: var(--fg);
+            font-weight: normal;
+        }
+        .comparison-table .cell-yes {
+            color: var(--success);
+        }
+        .comparison-table .cell-no {
+            color: var(--danger);
+        }
+        .comparison-table .cell-partial {
+            color: var(--partial);
+        }
+        .comparison-table .cell-na {
+            color: var(--na);
+        }
+
+        /* Rigor meter */
+        .rigor-meter {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .rigor-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1.5s ease-out;
+        }
+
+        /* Personajes SVG */
+        .character-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .character-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+        }
+
+        /* Grupo indicator */
+        .group-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        .group-exp {
+            background: rgba(0,255,65,0.1);
+            border: 1px solid rgba(0,255,65,0.3);
+            color: var(--success);
+        }
+        .group-ctrl {
+            background: rgba(100,150,255,0.1);
+            border: 1px solid rgba(100,150,255,0.3);
+            color: #88aaff;
+        }
+        .group-none {
+            background: rgba(85,85,85,0.1);
+            border: 1px solid rgba(85,85,85,0.3);
+            color: var(--na);
+        }
+
+        /* Sección título */
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        /* Animación de entrada */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Glow decorativo */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .lab-header h1 { font-size: 1.2rem !important; letter-spacing: 1px; }
+            .comparison-table { font-size: 0.7rem; }
+            .comparison-table .criterion-name { font-size: 0.65rem; }
+            .criterion .tooltip-text { width: 220px; font-size: 0.7rem; }
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="scanlines"></div>
+<canvas id="particles"></canvas>
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+
+    <!-- HEADER -->
+    <header class="lab-header text-center py-10 mb-12">
+        <div class="flex items-center justify-center gap-3 mb-3">
+            <i class="fa-solid fa-flask text-[var(--fg-dim)] text-xl"></i>
+            <span class="subtitle">ACME CORPORATION // DIVISION DE INVESTIGACION CONDUCTUAL</span>
+            <i class="fa-solid fa-flask text-[var(--fg-dim)] text-xl"></i>
+        </div>
+        <h1 class="text-3xl md:text-5xl mb-4">LABORATORIO ACME</h1>
+        <p class="text-[var(--fg-dim)] text-sm max-w-2xl mx-auto leading-relaxed">
+            Simulacion interactiva de disenos experimentales con sujetos de prueba BRAIN (Sujeto A) y PINKY (Sujeto B).
+            Identifica los criterios metodologicos en cada tipo de investigacion.
+        </p>
+        <div class="mt-4 text-[var(--fg-dim)] text-xs">
+            SISTEMA ACTIVO <span class="blink text-[var(--fg-bright)]">_</span>
+        </div>
+    </header>
+
+    <!-- INTRO: SUJETOS -->
+    <section class="fade-in mb-16">
+        <div class="flex items-center gap-2 mb-6">
+            <i class="fa-solid fa-microscope text-[var(--fg-dim)]"></i>
+            <h2 class="section-title text-sm text-[var(--fg-dim)]">SUJETOS DE PRUEBA</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Brain -->
+            <div class="exp-card p-6 flex items-center gap-6">
+                <div class="character-container flex-shrink-0">
+                    <svg width="90" height="110" viewBox="0 0 100 120">
+                        <ellipse cx="50" cy="82" rx="18" ry="22" fill="#d0d0d0"/>
+                        <ellipse cx="50" cy="40" rx="30" ry="34" fill="#d8d8d8"/>
+                        <circle cx="22" cy="18" r="13" fill="#ffaaaa"/>
+                        <circle cx="78" cy="18" r="13" fill="#ffaaaa"/>
+                        <circle cx="22" cy="18" r="8" fill="#ff9090"/>
+                        <circle cx="78" cy="18" r="8" fill="#ff9090"/>
+                        <circle cx="40" cy="34" r="4" fill="#333"/>
+                        <circle cx="60" cy="34" r="4" fill="#333"/>
+                        <circle cx="41" cy="33" r="1.5" fill="#fff"/>
+                        <circle cx="61" cy="33" r="1.5" fill="#fff"/>
+                        <circle cx="50" cy="48" r="3" fill="#ff9999"/>
+                        <path d="M47 53 Q44 58 47 60" stroke="#ccc" fill="none" stroke-width="1"/>
+                        <path d="M53 53 Q56 58 53 60" stroke="#ccc" fill="none" stroke-width="1"/>
+                        <path d="M28 100 Q8 88 14 68" stroke="#d0d0d0" fill="none" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M28 68 L16 105 L46 88 Z" fill="#cc2222" opacity="0.85"/>
+                        <!-- Cerebro grande visible -->
+                        <path d="M25 28 Q20 10 35 8 Q50 5 55 12 Q65 5 78 15 Q85 25 75 35 Q80 42 70 48 Q60 55 50 48 Q40 55 30 48 Q20 42 25 28 Z" fill="#ffccaa" opacity="0.25" stroke="#ffccaa" stroke-width="0.5" stroke-opacity="0.4"/>
+                    </svg>
+                    <span class="character-name text-[var(--pre-color)]">BRAIN</span>
+                    <span class="group-tag group-exp">Sujeto A</span>
+                </div>
+                <div class="text-sm">
+                    <p class="text-[var(--fg)] mb-2"><strong>Especie:</strong> Mus musculus (raton de laboratorio geneticamente modificado)</p>
+                    <p class="text-[var(--fg-dim)] mb-2"><strong>CI estimado:</strong> Muy superior al promedio</p>
+                    <p class="text-[var(--fg-dim)]"><strong>Objetivo declarado:</strong> "Conquistar el mundo"</p>
+                </div>
+            </div>
+            <!-- Pinky -->
+            <div class="exp-card p-6 flex items-center gap-6">
+                <div class="character-container flex-shrink-0">
+                    <svg width="90" height="110" viewBox="0 0 100 120">
+                        <ellipse cx="50" cy="85" rx="20" ry="20" fill="#e8d8d8"/>
+                        <ellipse cx="50" cy="46" rx="24" ry="26" fill="#f0e0e0"/>
+                        <circle cx="28" cy="28" r="15" fill="#ffaacc"/>
+                        <circle cx="72" cy="28" r="15" fill="#ffaacc"/>
+                        <circle cx="28" cy="28" r="10" fill="#ff99bb"/>
+                        <circle cx="72" cy="28" r="10" fill="#ff99bb"/>
+                        <circle cx="40" cy="42" r="8" fill="white" stroke="#555" stroke-width="0.8"/>
+                        <circle cx="60" cy="42" r="8" fill="white" stroke="#555" stroke-width="0.8"/>
+                        <circle cx="42" cy="41" r="4" fill="#5599ff"/>
+                        <circle cx="62" cy="41" r="4" fill="#5599ff"/>
+                        <circle cx="43" cy="39.5" r="1.5" fill="#fff"/>
+                        <circle cx="63" cy="39.5" r="1.5" fill="#fff"/>
+                        <circle cx="50" cy="54" r="3.5" fill="#ff9999"/>
+                        <path d="M47 59 L44 64 L46 64 L43 68" stroke="#ddd" fill="none" stroke-width="0.8"/>
+                        <path d="M53 59 L56 64 L54 64 L57 68" stroke="#ddd" fill="none" stroke-width="0.8"/>
+                        <path d="M26 98 Q4 86 10 62" stroke="#e8d8d8" fill="none" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="character-name text-[#88aaff]">PINKY</span>
+                    <span class="group-tag group-ctrl">Sujeto B</span>
+                </div>
+                <div class="text-sm">
+                    <p class="text-[var(--fg)] mb-2"><strong>Especie:</strong> Mus musculus (raton de laboratorio, sin modificacion)</p>
+                    <p class="text-[var(--fg-dim)] mb-2"><strong>CI estimado:</strong> Significativamente bajo el promedio</p>
+                    <p class="text-[var(--fg-dim)]"><strong>Objetivo declarado:</strong> "¿Que vamos a hacer esta noche, Brain?"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- EXPERIMENTO 1: PRE-EXPERIMENTO -->
+    <!-- ============================================ -->
+    <section class="fade-in mb-16" id="sec-pre">
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <span class="badge-pre px-3 py-1 rounded text-xs font-bold tracking-wider">PRE-EXPERIMENTO</span>
+            <h2 class="section-title text-lg text-[var(--fg)]">Rayo de Inteligencia ACME Mk-III</h2>
+        </div>
+
+        <div class="exp-card pre-card p-6 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Columna izquierda: descripcion y criterios -->
+                <div>
+                    <h3 class="text-[var(--pre-color)] text-xs tracking-widest mb-3">DISENO: UN SOLO GRUPO CON POST-TEST UNICAMENTE</h3>
+                    <p class="text-sm text-[var(--fg)] mb-4 leading-relaxed">
+                        Brain se expone al <strong>Rayo de Inteligencia ACME Mk-III</strong>. Tras la exposicion, se le aplica un test estandarizado de CI para ratones. No existe medicion previa ni grupo de comparacion.
+                    </p>
+
+                    <div class="space-y-3">
+                        <!-- Criterio 1: VI -->
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>1. Manipulacion de VI</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Se aplica el rayo al sujeto (si/no)</div>
+                            </div>
+                            <span class="tooltip-text">La variable independiente (exposicion al rayo) SI es manipulada deliberadamente por el investigador.</span>
+                        </div>
+                        <!-- Criterio 2: VD -->
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>2. Medicion de VD</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Test de CI estandarizado post-exposicion</div>
+                            </div>
+                            <span class="tooltip-text">La variable dependiente (puntuacion CI) SI es medida con instrumento estandarizado tras la exposicion.</span>
+                        </div>
+                        <!-- Criterio 3: Control -->
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-no"><i class="fa-solid fa-xmark"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>3. Control y Validez Interna</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Sin control de variables extrañas</div>
+                            </div>
+                            <span class="tooltip-text">NO hay control de variables confusas (fatiga, practica, efecto placebo, condiciones ambientales). La validez interna es minima.</span>
+                        </div>
+                        <!-- Criterio 4: Aleatorizacion -->
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-na"><i class="fa-solid fa-minus"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>4. Aleatorizacion</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">No aplica: solo un sujeto</div>
+                            </div>
+                            <span class="tooltip-text">NO APLICA. Con un solo sujeto no es posible asignar aleatoriamente a condiciones. No hay grupos que formar.</span>
+                        </div>
+                        <!-- Criterio 5: Grupos -->
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-no"><i class="fa-solid fa-xmark"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>5. Comparacion de Grupos</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]"><span class="group-tag group-none">SIN GRUPO CONTROL</span> Un solo grupo</div>
+                            </div>
+                            <span class="tooltip-text">NO HAY grupo control ni grupo experimental como tales. Es un unico grupo sin comparacion. No se puede determinar si el resultado se debe al rayo.</span>
+                        </div>
+                    </div>
+
+                    <!-- Medidor de rigor -->
+                    <div class="mt-5">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-[var(--fg-dim)]">NIVEL DE RIGOR CIENTIFICO</span>
+                            <span class="text-[var(--pre-color)]">BAJO</span>
+                        </div>
+                        <div class="rigor-meter">
+                            <div class="rigor-fill" style="width:0%; background: var(--pre-color);" data-target="20"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna derecha: ejecucion y resultados -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs text-[var(--fg-dim)]">PANEL DE EJECUCION</span>
+                        <button class="btn-run" id="btn-pre" onclick="runExperiment('pre')">
+                            <i class="fa-solid fa-play mr-2"></i>EJECUTAR
+                        </button>
+                    </div>
+                    <div class="results-panel" id="results-pre">
+                        <div class="p-4 text-center text-xs text-[var(--fg-dim)]">
+                            <i class="fa-solid fa-terminal mr-1"></i> Esperando ejecucion del protocolo...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Callout de conclusion -->
+        <div class="callout callout-danger" id="conclusion-pre" style="display:none;">
+            <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+            <strong>Conclusion:</strong> Brain obtuvo CI=245, pero sin grupo de comparacion ni medicion previa, es IMPOSIBLE saber si el rayo causo algun efecto. Brain ya tenia un CI alto de base. Este diseno NO permite inferir causalidad.
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- EXPERIMENTO 2: CUASIEXPERIMENTO -->
+    <!-- ============================================ -->
+    <section class="fade-in mb-16" id="sec-quasi">
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <span class="badge-quasi px-3 py-1 rounded text-xs font-bold tracking-wider">CUASIEXPERIMENTO</span>
+            <h2 class="section-title text-lg text-[var(--fg)]">Dieta de Superalimento ACME</h2>
+        </div>
+
+        <div class="exp-card quasi-card p-6 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-[var(--quasi-color)] text-xs tracking-widest mb-3">DISENO: GRUPO CONTROL NO EQUIVALENTE CON PRE-TEST Y POST-TEST</h3>
+                    <p class="text-sm text-[var(--fg)] mb-4 leading-relaxed">
+                        Brain recibe la <strong>Dieta de Superalimento ACME</strong> (grupo experimental). Pinky recibe dieta normal de laboratorio (grupo control). Ambos son evaluados antes y despues con un test de resolucion de problemas (0-100).
+                    </p>
+
+                    <div class="space-y-3">
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>1. Manipulacion de VI</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Tipo de dieta: superalimento vs normal</div>
+                            </div>
+                            <span class="tooltip-text">La VI (tipo de dieta) SI es manipulada: un grupo recibe superalimento y otro dieta normal.</span>
+                        </div>
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>2. Medicion de VD</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Test resolucion de problemas (pre y post)</div>
+                            </div>
+                            <span class="tooltip-text">La VD (puntuacion en test) SI se mide en dos momentos: antes y despues de la intervencion.</span>
+                        </div>
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-partial"><i class="fa-solid fa-exclamation"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>3. Control y Validez Interna</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Parcial: misma sala, mismo horario, pero grupos no equivalentes</div>
+                            </div>
+                            <span class="tooltip-text">PARCIAL. Se controlan algunas variables (ambiente, horario), pero la NO equivalencia de los grupos amenaza seriamente la validez interna. La diferencia basal entre Brain y Pinky es una variable confusa.</span>
+                        </div>
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-no"><i class="fa-solid fa-xmark"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>4. Aleatorizacion</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">No hay asignacion aleatoria</div>
+                            </div>
+                            <span class="tooltip-text">NO hay aleatorizacion. Brain y Pinky son sujetos preexistentes con diferencias innatas. No se asignaron al azar a los grupos; simplemente se uso quien estaba disponible.</span>
+                        </div>
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-partial"><i class="fa-solid fa-exclamation"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>5. Comparacion de Grupos</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">
+                                    <span class="group-tag group-exp mr-1">Exp: Brain</span>
+                                    <span class="group-tag group-ctrl">Ctrl: Pinky</span>
+                                    <span class="text-[var(--quasi-color)] ml-1">NO EQUIVALENTES</span>
+                                </div>
+                            </div>
+                            <span class="tooltip-text">EXISTEN grupos (experimental y control), PERO NO SON EQUIVALENTES. Brain y Pinky parten de niveles muy distintos (78 vs 25). Cualquier diferencia en el post-test podria deberse a sus diferencias basales, no a la dieta.</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-[var(--fg-dim)]">NIVEL DE RIGOR CIENTIFICO</span>
+                            <span class="text-[var(--quasi-color)]">MEDIO</span>
+                        </div>
+                        <div class="rigor-meter">
+                            <div class="rigor-fill" style="width:0%; background: var(--quasi-color);" data-target="55"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs text-[var(--fg-dim)]">PANEL DE EJECUCION</span>
+                        <button class="btn-run" id="btn-quasi" onclick="runExperiment('quasi')">
+                            <i class="fa-solid fa-play mr-2"></i>EJECUTAR
+                        </button>
+                    </div>
+                    <div class="results-panel" id="results-quasi">
+                        <div class="p-4 text-center text-xs text-[var(--fg-dim)]">
+                            <i class="fa-solid fa-terminal mr-1"></i> Esperando ejecucion del protocolo...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="callout callout-warning" id="conclusion-quasi" style="display:none;">
+            <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+            <strong>Atencion:</strong> Brain mejoro +14 puntos y Pinky solo +3. PARECE que la dieta funciona, pero los grupos NO eran equivalentes al inicio (78 vs 25). La diferencia podria deberse a que Brain, siendo mas inteligente, aprovecha mejor cualquier cambio. Este diseno mejora el pre-experimento pero aun NO garantiza causalidad.
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- EXPERIMENTO 3: EXPERIMENTO PURO -->
+    <!-- ============================================ -->
+    <section class="fade-in mb-16" id="sec-pure">
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <span class="badge-pure px-3 py-1 rounded text-xs font-bold tracking-wider">EXPERIMENTO PURO</span>
+            <h2 class="section-title text-lg text-[var(--fg)]">Suero Cognitivo ACME (Doble Ciego)</h2>
+        </div>
+
+        <div class="exp-card pure-card p-6 mb-6 relative overflow-hidden">
+            <div class="glow-orb" style="width:200px;height:200px;background:var(--pure-color);top:-60px;right:-60px;"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
+                <div>
+                    <h3 class="text-[var(--pure-color)] text-xs tracking-widest mb-3">DISENO: PRE-TEST/POST-TEST CON GRUPO CONTROL ALEATORIZADO (DOBLE CIEGO)</h3>
+                    <p class="text-sm text-[var(--fg)] mb-4 leading-relaxed">
+                        Se clonan <strong>40 ratones geneticamente identicos</strong>. Se asignan aleatoriamente: 20 al grupo experimental (Suero Cognitivo ACME) y 20 al grupo control (placebo salino con colorante). El investigador NO sabe quien recibe que. Se mide tiempo en laberinto antes y despues.
+                    </p>
+
+                    <div class="space-y-3">
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>1. Manipulacion de VI</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Suero cognitivo vs placebo (doble ciego)</div>
+                            </div>
+                            <span class="tooltip-text">La VI (tipo de sustancia) SI es manipulada con rigurosidad: suero real vs placebo identico en apariencia. El doble ciego evita sesgos del investigador y los sujetos.</span>
+                        </div>
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>2. Medicion de VD</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Tiempo en laberinto (segundos), pre y post</div>
+                            </div>
+                            <span class="tooltip-text">La VD (tiempo en laberinto) se mide con precision cronometrica en dos momentos. Es una medida objetiva y cuantitativa.</span>
+                        </div>
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>3. Control y Validez Interna</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Doble ciego, condiciones estandarizadas, mismos genes</div>
+                            </div>
+                            <span class="tooltip-text">CONTROL ESTRICTO. Doble ciego elimina sesgos. Sujetos geneticamente identicos eliminan variables individuales. Condiciones ambientales controladas (misma sala, temperatura, horario). Alta validez interna.</span>
+                        </div>
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>4. Aleatorizacion</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">Asignacion aleatoria de 40 sujetos a 2 grupos</div>
+                            </div>
+                            <span class="tooltip-text">SI hay aleatorizacion. Los 40 ratones clonados se asignan AL AZAR (ej: tabla de numeros aleatorios) a grupo experimental o control. Esto garantiza que ambos grupos sean estadisticamente equivalentes al inicio.</span>
+                        </div>
+                        <div class="criterion flex items-start gap-3">
+                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-[var(--fg)]"><strong>5. Comparacion de Grupos</strong></div>
+                                <div class="text-xs text-[var(--fg-dim)]">
+                                    <span class="group-tag group-exp mr-1">Exp: n=20</span>
+                                    <span class="group-tag group-ctrl">Ctrl: n=20</span>
+                                    <span class="text-[var(--pure-color)] ml-1">EQUIVALENTES</span>
+                                </div>
+                            </div>
+                            <span class="tooltip-text">EXISTEN grupos experimental y control que SON EQUIVALENTES gracias a la aleatorizacion. Ambos parten de tiempos similares (52.3s vs 51.8s). La unica diferencia sistematica entre ellos es la VI (suero vs placebo). Cualquier diferencia en el post-test puede atribuirse causalmente al suero.</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-[var(--fg-dim)]">NIVEL DE RIGOR CIENTIFICO</span>
+                            <span class="text-[var(--pure-color)]">ALTO</span>
+                        </div>
+                        <div class="rigor-meter">
+                            <div class="rigor-fill" style="width:0%; background: var(--pure-color);" data-target="95"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs text-[var(--fg-dim)]">PANEL DE EJECUCION</span>
+                        <button class="btn-run" id="btn-pure" onclick="runExperiment('pure')">
+                            <i class="fa-solid fa-play mr-2"></i>EJECUTAR
+                        </button>
+                    </div>
+                    <div class="results-panel" id="results-pure">
+                        <div class="p-4 text-center text-xs text-[var(--fg-dim)]">
+                            <i class="fa-solid fa-terminal mr-1"></i> Esperando ejecucion del protocolo...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="callout callout-success" id="conclusion-pure" style="display:none;">
+            <i class="fa-solid fa-check-circle mr-2 text-[var(--pure-color)]"></i>
+            <strong>Conclusion:</strong> El grupo experimental reduzco su tiempo en 18.2s vs solo 2.1s del control (p &lt; 0.01). Al ser los grupos equivalentes por aleatorizacion y controlarse variables confusas con doble ciego, la diferencia SE PUEDE ATRIBUIR CAUSALMENTE al Suero Cognitivo ACME. Este es el unico diseno que permite inferencia causal robusta.
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- TABLA COMPARATIVA -->
+    <!-- ============================================ -->
+    <section class="fade-in mb-16" id="sec-comparison">
+        <div class="flex items-center gap-2 mb-6">
+            <i class="fa-solid fa-table-columns text-[var(--fg-dim)]"></i>
+            <h2 class="section-title text-sm text-[var(--fg-dim)]">MATRIZ COMPARATIVA DE DISENOS</h2>
+        </div>
+
+        <div class="exp-card p-0 overflow-x-auto">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th class="text-left" style="min-width:200px;">CRITERIO</th>
+                        <th style="min-width:160px; color:var(--pre-color);">PRE-EXPERIMENTO</th>
+                        <th style="min-width:160px; color:var(--quasi-color);">CUASIEXPERIMENTO</th>
+                        <th style="min-width:160px; color:var(--pure-color);">EXPERIMENTO PURO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="criterion-name">1. Manipulacion de VI</td>
+                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente</td>
+                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente</td>
+                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente (doble ciego)</td>
+                    </tr>
+                    <tr>
+                        <td class="criterion-name">2. Medicion de VD</td>
+                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente</td>
+                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente (pre/post)</td>
+                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente (pre/post)</td>
+                    </tr>
+                    <tr>
+                        <td class="criterion-name">3. Control y Validez Interna</td>
+                        <td class="cell-no"><i class="fa-solid fa-xmark mr-1"></i> Ausente</td>
+                        <td class="cell-partial"><i class="fa-solid fa-exclamation mr-1"></i> Parcial</td>
+                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Estricto</td>
+                    </tr>
+                    <tr>
+                        <td class="criterion-name">4. Aleatorizacion</td>
+                        <td class="cell-na"><i class="fa-solid fa-minus mr-1"></i> No aplica</td>
+                        <td class="cell-no"><i class="fa-solid fa-xmark mr-1"></i> Ausente</td>
+                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente</td>
+                    </tr>
+                    <tr>
+                        <td class="criterion-name">5. Comparacion de Grupos</td>
+                        <td class="cell-no"><i class="fa-solid fa-xmark mr-1"></i> Sin grupos</td>
+                        <td class="cell-partial"><i class="fa-solid fa-exclamation mr-1"></i> No equivalentes</td>
+                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Equivalentes</td>
+                    </tr>
+                    <tr style="background: rgba(255,255,255,0.02);">
+                        <td class="criterion-name" style="font-family:'Orbitron',sans-serif; font-size:0.7rem; letter-spacing:1px;">INFERENCIA CAUSAL</td>
+                        <td class="cell-no" style="font-weight:bold;">NO</td>
+                        <td class="cell-partial" style="font-weight:bold;">LIMITADA</td>
+                        <td class="cell-yes" style="font-weight:bold;">SI</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 border-t border-[var(--border)]">
+        <p class="text-xs text-[var(--fg-dim)]">
+            <i class="fa-solid fa-flask-vial mr-1"></i>
+            LABORATORIO ACME // PROTOCOLO DE INVESTIGACION v3.7.1 // TODOS LOS SUJETOS SON VOLUNTARIOS (presuntamente)
+        </p>
+        <p class="text-xs text-[var(--fg-dim)] mt-2 opacity-50">
+            "¿Y ahora que hacemos, Brain?" // "Lo mismo de siempre, Pinky: intentar publicar en Nature."
+        </p>
+    </footer>
+
+</main>
+
+<script>
+// =============================================
+// PARTICULAS DE FONDO
+// =============================================
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particlesArray = [];
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = (Math.random() - 0.5) * 0.3;
+        this.opacity = Math.random() * 0.4 + 0.1;
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    draw() {
+        ctx.fillStyle = `rgba(0, 255, 65, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, Math.max(0.5, this.size), 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+for (let i = 0; i < 60; i++) {
+    particlesArray.push(new Particle());
+}
+
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particlesArray.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// =============================================
+// OBSERVADOR DE SCROLL PARA ANIMACIONES
+// =============================================
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Animar barras de rigor dentro de la seccion visible
+            entry.target.querySelectorAll('.rigor-fill').forEach(bar => {
+                const target = bar.getAttribute('data-target');
+                if (target) bar.style.width = target + '%';
+            });
+        }
+    });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// =============================================
+// FUNCIONES AUXILIARES
+// =============================================
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function createResultLine(text, type = 'info') {
+    const line = document.createElement('div');
+    line.className = `result-line ${type}`;
+    line.textContent = '> ' + text;
+    return line;
+}
+
+function createBarChart(container, data) {
+    // data: [{ label, value, maxValue, color, sublabel }]
+    const wrapper = document.createElement('div');
+    wrapper.className = 'data-bar-container';
+    wrapper.style.opacity = '0';
+    wrapper.style.transition = 'opacity 0.5s';
+
+    data.forEach((item, i) => {
+        const barWrapper = document.createElement('div');
+        barWrapper.className = 'data-bar-wrapper';
+
+        const valueEl = document.createElement('div');
+        valueEl.className = 'data-bar-value';
+        valueEl.style.color = item.color;
+        valueEl.textContent = item.value;
+
+        const bar = document.createElement('div');
+        bar.className = 'data-bar';
+        bar.style.background = item.color;
+        bar.style.height = '0px';
+        const targetHeight = (item.value / item.maxValue) * 85;
+        bar.style.opacity = '0.85';
+
+        const labelEl = document.createElement('div');
+        labelEl.className = 'data-bar-label';
+        labelEl.textContent = item.label;
+
+        const sublabelEl = document.createElement('div');
+        sublabelEl.className = 'data-bar-label';
+        sublabelEl.style.color = item.color;
+        sublabelEl.style.opacity = '0.7';
+        sublabelEl.textContent = item.sublabel || '';
+
+        barWrapper.appendChild(valueEl);
+        barWrapper.appendChild(bar);
+        barWrapper.appendChild(labelEl);
+        barWrapper.appendChild(sublabelEl);
+        wrapper.appendChild(barWrapper);
+
+        // Animar barra con retraso
+        setTimeout(() => {
+            bar.style.height = Math.max(4, targetHeight) + 'px';
+        }, 200 + i * 150);
+    });
+
+    container.appendChild(wrapper);
+    setTimeout(() => { wrapper.style.opacity = '1'; }, 100);
+}
+
+// =============================================
+// EJECUCION DE EXPERIMENTOS
+// =============================================
+const experimentState = { pre: false, quasi: false, pure: false };
+
+async function runExperiment(type) {
+    if (experimentState[type]) return;
+    experimentState[type] = true;
+
+    const btn = document.getElementById(`btn-${type}`);
+    const panel = document.getElementById(`results-${type}`);
+    const conclusion = document.getElementById(`conclusion-${type}`);
+
+    btn.disabled = true;
+    btn.classList.add('running');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>EJECUTANDO...';
+
+    // Limpiar panel
+    panel.innerHTML = '';
+
+    if (type === 'pre') {
+        await runPreExperiment(panel);
+    } else if (type === 'quasi') {
+        await runQuasiExperiment(panel);
+    } else if (type === 'pure') {
+        await runPureExperiment(panel);
+    }
+
+    // Mostrar conclusion
+    await delay(400);
+    conclusion.style.display = 'block';
+    conclusion.style.opacity = '0';
+    conclusion.style.transform = 'translateY(10px)';
+    conclusion.style.transition = 'all 0.5s';
+    await delay(50);
+    conclusion.style.opacity = '1';
+    conclusion.style.transform = 'translateY(0)';
+
+    btn.classList.remove('running');
+    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>COMPLETADO';
+}
+
+async function runPreExperiment(panel) {
+    const lines = [
+        { text: 'Inicializando protocolo PRE-001...', type: 'info', delay: 0 },
+        { text: 'Sujeto: BRAIN (Sujeto A)', type: 'info', delay: 500 },
+        { text: 'Sin medicion previa (pre-test no disponible)', type: 'warning', delay: 1000 },
+        { text: 'Aplicando Rayo de Inteligencia ACME Mk-III...', type: 'info', delay: 1800 },
+        { text: 'ZZZT... RAYO ACTIVADO [3.2 segundos]', type: 'error', delay: 2800 },
+        { text: 'Exposicion completada. Sin efectos adversos observados.', type: 'info', delay: 3800 },
+        { text: 'Administrando test de CI estandarizado...', type: 'info', delay: 4500 },
+        { text: 'RESULTADO: CI = 245', type: 'success', delay: 5500 },
+        { text: 'ADVERTENCIA: Sin punto de comparacion,', type: 'warning', delay: 6500 },
+        { text: 'no se puede determinar si el rayo tuvo efecto.', type: 'warning', delay: 7000 },
+    ];
+
+    for (const line of lines) {
+        await delay(line.delay > 0 ? 500 : 300);
+        const el = createResultLine(line.text, line.type);
+        panel.appendChild(el);
+        await delay(80);
+        el.classList.add('visible');
+    }
+
+    await delay(500);
+    // Grafico simple
+    createBarChart(panel, [
+        { label: 'Brain', value: 245, maxValue: 300, color: '#ff4444', sublabel: 'CI post-rayo' }
+    ]);
+
+    // Nota sobre falta de referencia
+    await delay(800);
+    const note = createResultLine('¿245 es alto o bajo? No hay referencia. ', 'warning');
+    panel.appendChild(note);
+    await delay(80);
+    note.classList.add('visible');
+    const note2 = createResultLine('Brain ya era excepcional de base.', 'warning');
+    panel.appendChild(note2);
+    await delay(80);
+    note2.classList.add('visible');
+}
+
+async function runQuasiExperiment(panel) {
+    const lines = [
+        { text: 'Inicializando protocolo CUASI-002...', type: 'info', delay: 0 },
+        { text: 'Grupo Experimental: BRAIN (Dieta Superalimento)', type: 'info', delay: 500 },
+        { text: 'Grupo Control: PINKY (Dieta normal)', type: 'info', delay: 1000 },
+        { text: 'NOTA: Grupos NO asignados aleatoriamente', type: 'warning', delay: 1500 },
+        { text: 'Fase 1: Pre-test de resolucion de problemas...', type: 'info', delay: 2200 },
+        { text: '  Brain pre-test: 78/100', type: 'success', delay: 3000 },
+        { text: '  Pinky pre-test: 25/100', type: 'info', delay: 3400 },
+        { text: 'Diferencia basal: 53 puntos (!)', type: 'error', delay: 3900 },
+        { text: 'Fase 2: Administrando dietas [14 dias]...', type: 'info', delay: 4600 },
+        { text: '  Brain: Superalimento ACME (3x/dia)', type: 'info', delay: 5200 },
+        { text: '  Pinky: Dieta estandar laboratorio', type: 'info', delay: 5600 },
+        { text: 'Fase 3: Post-test de resolucion de problemas...', type: 'info', delay: 6200 },
+        { text: '  Brain post-test: 92/100 (+14)', type: 'success', delay: 7000 },
+        { text: '  Pinky post-test: 28/100 (+3)', type: 'info', delay: 7400 },
+    ];
+
+    for (const line of lines) {
+        await delay(450);
+        const el = createResultLine(line.text, line.type);
+        panel.appendChild(el);
+        await delay(80);
+        el.classList.add('visible');
+    }
+
+    await delay(500);
+    // Grafico con 4 barras
+    createBarChart(panel, [
+        { label: 'Brain', value: 78, maxValue: 100, color: '#ffaa00', sublabel: 'Pre' },
+        { label: 'Brain', value: 92, maxValue: 100, color: '#ffcc00', sublabel: 'Post' },
+        { label: 'Pinky', value: 25, maxValue: 100, color: '#88aaff', sublabel: 'Pre' },
+        { label: 'Pinky', value: 28, maxValue: 100, color: '#aaccff', sublabel: 'Post' },
+    ]);
+
+    await delay(800);
+    const w = createResultLine('La mejora de Brain (+14) vs Pinky (+3) parece', 'warning');
+    panel.appendChild(w);
+    await delay(80);
+    w.classList.add('visible');
+    await delay(300);
+    const w2 = createResultLine('significativa, PERO la diferencia basal (78 vs 25)', 'warning');
+    panel.appendChild(w2);
+    await delay(80);
+    w2.classList.add('visible');
+    await delay(300);
+    const w3 = createResultLine('confunde los resultados. No son equivalentes.', 'warning');
+    panel.appendChild(w3);
+    await delay(80);
+    w3.classList.add('visible');
+}
+
+async function runPureExperiment(panel) {
+    const lines = [
+        { text: 'Inicializando protocolo PURE-003...', type: 'info', delay: 0 },
+        { text: 'Clonacion: 40 ratones geneticamente identicos', type: 'info', delay: 500 },
+        { text: 'Protocolo doble ciego activado', type: 'success', delay: 1100 },
+        { text: 'ASIGNACION ALEATORIA (tabla de numeros aleatorios):', type: 'success', delay: 1700 },
+        { text: '  Grupo Experimental: n=20 (Suero Cognitivo)', type: 'info', delay: 2300 },
+        { text: '  Grupo Control: n=20 (Placebo salino + colorante)', type: 'info', delay: 2700 },
+        { text: 'Verificacion de equivalencia inicial:', type: 'info', delay: 3300 },
+        { text: '  Exp pre-test: 52.3s | Ctrl pre-test: 51.8s', type: 'success', delay: 3900 },
+        { text: '  Diferencia NO significativa (p=0.82) -> EQUIVALENTES', type: 'success', delay: 4400 },
+        { text: 'Administrando sustancias [14 dias, doble ciego]...', type: 'info', delay: 5100 },
+        { text: 'Post-test: medicion de tiempo en laberinto...', type: 'info', delay: 5800 },
+        { text: '  Grupo Exp post-test: 34.1s (delta = -18.2s)', type: 'success', delay: 6600 },
+        { text: '  Grupo Ctrl post-test: 49.7s (delta = -2.1s)', type: 'info', delay: 7100 },
+        { text: 'ANALISIS ESTADISTICO: t(38) = 4.87, p < 0.01', type: 'success', delay: 7800 },
+        { text: 'Diferencia ESTADISTICAMENTE SIGNIFICATIVA', type: 'success', delay: 8400 },
+    ];
+
+    for (const line of lines) {
+        await delay(420);
+        const el = createResultLine(line.text, line.type);
+        panel.appendChild(el);
+        await delay(80);
+        el.classList.add('visible');
+    }
+
+    await delay(500);
+    createBarChart(panel, [
+        { label: 'Exp', value: 52.3, maxValue: 65, color: '#00ff41', sublabel: 'Pre: 52.3s' },
+        { label: 'Exp', value: 34.1, maxValue: 65, color: '#00cc33', sublabel: 'Post: 34.1s' },
+        { label: 'Ctrl', value: 51.8, maxValue: 65, color: '#88aaff', sublabel: 'Pre: 51.8s' },
+        { label: 'Ctrl', value: 49.7, maxValue: 65, color: '#6688dd', sublabel: 'Post: 49.7s' },
+    ]);
+
+    await delay(800);
+    const s = createResultLine('Grupos equivalentes al inicio + doble ciego =', 'success');
+    panel.appendChild(s);
+    await delay(80);
+    s.classList.add('visible');
+    await delay(300);
+    const s2 = createResultLine('la diferencia (-18.2s vs -2.1s) se atribuye', 'success');
+    panel.appendChild(s2);
+    await delay(80);
+    s2.classList.add('visible');
+    await delay(300);
+    const s3 = createResultLine('CAUSALMENTE al Suero Cognitivo ACME.', 'success');
+    panel.appendChild(s3);
+    await delay(80);
+    s3.classList.add('visible');
+}
+
+// =============================================
+// INICIALIZACION
+// =============================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Activar secciones visibles al cargar
+    document.querySelectorAll('.fade-in').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+            el.classList.add('visible');
+            el.querySelectorAll('.rigor-fill').forEach(bar => {
+                const target = bar.getAttribute('data-target');
+                if (target) bar.style.width = target + '%';
+            });
+        }
+    });
+});
+</script>
+
+</body>
+</html>
