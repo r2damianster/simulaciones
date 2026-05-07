@@ -2,7 +2,7 @@
 
 ## Contexto del proyecto
 
-Colección de **simulaciones interactivas (Serious Games)** de carácter pedagógico para educación universitaria en metodología de investigación y estadística, desarrolladas por el Dr. Arturo Damián Rodríguez Zambrano (Docente ULEAM / Doctorando UPV-EHU).
+Colección de **simulaciones interactivas (Serious Games)** de carácter pedagógico para educación universitaria en metodología de investigación y estadística, desarrolladas por el Dr. Arturo Damián Rodríguez Zambrano (Docente universitario / Doctorando UPV-EHU).
 
 Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla JS. No hay framework, no hay build step, no hay dependencias externas instaladas localmente (solo CDN).
 
