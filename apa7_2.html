@@ -176,10 +176,10 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
   <div class="rib-group">
     <div class="rib-gc">
       <select class="rib-sel" id="selSpacing" title="Interlineado" style="width:72px">
-        <option value="1">1.0</option>
+        <option value="1" selected>1.0</option>
         <option value="1.15">1.15</option>
         <option value="1.5">1.5</option>
-        <option value="2" selected>2.0</option>
+        <option value="2">2.0</option>
       </select>
       <button class="rib-btn" id="btnParaSpace" title="Espacio entre parrafos" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-arrows-up-down" style="margin-right:3px"></i>Espacio</button>
     </div>
@@ -247,6 +247,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
       <button class="rib-tool" id="btnEtal" title='Reemplazar "y otros" por "et al."'>et al.</button>
       <button class="rib-tool" id="btnDoi" title="Agregar enlaces DOI a las referencias">DOI</button>
       <button class="rib-tool" id="btnAlpha" title="Ordenar referencias alfabeticamente"><i class="fa-solid fa-arrow-down-a-z" style="margin-right:3px"></i>A-Z</button>
+      <button class="rib-tool" id="btnJournalItalic" title="Cursiva para nombres de revista y número de volumen"><i class="fa-solid fa-italic" style="margin-right:3px"></i>Cursiva rev.</button>
     </div>
     <div class="rib-gl">Herramientas APA</div>
   </div>
@@ -359,7 +360,7 @@ const TF = {
   affiliation:  { bold:false, italic:false, underline:false, align:'left',   case:'none' },
   h1:           { bold:false, italic:true,  underline:true,  align:'left',   case:'upper' },
   h2:           { bold:false, italic:false, underline:false, align:'center', case:'upper' },
-  paragraph:    { bold:false, italic:false, underline:false, align:'left',   case:'none' },
+  paragraph:    { bold:true,  italic:false, underline:false, align:'left',   case:'none' },
   'ref-heading':{ bold:false, italic:false, underline:true,  align:'left',   case:'upper' }
 };
 
@@ -509,6 +510,7 @@ function updateRibbon() {
   $('btnEtal').classList.toggle('on', G.etAl);
   $('btnDoi').classList.toggle('on', G.doi);
   $('btnAlpha').classList.toggle('on', G.alphaOrder);
+  $('btnJournalItalic').classList.toggle('on', G.journalItalic);
 
   /* Estado de selección en barra */
   const stSel = $('stSel');
@@ -554,6 +556,7 @@ paper.addEventListener('click', e => {
  $('btnB').addEventListener('click', () => {
   if (!selType || !TF[selType]) return;
   TF[selType].bold = !TF[selType].bold;
+  if (selType === 'paragraph') G.bodyBold = TF[selType].bold;
   render(); updateRibbon(); touchInteraction();
 });
 
@@ -628,6 +631,7 @@ document.querySelectorAll('.align-b').forEach(b => {
 
 /* Ordenar A-Z */
  $('btnAlpha').addEventListener('click', () => { G.alphaOrder = !G.alphaOrder; render(); updateRibbon(); touchInteraction(); });
+ $('btnJournalItalic').addEventListener('click', () => { G.journalItalic = !G.journalItalic; G.volumeItalic = G.journalItalic; render(); updateRibbon(); touchInteraction(); });
 
 /* =============================================
    VERIFICACIÓN DE FASES
@@ -797,7 +801,7 @@ setInterval(() => {
         <p style="margin-bottom:6px">${envios===1?'Excelente trabajo desde el primer intento. Es raro ver un formato tan impecable sin lista de verificacion.':'Revisa el manual con mas atencion la proxima vez para evitar multiples revisiones.'}</p>
         <p>Saludos cordiales,<br><strong>Prof. Dra. Ana Belen Montoya</strong></p>
       </div>
-      <div style="text-align:center;margin-top:18px"><button onclick="$('modal').classList.remove('on')" style="background:var(--ok);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">Cerrar</button></div>`;
+      <div style="text-align:center;margin-top:18px"><button onclick="document.getElementById('modal').classList.remove('on')" style="background:var(--ok);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">Cerrar</button></div>`;
     $('modal').classList.add('on');
     launchConfetti();
   } else {
@@ -851,7 +855,7 @@ setInterval(() => {
         </div>
         <p style="margin-top:10px">Saludos cordiales,<br><strong>Prof. Dra. Ana Belen Montoya</strong></p>
       </div>
-      <div style="text-align:center;margin-top:18px"><button onclick="$('modal').classList.remove('on')" style="background:var(--err);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">Entendido</button></div>`;
+      <div style="text-align:center;margin-top:18px"><button onclick="document.getElementById('modal').classList.remove('on')" style="background:var(--err);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">Entendido</button></div>`;
     $('modal').classList.add('on');
   }
 });
