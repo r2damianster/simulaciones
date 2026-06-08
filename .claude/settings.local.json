@@ -2,6 +2,9 @@
   "permissions": {
     "additionalDirectories": [
       "c:\\Users\\User\\.claude\\projects\\c--Users-User-Documents-Desarrollo-Web-Simulaciones"
+    ],
+    "allow": [
+      "Bash(git commit -m ' *)"
     ]
   }
 }

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulación Formato APA 7</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--bg:#141210;--fg:#E8E0D4;--muted:#8A8078;--accent:#D4A853;--card:#1E1B18;--border:#2E2A26;--error:#C75050;--success:#5A9E6F;--paper:#FAFAF8;--paper-text:#1A1A1A}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.bg-glow{position:fixed;border-radius:50%;pointer-events:none;filter:blur(120px);opacity:.06}
+.bg-glow-1{width:600px;height:600px;background:#D4A853;top:-200px;right:-100px}
+.bg-glow-2{width:400px;height:400px;background:#C75050;bottom:-100px;left:-100px}
+.bg-glow-3{width:300px;height:300px;background:#5A9E6F;top:50%;left:40%}
+
+/* Tareas checkbox */
+.task-check{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:2px solid var(--border);border-radius:3px;cursor:pointer;flex-shrink:0;transition:all .25s;position:relative}
+.task-check:checked{background:var(--accent);border-color:var(--accent)}
+.task-check:checked::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--bg);font-size:11px;font-weight:800}
+.task-check:hover{border-color:var(--accent)}
+.task-check:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Papel */
+.paper{background:var(--paper);color:var(--paper-text);width:100%;min-height:900px;margin:0 auto;padding:24px 28px;box-shadow:0 8px 60px rgba(0,0,0,.55);position:relative;transition:all .5s ease;font-family:'Source Sans 3',Arial,sans-serif;font-size:13.5px;line-height:1.35}
+.paper.t-fuente{font-family:'Times New Roman',Times,serif;font-size:12pt}
+.paper.t-espaciado{line-height:2}
+.paper.t-margenes{padding:40px 42px}
+.paper.t-sangria .parr{text-indent:1.27cm}
+.paper.t-sin-espacio .parr{margin-bottom:0}
+.paper.t-salto .break-mark{display:block}
+.paper.t-h1 .h1{font-weight:700;text-align:center;text-transform:none;text-decoration:none;font-style:normal}
+.paper.t-h2 .h2{font-weight:700;text-align:left;text-transform:none}
+.paper.t-refs-head .refs-h{font-weight:700;text-align:center;text-transform:none;text-decoration:none;font-style:normal}
+.paper.t-hang .ref-e{text-indent:-1.27cm;padding-left:1.27cm}
+.paper.t-cursiva .jname{font-style:italic}
+.paper.t-cursiva .vnum{font-style:italic}
+.paper.t-mayus .atitle{text-transform:none}
+.paper.t-doi .doi-l{display:inline}
+.paper.t-nobold .ubold{font-weight:400}
+.paper.t-etal .yot{display:none}.paper.t-etal .etal{display:inline}
+.paper.t-cita .wcita{display:none}.paper.t-cita .rcita{display:inline}
+.paper.t-bullets .blist{display:none}.paper.t-bullets .bparas{display:block}
+.paper.t-rhead .rhead{display:block}
+.paper.t-pnum .pnum{display:block}
+.paper.t-portada .portada{display:flex;flex-direction:column;justify-content:center;min-height:650px}
+.paper.t-titulo .tit{font-weight:700;text-align:center;text-transform:none;text-decoration:none}
+.paper.t-autor .autor{text-align:center}
+.paper.t-afil .afil{text-align:center}
+
+/* Estado inicial del papel */
+.tit{text-align:left;font-weight:400;text-transform:uppercase;text-decoration:underline;font-size:15px;transition:all .4s}
+.autor{text-align:left;transition:all .4s}
+.afil{text-align:left;transition:all .4s}
+.portada{transition:all .5s}
+.parr{margin-bottom:10px;text-indent:0;transition:all .4s}
+.h1{text-align:left;font-weight:400;text-transform:uppercase;text-decoration:underline;font-style:italic;transition:all .4s;margin:18px 0 8px}
+.h2{text-align:center;font-weight:400;text-transform:uppercase;transition:all .4s;margin:14px 0 6px}
+.refs-h{text-align:left;font-weight:400;text-transform:uppercase;text-decoration:underline;transition:all .4s;margin:20px 0 10px}
+.ref-e{text-indent:0;padding-left:0;margin-bottom:6px;transition:all .4s}
+.jname{font-style:normal;transition:all .4s}
+.vnum{font-style:normal;transition:all .4s}
+.atitle{text-transform:uppercase;transition:all .4s}
+.doi-l{display:none;transition:all .4s}
+.ubold{font-weight:700;transition:all .4s}
+.yot{transition:all .3s}
+.etal{display:none;transition:all .3s}
+.wcita{transition:all .3s}.rcita{display:none;transition:all .3s}
+.blist{transition:all .3s}
+.bparas{display:none;transition:all .3s}
+.rhead{display:none;position:absolute;top:12px;left:42px;font-size:11px;color:var(--paper-text);transition:all .4s}
+.pnum{display:none;position:absolute;top:12px;right:42px;font-size:11px;color:var(--paper-text);transition:all .4s}
+.break-mark{display:none;border-top:2px dashed #bbb;margin:20px 0;text-align:center;color:#999;font-size:10px;letter-spacing:2px;transition:all .4s}
+
+/* Categoría */
+.cat-head{cursor:pointer;user-select:none;transition:color .2s}.cat-head:hover{color:var(--accent)}
+.cat-head .chev{transition:transform .3s}.cat-head.collapsed .chev{transform:rotate(-90deg)}
+.cat-body{overflow:hidden;transition:max-height .4s ease,opacity .3s;max-height:600px;opacity:1}
+.cat-body.shut{max-height:0;opacity:0}
+
+/* Tarea completada */
+.task-done{opacity:.55}.task-done .task-label{text-decoration:line-through;color:var(--muted)}
+
+/* Botón enviar */
+.send-btn{background:var(--accent);color:var(--bg);border:none;padding:13px 52px;font-size:15px;font-weight:700;border-radius:8px;cursor:pointer;transition:all .3s;font-family:'Source Sans 3',sans-serif;letter-spacing:.3px}
+.send-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,168,83,.35)}
+.send-btn:active{transform:translateY(0)}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(5px)}
+.modal-bg.on{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px 32px;max-width:580px;width:92%;max-height:82vh;overflow-y:auto;animation:mIn .35s ease}
+.modal-box.rej{border-color:var(--error)}
+.modal-box.acc{border-color:var(--success)}
+@keyframes mIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* Toast */
+.toast-el{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:7px;font-size:13px;font-weight:600;z-index:500;transform:translateY(80px);opacity:0;transition:all .35s;pointer-events:none}
+.toast-el.vis{transform:translateY(0);opacity:1}
+.toast-el.ok{background:var(--success);color:#fff}
+.toast-el.inf{background:var(--accent);color:var(--bg)}
+
+/* Barra progreso */
+.prog-fill{transition:width .5s ease;height:100%;border-radius:99px}
+
+/* Animación sacudida */
+@keyframes shake{0%,100%{transform:translateX(0)}15%,45%,75%{transform:translateX(-5px)}30%,60%,90%{transform:translateX(5px)}}
+.shake-it{animation:shake .55s ease}
+
+/* Confeti */
+.conf{position:fixed;pointer-events:none;z-index:2000;border-radius:2px}
+
+@media(max-width:1024px){
+  .main-wrap{flex-direction:column!important}
+  .task-col{width:100%!important;max-height:40vh;border-right:none!important;border-bottom:1px solid var(--border)}
+  .doc-col{width:100%!important}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<!-- Fondo decorativo -->
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div class="bg-glow bg-glow-3"></div>
+
+<!-- Barra superior -->
+<header style="background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100">
+  <div style="display:flex;align-items:center;gap:12px">
+    <i class="fa-solid fa-graduation-cap" style="color:var(--accent);font-size:20px"></i>
+    <div>
+      <div style="font-family:'Crimson Pro',serif;font-weight:700;font-size:18px;line-height:1.1">Simulacion APA 7</div>
+      <div style="font-size:11px;color:var(--muted)">Formatacion de manuscrito academico</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div style="text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Tiempo</div><div id="timer" style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">00:00</div></div>
+    <div style="text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Envios</div><div id="envios" style="font-size:16px;font-weight:700;color:var(--error)">0</div></div>
+    <div style="text-align:center;min-width:120px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Progreso</div><div style="background:var(--border);border-radius:99px;height:8px;overflow:hidden"><div class="prog-fill" id="progBar" style="width:0%;background:var(--accent)"></div></div><div id="progText" style="font-size:11px;color:var(--muted);margin-top:2px">0 / 24</div></div>
+  </div>
+</header>
+
+<!-- Contenido principal -->
+<main class="main-wrap" style="display:flex;height:calc(100vh - 57px - 64px);overflow:hidden">
+
+  <!-- Panel de tareas -->
+  <aside class="task-col" style="width:360px;flex-shrink:0;overflow-y:auto;border-right:1px solid var(--border);padding:16px 18px;background:rgba(30,27,24,.6)">
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:600">Lista de correcciones</div>
+    <div id="taskList"></div>
+  </aside>
+
+  <!-- Vista del documento -->
+  <section class="doc-col" style="flex:1;overflow-y:auto;padding:24px;display:flex;justify-content:center;background:rgba(20,18,16,.4)">
+    <div class="paper" id="paper">
+
+      <!-- Encabezado y número de página -->
+      <div class="rhead">IMPACTO TECNOLOGÍA ADOLESCENTES</div>
+      <div class="pnum">1</div>
+
+      <!-- PORTADA -->
+      <div class="portada">
+        <h1 class="tit">EL IMPACTO DE LA TECNOLOGÍA EN EL DESARROLLO COGNITIVO DE LOS ADOLESCENTES: UNA REVISIÓN SISTEMÁTICA</h1>
+        <p class="autor" style="margin-top:16px">María Carmen Rodríguez Pérez</p>
+        <p class="afil" style="margin-top:4px">Universidad Nacional de Educación a Distancia</p>
+      </div>
+
+      <!-- Marca de salto de página -->
+      <div class="break-mark">— salto de página —</div>
+
+      <!-- INTRODUCCIÓN -->
+      <h2 class="h1">INTRODUCCIÓN</h2>
+      <p class="parr">En la última década, el uso de dispositivos tecnológicos por parte de los adolescentes ha aumentado de manera <span class="ubold">significativa</span>. Según estudios recientes <span class="wcita">(según García y López, 2019)</span><span class="rcita">(García y López, 2019)</span>, el tiempo promedio de pantalla diario en adolescentes de 12 a 18 años se ha triplicado, lo que ha generado un intenso debate en la comunidad científica sobre sus implicaciones en el desarrollo cognitivo.</p>
+      <p class="parr">Diversos investigadores <span class="wcita">(como señalan Martínez y otros, 2020)</span><span class="rcita">(Martínez <span class="yot">y otros</span><span class="etal">et al.</span>, 2020)</span> han identificado correlaciones entre el uso excesivo de redes sociales y una disminución en las capacidades de atención sostenida. Sin embargo, otros autores <span class="wcita">(ver Fernández, 2021)</span><span class="rcita">(Fernández, 2021)</span> sostienen que la tecnología puede facilitar el desarrollo de habilidades digitales fundamentales para el siglo XXI.</p>
+
+      <h3 class="h2">PLANTEAMIENTO DEL PROBLEMA</h3>
+      <p class="parr">El presente estudio tiene como objetivo analizar de manera <span class="ubold">sistemática</span> la evidencia empírica disponible sobre la relación entre el uso de tecnología y el desarrollo cognitivo en población adolescente. Se busca responder a la siguiente pregunta de investigación: ¿cuál es el impacto real de la exposición tecnológica en las funciones ejecutivas, la memoria y la atención de los adolescentes?</p>
+
+      <!-- Viñetas (mal) -->
+      <ul class="blist" style="margin:8px 0 8px 28px;list-style:disc">
+        <li class="parr" style="margin-bottom:6px">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas.</li>
+        <li class="parr" style="margin-bottom:6px">Se ha observado una disminución en los puntajes de atención sostenida.</li>
+        <li class="parr" style="margin-bottom:6px">Las habilidades de multitarea digital han mejorado significativamente.</li>
+      </ul>
+      <!-- Párrafos (bien, ocultos) -->
+      <div class="bparas">
+        <p class="parr">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas, según datos recientes de organismos internacionales de salud.</p>
+        <p class="parr">Se ha observado una disminución en los puntajes de atención sostenida en evaluaciones estandarizadas aplicadas a población estudiantil.</p>
+        <p class="parr">Las habilidades de multitarea digital han mejorado significativamente en comparación con generaciones anteriores.</p>
+      </div>
+
+      <!-- MÉTODO -->
+      <h2 class="h1">MÉTODO</h2>
+      <h3 class="h2">PARTICIPANTES</h3>
+      <p class="parr">Se revisaron 45 estudios publicados entre 2015 y 2023, que incluían un total de 12.340 participantes con edades comprendidas entre los 12 y 18 años. Los criterios de inclusión requirieron que los estudios emplearan diseños longitudinales o transversales con <span class="ubold">controles metodológicos</span> adecuados.</p>
+
+      <h3 class="h2">PROCEDIMIENTO</h3>
+      <p class="parr">La búsqueda se realizó en las bases de datos PubMed, PsycINFO y Web of Science. Los investigadores <span class="wcita">(según Chen y colaboradores, 2022)</span><span class="rcita">(Chen <span class="yot">y colaboradores</span><span class="etal">et al.</span>, 2022)</span> aplicaron un protocolo de revisión sistemática siguiendo las directrices PRISMA, evaluando la calidad metodológica mediante la escala de Newcastle-Ottawa.</p>
+
+      <!-- RESULTADOS -->
+      <h2 class="h1">RESULTADOS</h2>
+      <p class="parr">Los resultados revelan un panorama <span class="ubold">complejo</span> y matizado. Por un lado, se identificó una correlación negativa moderada (r = -0.34) entre el tiempo de uso de redes sociales y el rendimiento en tareas de atención sostenida. Por otro lado, el uso de herramientas digitales educativas mostró una correlación positiva (r = 0.28) con la memoria de trabajo visual.</p>
+      <p class="parr">Los análisis de subgrupos realizados por <span class="wcita">(Torres y otros, 2023)</span><span class="rcita">(Torres <span class="yot">y otros</span><span class="etal">et al.</span>, 2023)</span> indicaron que el tipo de actividad tecnológica es un factor moderador crucial: las actividades pasivas (como ver videos) se asociaron con peores resultados cognitivos, mientras que las actividades interactivas (como programación o creación de contenido) mostraron efectos neutros o positivos.</p>
+
+      <!-- DISCUSIÓN -->
+      <h2 class="h1">DISCUSIÓN</h2>
+      <p class="parr">Los hallazgos de esta revisión sistemática sugieren que el impacto de la tecnología en el desarrollo cognitivo adolescente no es uniforme, sino que depende de múltiples variables como el tipo de uso, la duración de la exposición y el contexto en el que se utiliza la tecnología. Estos resultados son consistentes con los planteamientos de <span class="wcita">(véase García y López, 2019)</span><span class="rcita">(García y López, 2019)</span> sobre la necesidad de adoptar una perspectiva diferenciada.</p>
+      <p class="parr">Se recomienda que futuras investigaciones adopten diseños longitudinales de mayor duración y utilicen medidas neurocognitivas objetivas. Asimismo, los resultados subrayan la importancia de desarrollar programas de alfabetización digital que promuevan un uso <span class="ubold">responsable</span> y activo de la tecnología por parte de los adolescentes.</p>
+
+      <!-- REFERENCIAS -->
+      <h2 class="refs-h">REFERENCIAS</h2>
+      <div class="refs-list" id="refsList">
+        <p class="ref-e" data-key="torres">Torres, R., Navarro, M., y Delgado, P. (2023). <span class="atitle">EFECTOS DIFERENCIALES DE LA TECNOLOGÍA EN COGNICIÓN ADOLESCENTE</span>. <span class="jname">Revista de Psicología Educativa</span>, <span class="vnum">29</span>(3), 145–162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span></p>
+        <p class="ref-e" data-key="garcia">García, M., y López, C. (2019). <span class="atitle">PANTALLAS Y DESARROLLO COGNITIVO: UNA PERSPECTIVA DIFERENCIADA</span>. <span class="jname">Infancia y Aprendizaje</span>, <span class="vnum">42</span>(4), 890–912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span></p>
+        <p class="ref-e" data-key="chen">Chen, W., Park, S., y Müller, H. (2022). <span class="atitle">METODOLOGÍAS DE REVISIÓN SISTEMÁTICA EN INVESTIGACIÓN COGNITIVA</span>. <span class="jname">Psychological Methods</span>, <span class="vnum">27</span>(1), 34–52. <span class="doi-l">https://doi.org/10.1037/met0000412</span></p>
+        <p class="ref-e" data-key="martinez">Martínez, A., Ruiz, B., y Santos, L. (2020). <span class="atitle">REDES SOCIALES Y ATENCIÓN SOSTENIDA EN ADOLESCENTES</span>. <span class="jname">Journal of Adolescent Psychology</span>, <span class="vnum">45</span>(2), 78–95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span></p>
+        <p class="ref-e" data-key="fernandez">Fernández, J. (2021). <span class="atitle">HABILIDADES DIGITALES Y COMPETENCIAS DEL SIGLO XXI EN JÓVENES</span>. <span class="jname">Comunicar</span>, <span class="vnum">69</span>, 23–38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span></p>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<!-- Barra inferior de envío -->
+<footer style="height:64px;background:var(--card);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:16px;position:sticky;bottom:0;z-index:100">
+  <button class="send-btn" id="sendBtn" aria-label="Enviar tarea"><i class="fa-solid fa-paper-plane" style="margin-right:8px"></i>Enviar Tarea</button>
+</footer>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal" role="dialog" aria-modal="true">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast-el" id="toast"></div>
+
+<script>
+/* ============================================
+   DATOS DE TAREAS
+   ============================================ */
+const TASKS = [
+  { id:'fuente',    cat:'portada', label:'Cambiar tipo de letra a Times New Roman 12pt',           css:'t-fuente',   fb:'El documento no está en Times New Roman 12pt. APA 7 exige esta tipografía.' },
+  { id:'portada',   cat:'portada', label:'Centrar verticalmente el contenido de la portada',        css:'t-portada',  fb:'El contenido de la portada no está centrado en la mitad superior de la página.' },
+  { id:'titulo',    cat:'portada', label:'Título: centrado, negrita, sin subrayar ni mayúsculas',   css:'t-titulo',   fb:'El título debe estar centrado, en negrita, sin subrayado ni mayúsculas sostenidas.' },
+  { id:'autor',     cat:'portada', label:'Centrar el nombre del autor',                             css:'t-autor',    fb:'El nombre del autor debe estar centrado debajo del título.' },
+  { id:'afil',      cat:'portada', label:'Centrar la afiliación institucional',                     css:'t-afil',     fb:'La afiliación institucional debe estar centrada debajo del nombre del autor.' },
+  { id:'espaciado', cat:'formato', label:'Aplicar interlineado doble (2.0)',                        css:'t-espaciado',fb:'El interlineado no es doble. APA 7 requiere interlineado 2.0 en todo el documento.' },
+  { id:'sin-esp',   cat:'formato', label:'Eliminar espacio adicional entre párrafos',               css:'t-sin-espacio',fb:'Hay espacios adicionales entre párrafos. Deben eliminarse; el interlineado doble es suficiente.' },
+  { id:'margenes',  cat:'formato', label:'Establecer márgenes de 2.54 cm (1 pulgada)',              css:'t-margenes', fb:'Los márgenes no son de 2.54 cm en todos los lados. Verifica la configuración de página.' },
+  { id:'pnum',      cat:'formato', label:'Agregar número de página en esquina superior derecha',    css:'t-pnum',     fb:'No hay número de página en la esquina superior derecha. Todas las páginas deben estar numeradas.' },
+  { id:'salto',     cat:'formato', label:'Insertar salto de página después de la portada',          css:'t-salto',    fb:'Falta el salto de página después de la portada. El cuerpo debe comenzar en una nueva página.' },
+  { id:'rhead',     cat:'encab',   label:'Agregar encabezado con título abreviado en mayúsculas',   css:'t-rhead',    fb:'Falta el encabezado con el título abreviado en mayúsculas en el margen superior.' },
+  { id:'sangria',   cat:'cuerpo',  label:'Aplicar sangría de 1.27 cm en la primera línea',         css:'t-sangria',  fb:'Los párrafos no tienen sangría de 1.27 cm en la primera línea. Es obligatorio en APA 7.' },
+  { id:'h1',        cat:'cuerpo',  label:'Encabezados Nivel 1: centrados, en negrita',              css:'t-h1',       fb:'Los encabezados de Nivel 1 deben estar centrados y en negrita, sin subrayado ni mayúsculas.' },
+  { id:'h2',        cat:'cuerpo',  label:'Encabezados Nivel 2: alineados a la izquierda, negrita', css:'t-h2',       fb:'Los encabezados de Nivel 2 deben estar alineados a la izquierda y en negrita.' },
+  { id:'cita',      cat:'cuerpo',  label:'Corregir formato de citas en el texto (Autor, Año)',       css:'t-cita',     fb:'Las citas en el texto no siguen el formato (Autor, Año). Revisa todas las citas parentéticas.' },
+  { id:'nobold',    cat:'cuerpo',  label:'Eliminar negritas innecesarias en el cuerpo del texto',    css:'t-nobold',   fb:'Hay negritas innecesarias en el cuerpo del texto. APA 7 no permite negritas para enfatizar palabras.' },
+  { id:'etal',      cat:'cuerpo',  label:'Cambiar "y otros" por "et al." en citas de 3+ autores',   css:'t-etal',     fb:'Se usa "y otros" en lugar de "et al." para citas con tres o más autores. Es un error frecuente.' },
+  { id:'bullets',   cat:'cuerpo',  label:'Convertir viñetas a párrafos de texto continuo',          css:'t-bullets',  fb:'El cuerpo del texto contiene viñetas. APA 7 exige formato de párrafo continuo; no se usan viñetas en el cuerpo.' },
+  { id:'refs-head', cat:'refs',    label:'"Referencias" como encabezado Nivel 1 (centrado, negrita)',css:'t-refs-head',fb:'El título "Referencias" no está formateado como encabezado de Nivel 1.' },
+  { id:'hang',      cat:'refs',    label:'Aplicar sangría francesa (hanging indent) a referencias', css:'t-hang',     fb:'Las referencias no tienen sangría francesa. La primera línea va al margen y las siguientes se sangran 1.27 cm.' },
+  { id:'cursiva',   cat:'refs',    label:'Poner en cursiva nombres de revistas y números de volumen',css:'t-cursiva',  fb:'Los nombres de las revistas y los números de volumen deben estar en cursiva.' },
+  { id:'mayus',     cat:'refs',    label:'Corregir mayúsculas en títulos de artículos (tipo oración)',css:'t-mayus',   fb:'Los títulos de artículos deben estar en mayúscula de tipo oración (solo primera palabra y nombres propios en mayúscula).' },
+  { id:'doi',       cat:'refs',    label:'Agregar enlaces DOI a cada referencia',                   css:'t-doi',      fb:'Faltan los enlaces DOI en las referencias. Cuando esté disponible, el DOI debe incluirse con formato https://doi.org/...' },
+  { id:'alpha',     cat:'refs',    label:'Ordenar referencias alfabéticamente por apellido',        css:null,         fb:'Las referencias no están ordenadas alfabéticamente por el apellido del primer autor.' },
+];
+
+const CATS = [
+  { id:'portada', label:'Portada',       icon:'fa-file-lines',     color:'#D4A853' },
+  { id:'formato', label:'Formato general',icon:'fa-sliders',       color:'#7EB8DA' },
+  { id:'encab',   label:'Encabezado',     icon:'fa-heading',        color:'#C78DD2' },
+  { id:'cuerpo',  label:'Cuerpo del texto',icon:'fa-align-left',    color:'#E0915A' },
+  { id:'refs',    label:'Referencias',    icon:'fa-book-open',      color:'#5A9E6F' },
+];
+
+/* ============================================
+   ESTADO
+   ============================================ */
+const state = {};
+TASKS.forEach(t => state[t.id] = false);
+let envioCount = 0;
+let seconds = 0;
+let timerInterval = null;
+
+/* ============================================
+   ELEMENTOS DOM
+   ============================================ */
+const paper = document.getElementById('paper');
+const taskListEl = document.getElementById('taskList');
+const progBar = document.getElementById('progBar');
+const progText = document.getElementById('progText');
+const enviosEl = document.getElementById('envios');
+const timerEl = document.getElementById('timer');
+const sendBtn = document.getElementById('sendBtn');
+const modal = document.getElementById('modal');
+const modalBox = document.getElementById('modalBox');
+const toastEl = document.getElementById('toast');
+const refsList = document.getElementById('refsList');
+
+/* Orden correcto alfabético de referencias */
+const correctOrder = ['chen','fernandez','garcia','martinez','torres'];
+const originalOrder = ['torres','garcia','chen','martinez','fernandez'];
+
+/* ============================================
+   RENDERIZAR LISTA DE TAREAS
+   ============================================ */
+function renderTasks() {
+  let html = '';
+  CATS.forEach(cat => {
+    const catTasks = TASKS.filter(t => t.cat === cat.id);
+    const allDone = catTasks.every(t => state[t.id]);
+    html += `<div style="margin-bottom:14px">
+      <div class="cat-head" data-cat="${cat.id}" style="display:flex;align-items:center;gap:8px;padding:6px 0;margin-bottom:4px">
+        <i class="fa-solid ${cat.icon}" style="color:${cat.color};width:16px;text-align:center;font-size:13px"></i>
+        <span style="font-weight:700;font-size:13px;flex:1">${cat.label}</span>
+        ${allDone ? '<i class="fa-solid fa-circle-check" style="color:var(--success);font-size:14px"></i>' : `<span style="font-size:11px;color:var(--muted)">${catTasks.filter(t=>!state[t.id]).length}</span>`}
+        <i class="fa-solid fa-chevron-down chev" style="font-size:10px;color:var(--muted)"></i>
+      </div>
+      <div class="cat-body" data-catbody="${cat.id}">`;
+    catTasks.forEach(t => {
+      html += `<label class="task-item ${state[t.id]?'task-done':''}" style="display:flex;align-items:flex-start;gap:8px;padding:5px 8px 5px 28px;cursor:pointer;border-radius:5px;transition:background .2s" onmouseenter="this.style.background='rgba(255,255,255,.03)'" onmouseleave="this.style.background='transparent'">
+        <input type="checkbox" class="task-check" data-id="${t.id}" ${state[t.id]?'checked':''} aria-label="${t.label}">
+        <span class="task-label" style="font-size:12.5px;line-height:1.4;padding-top:1px">${t.label}</span>
+      </label>`;
+    });
+    html += `</div></div>`;
+  });
+  taskListEl.innerHTML = html;
+
+  /* Eventos de colapso */
+  document.querySelectorAll('.cat-head').forEach(h => {
+    h.addEventListener('click', () => {
+      h.classList.toggle('collapsed');
+      const body = document.querySelector(`[data-catbody="${h.dataset.cat}"]`);
+      body.classList.toggle('shut');
+    });
+  });
+
+  /* Eventos de checkbox */
+  document.querySelectorAll('.task-check').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const id = e.target.dataset.id;
+      state[id] = e.target.checked;
+      onTaskToggle(id);
+    });
+  });
+}
+
+/* ============================================
+   ACTUALIZAR DOCUMENTO SEGÚN ESTADO
+   ============================================ */
+function updatePaper() {
+  TASKS.forEach(t => {
+    if (t.css) {
+      if (state[t.id]) paper.classList.add(t.css);
+      else paper.classList.remove(t.css);
+    }
+  });
+
+  /* Orden alfabético de referencias */
+  if (state['alpha']) {
+    correctOrder.forEach(key => {
+      const el = refsList.querySelector(`[data-key="${key}"]`);
+      if (el) refsList.appendChild(el);
+    });
+  } else {
+    originalOrder.forEach(key => {
+      const el = refsList.querySelector(`[data-key="${key}"]`);
+      if (el) refsList.appendChild(el);
+    });
+  }
+}
+
+/* ============================================
+   AL TOGGLE UNA TAREA
+   ============================================ */
+function onTaskToggle(id) {
+  updatePaper();
+  renderTasks();
+  updateProgress();
+
+  const task = TASKS.find(t => t.id === id);
+  if (state[id]) {
+    showToast('ok', `<i class="fa-solid fa-check" style="margin-right:6px"></i>${task.label}`);
+  }
+}
+
+/* ============================================
+   PROGRESO
+   ============================================ */
+function updateProgress() {
+  const done = TASKS.filter(t => state[t.id]).length;
+  const total = TASKS.length;
+  const pct = (done / total) * 100;
+  progBar.style.width = pct + '%';
+  progText.textContent = `${done} / ${total}`;
+
+  if (pct === 100) {
+    progBar.style.background = 'var(--success)';
+  } else {
+    progBar.style.background = 'var(--accent)';
+  }
+}
+
+/* ============================================
+   TOAST
+   ============================================ */
+let toastTimer = null;
+function showToast(type, msg) {
+  toastEl.className = 'toast-el ' + type;
+  toastEl.innerHTML = msg;
+  requestAnimationFrame(() => toastEl.classList.add('vis'));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('vis'), 2200);
+}
+
+/* ============================================
+   TEMPORIZADOR
+   ============================================ */
+function startTimer() {
+  timerInterval = setInterval(() => {
+    seconds++;
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    timerEl.textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+/* ============================================
+   ENVÍO
+   ============================================ */
+sendBtn.addEventListener('click', () => {
+  envioCount++;
+  enviosEl.textContent = envioCount;
+
+  const pendientes = TASKS.filter(t => !state[t.id]);
+
+  if (pendientes.length === 0) {
+    /* APROBADO */
+    modalBox.className = 'modal-box acc';
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    modalBox.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-check" style="color:#fff;font-size:18px"></i></div>
+        <div>
+          <div style="font-weight:700;font-size:16px;color:var(--success)">Trabajo Aprobado</div>
+          <div style="font-size:11px;color:var(--muted)">Después de ${envioCount} intento${envioCount>1?'s':''} y ${m}:${s} de trabajo</div>
+        </div>
+      </div>
+      <div style="background:rgba(90,158,111,.08);border:1px solid rgba(90,158,111,.2);border-radius:8px;padding:16px;font-size:13.5px;line-height:1.7;color:var(--fg)">
+        <p style="margin-bottom:8px"><strong>De:</strong> Prof. Dra. Ana Belén Montoya</p>
+        <p style="margin-bottom:8px"><strong>Asunto:</strong> Aprobado — Formato APA 7</p>
+        <p style="margin-bottom:12px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
+        <p style="margin-bottom:8px">Estimada María Carmen,</p>
+        <p style="margin-bottom:8px">Tu trabajo cumple correctamente con todas las especificaciones de formato APA 7.ª edición. El manuscrito ha sido aceptado para evaluación de contenido.</p>
+        <p style="margin-bottom:8px">${envioCount === 1 ? 'Excelente trabajo desde el primer intento. Es raro ver un formato tan impecable.' : 'Veamos si la próxima vez puedes lograrlo desde el primer envío. Revisa el manual con más atención antes de entregar.'}</p>
+        <p>Saludos cordiales,<br><strong>Prof. Dra. Ana Belén Montoya</strong></p>
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <button onclick="closeModal()" style="background:var(--success);color:#fff;border:none;padding:10px 36px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:14px;transition:opacity .2s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">Cerrar</button>
+      </div>`;
+    modal.classList.add('on');
+    launchConfetti();
+  } else {
+    /* RECHAZADO */
+    sendBtn.classList.add('shake-it');
+    setTimeout(() => sendBtn.classList.remove('shake-it'), 600);
+
+    modalBox.className = 'modal-box rej';
+
+    /* Agrupar feedback por categoría */
+    let fbHtml = '';
+    CATS.forEach(cat => {
+      const catPend = pendientes.filter(t => t.cat === cat.id);
+      if (catPend.length === 0) return;
+      fbHtml += `<div style="margin-bottom:12px">
+        <div style="font-weight:700;font-size:12px;color:${cat.color};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px"><i class="fa-solid ${cat.icon}" style="margin-right:6px"></i>${cat.label}</div>`;
+      catPend.forEach((t, i) => {
+        fbHtml += `<div style="display:flex;gap:8px;font-size:13px;line-height:1.5;margin-bottom:5px;padding-left:4px">
+          <span style="color:var(--error);font-weight:700;flex-shrink:0">${i+1}.</span>
+          <span style="color:var(--fg)">${t.fb}</span>
+        </div>`;
+      });
+      fbHtml += `</div>`;
+    });
+
+    /* Frases motivacionales/desmotivadoras según cuántos envíos lleve */
+    let frase = '';
+    if (envioCount === 1) frase = 'Revisa cuidadosamente cada punto antes de volver a enviar.';
+    else if (envioCount === 2) frase = 'Te falta la mitad del trabajo. Revisa el Manual de Publicaciones APA.';
+    else if (envioCount === 3) frase = 'Sigue sin estar listo. Te sugiero comparar tu documento con una plantilla APA 7 oficial.';
+    else if (envioCount <= 5) frase = 'Esto está tomando demasiado tiempo. Revisa cada elemento uno por uno con la lista.';
+    else if (envioCount <= 8) frase = '¿Has consultado el manual? Los puntos marcados son específicos y claros.';
+    else frase = 'La paciencia tiene un límite. Cada punto está detallado. Corrígelo ya.';
+
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+
+    modalBox.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--error);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-xmark" style="color:#fff;font-size:18px"></i></div>
+        <div>
+          <div style="font-weight:700;font-size:16px;color:var(--error)">Trabajo Devuelto</div>
+          <div style="font-size:11px;color:var(--muted)">Intento ${envioCount} — ${pendientes.length} error${pendientes.length>1?'es':''} encontrado${pendientes.length>1?'s':''} — ${m}:${s} transcurridos</div>
+        </div>
+      </div>
+      <div style="background:rgba(199,80,80,.06);border:1px solid rgba(199,80,80,.15);border-radius:8px;padding:16px;font-size:13.5px;line-height:1.7;color:var(--fg)">
+        <p style="margin-bottom:8px"><strong>De:</strong> Prof. Dra. Ana Belén Montoya</p>
+        <p style="margin-bottom:8px"><strong>Asunto:</strong> Devolución — Formato APA 7 incompleto</p>
+        <p style="margin-bottom:12px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
+        <p style="margin-bottom:8px">Estimada María Carmen,</p>
+        <p style="margin-bottom:12px">He revisado tu trabajo y lo devuelvo con observaciones. El contenido es adecuado, pero el formato <strong>no cumple</strong> con las normas APA 7.ª edición. Corrige los siguientes <strong>${pendientes.length} punto${pendientes.length>1?'s':''}</strong>:</p>
+        ${fbHtml}
+        <div style="border-top:1px solid rgba(199,80,80,.15);margin-top:14px;padding-top:12px;font-style:italic;color:var(--muted);font-size:12.5px">
+          <i class="fa-solid fa-circle-info" style="margin-right:4px"></i>${frase}
+        </div>
+        <p style="margin-top:12px">Saludos cordiales,<br><strong>Prof. Dra. Ana Belén Montoya</strong></p>
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <button onclick="closeModal()" style="background:var(--error);color:#fff;border:none;padding:10px 36px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:14px;transition:opacity .2s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">Entendido, vuelvo a revisar</button>
+      </div>`;
+    modal.classList.add('on');
+  }
+});
+
+function closeModal() {
+  modal.classList.remove('on');
+}
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* ============================================
+   CONFETI
+   ============================================ */
+function launchConfetti() {
+  const colors = ['#D4A853','#5A9E6F','#7EB8DA','#C78DD2','#E0915A','#C75050'];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement('div');
+    el.className = 'conf';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.top = '-10px';
+    el.style.width = (Math.random() * 8 + 4) + 'px';
+    el.style.height = (Math.random() * 8 + 4) + 'px';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.opacity = (Math.random() * 0.6 + 0.4).toFixed(2);
+    document.body.appendChild(el);
+
+    const dur = Math.random() * 2000 + 1500;
+    const xDrift = (Math.random() - 0.5) * 200;
+    const rot = Math.random() * 720 - 360;
+
+    el.animate([
+      { transform: `translate(0,0) rotate(0deg)`, opacity: 1 },
+      { transform: `translate(${xDrift}px, ${window.innerHeight + 50}px) rotate(${rot}deg)`, opacity: 0 }
+    ], { duration: dur, easing: 'cubic-bezier(.25,.46,.45,.94)' }).onfinish = () => el.remove();
+  }
+}
+
+/* ============================================
+   INICIO
+   ============================================ */
+renderTasks();
+updateProgress();
+startTimer();
+</script>
+</body>
+</html>

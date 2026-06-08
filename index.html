@@ -301,6 +301,7 @@
         .sim-out.obs:hover { border-color: rgba(217,119,6,0.5);  box-shadow: 0 24px 60px rgba(217,119,6,0.08); }
         .sim-out.fin:hover { border-color: rgba(0,243,255,0.35); box-shadow: 0 24px 60px rgba(0,243,255,0.06); }
         .sim-out.des:hover { border-color: rgba(0,255,65,0.35);  box-shadow: 0 24px 60px rgba(0,255,65,0.06);  }
+        .sim-out.apa:hover { border-color: rgba(212,168,83,0.4); box-shadow: 0 24px 60px rgba(212,168,83,0.08); }
 
         .sim-in {
             border-radius: calc(1.75rem - 4px); background: var(--card);
@@ -666,6 +667,24 @@
                             <div class="sim-title">Laboratorio ACME</div>
                             <p class="sim-desc">Diseña y ejecuta experimentos conductuales en un laboratorio virtual de estética terminal-cyberpunk.</p>
                             <a class="btn-sim" href="disenos.html" onclick="trackAndGo('simlab_des','disenos.html');return false;">
+                                Iniciar Simulación
+                                <span class="btn-sim-ico">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APA 7 -->
+                <div class="sim-out apa reveal d4" onclick="trackAndGo('simlab_apa','apa7.html')">
+                    <div class="sim-in">
+                        <div class="sim-thumb">
+                            <span class="sim-thumb-icon">📝</span>
+                        </div>
+                        <div class="sim-body">
+                            <span class="sim-tag">Redacción Académica</span>
+                            <div class="sim-title">Simulación Formato APA 7</div>
+                            <p class="sim-desc">Corrige un manuscrito con errores de formato APA 7.ª edición: portada, encabezados, citas y referencias, bajo la mirada de la profesora revisora.</p>
+                            <a class="btn-sim" href="apa7.html" onclick="trackAndGo('simlab_apa','apa7.html');return false;">
                                 Iniciar Simulación
                                 <span class="btn-sim-ico">→</span>
                             </a>

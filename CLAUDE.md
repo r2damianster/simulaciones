@@ -15,6 +15,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `observación.html` | Observación en Investigación Social | Metodología cualitativa — tipos de observación, notas de campo, sesgos |
 | `financiamiento_etica.html` | El Dilema del Investigador 2.0 | Ética académica — revistas depredadoras, gestión de fondos ONU/CEDIA |
 | `disenos.html` | Laboratorio ACME | Diseños experimentales — investigación conductual |
+| `apa7.html` | Simulación Formato APA 7 | Redacción académica — corrección de manuscrito con errores de formato APA 7.ª ed. |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 
@@ -27,7 +28,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 - **JavaScript** Vanilla (sin frameworks)
 - **Fuentes CDN**: Google Fonts (Playfair Display, Source Sans 3, Orbitron, Share Tech Mono)
 - **Iconos CDN**: Font Awesome 6.5
-- **CSS framework opcional**: Tailwind CDN (solo en `disenos.html`)
+- **CSS framework opcional**: Tailwind CDN (en `disenos.html` y `apa7.html`)
 
 ---
 
@@ -40,6 +41,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 | `observación.html` | `#1C1917` (dark warm) | `#D97706` (amber) | Premium editorial dark |
 | `financiamiento_etica.html` | `#f4f6f8` (light) | azul ONU / verde / naranja | Institucional |
 | `disenos.html` | `#060d06` (dark green) | `#00ff41` (matrix green) | Terminal / cyberpunk |
+| `apa7.html` | `#141210` (dark warm) | `#D4A853` (gold) | Editorial académico / Tailwind |
 
 ### Patrones de código JS
 

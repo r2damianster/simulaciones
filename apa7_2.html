@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor APA 7 — Simulacion</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--bg:#1E1E1E;--ribbon:#2D2D2D;--rbord:#404040;--bt:#CCC;--bthov:#3D3D3D;--btact:#D4A853;--btactt:#1A1A1A;--dis:#555;--paper:#FFF;--ptxt:#1A1A1A;--status:#252526;--accent:#D4A853;--err:#E05050;--ok:#50A060;--selbg:rgba(0,120,215,.13);--selbd:rgba(0,120,215,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt);height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
+::-webkit-scrollbar{width:7px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#444;border-radius:4px}
+
+/* Pestañas */
+.tab-bar{display:flex;align-items:stretch;background:#252526;border-bottom:1px solid #1a1a1a;flex-shrink:0}
+.tab{padding:6px 18px;font-size:12px;cursor:pointer;border-bottom:2px solid transparent;color:#888;transition:all .2s}
+.tab:hover{color:#bbb;background:#2a2a2a}
+.tab.active{color:#eee;border-bottom-color:var(--accent);background:var(--ribbon)}
+.tab.off{pointer-events:none;color:#444}
+
+/* Cinta */
+.ribbon{background:var(--ribbon);border-bottom:1px solid var(--rbord);flex-shrink:0;overflow-x:auto;overflow-y:hidden}
+.ribbon::-webkit-scrollbar{height:3px}
+.rib-row{display:flex;align-items:stretch;min-width:max-content;padding:4px 6px;gap:0}
+.rib-group{display:flex;flex-direction:column;align-items:center;padding:0 6px}
+.rib-gc{display:flex;align-items:center;gap:2px;flex:1;padding:2px 0}
+.rib-gl{font-size:9.5px;color:#666;padding:1px 0 2px;text-align:center;white-space:nowrap}
+.rib-sep{width:1px;background:var(--rbord);margin:4px 2px;align-self:stretch}
+
+.rib-btn{width:30px;height:28px;display:flex;align-items:center;justify-content:center;background:0 0;border:1px solid transparent;border-radius:3px;color:var(--bt);cursor:pointer;font-size:13px;transition:all .15s;flex-shrink:0}
+.rib-btn:hover:not(:disabled){background:var(--bthov);border-color:var(--rbord)}
+.rib-btn.on{background:var(--btact)!important;color:var(--btactt)!important;border-color:var(--btact)!important}
+.rib-btn:disabled{color:var(--dis);cursor:not-allowed}
+.rib-btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+.rib-sel{background:#383838;color:#ddd;border:1px solid #4a4a4a;border-radius:3px;padding:3px 4px;font-size:11px;font-family:'Source Sans 3',sans-serif;cursor:pointer;outline:0}
+.rib-sel:focus{border-color:var(--accent)}
+.rib-sel:disabled{opacity:.4;cursor:not-allowed}
+
+.rib-tool{padding:3px 7px;background:0 0;border:1px solid transparent;border-radius:3px;color:var(--bt);cursor:pointer;font-size:10.5px;font-family:'Source Sans 3',sans-serif;white-space:nowrap;transition:all .15s}
+.rib-tool:hover:not(:disabled){background:var(--bthov);border-color:var(--rbord)}
+.rib-tool:disabled{color:var(--dis);cursor:not-allowed}
+
+/* Pista */
+.hint-bar{background:rgba(212,168,83,.1);border-bottom:1px solid rgba(212,168,83,.2);color:var(--accent);padding:7px 16px;font-size:12.5px;display:none;align-items:center;gap:8px;flex-shrink:0;animation:fadeI .3s}
+.hint-bar.show{display:flex}
+@keyframes fadeI{from{opacity:0}to{opacity:1}}
+
+/* Editor */
+.editor-area{flex:1;overflow-y:auto;background:#2A2A2A;padding:24px;display:flex;justify-content:center}
+.paper{background:var(--paper);color:var(--ptxt);width:612px;min-height:792px;padding:24px 28px;box-shadow:0 2px 30px rgba(0,0,0,.35);position:relative;flex-shrink:0;font-family:'Arial',sans-serif;font-size:14px;line-height:1.35;transition:font-family .4s,font-size .4s,line-height .4s,padding .4s}
+
+/* Secciones bloqueadas */
+.doc-sec{transition:opacity .7s,filter .7s;position:relative}
+.doc-sec.locked{opacity:.06;filter:blur(3px);pointer-events:none}
+.doc-sec.locked .lock-ico{display:flex}
+.lock-ico{display:none;position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);align-items:center;gap:10px;font-size:11px;color:rgba(0,0,0,.25);pointer-events:none;z-index:5}
+.lock-ico i{font-size:24px}
+
+/* Selección */
+.sel-el{background:var(--selbg)!important;outline:1px solid var(--selbd);outline-offset:-1px;border-radius:2px}
+
+/* Estado inicial documento */
+.tit{text-align:left;font-weight:400;text-transform:uppercase;text-decoration:underline;font-size:inherit;transition:all .35s}
+.autor-t{text-align:left;transition:all .35s}
+.afil-t{text-align:left;transition:all .35s}
+.h1{font-weight:400;text-transform:uppercase;text-decoration:underline;font-style:italic;text-align:left;margin:16px 0 6px;transition:all .35s;font-size:inherit}
+.h2{font-weight:400;text-transform:uppercase;text-align:center;margin:12px 0 4px;transition:all .35s;font-size:inherit}
+.parr{margin-bottom:10px;text-indent:0;transition:all .35s}
+.refs-h{font-weight:400;text-transform:uppercase;text-decoration:underline;text-align:left;margin:18px 0 8px;transition:all .35s;font-size:inherit}
+.ref-e{text-indent:0;padding-left:0;margin-bottom:5px;transition:all .35s}
+.jname{font-style:normal;transition:all .3s}
+.vnum{font-style:normal;transition:all .3s}
+.atitle{text-transform:uppercase;transition:all .3s}
+.doi-l{display:none;transition:all .3s}
+.ubold{font-weight:700;transition:all .3s}
+.yot{transition:all .2s}.etal{display:none;transition:all .2s}
+.wcita{transition:all .2s}.rcita{display:none;transition:all .2s}
+.blist{margin:8px 0 8px 28px;list-style:disc;transition:all .3s}
+.bparas{display:none;transition:all .3s}
+.rhead{display:none;position:absolute;top:14px;left:42px;font-size:11px;color:var(--ptxt);transition:all .3s}
+.pnum{display:none;position:absolute;top:14px;right:42px;font-size:11px;color:var(--ptxt);transition:all .3s}
+.break-mark{display:none;border-top:2px dashed #bbb;margin:20px 0;text-align:center;color:#999;font-size:10px;letter-spacing:2px;transition:all .3s}
+
+/* Barra de estado */
+.status-bar{background:var(--status);border-top:1px solid #1a1a1a;padding:4px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;font-size:11.5px;gap:12px;min-height:30px}
+.status-bar .st-l{display:flex;align-items:center;gap:12px;color:#777;flex:1}
+.status-bar .st-c{color:#555;flex:1;text-align:center}
+.status-bar .st-r{flex:1;display:flex;justify-content:flex-end}
+.send-sb{background:var(--accent);color:var(--btactt);border:none;padding:4px 16px;border-radius:4px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:all .2s}
+.send-sb:hover{opacity:.85;transform:translateY(-1px)}
+.send-sb:active{transform:translateY(0)}
+
+/* Notificación fase */
+.phase-not{position:fixed;top:-56px;left:50%;transform:translateX(-50%);background:var(--ok);color:#fff;padding:10px 24px;border-radius:0 0 8px 8px;font-weight:600;font-size:13px;z-index:600;transition:top .5s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.phase-not.show{top:0}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+.modal-bg.on{display:flex}
+.modal-box{background:#2D2D2D;border:1px solid #404040;border-radius:12px;padding:24px 28px;max-width:560px;width:92%;max-height:80vh;overflow-y:auto;animation:mIn .35s ease;color:var(--bt)}
+.modal-box.rej{border-color:var(--err)}.modal-box.acc{border-color:var(--ok)}
+@keyframes mIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+@keyframes shake{0%,100%{transform:translateX(0)}15%,45%,75%{transform:translateX(-4px)}30%,60%,90%{transform:translateX(4px)}}
+.shake-it{animation:shake .5s ease}
+
+.conf{position:fixed;pointer-events:none;z-index:2000;border-radius:2px}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:700px){.editor-area{padding:8px}.paper{width:100%;min-height:auto;font-size:12px}}
+</style>
+</head>
+<body>
+
+<!-- Pestañas -->
+<div class="tab-bar">
+  <div class="tab active">Inicio</div>
+  <div class="tab off">Insertar</div>
+  <div class="tab off">Diseno</div>
+  <div class="tab off">Referencias</div>
+</div>
+
+<!-- Cinta de herramientas -->
+<div class="ribbon">
+<div class="rib-row">
+
+  <!-- Tipografía -->
+  <div class="rib-group">
+    <div class="rib-gc">
+      <select class="rib-sel" id="selFont" title="Tipo de letra" style="width:110px">
+        <option value="arial" selected>Arial</option>
+        <option value="calibri">Calibri</option>
+        <option value="comic">Comic Sans MS</option>
+        <option value="georgia">Georgia</option>
+        <option value="times">Times New Roman</option>
+        <option value="verdana">Verdana</option>
+      </select>
+      <select class="rib-sel" id="selSize" title="Tamano de letra" style="width:56px">
+        <option value="10pt">10pt</option>
+        <option value="11pt">11pt</option>
+        <option value="12pt">12pt</option>
+        <option value="14px" selected>14px</option>
+        <option value="16pt">16pt</option>
+      </select>
+    </div>
+    <div class="rib-gl">Tipografia</div>
+  </div>
+  <div class="rib-sep"></div>
+
+  <!-- Estilo -->
+  <div class="rib-group">
+    <div class="rib-gc" id="styleGroup">
+      <button class="rib-btn" id="btnB" title="Negrita (B)" disabled><i class="fa-solid fa-bold"></i></button>
+      <button class="rib-btn" id="btnI" title="Cursiva (I)" disabled><i class="fa-solid fa-italic"></i></button>
+      <button class="rib-btn" id="btnU" title="Subrayado (U)" disabled><i class="fa-solid fa-underline"></i></button>
+    </div>
+    <div class="rib-gl">Estilo</div>
+  </div>
+  <div class="rib-sep"></div>
+
+  <!-- Alineación -->
+  <div class="rib-group">
+    <div class="rib-gc" id="alignGroup">
+      <button class="rib-btn align-b" data-a="left" title="Alinear a la izquierda" disabled><i class="fa-solid fa-align-left"></i></button>
+      <button class="rib-btn align-b" data-a="center" title="Centrar" disabled><i class="fa-solid fa-align-center"></i></button>
+      <button class="rib-btn align-b" data-a="right" title="Alinear a la derecha" disabled><i class="fa-solid fa-align-right"></i></button>
+    </div>
+    <div class="rib-gl">Alineacion</div>
+  </div>
+  <div class="rib-sep"></div>
+
+  <!-- Espaciado -->
+  <div class="rib-group">
+    <div class="rib-gc">
+      <select class="rib-sel" id="selSpacing" title="Interlineado" style="width:72px">
+        <option value="1">1.0</option>
+        <option value="1.15">1.15</option>
+        <option value="1.5">1.5</option>
+        <option value="2" selected>2.0</option>
+      </select>
+      <button class="rib-btn" id="btnParaSpace" title="Espacio entre parrafos" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-arrows-up-down" style="margin-right:3px"></i>Espacio</button>
+    </div>
+    <div class="rib-gl">Espaciado</div>
+  </div>
+  <div class="rib-sep"></div>
+
+  <!-- Lista -->
+  <div class="rib-group">
+    <div class="rib-gc">
+      <button class="rib-btn" id="btnBullets" title="Viñetas" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-list-ul"></i></button>
+    </div>
+    <div class="rib-gl">Lista</div>
+  </div>
+  <div class="rib-sep"></div>
+
+  <!-- Sangría -->
+  <div class="rib-group">
+    <div class="rib-gc">
+      <select class="rib-sel" id="selIndent" title="Tipo de sangria" style="width:120px">
+        <option value="none" selected>Ninguna</option>
+        <option value="first">Primera linea</option>
+        <option value="hanging">Sangria francesa</option>
+      </select>
+    </div>
+    <div class="rib-gl">Sangria</div>
+  </div>
+  <div class="rib-sep"></div>
+
+  <!-- Página -->
+  <div class="rib-group">
+    <div class="rib-gc">
+      <select class="rib-sel" id="selMargins" title="Margenes" style="width:100px">
+        <option value="narrow" selected>Estrechos</option>
+        <option value="normal">Normal (2.54cm)</option>
+        <option value="wide">Anchos</option>
+      </select>
+      <button class="rib-btn" id="btnBreak" title="Salto de pagina" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-arrow-turn-down"></i></button>
+      <button class="rib-btn" id="btnPageNum" title="Numero de pagina" style="width:auto;padding:0 6px;font-size:10px">#</button>
+      <button class="rib-btn" id="btnHeader" title="Encabezado" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-heading"></i></button>
+    </div>
+    <div class="rib-gl">Pagina</div>
+  </div>
+  <div class="rib-sep"></div>
+
+  <!-- Texto -->
+  <div class="rib-group">
+    <div class="rib-gc" id="caseGroup">
+      <select class="rib-sel" id="selCase" title="Cambiar mayusculas/minusculas" style="width:105px" disabled>
+        <option value="none" selected>Ninguno</option>
+        <option value="upper">MAYUSCULAS</option>
+        <option value="lower">minusculas</option>
+        <option value="sentence">Tipo oracion</option>
+        <option value="title">Tipo Titulo</option>
+      </select>
+    </div>
+    <div class="rib-gl">Texto</div>
+  </div>
+  <div class="rib-sep"></div>
+
+  <!-- Herramientas APA -->
+  <div class="rib-group">
+    <div class="rib-gc">
+      <button class="rib-tool" id="btnCite" title="Corregir formato de citas al estilo (Autor, Ano)"><i class="fa-solid fa-quote-left" style="margin-right:3px"></i>Citas</button>
+      <button class="rib-tool" id="btnEtal" title='Reemplazar "y otros" por "et al."'>et al.</button>
+      <button class="rib-tool" id="btnDoi" title="Agregar enlaces DOI a las referencias">DOI</button>
+      <button class="rib-tool" id="btnAlpha" title="Ordenar referencias alfabeticamente"><i class="fa-solid fa-arrow-down-a-z" style="margin-right:3px"></i>A-Z</button>
+    </div>
+    <div class="rib-gl">Herramientas APA</div>
+  </div>
+
+</div>
+</div>
+
+<!-- Barra de pistas -->
+<div class="hint-bar" id="hintBar"><i class="fa-solid fa-lightbulb"></i><span id="hintText"></span></div>
+
+<!-- Área del editor -->
+<section class="editor-area">
+<div class="paper" id="paper">
+
+  <div class="rhead">IMPACTO TECNOLOGIA ADOLESCENTES</div>
+  <div class="pnum">1</div>
+
+  <!-- FASE 0: PORTADA -->
+  <div class="doc-sec" data-phase="0">
+    <h1 class="tit" data-sel="title">El impacto de la tecnologia en el desarrollo cognitivo de los adolescentes: una revision sistematica</h1>
+    <p class="autor-t" data-sel="author" style="margin-top:14px">Maria Carmen Rodriguez Perez</p>
+    <p class="afil-t" data-sel="affiliation" style="margin-top:4px">Universidad Nacional de Educacion a Distancia</p>
+  </div>
+
+  <!-- FASE 1: INTRODUCCIÓN -->
+  <div class="doc-sec locked" data-phase="1">
+    <div class="lock-ico"><i class="fa-solid fa-lock"></i><span>Completa la portada primero</span></div>
+    <div class="break-mark">— salto de pagina —</div>
+    <h2 class="h1" data-sel="h1">Introduccion</h2>
+    <p class="parr" data-sel="paragraph">En la ultima decada, el uso de dispositivos tecnologicos por parte de los adolescentes ha aumentado de manera <span class="ubold">significativa</span>. Segun estudios recientes <span class="wcita">(segun Garcia y Lopez, 2019)</span><span class="rcita">(Garcia y Lopez, 2019)</span>, el tiempo promedio de pantalla diario en adolescentes de 12 a 18 anos se ha triplicado, lo que ha generado un intenso debate en la comunidad cientifica sobre sus implicaciones en el desarrollo cognitivo.</p>
+    <p class="parr" data-sel="paragraph">Diversos investigadores <span class="wcita">(como senalan Martinez y otros, 2020)</span><span class="rcita">(Martinez <span class="yot">y otros</span><span class="etal">et al.</span>, 2020)</span> han identificado correlaciones entre el uso excesivo de redes sociales y una disminucion en las capacidades de atencion sostenida. Sin embargo, otros autores <span class="wcita">(ver Fernandez, 2021)</span><span class="rcita">(Fernandez, 2021)</span> sostienen que la tecnologia puede facilitar el desarrollo de habilidades digitales fundamentales para el siglo XXI.</p>
+    <h3 class="h2" data-sel="h2">Planteamiento del problema</h3>
+    <p class="parr" data-sel="paragraph">El presente estudio tiene como objetivo analizar de manera <span class="ubold">sistematica</span> la evidencia empirica disponible sobre la relacion entre el uso de tecnologia y el desarrollo cognitivo en poblacion adolescente. Se busca responder a la siguiente pregunta de investigacion: cual es el impacto real de la exposicion tecnologica en las funciones ejecutivas, la memoria y la atencion de los adolescentes?</p>
+    <ul class="blist">
+      <li class="parr">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas.</li>
+      <li class="parr">Se ha observado una disminucion en los puntajes de atencion sostenida.</li>
+      <li class="parr">Las habilidades de multitarea digital han mejorado significativamente.</li>
+    </ul>
+    <div class="bparas">
+      <p class="parr" data-sel="paragraph">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas, segun datos recientes de organismos internacionales de salud.</p>
+      <p class="parr" data-sel="paragraph">Se ha observado una disminucion en los puntajes de atencion sostenida en evaluaciones estandarizadas aplicadas a poblacion estudiantil.</p>
+      <p class="parr" data-sel="paragraph">Las habilidades de multitarea digital han mejorado significativamente en comparacion con generaciones anteriores.</p>
+    </div>
+  </div>
+
+  <!-- FASE 2: CUERPO -->
+  <div class="doc-sec locked" data-phase="2">
+    <div class="lock-ico"><i class="fa-solid fa-lock"></i><span>Completa la introduccion primero</span></div>
+    <h2 class="h1" data-sel="h1">Metodo</h2>
+    <h3 class="h2" data-sel="h2">Participantes</h3>
+    <p class="parr" data-sel="paragraph">Se revisaron 45 estudios publicados entre 2015 y 2023, que incluian un total de 12.340 participantes con edades comprendidas entre los 12 y 18 anos. Los criterios de inclusion requirieron que los estudios emplearan disenos longitudinales o transversales con <span class="ubold">controles metodologicos</span> adecuados.</p>
+    <h3 class="h2" data-sel="h2">Procedimiento</h3>
+    <p class="parr" data-sel="paragraph">La busqueda se realizo en las bases de datos PubMed, PsycINFO y Web of Science. Los investigadores <span class="wcita">(segun Chen y colaboradores, 2022)</span><span class="rcita">(Chen <span class="yot">y colaboradores</span><span class="etal">et al.</span>, 2022)</span> aplicaron un protocolo de revision sistematica siguiendo las directrices PRISMA, evaluando la calidad metodologica mediante la escala de Newcastle-Ottawa.</p>
+    <h2 class="h1" data-sel="h1">Resultados</h2>
+    <p class="parr" data-sel="paragraph">Los resultados revelan un panorama <span class="ubold">complejo</span> y matizado. Por un lado, se identifico una correlacion negativa moderada (r = -0.34) entre el tiempo de uso de redes sociales y el rendimiento en tareas de atencion sostenida. Por otro lado, el uso de herramientas digitales educativas mostro una correlacion positiva (r = 0.28) con la memoria de trabajo visual.</p>
+    <p class="parr" data-sel="paragraph">Los analisis de subgrupos realizados por <span class="wcita">(Torres y otros, 2023)</span><span class="rcita">(Torres <span class="yot">y otros</span><span class="etal">et al.</span>, 2023)</span> indicaron que el tipo de actividad tecnologica es un factor moderador crucial: las actividades pasivas se asociaron con peores resultados cognitivos, mientras que las actividades interactivas mostraron efectos neutros o positivos.</p>
+    <h2 class="h1" data-sel="h1">Discusion</h2>
+    <p class="parr" data-sel="paragraph">Los hallazgos de esta revision sistematica sugieren que el impacto de la tecnologia en el desarrollo cognitivo adolescente no es uniforme, sino que depende de multiples variables. Estos resultados son consistentes con los planteamientos de <span class="wcita">(vease Garcia y Lopez, 2019)</span><span class="rcita">(Garcia y Lopez, 2019)</span> sobre la necesidad de adoptar una perspectiva diferenciada.</p>
+    <p class="parr" data-sel="paragraph">Se recomienda que futuras investigaciones adopten disenos longitudinales de mayor duracion y utilicen medidas neurocognitivas objetivas. Asimismo, los resultados subrayan la importancia de desarrollar programas de alfabetizacion digital que promuevan un uso <span class="ubold">responsable</span> y activo de la tecnologia.</p>
+  </div>
+
+  <!-- FASE 3: REFERENCIAS -->
+  <div class="doc-sec locked" data-phase="3">
+    <div class="lock-ico"><i class="fa-solid fa-lock"></i><span>Completa el cuerpo primero</span></div>
+    <h2 class="refs-h" data-sel="ref-heading">Referencias</h2>
+    <div id="refsList">
+      <p class="ref-e" data-key="torres">Torres, R., Navarro, M., y Delgado, P. (2023). <span class="atitle">Efectos diferenciales de la tecnologia en cognicion adolescente</span>. <span class="jname">Revista de Psicologia Educativa</span>, <span class="vnum">29</span>(3), 145-162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span></p>
+      <p class="ref-e" data-key="garcia">Garcia, M., y Lopez, C. (2019). <span class="atitle">Pantallas y desarrollo cognitivo: una perspectiva diferenciada</span>. <span class="jname">Infancia y Aprendizaje</span>, <span class="vnum">42</span>(4), 890-912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span></p>
+      <p class="ref-e" data-key="chen">Chen, W., Park, S., y Muller, H. (2022). <span class="atitle">Metodologias de revision sistematica en investigacion cognitiva</span>. <span class="jname">Psychological Methods</span>, <span class="vnum">27</span>(1), 34-52. <span class="doi-l">https://doi.org/10.1037/met0000412</span></p>
+      <p class="ref-e" data-key="martinez">Martinez, A., Ruiz, B., y Santos, L. (2020). <span class="atitle">Redes sociales y atencion sostenida en adolescentes</span>. <span class="jname">Journal of Adolescent Psychology</span>, <span class="vnum">45</span>(2), 78-95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span></p>
+      <p class="ref-e" data-key="fernandez">Fernandez, J. (2021). <span class="atitle">Habilidades digitales y competencias del siglo XXI en jovenes</span>. <span class="jname">Comunicar</span>, <span class="vnum">69</span>, 23-38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span></p>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- Barra de estado -->
+<footer class="status-bar">
+  <div class="st-l"><i class="fa-solid fa-file-lines" style="margin-right:4px"></i><span id="stSection">Portada</span><span id="stSel" style="color:var(--accent);display:none"></span></div>
+  <div class="st-c"><span id="stTime">00:00</span> &nbsp;|&nbsp; <span id="stWords">487 palabras</span></div>
+  <div class="st-r"><span style="color:#666;margin-right:8px;font-size:10.5px">Envios: <span id="stEnvios">0</span></span><button class="send-sb" id="sendBtn"><i class="fa-solid fa-paper-plane" style="margin-right:4px"></i>Enviar Tarea</button></div>
+</footer>
+
+<!-- Notificación de fase -->
+<div class="phase-not" id="phaseNot"><i class="fa-solid fa-circle-check"></i><span id="phaseNotText"></span></div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal" role="dialog" aria-modal="true"><div class="modal-box" id="modalBox"></div></div>
+
+<script>
+/* =============================================
+   ESTADO GLOBAL DE FORMATO
+   ============================================= */
+const G = {
+  font:'arial', size:'14px',
+  lineSpacing:1, paraSpacing:true,
+  margins:'narrow',
+  pageNum:false, header:false, pageBreak:false,
+  bullets:true, firstIndent:false, hangIndent:false,
+  bodyBold:true, citations:false, etAl:false,
+  journalItalic:false, volumeItalic:false,
+  articleCase:'upper', doi:false, alphaOrder:false
+};
+
+/* Formato por tipo de elemento seleccionable */
+const TF = {
+  title:        { bold:false, italic:false, underline:true,  align:'left',   case:'upper' },
+  author:       { bold:false, italic:false, underline:false, align:'left',   case:'none' },
+  affiliation:  { bold:false, italic:false, underline:false, align:'left',   case:'none' },
+  h1:           { bold:false, italic:true,  underline:true,  align:'left',   case:'upper' },
+  h2:           { bold:false, italic:false, underline:false, align:'center', case:'upper' },
+  paragraph:    { bold:false, italic:false, underline:false, align:'left',   case:'none' },
+  'ref-heading':{ bold:false, italic:false, underline:true,  align:'left',   case:'upper' }
+};
+
+/* Mapa tipo de elemento → selector CSS */
+const SEL_MAP = {
+  title:'.tit', author:'.autor-t', affiliation:'.afil-t',
+  h1:'.h1', h2:'.h2', paragraph:'.parr', 'ref-heading':'.refs-h'
+};
+
+/* Etiquetas legibles */
+const TYPE_LABEL = {
+  title:'Titulo', author:'Autor', affiliation:'Afiliacion',
+  h1:'Encabezado Nivel 1', h2:'Encabezado Nivel 2',
+  paragraph:'Parrafo', 'ref-heading':'Encabezado Referencias'
+};
+
+let selType = null;       // Tipo de elemento seleccionado
+let maxPhase = 0;         // Fase máxima desbloqueada (0=portada visible)
+let envios = 0;
+let secs = 0;
+let hintTimer = null;
+let hintIdx = 0;
+let lastInteraction = Date.now();
+
+/* =============================================
+   REFERENCIAS DOM
+   ============================================= */
+const $ = id => document.getElementById(id);
+const paper = $('paper');
+const refsList = $('refsList');
+const correctOrder = ['chen','fernandez','garcia','martinez','torres'];
+const wrongOrder = ['torres','garcia','chen','martinez','fernandez'];
+
+/* =============================================
+   RENDERIZAR DOCUMENTO
+   ============================================= */
+function render() {
+  const fontMap = {
+    arial:"'Arial',sans-serif", calibri:"'Calibri',sans-serif",
+    comic:"'Comic Sans MS',cursive", georgia:"'Georgia',serif",
+    times:"'Times New Roman',Times,serif", verdana:"'Verdana',sans-serif"
+  };
+  paper.style.fontFamily = fontMap[G.font] || fontMap.arial;
+  paper.style.fontSize = G.size;
+  paper.style.lineHeight = String(G.lineSpacing);
+
+  const margMap = { narrow:'24px 28px', normal:'40px 42px', wide:'60px 60px' };
+  paper.style.padding = margMap[G.margins] || margMap.narrow;
+
+  /* Espaciado entre párrafos */
+  paper.querySelectorAll('.parr').forEach(el => {
+    el.style.marginBottom = G.paraSpacing ? '10px' : '0';
+  });
+
+  /* Viñetas */
+  paper.querySelector('.blist').style.display = G.bullets ? 'block' : 'none';
+  paper.querySelector('.bparas').style.display = G.bullets ? 'none' : 'block';
+
+  /* Salto de página, número, encabezado */
+  paper.querySelector('.break-mark').style.display = G.pageBreak ? 'block' : 'none';
+  paper.querySelector('.pnum').style.display = G.pageNum ? 'block' : 'none';
+  paper.querySelector('.rhead').style.display = G.header ? 'block' : 'none';
+
+  /* Sangría primera línea */
+  paper.querySelectorAll('.parr').forEach(el => {
+    el.style.textIndent = G.firstIndent ? '1.27cm' : '0';
+  });
+
+  /* Sangría francesa */
+  paper.querySelectorAll('.ref-e').forEach(el => {
+    el.style.textIndent = G.hangIndent ? '-1.27cm' : '0';
+    el.style.paddingLeft = G.hangIndent ? '1.27cm' : '0';
+  });
+
+  /* Negritas innecesarias en cuerpo */
+  paper.querySelectorAll('.ubold').forEach(el => {
+    el.style.fontWeight = G.bodyBold ? '700' : '400';
+  });
+
+  /* Citas */
+  paper.querySelectorAll('.wcita').forEach(el => el.style.display = G.citations ? 'none' : 'inline');
+  paper.querySelectorAll('.rcita').forEach(el => el.style.display = G.citations ? 'inline' : 'none');
+
+  /* et al. */
+  paper.querySelectorAll('.yot').forEach(el => el.style.display = G.etAl ? 'none' : 'inline');
+  paper.querySelectorAll('.etal').forEach(el => el.style.display = G.etAl ? 'inline' : 'none');
+
+  /* Cursivas revistas y volúmenes */
+  paper.querySelectorAll('.jname').forEach(el => el.style.fontStyle = G.journalItalic ? 'italic' : 'normal');
+  paper.querySelectorAll('.vnum').forEach(el => el.style.fontStyle = G.volumeItalic ? 'italic' : 'normal');
+
+  /* Mayúsculas en títulos de artículos */
+  const caseMapG = { upper:'uppercase', lower:'lowercase', sentence:'none', title:'capitalize', none:'none' };
+  paper.querySelectorAll('.atitle').forEach(el => el.style.textTransform = caseMapG[G.articleCase] || 'none');
+
+  /* DOI */
+  paper.querySelectorAll('.doi-l').forEach(el => el.style.display = G.doi ? 'inline' : 'none');
+
+  /* Orden alfabético */
+  const order = G.alphaOrder ? correctOrder : wrongOrder;
+  order.forEach(k => { const el = refsList.querySelector(`[data-key="${k}"]`); if(el) refsList.appendChild(el); });
+
+  /* Formato por tipo de elemento */
+  const caseMapT = { upper:'uppercase', lower:'lowercase', sentence:'none', title:'capitalize', none:'none' };
+  for (const [type, fmt] of Object.entries(TF)) {
+    const sel = SEL_MAP[type];
+    if (!sel) continue;
+    paper.querySelectorAll(sel).forEach(el => {
+      el.style.fontWeight = fmt.bold ? '700' : '400';
+      el.style.fontStyle = fmt.italic ? 'italic' : 'normal';
+      el.style.textDecoration = fmt.underline ? 'underline' : 'none';
+      el.style.textAlign = fmt.align;
+      el.style.textTransform = caseMapT[fmt.case] || 'none';
+    });
+  }
+}
+
+/* =============================================
+   ACTUALIZAR ESTADO DE LA CINTA
+   ============================================= */
+function updateRibbon() {
+  const fmt = selType ? TF[selType] : null;
+  const dis = !fmt;
+
+  /* Botones de estilo */
+  $('btnB').disabled = dis; $('btnB').classList.toggle('on', !!(fmt && fmt.bold));
+  $('btnI').disabled = dis; $('btnI').classList.toggle('on', !!(fmt && fmt.italic));
+  $('btnU').disabled = dis; $('btnU').classList.toggle('on', !!(fmt && fmt.underline));
+
+  /* Alineación */
+  document.querySelectorAll('.align-b').forEach(b => {
+    b.disabled = dis;
+    b.classList.toggle('on', !!(fmt && fmt.align === b.dataset.a));
+  });
+
+  /* Mayúsculas */
+  $('selCase').disabled = dis;
+  if (fmt) $('selCase').value = fmt.case;
+
+  /* Botones globales */
+  $('btnParaSpace').classList.toggle('on', G.paraSpacing);
+  $('btnBullets').classList.toggle('on', G.bullets);
+  $('btnPageNum').classList.toggle('on', G.pageNum);
+  $('btnHeader').classList.toggle('on', G.header);
+  $('btnBreak').classList.toggle('on', G.pageBreak);
+  $('btnCite').classList.toggle('on', G.citations);
+  $('btnEtal').classList.toggle('on', G.etAl);
+  $('btnDoi').classList.toggle('on', G.doi);
+  $('btnAlpha').classList.toggle('on', G.alphaOrder);
+
+  /* Estado de selección en barra */
+  const stSel = $('stSel');
+  if (selType) {
+    stSel.textContent = ' | ' + TYPE_LABEL[selType] + ' seleccionado';
+    stSel.style.display = 'inline';
+  } else {
+    stSel.style.display = 'none';
+  }
+}
+
+/* =============================================
+   SELECCIÓN DE ELEMENTOS
+   ============================================= */
+paper.addEventListener('click', e => {
+  paper.querySelectorAll('.sel-el').forEach(el => el.classList.remove('sel-el'));
+
+  const target = e.target.closest('[data-sel]');
+  if (target) {
+    /* Verificar que la sección no esté bloqueada */
+    const sec = target.closest('.doc-sec');
+    if (sec && sec.classList.contains('locked')) return;
+    target.classList.add('sel-el');
+    selType = target.dataset.sel;
+  } else {
+    selType = null;
+  }
+  updateRibbon();
+  touchInteraction();
+});
+
+/* =============================================
+   EVENTOS DE LA CINTA
+   ============================================= */
+
+/* Fuente */
+ $('selFont').addEventListener('change', e => { G.font = e.target.value; render(); touchInteraction(); });
+
+/* Tamaño */
+ $('selSize').addEventListener('change', e => { G.size = e.target.value; render(); touchInteraction(); });
+
+/* Negrita */
+ $('btnB').addEventListener('click', () => {
+  if (!selType || !TF[selType]) return;
+  TF[selType].bold = !TF[selType].bold;
+  render(); updateRibbon(); touchInteraction();
+});
+
+/* Cursiva */
+ $('btnI').addEventListener('click', () => {
+  if (!selType || !TF[selType]) return;
+  TF[selType].italic = !TF[selType].italic;
+  render(); updateRibbon(); touchInteraction();
+});
+
+/* Subrayado */
+ $('btnU').addEventListener('click', () => {
+  if (!selType || !TF[selType]) return;
+  TF[selType].underline = !TF[selType].underline;
+  render(); updateRibbon(); touchInteraction();
+});
+
+/* Alineación */
+document.querySelectorAll('.align-b').forEach(b => {
+  b.addEventListener('click', () => {
+    if (!selType || !TF[selType]) return;
+    TF[selType].align = b.dataset.a;
+    render(); updateRibbon(); touchInteraction();
+  });
+});
+
+/* Interlineado */
+ $('selSpacing').addEventListener('change', e => { G.lineSpacing = parseFloat(e.target.value); render(); touchInteraction(); });
+
+/* Espacio entre párrafos */
+ $('btnParaSpace').addEventListener('click', () => { G.paraSpacing = !G.paraSpacing; render(); updateRibbon(); touchInteraction(); });
+
+/* Viñetas */
+ $('btnBullets').addEventListener('click', () => { G.bullets = !G.bullets; render(); updateRibbon(); touchInteraction(); });
+
+/* Sangría */
+ $('selIndent').addEventListener('change', e => {
+  const v = e.target.value;
+  if (v === 'first') { G.firstIndent = true; G.hangIndent = false; }
+  else if (v === 'hanging') { G.hangIndent = true; G.firstIndent = false; }
+  else { G.firstIndent = false; G.hangIndent = false; }
+  render(); updateRibbon(); touchInteraction();
+});
+
+/* Márgenes */
+ $('selMargins').addEventListener('change', e => { G.margins = e.target.value; render(); touchInteraction(); });
+
+/* Salto de página */
+ $('btnBreak').addEventListener('click', () => { G.pageBreak = !G.pageBreak; render(); updateRibbon(); touchInteraction(); });
+
+/* Número de página */
+ $('btnPageNum').addEventListener('click', () => { G.pageNum = !G.pageNum; render(); updateRibbon(); touchInteraction(); });
+
+/* Encabezado */
+ $('btnHeader').addEventListener('click', () => { G.header = !G.header; render(); updateRibbon(); touchInteraction(); });
+
+/* Mayúsculas */
+ $('selCase').addEventListener('change', e => {
+  if (!selType || !TF[selType]) return;
+  TF[selType].case = e.target.value;
+  render(); updateRibbon(); touchInteraction();
+});
+
+/* Corregir citas */
+ $('btnCite').addEventListener('click', () => { G.citations = !G.citations; render(); updateRibbon(); touchInteraction(); });
+
+/* et al. */
+ $('btnEtal').addEventListener('click', () => { G.etAl = !G.etAl; render(); updateRibbon(); touchInteraction(); });
+
+/* DOI */
+ $('btnDoi').addEventListener('click', () => { G.doi = !G.doi; render(); updateRibbon(); touchInteraction(); });
+
+/* Ordenar A-Z */
+ $('btnAlpha').addEventListener('click', () => { G.alphaOrder = !G.alphaOrder; render(); updateRibbon(); touchInteraction(); });
+
+/* =============================================
+   VERIFICACIÓN DE FASES
+   ============================================= */
+function checkPhase(n) {
+  if (n === 0) {
+    return G.font === 'times' && G.size === '12pt' &&
+      TF.title.bold && TF.title.align === 'center' && !TF.title.underline && TF.title.case !== 'upper' &&
+      TF.author.align === 'center' && TF.affiliation.align === 'center';
+  }
+  if (n === 1) {
+    return G.lineSpacing === 2 && !G.paraSpacing && G.margins === 'normal' &&
+      TF.h1.align === 'center' && TF.h1.bold && !TF.h1.underline && !TF.h1.italic && TF.h1.case !== 'upper' &&
+      TF.h2.align === 'left' && TF.h2.bold && TF.h2.case !== 'upper';
+  }
+  if (n === 2) {
+    return G.firstIndent && !G.bullets && !G.bodyBold && G.citations && G.etAl;
+  }
+  if (n === 3) {
+    return TF['ref-heading'].align === 'center' && TF['ref-heading'].bold &&
+      !TF['ref-heading'].underline && TF['ref-heading'].case !== 'upper' &&
+      G.hangIndent && G.journalItalic && G.volumeItalic &&
+      G.articleCase === 'sentence' && G.doi && G.alphaOrder;
+  }
+  return false;
+}
+
+function checkAllPhases() {
+  for (let i = 0; i <= 3; i++) if (!checkPhase(i)) return false;
+  return true;
+}
+
+/* Desbloquear siguiente sección */
+function tryUnlock() {
+  for (let i = maxPhase; i <= 3; i++) {
+    if (checkPhase(i)) {
+      if (i < 3) {
+        maxPhase = i + 1;
+        const sec = paper.querySelector(`.doc-sec[data-phase="${maxPhase}"]`);
+        if (sec) {
+          sec.classList.remove('locked');
+          const names = ['','Introduccion','Cuerpo del texto','Referencias'];
+          showPhaseNot('Seccion desbloqueada: ' + names[maxPhase]);
+          updateStatusSection();
+        }
+      }
+    } else {
+      break;
+    }
+  }
+}
+
+/* Verificar después de cada cambio */
+const origRender = render;
+render = function() {
+  origRender();
+  tryUnlock();
+};
+
+/* =============================================
+   PISTAS (HINTS)
+   ============================================= */
+const HINTS = {
+  0: [
+    'APA 7 exige Times New Roman 12pt como tipografia obligatoria.',
+    'Selecciona el titulo y aplicale negrita y centrado.',
+    'El titulo no debe estar subrayado ni en MAYUSCULAS.',
+    'Centra el nombre del autor y la afiliacion institucional.',
+    'Haz clic en un elemento del documento para seleccionarlo, luego usa los botones de la cinta.'
+  ],
+  1: [
+    'El interlineado debe ser doble (2.0) en todo el documento.',
+    'Desactiva el espacio adicional entre parrafos.',
+    'Los margenes deben ser de 2.54 cm — selecciona "Normal".',
+    'Los encabezados de Nivel 1 van centrados y en negrita, sin subrayado ni cursiva.',
+    'Los encabezados de Nivel 2 van alineados a la izquierda y en negrita.',
+    'Cambia las mayusculas de los encabezados a "Tipo oracion".'
+  ],
+  2: [
+    'Los parrafos necesitan sangria de 1.27 cm en la primera linea.',
+    'Desactiva las viñetas — APA 7 usa parrafos continuos.',
+    'Quita las negritas innecesarias del cuerpo del texto.',
+    'Corrige el formato de las citas al estandar (Autor, Ano).',
+    'Reemplaza "y otros" por "et al." en citas con tres o mas autores.'
+  ],
+  3: [
+    'El encabezado "Referencias" debe ir centrado y en negrita.',
+    'Aplica sangria francesa a las entradas de referencia.',
+    'Los nombres de revistas y numeros de volumen van en cursiva.',
+    'Los titulos de articulos usan mayusculula de tipo oracion.',
+    'Agrega los enlaces DOI a cada referencia.',
+    'Ordena las referencias alfabeticamente por apellido del primer autor.'
+  ]
+};
+
+function resetHintTimer() {
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(showHint, 40000);
+}
+
+function showHint() {
+  const hints = HINTS[maxPhase];
+  if (!hints) return;
+  $('hintText').textContent = hints[hintIdx % hints.length];
+  hintIdx++;
+  $('hintBar').classList.add('show');
+  resetHintTimer();
+}
+
+function touchInteraction() {
+  lastInteraction = Date.now();
+  $('hintBar').classList.remove('show');
+  resetHintTimer();
+}
+
+/* =============================================
+   NOTIFICACIÓN DE FASE
+   ============================================= */
+function showPhaseNot(text) {
+  $('phaseNotText').textContent = text;
+  $('phaseNot').classList.add('show');
+  setTimeout(() => $('phaseNot').classList.remove('show'), 3200);
+}
+
+/* =============================================
+   BARRA DE ESTADO
+   ============================================= */
+const SECTION_NAMES = ['Portada','Introduccion','Cuerpo','Referencias'];
+function updateStatusSection() {
+  $('stSection').textContent = SECTION_NAMES[Math.min(maxPhase, 3)];
+}
+
+/* =============================================
+   TEMPORIZADOR
+   ============================================= */
+setInterval(() => {
+  secs++;
+  const m = String(Math.floor(secs/60)).padStart(2,'0');
+  const s = String(secs%60).padStart(2,'0');
+  $('stTime').textContent = m+':'+s;
+}, 1000);
+
+/* =============================================
+   ENVÍO
+   ============================================= */
+ $('sendBtn').addEventListener('click', () => {
+  envios++;
+  $('stEnvios').textContent = envios;
+
+  if (checkAllPhases()) {
+    /* APROBADO */
+    $('modalBox').className = 'modal-box acc';
+    const m = String(Math.floor(secs/60)).padStart(2,'0');
+    const s = String(secs%60).padStart(2,'0');
+    $('modalBox').innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--ok);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-check" style="color:#fff;font-size:16px"></i></div>
+        <div><div style="font-weight:700;font-size:15px;color:var(--ok)">Trabajo Aprobado</div>
+        <div style="font-size:11px;color:#888">Intento ${envios} — ${m}:${s}</div></div>
+      </div>
+      <div style="background:rgba(80,160,96,.08);border:1px solid rgba(80,160,96,.2);border-radius:8px;padding:14px;font-size:13px;line-height:1.7">
+        <p style="margin-bottom:6px"><strong>De:</strong> Prof. Dra. Ana Belen Montoya</p>
+        <p style="margin-bottom:6px"><strong>Asunto:</strong> Aprobado — Formato APA 7</p>
+        <p style="margin-bottom:10px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
+        <p style="margin-bottom:6px">Estimada Maria Carmen,</p>
+        <p style="margin-bottom:6px">Tu trabajo cumple con todas las especificaciones de formato APA 7.ª edicion. Aceptado para evaluacion de contenido.</p>
+        <p style="margin-bottom:6px">${envios===1?'Excelente trabajo desde el primer intento. Es raro ver un formato tan impecable sin lista de verificacion.':'Revisa el manual con mas atencion la proxima vez para evitar multiples revisiones.'}</p>
+        <p>Saludos cordiales,<br><strong>Prof. Dra. Ana Belen Montoya</strong></p>
+      </div>
+      <div style="text-align:center;margin-top:18px"><button onclick="$('modal').classList.remove('on')" style="background:var(--ok);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">Cerrar</button></div>`;
+    $('modal').classList.add('on');
+    launchConfetti();
+  } else {
+    /* RECHAZADO */
+    $('sendBtn').classList.add('shake-it');
+    setTimeout(()=>$('sendBtn').classList.remove('shake-it'),500);
+
+    $('modalBox').className = 'modal-box rej';
+
+    /* Recopilar errores por fase */
+    let fbHtml = '';
+    const phaseNames = ['Portada','Introduccion','Parrafos y cuerpo','Referencias'];
+    const phaseColors = ['#D4A853','#7EB8DA','#E0915A','#5A9E6F'];
+
+    for (let p = 0; p <= 3; p++) {
+      if (maxPhase < p) break; // No mostrar errores de fases aún no alcanzadas
+      if (checkPhase(p)) continue;
+      const errs = getPhaseErrors(p);
+      if (errs.length === 0) continue;
+      fbHtml += `<div style="margin-bottom:10px"><div style="font-weight:700;font-size:11px;color:${phaseColors[p]};text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">${phaseNames[p]}</div>`;
+      errs.forEach((err,i) => {
+        fbHtml += `<div style="display:flex;gap:6px;font-size:12.5px;line-height:1.5;margin-bottom:3px;padding-left:2px"><span style="color:var(--err);font-weight:700;flex-shrink:0">${i+1}.</span><span>${err}</span></div>`;
+      });
+      fbHtml += '</div>';
+    }
+
+    let frase;
+    if(envios===1) frase='Revisa cada seccion con cuidado antes de reenviar.';
+    else if(envios===2) frase='Sigue sin estar listo. Explora los botones de la cinta de herramientas.';
+    else if(envios<=4) frase='Te sugiero seleccionar cada elemento del documento y probar las opciones disponibles.';
+    else if(envios<=7) frase='Cada seccion se desbloquea al completar la anterior. Concéntrate en una a la vez.';
+    else frase='Los errores estan detallados arriba. Corrigelos uno por uno.';
+
+    const m = String(Math.floor(secs/60)).padStart(2,'0');
+    const s = String(secs%60).padStart(2,'0');
+
+    $('modalBox').innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--err);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-xmark" style="color:#fff;font-size:16px"></i></div>
+        <div><div style="font-weight:700;font-size:15px;color:var(--err)">Trabajo Devuelto</div>
+        <div style="font-size:11px;color:#888">Intento ${envios} — ${m}:${s}</div></div>
+      </div>
+      <div style="background:rgba(224,80,80,.06);border:1px solid rgba(224,80,80,.15);border-radius:8px;padding:14px;font-size:13px;line-height:1.7">
+        <p style="margin-bottom:6px"><strong>De:</strong> Prof. Dra. Ana Belen Montoya</p>
+        <p style="margin-bottom:6px"><strong>Asunto:</strong> Devolucion — Formato APA 7 incompleto</p>
+        <p style="margin-bottom:10px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
+        <p style="margin-bottom:10px">Estimada Maria Carmen, el formato no cumple con APA 7. Corrige lo siguiente:</p>
+        ${fbHtml}
+        <div style="border-top:1px solid rgba(224,80,80,.15);margin-top:12px;padding-top:10px;font-style:italic;color:#888;font-size:12px">
+          <i class="fa-solid fa-circle-info" style="margin-right:4px"></i>${frase}
+        </div>
+        <p style="margin-top:10px">Saludos cordiales,<br><strong>Prof. Dra. Ana Belen Montoya</strong></p>
+      </div>
+      <div style="text-align:center;margin-top:18px"><button onclick="$('modal').classList.remove('on')" style="background:var(--err);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">Entendido</button></div>`;
+    $('modal').classList.add('on');
+  }
+});
+
+/* Errores específicos por fase */
+function getPhaseErrors(p) {
+  const e = [];
+  if (p===0) {
+    if(G.font!=='times') e.push('La tipografia no es Times New Roman 12pt.');
+    if(G.size!=='12pt') e.push('El tamano no es 12pt.');
+    if(!TF.title.bold) e.push('El titulo no esta en negrita.');
+    if(TF.title.align!=='center') e.push('El titulo no esta centrado.');
+    if(TF.title.underline) e.push('El titulo esta subrayado — debe quitarse.');
+    if(TF.title.case==='upper') e.push('El titulo esta en MAYUSCULAS — usar tipo oracion.');
+    if(TF.author.align!=='center') e.push('El nombre del autor no esta centrado.');
+    if(TF.affiliation.align!=='center') e.push('La afiliacion no esta centrada.');
+  }
+  if (p===1) {
+    if(G.lineSpacing!==2) e.push('El interlineado no es doble (2.0).');
+    if(G.paraSpacing) e.push('Hay espacio adicional entre parrafos.');
+    if(G.margins!=='normal') e.push('Los margenes no son de 2.54 cm.');
+    if(TF.h1.align!=='center'||!TF.h1.bold) e.push('Los encabezados Nivel 1 deben estar centrados y en negrita.');
+    if(TF.h1.underline) e.push('Los encabezados Nivel 1 no deben estar subrayados.');
+    if(TF.h1.italic) e.push('Los encabezados Nivel 1 no deben estar en cursiva.');
+    if(TF.h1.case==='upper') e.push('Los encabezados Nivel 1 no deben estar en MAYUSCULAS.');
+    if(TF.h2.align!=='left'||!TF.h2.bold) e.push('Los encabezados Nivel 2 deben estar a la izquierda y en negrita.');
+    if(TF.h2.case==='upper') e.push('Los encabezados Nivel 2 no deben estar en MAYUSCULAS.');
+  }
+  if (p===2) {
+    if(!G.firstIndent) e.push('Los parrafos no tienen sangria en la primera linea.');
+    if(G.bullets) e.push('Hay viñetas en el texto — APA 7 exige parrafos continuos.');
+    if(G.bodyBold) e.push('Hay negritas innecesarias en el cuerpo del texto.');
+    if(!G.citations) e.push('Las citas no siguen el formato (Autor, Ano).');
+    if(!G.etAl) e.push('Se usa "y otros" en lugar de "et al." en citas con 3+ autores.');
+  }
+  if (p===3) {
+    if(TF['ref-heading'].align!=='center'||!TF['ref-heading'].bold) e.push('"Referencias" debe estar centrado y en negrita.');
+    if(TF['ref-heading'].underline) e.push('"Referencias" no debe estar subrayado.');
+    if(TF['ref-heading'].case==='upper') e.push('"Referencias" no debe estar en MAYUSCULAS.');
+    if(!G.hangIndent) e.push('Las referencias no tienen sangria francesa.');
+    if(!G.journalItalic||!G.volumeItalic) e.push('Los nombres de revistas y volumenes deben ir en cursiva.');
+    if(G.articleCase!=='sentence') e.push('Los titulos de articulos deben usar mayusculula de tipo oracion.');
+    if(!G.doi) e.push('Faltan los enlaces DOI en las referencias.');
+    if(!G.alphaOrder) e.push('Las referencias no estan ordenadas alfabeticamente.');
+  }
+  return e;
+}
+
+/* Cerrar modal */
+ $('modal').addEventListener('click', e => { if(e.target===$('modal')) $('modal').classList.remove('on'); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') $('modal').classList.remove('on'); });
+
+/* =============================================
+   CONFETI
+   ============================================= */
+function launchConfetti() {
+  const cols = ['#D4A853','#50A060','#7EB8DA','#C78DD2','#E0915A','#E05050'];
+  for (let i = 0; i < 70; i++) {
+    const el = document.createElement('div');
+    el.className = 'conf';
+    el.style.left = Math.random()*100+'vw';
+    el.style.top = '-10px';
+    el.style.width = (Math.random()*8+4)+'px';
+    el.style.height = (Math.random()*8+4)+'px';
+    el.style.background = cols[Math.floor(Math.random()*cols.length)];
+    el.style.opacity = (Math.random()*.5+.5).toFixed(2);
+    document.body.appendChild(el);
+    const dur = Math.random()*2000+1500;
+    const xd = (Math.random()-.5)*200;
+    const rot = Math.random()*720-360;
+    el.animate([
+      {transform:'translate(0,0) rotate(0deg)',opacity:1},
+      {transform:`translate(${xd}px,${window.innerHeight+50}px) rotate(${rot}deg)`,opacity:0}
+    ],{duration:dur,easing:'cubic-bezier(.25,.46,.45,.94)'}).onfinish=()=>el.remove();
+  }
+}
+
+/* =============================================
+   INICIO
+   ============================================= */
+render();
+updateRibbon();
+updateStatusSection();
+resetHintTimer();
+</script>
+</body>
+</html>
