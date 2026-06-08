@@ -301,7 +301,8 @@
         .sim-out.obs:hover { border-color: rgba(217,119,6,0.5);  box-shadow: 0 24px 60px rgba(217,119,6,0.08); }
         .sim-out.fin:hover { border-color: rgba(0,243,255,0.35); box-shadow: 0 24px 60px rgba(0,243,255,0.06); }
         .sim-out.des:hover { border-color: rgba(0,255,65,0.35);  box-shadow: 0 24px 60px rgba(0,255,65,0.06);  }
-        .sim-out.apa:hover { border-color: rgba(212,168,83,0.4); box-shadow: 0 24px 60px rgba(212,168,83,0.08); }
+        .sim-out.apa:hover  { border-color: rgba(212,168,83,0.4); box-shadow: 0 24px 60px rgba(212,168,83,0.08); }
+        .sim-out.apa2:hover { border-color: rgba(212,168,83,0.3); box-shadow: 0 24px 60px rgba(126,184,218,0.07); }
 
         .sim-in {
             border-radius: calc(1.75rem - 4px); background: var(--card);
@@ -409,6 +410,7 @@
         .d2 { transition-delay: 0.2s; }
         .d3 { transition-delay: 0.3s; }
         .d4 { transition-delay: 0.4s; }
+        .d5 { transition-delay: 0.5s; }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
@@ -685,6 +687,24 @@
                             <div class="sim-title">Simulación Formato APA 7</div>
                             <p class="sim-desc">Corrige un manuscrito con errores de formato APA 7.ª edición: portada, encabezados, citas y referencias, bajo la mirada de la profesora revisora.</p>
                             <a class="btn-sim" href="apa7.html" onclick="trackAndGo('simlab_apa','apa7.html');return false;">
+                                Iniciar Simulación
+                                <span class="btn-sim-ico">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APA 7 Editor -->
+                <div class="sim-out apa2 reveal d5" onclick="trackAndGo('simlab_apa2','apa7_2.html')">
+                    <div class="sim-in">
+                        <div class="sim-thumb">
+                            <span class="sim-thumb-icon">🖊️</span>
+                        </div>
+                        <div class="sim-body">
+                            <span class="sim-tag">Redacción Académica</span>
+                            <div class="sim-title">Editor APA 7 — Cinta de herramientas</div>
+                            <p class="sim-desc">Formatea un manuscrito usando una cinta estilo Word: tipografía, alineación, márgenes, sangría y herramientas APA. Se desbloquea sección a sección.</p>
+                            <a class="btn-sim" href="apa7_2.html" onclick="trackAndGo('simlab_apa2','apa7_2.html');return false;">
                                 Iniciar Simulación
                                 <span class="btn-sim-ico">→</span>
                             </a>

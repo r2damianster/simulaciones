@@ -16,6 +16,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `financiamiento_etica.html` | El Dilema del Investigador 2.0 | Ética académica — revistas depredadoras, gestión de fondos ONU/CEDIA |
 | `disenos.html` | Laboratorio ACME | Diseños experimentales — investigación conductual |
 | `apa7.html` | Simulación Formato APA 7 | Redacción académica — corrección de manuscrito con errores de formato APA 7.ª ed. |
+| `apa7_2.html` | Editor APA 7 — Cinta de herramientas | Redacción académica — editor estilo Word por fases, ribbon interactivo, desbloqueo secuencial |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 
@@ -42,6 +43,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 | `financiamiento_etica.html` | `#f4f6f8` (light) | azul ONU / verde / naranja | Institucional |
 | `disenos.html` | `#060d06` (dark green) | `#00ff41` (matrix green) | Terminal / cyberpunk |
 | `apa7.html` | `#141210` (dark warm) | `#D4A853` (gold) | Editorial académico / Tailwind |
+| `apa7_2.html` | `#1E1E1E` (VS Code dark) | `#D4A853` (gold) | Editor de código / Word-like ribbon |
 
 ### Patrones de código JS
 
