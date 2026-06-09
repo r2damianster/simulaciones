@@ -26,7 +26,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
 .task-check:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* Papel */
-.paper{background:var(--paper);color:var(--paper-text);width:100%;min-height:900px;margin:0 auto;padding:24px 28px;box-shadow:0 8px 60px rgba(0,0,0,.55);position:relative;transition:all .5s ease;font-family:'Source Sans 3',Arial,sans-serif;font-size:13.5px;line-height:1.35}
+.paper{background:var(--paper);color:var(--paper-text);width:100%;min-height:900px;margin:0 auto;padding:24px 28px;box-shadow:0 8px 60px rgba(0,0,0,.55);position:relative;align-self:flex-start;transition:all .5s ease;font-family:'Source Sans 3',Arial,sans-serif;font-size:13.5px;line-height:1.35}
 .paper.t-fuente{font-family:'Times New Roman',Times,serif;font-size:12pt}
 .paper.t-espaciado{line-height:2}
 .paper.t-margenes{padding:40px 42px}
@@ -245,7 +245,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
 const TASKS = [
   { id:'fuente',    cat:'portada', label:'Cambiar tipo de letra a Times New Roman 12pt',           css:'t-fuente',   fb:'El documento no está en Times New Roman 12pt. APA 7 exige esta tipografía.' },
   { id:'portada',   cat:'portada', label:'Centrar verticalmente el contenido de la portada',        css:'t-portada',  fb:'El contenido de la portada no está centrado en la mitad superior de la página.' },
-  { id:'titulo',    cat:'portada', label:'Título: centrado, negrita, sin subrayar ni mayúsculas',   css:'t-titulo',   fb:'El título debe estar centrado, en negrita, sin subrayado ni mayúsculas sostenidas.' },
+  { id:'titulo',    cat:'portada', label:'Título (Nivel 1): centrado, negrita, sin subrayar ni mayúsculas',   css:'t-titulo',   fb:'El título debe estar centrado, en negrita, sin subrayado ni mayúsculas sostenidas.' },
   { id:'autor',     cat:'portada', label:'Centrar el nombre del autor',                             css:'t-autor',    fb:'El nombre del autor debe estar centrado debajo del título.' },
   { id:'afil',      cat:'portada', label:'Centrar la afiliación institucional',                     css:'t-afil',     fb:'La afiliación institucional debe estar centrada debajo del nombre del autor.' },
   { id:'espaciado', cat:'formato', label:'Aplicar interlineado doble (2.0)',                        css:'t-espaciado',fb:'El interlineado no es doble. APA 7 requiere interlineado 2.0 en todo el documento.' },
@@ -255,13 +255,13 @@ const TASKS = [
   { id:'salto',     cat:'formato', label:'Insertar salto de página después de la portada',          css:'t-salto',    fb:'Falta el salto de página después de la portada. El cuerpo debe comenzar en una nueva página.' },
   { id:'rhead',     cat:'encab',   label:'Agregar encabezado con título abreviado en mayúsculas',   css:'t-rhead',    fb:'Falta el encabezado con el título abreviado en mayúsculas en el margen superior.' },
   { id:'sangria',   cat:'cuerpo',  label:'Aplicar sangría de 1.27 cm en la primera línea',         css:'t-sangria',  fb:'Los párrafos no tienen sangría de 1.27 cm en la primera línea. Es obligatorio en APA 7.' },
-  { id:'h1',        cat:'cuerpo',  label:'Encabezados Nivel 1: centrados, en negrita',              css:'t-h1',       fb:'Los encabezados de Nivel 1 deben estar centrados y en negrita, sin subrayado ni mayúsculas.' },
-  { id:'h2',        cat:'cuerpo',  label:'Encabezados Nivel 2: alineados a la izquierda, negrita', css:'t-h2',       fb:'Los encabezados de Nivel 2 deben estar alineados a la izquierda y en negrita.' },
+  { id:'h1',        cat:'cuerpo',  label:'Encabezados Nivel 2: centrados, en negrita',              css:'t-h1',       fb:'Los encabezados de Nivel 2 deben estar centrados y en negrita, sin subrayado ni mayúsculas.' },
+  { id:'h2',        cat:'cuerpo',  label:'Encabezados Nivel 3: alineados a la izquierda, negrita', css:'t-h2',       fb:'Los encabezados de Nivel 3 deben estar alineados a la izquierda y en negrita.' },
   { id:'cita',      cat:'cuerpo',  label:'Corregir formato de citas en el texto (Autor, Año)',       css:'t-cita',     fb:'Las citas en el texto no siguen el formato (Autor, Año). Revisa todas las citas parentéticas.' },
   { id:'nobold',    cat:'cuerpo',  label:'Eliminar negritas innecesarias en el cuerpo del texto',    css:'t-nobold',   fb:'Hay negritas innecesarias en el cuerpo del texto. APA 7 no permite negritas para enfatizar palabras.' },
   { id:'etal',      cat:'cuerpo',  label:'Cambiar "y otros" por "et al." en citas de 3+ autores',   css:'t-etal',     fb:'Se usa "y otros" en lugar de "et al." para citas con tres o más autores. Es un error frecuente.' },
   { id:'bullets',   cat:'cuerpo',  label:'Convertir viñetas a párrafos de texto continuo',          css:'t-bullets',  fb:'El cuerpo del texto contiene viñetas. APA 7 exige formato de párrafo continuo; no se usan viñetas en el cuerpo.' },
-  { id:'refs-head', cat:'refs',    label:'"Referencias" como encabezado Nivel 1 (centrado, negrita)',css:'t-refs-head',fb:'El título "Referencias" no está formateado como encabezado de Nivel 1.' },
+  { id:'refs-head', cat:'refs',    label:'"Referencias" como encabezado Nivel 2 (centrado, negrita)',css:'t-refs-head',fb:'El título "Referencias" no está formateado como encabezado de Nivel 2.' },
   { id:'hang',      cat:'refs',    label:'Aplicar sangría francesa (hanging indent) a referencias', css:'t-hang',     fb:'Las referencias no tienen sangría francesa. La primera línea va al margen y las siguientes se sangran 1.27 cm.' },
   { id:'cursiva',   cat:'refs',    label:'Poner en cursiva nombres de revistas y números de volumen',css:'t-cursiva',  fb:'Los nombres de las revistas y los números de volumen deben estar en cursiva.' },
   { id:'mayus',     cat:'refs',    label:'Corregir mayúsculas en títulos de artículos (tipo oración)',css:'t-mayus',   fb:'Los títulos de artículos deben estar en mayúscula de tipo oración (solo primera palabra y nombres propios en mayúscula).' },

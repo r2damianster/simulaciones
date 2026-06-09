@@ -63,13 +63,13 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
 .sel-el{background:var(--selbg)!important;outline:1px solid var(--selbd);outline-offset:-1px;border-radius:2px}
 
 /* Estado inicial documento */
-.tit{text-align:left;font-weight:400;text-transform:uppercase;text-decoration:underline;font-size:inherit;transition:all .35s}
+.tit{text-align:left;font-weight:400;text-transform:uppercase;font-size:inherit;transition:all .35s}
 .autor-t{text-align:left;transition:all .35s}
 .afil-t{text-align:left;transition:all .35s}
-.h1{font-weight:400;text-transform:uppercase;text-decoration:underline;font-style:italic;text-align:left;margin:16px 0 6px;transition:all .35s;font-size:inherit}
+.h1{font-weight:400;text-transform:uppercase;font-style:italic;text-align:left;margin:16px 0 6px;transition:all .35s;font-size:inherit}
 .h2{font-weight:400;text-transform:uppercase;text-align:center;margin:12px 0 4px;transition:all .35s;font-size:inherit}
 .parr{margin-bottom:10px;text-indent:0;transition:all .35s}
-.refs-h{font-weight:400;text-transform:uppercase;text-decoration:underline;text-align:left;margin:18px 0 8px;transition:all .35s;font-size:inherit}
+.refs-h{font-weight:400;text-transform:uppercase;text-align:left;margin:18px 0 8px;transition:all .35s;font-size:inherit}
 .ref-e{text-indent:0;padding-left:0;margin-bottom:5px;transition:all .35s}
 .jname{font-style:normal;transition:all .3s}
 .vnum{font-style:normal;transition:all .3s}
@@ -110,7 +110,15 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
 .conf{position:fixed;pointer-events:none;z-index:2000;border-radius:2px}
 
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-@media(max-width:700px){.editor-area{padding:8px}.paper{width:100%;min-height:auto;font-size:12px}}
+@media(max-width:700px){
+  .editor-area{padding:8px}
+  .paper{width:100%;min-height:auto;font-size:12px}
+  .status-bar{flex-wrap:wrap;padding:6px 10px;gap:6px}
+  .status-bar .st-l{font-size:10.5px}
+  .status-bar .st-c{display:none}
+  .status-bar .st-r{flex:1 1 100%;justify-content:stretch}
+  .send-sb{width:100%;padding:9px 16px;font-size:13px}
+}
 </style>
 </head>
 <body>
