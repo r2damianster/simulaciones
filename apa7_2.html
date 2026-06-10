@@ -46,6 +46,11 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
 /* Pista */
 .hint-bar{background:rgba(212,168,83,.1);border-bottom:1px solid rgba(212,168,83,.2);color:var(--accent);padding:7px 16px;font-size:12.5px;display:none;align-items:center;gap:8px;flex-shrink:0;animation:fadeI .3s}
 .hint-bar.show{display:flex}
+
+.phase-checklist{background:rgba(255,255,255,.03);border-bottom:1px solid #2a2a2a;padding:6px 16px;font-size:11.5px;display:flex;flex-wrap:wrap;gap:5px 16px;flex-shrink:0}
+.phase-checklist .pc-item{display:flex;align-items:center;gap:5px;color:#888;transition:color .25s}
+.phase-checklist .pc-item.done{color:var(--ok)}
+.phase-checklist .pc-item i{font-size:10px;width:11px;text-align:center}
 @keyframes fadeI{from{opacity:0}to{opacity:1}}
 
 /* Editor */
@@ -269,6 +274,9 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
 
 <!-- Barra de pistas -->
 <div class="hint-bar" id="hintBar"><i class="fa-solid fa-lightbulb"></i><span id="hintText"></span></div>
+
+<!-- Checklist de la fase actual -->
+<div class="phase-checklist" id="phaseChecklist"></div>
 
 <!-- Área del editor -->
 <section class="editor-area">
@@ -676,6 +684,53 @@ function checkAllPhases() {
   return true;
 }
 
+/* Requisitos por fase, para el checklist en vivo */
+const PHASE_REQS = {
+  0: [
+    { label:'Times New Roman 12pt',          ok:() => G.font==='times' && G.size==='12pt' },
+    { label:'Titulo en negrita',             ok:() => TF.title.bold },
+    { label:'Titulo centrado',               ok:() => TF.title.align==='center' },
+    { label:'Titulo sin subrayado',          ok:() => !TF.title.underline },
+    { label:'Titulo sin MAYUSCULAS',         ok:() => TF.title.case!=='upper' },
+    { label:'Autor centrado',                ok:() => TF.author.align==='center' },
+    { label:'Afiliacion centrada',           ok:() => TF.affiliation.align==='center' },
+  ],
+  1: [
+    { label:'Interlineado doble (2.0)',                ok:() => G.lineSpacing===2 },
+    { label:'Sin espacio extra entre parrafos',         ok:() => !G.paraSpacing },
+    { label:'Margenes de 2.54cm',                       ok:() => G.margins==='normal' },
+    { label:'Encabezado N1 centrado y negrita, sin subrayado/cursiva/MAYUSCULAS',
+      ok:() => TF.h1.align==='center' && TF.h1.bold && !TF.h1.underline && !TF.h1.italic && TF.h1.case!=='upper' },
+    { label:'Encabezado N2 izquierda y negrita, sin MAYUSCULAS',
+      ok:() => TF.h2.align==='left' && TF.h2.bold && TF.h2.case!=='upper' },
+  ],
+  2: [
+    { label:'Sangria en primera linea',                 ok:() => G.firstIndent },
+    { label:'Sin viñetas (parrafos continuos)',         ok:() => !G.bullets },
+    { label:'Sin negritas en el cuerpo',                ok:() => !G.bodyBold },
+    { label:'Citas en formato (Autor, Año)',            ok:() => G.citations },
+    { label:'"et al." en lugar de "y otros"',           ok:() => G.etAl },
+  ],
+  3: [
+    { label:'"Referencias" centrado, negrita, sin subrayado/MAYUSCULAS',
+      ok:() => TF['ref-heading'].align==='center' && TF['ref-heading'].bold && !TF['ref-heading'].underline && TF['ref-heading'].case!=='upper' },
+    { label:'Sangria francesa en referencias',          ok:() => G.hangIndent },
+    { label:'Revistas y volumenes en cursiva',          ok:() => G.journalItalic && G.volumeItalic },
+    { label:'Titulos en mayuscula tipo oracion',        ok:() => G.articleCase==='sentence' },
+    { label:'Enlaces DOI agregados',                    ok:() => G.doi },
+    { label:'Referencias en orden alfabetico',          ok:() => G.alphaOrder },
+  ],
+};
+
+function updateChecklist() {
+  const reqs = PHASE_REQS[Math.min(maxPhase, 3)];
+  const el = $('phaseChecklist');
+  el.innerHTML = reqs.map(r => {
+    const done = r.ok();
+    return `<span class="pc-item${done?' done':''}"><i class="fa-solid ${done?'fa-circle-check':'fa-circle'}"></i>${r.label}</span>`;
+  }).join('');
+}
+
 /* Desbloquear siguiente sección */
 function tryUnlock() {
   for (let i = maxPhase; i <= 3; i++) {
@@ -705,6 +760,7 @@ const origRender = render;
 render = function() {
   origRender();
   tryUnlock();
+  updateChecklist();
 };
 
 /* =============================================
