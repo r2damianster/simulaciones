@@ -29,6 +29,15 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        .home-btn {
+            position: fixed; top: 14px; left: 14px; z-index: 50;
+            width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border-bright); border-radius: 8px;
+            color: var(--fg-bright); background: var(--bg-card);
+            text-decoration: none; font-size: 16px; transition: all .2s;
+        }
+        .home-btn:hover { background: var(--bg-card-alt); box-shadow: 0 0 12px rgba(0,255,65,0.25); }
+
         body {
             font-family: 'Share Tech Mono', monospace;
             background: var(--bg);
@@ -463,6 +472,8 @@
     </style>
 </head>
 <body>
+
+<a href="index.html" class="home-btn" title="Volver al inicio"><i class="fa-solid fa-house"></i></a>
 
 <div class="grid-bg"></div>
 <div class="scanlines"></div>
