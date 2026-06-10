@@ -53,7 +53,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
 .paper{background:var(--paper);color:var(--ptxt);width:612px;min-height:792px;padding:24px 28px;box-shadow:0 2px 30px rgba(0,0,0,.35);position:relative;flex-shrink:0;font-family:'Arial',sans-serif;font-size:14px;line-height:1.35;transition:font-family .4s,font-size .4s,line-height .4s,padding .4s}
 
 /* Secciones bloqueadas */
-.doc-sec{transition:opacity .7s,filter .7s;position:relative}
+.doc-sec{transition:opacity .7s,filter .7s;position:relative;will-change:opacity,filter;backface-visibility:hidden}
 .doc-sec.locked{opacity:.06;filter:blur(3px);pointer-events:none}
 .doc-sec.locked .lock-ico{display:flex}
 .lock-ico{display:none;position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);align-items:center;gap:10px;font-size:11px;color:rgba(0,0,0,.25);pointer-events:none;z-index:5}
@@ -684,6 +684,7 @@ function tryUnlock() {
         const sec = paper.querySelector(`.doc-sec[data-phase="${maxPhase}"]`);
         if (sec) {
           sec.classList.remove('locked');
+          void sec.offsetHeight; // forzar reflow para evitar glitch de filter/opacity residual
           const names = ['','Introduccion','Cuerpo del texto','Referencias'];
           showPhaseNot('Seccion desbloqueada: ' + names[maxPhase]);
           updateStatusSection();
