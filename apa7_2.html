@@ -684,7 +684,10 @@ function tryUnlock() {
         const sec = paper.querySelector(`.doc-sec[data-phase="${maxPhase}"]`);
         if (sec) {
           sec.classList.remove('locked');
-          void sec.offsetHeight; // forzar reflow para evitar glitch de filter/opacity residual
+          // forzar repintado completo: el reflow simple no basta para limpiar el filter:blur residual en Chrome
+          sec.style.display = 'none';
+          void sec.offsetHeight;
+          sec.style.display = '';
           const names = ['','Introduccion','Cuerpo del texto','Referencias'];
           showPhaseNot('Seccion desbloqueada: ' + names[maxPhase]);
           updateStatusSection();
