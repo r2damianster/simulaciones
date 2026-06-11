@@ -46,6 +46,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 | `disenos.html` | `#060d06` (dark green) | `#00ff41` (matrix green) | Terminal / cyberpunk |
 | `apa7.html` | `#141210` (dark warm) | `#D4A853` (gold) | Editorial académico / Tailwind |
 | `apa7_2.html` | `#1E1E1E` (VS Code dark) | `#D4A853` (gold) | Editor de código / Word-like ribbon |
+| `evaluaciones_lectura.html` | `#0d0f12` (dark slate) | `#D4A24E` (gold) | Editorial caligráfico / papel manuscrito, Tailwind |
 
 ### Patrones de código JS
 
