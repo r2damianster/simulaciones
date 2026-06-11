@@ -28,7 +28,35 @@
         }
 
         h1 { text-align: center; color: var(--primary); font-size: 1.8em; margin-bottom: 5px; }
-        .subtitulo { text-align: center; color: #7f8c8d; margin-bottom: 30px; }
+        .subtitulo { text-align: center; color: #7f8c8d; margin-bottom: 20px; }
+
+        /* Barra de progreso de ejercicios */
+        .progreso-ejercicios {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .paso {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: #ecf0f1;
+            color: #7f8c8d;
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+            font-size: 1.1em;
+        }
+        .paso.activo { background: var(--accent); color: white; border-color: var(--accent); transform: scale(1.1); }
+        .paso.completado { background: var(--exp-color); color: white; border-color: var(--exp-color); }
+        .paso.bloqueado { opacity: 0.5; }
+        .paso-conector { width: 30px; height: 2px; background: var(--border); }
 
         .contexto-caja {
             background: var(--panel);
@@ -98,7 +126,7 @@
             position: relative;
         }
         .slot:hover { border-color: var(--accent); background: #fbfbfb; }
-        
+
         /* Etiquetas PEEL dentro de los slots */
         .slot-label {
             position: absolute;
@@ -113,6 +141,7 @@
         }
         .label-p { color: var(--p-color); border-color: var(--p-color); }
         .label-e { color: var(--e-color); border-color: var(--e-color); }
+        .label-e2 { color: var(--e-color); border-color: var(--e-color); }
         .label-exp { color: var(--exp-color); border-color: var(--exp-color); }
         .label-l { color: var(--l-color); border-color: var(--l-color); }
 
@@ -138,18 +167,20 @@
         button:hover { background: #2980b9; }
         .btn-reset { background: #7f8c8d; }
         .btn-reset:hover { background: #95a5a6; }
+        .btn-siguiente { background: var(--exp-color); }
+        .btn-siguiente:hover { background: #229954; }
 
         /* Feedback */
         .correcto { border-color: var(--exp-color) !important; background-color: #eafaf1 !important; }
         .incorrecto { border-color: var(--p-color) !important; background-color: #fdedec !important; animation: shake 0.5s; }
-        
+
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
 
-        #feedback-final {
+        .feedback-final {
             margin-top: 20px;
             padding: 20px;
             border-radius: 8px;
@@ -157,6 +188,31 @@
             text-align: center;
             display: none;
         }
+
+        .ejercicio-container.oculto { display: none; }
+
+        #resumen-final {
+            display: none;
+            text-align: center;
+            background: var(--panel);
+            padding: 40px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        #resumen-final.visible { display: block; }
+        #resumen-final h2 { color: var(--exp-color); }
+        #resumen-final .resumen-icono { font-size: 3em; margin-bottom: 10px; }
+        .btn-volver {
+            display: inline-block;
+            margin-top: 20px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .btn-volver:hover { background: #2980b9; }
     </style>
 </head>
 <body>
@@ -164,105 +220,288 @@
     <a href="index.html" title="Volver al inicio" style="position:fixed;top:15px;left:15px;z-index:100;color:var(--primary);font-size:22px;text-decoration:none;background:var(--panel);width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.1)"><i class="fa-solid fa-house"></i></a>
 
     <h1>🧩 Constructor de Textos PEEL</h1>
-    <p class="subtitulo">Arrastra las frases del banco y suéltalas en la estructura correcta. ¡Cuidado con las trampas!</p>
+    <p class="subtitulo">Arrastra las frases del banco y suéltalas en la estructura correcta. ¡Cuidado con las trampas! Completa los 4 ejercicios para dominar la estructura PEEL.</p>
 
-    <div class="contexto-caja">
-        <h2>📝 Escenario: Carta al Ayuntamiento</h2>
-        <p>El ayuntamiento quiere talar un parque histórico de 50 años en el centro para hacer un estacionamiento subterráneo. Eres el portavoz de los vecinos.</p>
-        <p class="tesis">Tesis a defender: "La tala del Parque Central es un error urbanístico y ambiental que perjudicará la salud pública y la economía local."</p>
+    <div class="progreso-ejercicios" id="progreso-ejercicios"></div>
+
+    <div id="contenedor-ejercicios"></div>
+
+    <div id="resumen-final">
+        <div class="resumen-icono">🏆</div>
+        <h2>¡Felicidades! Has dominado la estructura PEEL</h2>
+        <p>Construiste argumentos sólidos en cuatro contextos distintos: una carta vecinal, un debate escolar, una propuesta institucional y un foro estudiantil.</p>
+        <p>Recuerda siempre: <b>P</b>unto (idea), <b>E</b>videncia (dato), <b>Exp</b>licación (porqué) y <b>L</b>ink (cierre que conecta con tu tesis). Y desconfía de las frases que "suenan bien" pero contradicen tu propio argumento.</p>
+        <a class="btn-volver" href="index.html"><i class="fa-solid fa-house"></i> Volver al inicio</a>
     </div>
-
-    <div class="grid-principal">
-        <!-- BANCO DE FRASES -->
-        <div class="banco-frases">
-            <h3>📦 Banco de Frases (Arrastra de aquí)</h3>
-            <div id="banco" ondragover="allowDrop(event)" ondrop="dropBanco(event)"></div>
-        </div>
-
-        <!-- ZONA DE CONSTRUCCIÓN -->
-        <div class="zona-construccion">
-            <!-- Párrafo 1 -->
-            <div class="parrafo-bloque">
-                <span class="titulo-parrafo">Párrafo 1: Enfoque en la Salud</span>
-                
-                <div class="slot" id="p1-p" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    <span class="slot-label label-p">[P] Punto</span>
-                </div>
-                <div class="slot" id="p1-e" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    <span class="slot-label label-e">[E] Evidencia</span>
-                </div>
-                <div class="slot" id="p1-exp" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    <span class="slot-label label-exp">[E] Explicación</span>
-                </div>
-                <div class="slot" id="p1-l" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    <span class="slot-label label-l">[L] Link</span>
-                </div>
-            </div>
-
-            <!-- Párrafo 2 -->
-            <div class="parrafo-bloque">
-                <span class="titulo-parrafo">Párrafo 2: Enfoque Económico</span>
-                
-                <div class="slot" id="p2-p" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    <span class="slot-label label-p">[P] Punto</span>
-                </div>
-                <div class="slot" id="p2-e" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    <span class="slot-label label-e">[E] Evidencia</span>
-                </div>
-                <div class="slot" id="p2-exp" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    <span class="slot-label label-exp">[E] Explicación</span>
-                </div>
-                <div class="slot" id="p2-l" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    <span class="slot-label label-l">[L] Link</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="botones-accion">
-        <button class="btn-reset" onclick="resetearEjercicio()">🔄 Mezclar de nuevo</button>
-        <button onclick="comprobarEstructura()">✅ Comprobar Estructura PEEL</button>
-    </div>
-
-    <div id="feedback-final"></div>
 
     <script>
-        // Base de datos de frases
-        // id: identificador, texto: lo que se ve, correcta: a qué slot pertenece (null si es trampa)
-        const frasesDB = [
-            // PÁRRAFO 1 (Salud)
-            { id: "p1_p", texto: "La destrucción del Parque Central incrementará drásticamente los problemas respiratorios en la zona céntrica.", correcta: "p1-p" },
-            { id: "p1_e", texto: "Un estudio de la Universidad Complutense demuestra que este bosque urbano filtra hasta 15 toneladas de dióxido de carbono al año.", correcta: "p1-e" },
-            { id: "p1_exp", texto: "Al eliminar esta barrera natural, las partículas tóxicas de los coches del nuevo estacionamiento quedarán sin filtro, provocando un aumento de casos de asma entre los vecinos.", correcta: "p1-exp" },
-            { id: "p1_l", texto: "Por lo tanto, sustituir vegetación por asfalto contradice directamente la pretensión del ayuntamiento de mantener una ciudad saludable.", correcta: "p1-l" },
-            
-            // PÁRRAFO 2 (Economía)
-            { id: "p2_p", texto: "Además, el proyecto del estacionamiento subterráneo es económicamente inviable a largo plazo.", correcta: "p2-p" },
-            { id: "p2_e", texto: "Datos del Ministerio de Transporte revelan que los aparcamientos subterráneos en zonas peatonales históricas operan, de media, al 40% de su capacidad.", correcta: "p2-e" },
-            { id: "p2_exp", texto: "Esta baja ocupación significa que los ingresos por tarifas de parking nunca cubrirán los millones de euros que cuesta excavar y construir la infraestructura, generando una deuda pública innecesaria.", correcta: "p2-exp" },
-            { id: "p2_l", texto: "En conclusión, el plan no solo dañará la salud, sino que también supondrá un agujero financiero que pagaremos todos los ciudadanos.", correcta: "p2-l" },
+        // ============================================================
+        // BASE DE DATOS DE EJERCICIOS
+        // ============================================================
+        // Cada ejercicio define su contexto, tesis, estructura de párrafos
+        // (slots PEEL) y el banco de frases (correctas + trampas).
+        // El id de cada slot sigue el patrón: e{ejercicio}-p{parrafo}-{clave}
+        // y "correcta" en frasesDB debe coincidir exactamente con ese id.
+        const ejerciciosDB = [
+            // ================= EJERCICIO 1 =================
+            {
+                id: 1,
+                contextoTitulo: "📝 Escenario 1: Carta al Municipio",
+                contextoTexto: "El municipio quiere talar un parque histórico de 50 años en el centro para hacer un estacionamiento subterráneo. Eres el portavoz de los vecinos.",
+                tesis: "La tala del Parque Central es un error urbanístico y ambiental que perjudicará la salud pública y la economía local.",
+                ayuda: "Recuerda: <b>P</b> es la idea, <b>E</b> es el DATO, <b>Exp</b> es el PORQUÉ, y <b>L</b> es el cierre.",
+                parrafos: [
+                    {
+                        titulo: "Párrafo 1: Enfoque en la Salud",
+                        slots: [
+                            { key: "p", label: "[P] Punto", clase: "label-p" },
+                            { key: "e", label: "[E] Evidencia", clase: "label-e" },
+                            { key: "exp", label: "[Exp] Explicación", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    },
+                    {
+                        titulo: "Párrafo 2: Enfoque Económico",
+                        slots: [
+                            { key: "p", label: "[P] Punto", clase: "label-p" },
+                            { key: "e", label: "[E] Evidencia", clase: "label-e" },
+                            { key: "exp", label: "[Exp] Explicación", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    }
+                ],
+                frases: [
+                    { id: "f_p1p", texto: "La destrucción del Parque Central incrementará drásticamente los problemas respiratorios en la zona céntrica.", correcta: "e1-p1-p" },
+                    { id: "f_p1e", texto: "Un estudio de la Universidad Complutense demuestra que este bosque urbano filtra hasta 15 toneladas de dióxido de carbono al año.", correcta: "e1-p1-e" },
+                    { id: "f_p1exp", texto: "Al eliminar esta barrera natural, las partículas tóxicas de los coches del nuevo estacionamiento quedarán sin filtro, provocando un aumento de casos de asma entre los vecinos.", correcta: "e1-p1-exp" },
+                    { id: "f_p1l", texto: "Por lo tanto, sustituir vegetación por asfalto contradice directamente la pretensión del municipio de mantener una ciudad saludable.", correcta: "e1-p1-l" },
 
-            // TRAMPAS (Distractores)
-            { id: "trampa1", texto: "A mí personalmente me parece muy bonito el parque porque hay muchos pájaros.", correcta: null },
-            { id: "trampa2", texto: "El asfalto es de color gris y hace que la ciudad se vea muy fea y triste.", correcta: null },
-            { id: "trampa3", texto: "Todo el mundo sabe que los coches emiten mucho humo y eso es malo.", correcta: null },
-            { id: "trampa4", texto: "Por lo tanto, los árboles tienen hojas verdes que se caen en otoño.", correcta: null }
+                    { id: "f_p2p", texto: "Además, el proyecto del estacionamiento subterráneo es económicamente inviable a largo plazo.", correcta: "e1-p2-p" },
+                    { id: "f_p2e", texto: "Datos del Ministerio de Transporte revelan que los aparcamientos subterráneos en zonas peatonales históricas operan, de media, al 40% de su capacidad.", correcta: "e1-p2-e" },
+                    { id: "f_p2exp", texto: "Esta baja ocupación significa que los ingresos por tarifas de parking nunca cubrirán los millones de euros que cuesta excavar y construir la infraestructura, generando una deuda pública innecesaria.", correcta: "e1-p2-exp" },
+                    { id: "f_p2l", texto: "En conclusión, el plan no solo dañará la salud, sino que también supondrá un agujero financiero que pagaremos todos los ciudadanos.", correcta: "e1-p2-l" },
+
+                    { id: "f_t1", texto: "A mí personalmente me parece muy bonito el parque porque hay muchos pájaros.", correcta: null },
+                    { id: "f_t2", texto: "El asfalto es de color gris y hace que la ciudad se vea muy fea y triste.", correcta: null },
+                    { id: "f_t3", texto: "Todo el mundo sabe que los coches emiten mucho humo y eso es malo.", correcta: null },
+                    { id: "f_t4", texto: "Por lo tanto, los árboles tienen hojas verdes que se caen en otoño.", correcta: null }
+                ]
+            },
+
+            // ================= EJERCICIO 2 (estructura con 2 evidencias) =================
+            {
+                id: 2,
+                contextoTitulo: "📱 Escenario 2: Reunión de Padres y Docentes",
+                contextoTexto: "La dirección del colegio debate si prohibir el uso de celulares durante las clases. Te piden redactar un argumento técnico para presentarlo en la reunión. Atención: esta vez la estructura cambia, el párrafo necesita DOS evidencias antes de pasar a la explicación.",
+                tesis: "El uso de celulares durante las clases debe restringirse, ya que afecta negativamente la concentración y el rendimiento académico de los estudiantes.",
+                ayuda: "Esta estructura usa dos evidencias (E1 y E2) que respaldan el mismo Punto antes de la Explicación y el Link.",
+                parrafos: [
+                    {
+                        titulo: "Párrafo único: Concentración y rendimiento",
+                        slots: [
+                            { key: "p", label: "[P] Punto", clase: "label-p" },
+                            { key: "e1", label: "[E1] Evidencia 1", clase: "label-e" },
+                            { key: "e2", label: "[E2] Evidencia 2", clase: "label-e2" },
+                            { key: "exp", label: "[Exp] Explicación", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    }
+                ],
+                frases: [
+                    { id: "f_p", texto: "El acceso constante al celular durante las clases reduce significativamente la capacidad de los estudiantes para mantener la atención sostenida.", correcta: "e2-p1-p" },
+                    { id: "f_e1", texto: "Una investigación de la Universidad de Stanford encontró que los estudiantes que usaban el celular durante una clase obtuvieron, en promedio, un punto menos en sus exámenes que quienes no lo usaron.", correcta: "e2-p1-e1" },
+                    { id: "f_e2", texto: "Datos de la UNESCO (2023) revelan que los países que limitaron el uso de celulares en las aulas registraron una mejora del 14% en los resultados de comprensión lectora.", correcta: "e2-p1-e2" },
+                    { id: "f_exp", texto: "Esto ocurre porque el cerebro humano no puede procesar dos tareas complejas al mismo tiempo: cada notificación obliga a la mente a 'reiniciar' el proceso de atención hacia el contenido académico, lo cual reduce la retención de información.", correcta: "e2-p1-exp" },
+                    { id: "f_l", texto: "Por lo tanto, restringir el uso del celular en el aula no es una medida arbitraria, sino una decisión respaldada por evidencia que busca proteger el aprendizaje de los estudiantes.", correcta: "e2-p1-l" },
+
+                    { id: "f_t1", texto: "A mí me parece que los celulares son muy caros y no todos los estudiantes pueden comprar uno.", correcta: null },
+                    { id: "f_t2", texto: "Los celulares modernos tienen cámaras de muy alta resolución y baterías de larga duración.", correcta: null },
+                    { id: "f_t3", texto: "Es evidente que a los jóvenes de hoy les gusta mucho usar redes sociales.", correcta: null }
+                ]
+            },
+
+            // ================= EJERCICIO 3 (link/explicación contradictorios) =================
+            {
+                id: 3,
+                contextoTitulo: "♻️ Escenario 3: Propuesta ante el Consejo Universitario",
+                contextoTexto: "Como representante estudiantil, debes argumentar a favor de un sistema de reciclaje obligatorio en los campus. Cuidado: en el banco hay frases que SUENAN como una buena explicación o un buen cierre, pero en realidad contradicen tu propia tesis. No caigas en la trampa.",
+                tesis: "La implementación de un sistema obligatorio de separación de residuos en la universidad es una medida necesaria para reducir el impacto ambiental de la institución.",
+                ayuda: "Algunas frases parecen un Link o una Explicación válidos, pero en realidad contradicen la tesis. Léelas con cuidado antes de soltarlas.",
+                parrafos: [
+                    {
+                        titulo: "Párrafo único: Gestión de residuos universitarios",
+                        slots: [
+                            { key: "p", label: "[P] Punto", clase: "label-p" },
+                            { key: "e", label: "[E] Evidencia", clase: "label-e" },
+                            { key: "exp", label: "[Exp] Explicación", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    }
+                ],
+                frases: [
+                    { id: "f_p", texto: "La universidad genera diariamente grandes cantidades de residuos que actualmente no reciben ningún tipo de separación ni tratamiento diferenciado.", correcta: "e3-p1-p" },
+                    { id: "f_e", texto: "Un diagnóstico interno realizado en 2023 determinó que el 68% de los desechos producidos en los campus son materiales reciclables (papel, plástico y vidrio) que terminan mezclados con la basura común.", correcta: "e3-p1-e" },
+                    { id: "f_exp", texto: "Esto significa que la mayor parte de esos residuos, que podrían reintroducirse en cadenas de reciclaje, terminan en rellenos sanitarios, generando emisiones de metano y desperdiciando recursos que podrían reutilizarse.", correcta: "e3-p1-exp" },
+                    { id: "f_l", texto: "Por lo tanto, establecer estaciones de separación obligatoria permitiría a la universidad reducir su huella ambiental y convertirse en un modelo de sostenibilidad para otras instituciones.", correcta: "e3-p1-l" },
+
+                    { id: "f_trampa_exp", texto: "Esto demuestra que separar la basura no tiene ningún impacto real en el medioambiente, ya que las empresas recolectoras igual mezclan los residuos al final.", correcta: null },
+                    { id: "f_trampa_l", texto: "Sin embargo, dado que cada persona genera residuos de forma distinta, intentar uniformar la separación de basura en la universidad sería una medida ineficaz que no vale la pena implementar.", correcta: null },
+                    { id: "f_trampa3", texto: "La palabra 'reciclar' viene del latín y significa, literalmente, 'volver al ciclo'.", correcta: null }
+                ]
+            },
+
+            // ================= EJERCICIO 4 (consolidación, dos párrafos) =================
+            {
+                id: 4,
+                contextoTitulo: "📚 Escenario 4: Foro Estudiantil sobre Tareas de Fin de Semana",
+                contextoTexto: "Participas en un foro estudiantil donde se debate si los docentes deberían dejar de asignar tareas durante los fines de semana. Redacta dos párrafos que combinen argumentos pedagógicos y familiares para defender tu postura.",
+                tesis: "Asignar tareas escolares durante los fines de semana no mejora el aprendizaje y, en cambio, reduce el tiempo de descanso y convivencia familiar de los estudiantes.",
+                ayuda: "Recuerda: <b>P</b> es la idea, <b>E</b> es el DATO, <b>Exp</b> es el PORQUÉ, y <b>L</b> es el cierre. Revisa que cada frase corresponda al párrafo correcto (pedagógico o familiar).",
+                parrafos: [
+                    {
+                        titulo: "Párrafo 1: Enfoque Pedagógico",
+                        slots: [
+                            { key: "p", label: "[P] Punto", clase: "label-p" },
+                            { key: "e", label: "[E] Evidencia", clase: "label-e" },
+                            { key: "exp", label: "[Exp] Explicación", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    },
+                    {
+                        titulo: "Párrafo 2: Enfoque Familiar y Bienestar",
+                        slots: [
+                            { key: "p", label: "[P] Punto", clase: "label-p" },
+                            { key: "e", label: "[E] Evidencia", clase: "label-e" },
+                            { key: "exp", label: "[Exp] Explicación", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    }
+                ],
+                frases: [
+                    { id: "f_p1p", texto: "La evidencia pedagógica sugiere que las tareas asignadas para el fin de semana no generan un aprendizaje significativamente mayor que las actividades realizadas entre semana.", correcta: "e4-p1-p" },
+                    { id: "f_p1e", texto: "Un metaanálisis de Cooper, Robinson y Patall (2006) encontró que, a partir de cierto punto, la correlación entre la cantidad de tareas y el rendimiento académico se vuelve prácticamente nula.", correcta: "e4-p1-e" },
+                    { id: "f_p1exp", texto: "Esto ocurre porque, sin la guía directa del docente durante el fin de semana, los estudiantes tienden a memorizar procedimientos en lugar de comprenderlos, lo que produce un aprendizaje superficial y poco duradero.", correcta: "e4-p1-exp" },
+                    { id: "f_p1l", texto: "Por lo tanto, la carga de tareas en el fin de semana no se traduce en mejores resultados académicos, sino en horas de estudio poco efectivas.", correcta: "e4-p1-l" },
+
+                    { id: "f_p2p", texto: "Además, las tareas de fin de semana reducen el tiempo disponible para el descanso y la convivencia familiar, factores clave para el desarrollo socioemocional de los estudiantes.", correcta: "e4-p2-p" },
+                    { id: "f_p2e", texto: "Una encuesta aplicada a 500 familias por el departamento de orientación de un colegio en Quito (2022) mostró que el 72% de los padres considera que las tareas de fin de semana generan conflictos familiares.", correcta: "e4-p2-e" },
+                    { id: "f_p2exp", texto: "Esto sucede porque el tiempo que antes se dedicaba a actividades recreativas o familiares ahora se destina a completar trabajos escolares, lo que genera estrés tanto en los estudiantes como en los padres encargados de supervisarlos.", correcta: "e4-p2-exp" },
+                    { id: "f_p2l", texto: "En conclusión, eliminar las tareas de fin de semana no solo no perjudicaría el aprendizaje, sino que devolvería a las familias un tiempo valioso para el descanso y la convivencia.", correcta: "e4-p2-l" },
+
+                    { id: "f_t1", texto: "Está comprobado que a los niños no les gusta hacer tareas los fines de semana.", correcta: null },
+                    { id: "f_t2", texto: "Los fines de semana tienen dos días: sábado y domingo, en la mayoría de los países.", correcta: null },
+                    { id: "f_t3", texto: "Algunos profesores dejan demasiadas tareas porque no organizan bien su planificación semanal.", correcta: null },
+                    { id: "f_t4", texto: "Por lo tanto, los estudiantes deberían tener vacaciones durante todo el año escolar.", correcta: null }
+                ]
+            }
         ];
 
-        let dragData = null;
+        let dragData = null; // id completo del elemento .frase que se está arrastrando
+        const estado = { actual: 1, completados: [false, false, false, false] };
 
-        // Inicializar el banco mezclando las frases
-        function iniciarBanco() {
-            const banco = document.getElementById('banco');
+        // ============================================================
+        // RENDERIZADO
+        // ============================================================
+        function construirEjercicios() {
+            const contenedor = document.getElementById('contenedor-ejercicios');
+
+            ejerciciosDB.forEach(ej => {
+                const totalSlots = ej.parrafos.reduce((acc, p) => acc + p.slots.length, 0);
+
+                const cont = document.createElement('div');
+                cont.className = 'ejercicio-container' + (ej.id === 1 ? '' : ' oculto');
+                cont.id = `ejercicio-${ej.id}`;
+
+                const parrafosHtml = ej.parrafos.map((p, pIdx) => `
+                    <div class="parrafo-bloque">
+                        <span class="titulo-parrafo">${p.titulo}</span>
+                        ${p.slots.map(s => `
+                            <div class="slot" id="e${ej.id}-p${pIdx + 1}-${s.key}" ondragover="allowDrop(event)" ondrop="drop(event)">
+                                <span class="slot-label ${s.clase}">${s.label}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `).join('');
+
+                cont.innerHTML = `
+                    <div class="contexto-caja">
+                        <h2>${ej.contextoTitulo}</h2>
+                        <p>${ej.contextoTexto}</p>
+                        <p class="tesis">Tesis a defender: "${ej.tesis}"</p>
+                    </div>
+                    <div class="grid-principal">
+                        <div class="banco-frases">
+                            <h3>📦 Banco de Frases (Arrastra de aquí)</h3>
+                            <div id="banco-${ej.id}" ondragover="allowDrop(event)" ondrop="dropBanco(event)"></div>
+                        </div>
+                        <div class="zona-construccion">
+                            ${parrafosHtml}
+                        </div>
+                    </div>
+                    <div class="botones-accion">
+                        <button class="btn-reset" onclick="resetearEjercicio(${ej.id})">🔄 Mezclar de nuevo</button>
+                        <button onclick="comprobarEstructura(${ej.id})">✅ Comprobar Estructura PEEL</button>
+                    </div>
+                    <div id="feedback-final-${ej.id}" class="feedback-final"></div>
+                `;
+
+                contenedor.appendChild(cont);
+                ej._totalSlots = totalSlots;
+
+                iniciarBanco(ej.id);
+            });
+        }
+
+        function construirProgreso() {
+            const barra = document.getElementById('progreso-ejercicios');
+            barra.innerHTML = '';
+            ejerciciosDB.forEach((ej, idx) => {
+                if (idx > 0) {
+                    const conector = document.createElement('div');
+                    conector.className = 'paso-conector';
+                    barra.appendChild(conector);
+                }
+                const paso = document.createElement('div');
+                paso.className = 'paso';
+                paso.id = `paso-${ej.id}`;
+                paso.textContent = ej.id;
+                barra.appendChild(paso);
+            });
+            actualizarProgreso();
+        }
+
+        function actualizarProgreso() {
+            ejerciciosDB.forEach(ej => {
+                const paso = document.getElementById(`paso-${ej.id}`);
+                paso.classList.remove('activo', 'completado', 'bloqueado');
+                if (estado.completados[ej.id - 1]) {
+                    paso.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    paso.classList.add('completado');
+                } else if (ej.id === estado.actual) {
+                    paso.textContent = ej.id;
+                    paso.classList.add('activo');
+                } else if (ej.id > estado.actual) {
+                    paso.innerHTML = '<i class="fa-solid fa-lock"></i>';
+                    paso.classList.add('bloqueado');
+                } else {
+                    paso.textContent = ej.id;
+                }
+            });
+        }
+
+        // Inicializar el banco mezclando las frases de un ejercicio
+        function iniciarBanco(ejId) {
+            const ej = ejerciciosDB[ejId - 1];
+            const banco = document.getElementById(`banco-${ejId}`);
             banco.innerHTML = '';
-            
-            // Mezclar array (Algoritmo Fisher-Yates)
-            const frasesMezcladas = [...frasesDB].sort(() => Math.random() - 0.5);
+
+            // Mezclar array (Algoritmo Fisher-Yates simplificado)
+            const frasesMezcladas = [...ej.frases].sort(() => Math.random() - 0.5);
 
             frasesMezcladas.forEach(frase => {
                 const div = document.createElement('div');
                 div.className = 'frase';
-                div.id = frase.id;
+                div.id = `e${ejId}-${frase.id}`;
                 div.textContent = frase.texto;
                 div.draggable = true;
                 div.ondragstart = dragStart;
@@ -271,7 +510,9 @@
             });
         }
 
-        // Funciones Drag & Drop
+        // ============================================================
+        // DRAG & DROP
+        // ============================================================
         function dragStart(e) {
             dragData = e.target.id;
             e.target.style.opacity = '0.5';
@@ -288,14 +529,15 @@
         function drop(e) {
             e.preventDefault();
             const slot = e.currentTarget;
-            const fraseId = dragData;
-            const fraseElement = document.getElementById(fraseId);
+            const fraseElement = document.getElementById(dragData);
+            if (!fraseElement) return;
 
-            // Si el slot ya tiene una frase, devolverla al banco
+            // Si el slot ya tiene una frase, devolverla a su banco
             const fraseAnterior = slot.querySelector('.frase');
             if (fraseAnterior) {
+                const ejAnterior = fraseAnterior.id.match(/^e(\d+)-/)[1];
                 fraseAnterior.classList.remove('usada');
-                document.getElementById('banco').appendChild(fraseAnterior);
+                document.getElementById(`banco-${ejAnterior}`).appendChild(fraseAnterior);
             }
 
             // Mover la nueva frase al slot
@@ -304,32 +546,36 @@
             fraseElement.style.opacity = '1'; // Restaurar opacidad
         }
 
-        // Devolver frase desde un slot al banco
+        // Devolver frase desde un slot al banco correspondiente
         function dropBanco(e) {
             e.preventDefault();
             const fraseElement = document.getElementById(dragData);
             if (!fraseElement) return;
+            const ej = fraseElement.id.match(/^e(\d+)-/)[1];
             fraseElement.classList.remove('usada');
             fraseElement.style.opacity = '1';
-            document.getElementById('banco').appendChild(fraseElement);
+            document.getElementById(`banco-${ej}`).appendChild(fraseElement);
         }
 
-        // Comprobación estricta
-        function comprobarEstructura() {
+        // ============================================================
+        // COMPROBACIÓN Y PROGRESO
+        // ============================================================
+        function comprobarEstructura(ejId) {
+            const ej = ejerciciosDB[ejId - 1];
+            const totalSlots = ej._totalSlots;
             let aciertos = 0;
-            const totalSlots = 8;
-            const slots = document.querySelectorAll('.slot');
+
+            const slots = document.querySelectorAll(`#ejercicio-${ejId} .slot`);
 
             slots.forEach(slot => {
                 const fraseDentro = slot.querySelector('.frase');
-                // Limpiar clases anteriores
                 slot.classList.remove('correcto', 'incorrecto');
 
                 if (fraseDentro) {
-                    const idFrase = fraseDentro.id;
-                    const fraseData = frasesDB.find(f => f.id === idFrase);
+                    const idBase = fraseDentro.id.replace(`e${ejId}-`, '');
+                    const fraseData = ej.frases.find(f => f.id === idBase);
 
-                    if (fraseData.correcta === slot.id) {
+                    if (fraseData && fraseData.correcta === slot.id) {
                         slot.classList.add('correcto');
                         aciertos++;
                     } else {
@@ -340,40 +586,71 @@
                 }
             });
 
-            // Feedback final
-            const feedbackDiv = document.getElementById('feedback-final');
+            const feedbackDiv = document.getElementById(`feedback-final-${ejId}`);
             feedbackDiv.style.display = 'block';
-            
+
             if (aciertos === totalSlots) {
                 feedbackDiv.style.backgroundColor = '#eafaf1';
                 feedbackDiv.style.color = '#27ae60';
-                feedbackDiv.innerHTML = `🎉 ¡PERFECTO! Has construido un texto académico impecable. (${aciertos}/${totalSlots})`;
+
+                if (ejId < ejerciciosDB.length) {
+                    feedbackDiv.innerHTML = `🎉 ¡PERFECTO! Has construido un texto académico impecable. (${aciertos}/${totalSlots})
+                        <div style="margin-top:15px;">
+                            <button class="btn-siguiente" onclick="avanzarEjercicio(${ejId})">Siguiente ejercicio →</button>
+                        </div>`;
+                } else {
+                    feedbackDiv.innerHTML = `🎉 ¡PERFECTO! Has construido un texto académico impecable. (${aciertos}/${totalSlots})
+                        <div style="margin-top:15px;">
+                            <button class="btn-siguiente" onclick="finalizarSimulacion()">Ver resumen final →</button>
+                        </div>`;
+                }
+
+                estado.completados[ejId - 1] = true;
+                actualizarProgreso();
             } else {
                 feedbackDiv.style.backgroundColor = '#fdedec';
                 feedbackDiv.style.color = '#c0392b';
-                feedbackDiv.innerHTML = `❌ Tienes errores. Recuerda: <b>P</b> es la idea, <b>E</b> es el DATO, <b>Exp</b> es el PORQUÉ, y <b>L</b> es el cierre. Revisa los recuadros rojos. (${aciertos}/${totalSlots})`;
+                feedbackDiv.innerHTML = `❌ Tienes errores. ${ej.ayuda} Revisa los recuadros rojos. (${aciertos}/${totalSlots})`;
             }
-            
+
             feedbackDiv.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function resetearEjercicio() {
-            const slots = document.querySelectorAll('.slot');
+        function resetearEjercicio(ejId) {
+            const slots = document.querySelectorAll(`#ejercicio-${ejId} .slot`);
             slots.forEach(slot => {
                 slot.classList.remove('correcto', 'incorrecto');
                 const frase = slot.querySelector('.frase');
                 if (frase) {
                     frase.classList.remove('usada');
-                    document.getElementById('banco').appendChild(frase);
+                    document.getElementById(`banco-${ejId}`).appendChild(frase);
                 }
             });
-            document.getElementById('feedback-final').style.display = 'none';
-            iniciarBanco(); // Re-mezcla las del banco
+            document.getElementById(`feedback-final-${ejId}`).style.display = 'none';
+            iniciarBanco(ejId); // Re-mezcla las frases del banco
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function avanzarEjercicio(ejActualId) {
+            document.getElementById(`ejercicio-${ejActualId}`).classList.add('oculto');
+            const siguienteId = ejActualId + 1;
+            document.getElementById(`ejercicio-${siguienteId}`).classList.remove('oculto');
+            estado.actual = siguienteId;
+            actualizarProgreso();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function finalizarSimulacion() {
+            document.getElementById(`ejercicio-${ejerciciosDB.length}`).classList.add('oculto');
+            document.getElementById('resumen-final').classList.add('visible');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Arrancar la app
-        window.onload = iniciarBanco;
+        window.onload = function () {
+            construirProgreso();
+            construirEjercicios();
+        };
 
     </script>
 </body>
