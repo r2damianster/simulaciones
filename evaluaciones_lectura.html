@@ -649,7 +649,7 @@
                 const delay = i * 60;
                 if (state.submitted) {
                     // Modo retroalimentación
-                    const fb = ev.feedback[key];
+                    const fb = ev.feedback[key] || { expected: false, msg: '' };
                     let fbClass = 'omitted-ok';
                     let iconClass = 'omitted-ok';
                     let iconSymbol = '<i class="fa-solid fa-minus"></i>';
