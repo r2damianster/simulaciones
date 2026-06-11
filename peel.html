@@ -228,13 +228,42 @@
 
     <div id="resumen-final">
         <div class="resumen-icono">🏆</div>
-        <h2>¡Felicidades! Has dominado la estructura PEEL</h2>
+        <h2 id="resumen-final-titulo">¡Felicidades! Has dominado la estructura PEEL</h2>
         <p>Construiste argumentos sólidos en cuatro contextos distintos: una carta vecinal, un debate escolar, una propuesta institucional y un foro estudiantil.</p>
         <p>Recuerda siempre: <b>P</b>unto (idea), <b>E</b>videncia (dato), <b>Exp</b>licación (porqué) y <b>L</b>ink (cierre que conecta con tu tesis). Y desconfía de las frases que "suenan bien" pero contradicen tu propio argumento.</p>
         <a class="btn-volver" href="index.html"><i class="fa-solid fa-house"></i> Volver al inicio</a>
     </div>
 
     <script>
+        // ============================================================
+        // PERSONALIZACIÓN: NOMBRE DEL USUARIO
+        // (solo en esta sesión del navegador, no se guarda permanentemente)
+        // ============================================================
+        function obtenerNombreUsuario(callback) {
+            const guardado = sessionStorage.getItem('nombreEstudianteSim');
+            if (guardado) { callback(guardado); return; }
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
+            overlay.innerHTML = `
+                <div style="background:#fff;color:#222;padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--exp-color,#2563eb);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+                    <h3 style="margin:0 0 12px;color:var(--exp-color,#2563eb)">¿Cómo te llamas?</h3>
+                    <p style="font-size:.85rem;opacity:.75;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.</p>
+                    <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid #999;color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
+                    <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:var(--exp-color,#2563eb);color:#fff;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+                </div>`;
+            document.body.appendChild(overlay);
+            const input = overlay.querySelector('#inputNombreUsuario');
+            input.focus();
+            const confirmar = () => {
+                const nombre = input.value.trim() || 'Estudiante';
+                sessionStorage.setItem('nombreEstudianteSim', nombre);
+                overlay.remove();
+                callback(nombre);
+            };
+            overlay.querySelector('#btnConfirmarNombre').addEventListener('click', confirmar);
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') confirmar(); });
+        }
+
         // ============================================================
         // BASE DE DATOS DE EJERCICIOS
         // ============================================================
@@ -642,8 +671,11 @@
 
         function finalizarSimulacion() {
             document.getElementById(`ejercicio-${ejerciciosDB.length}`).classList.add('oculto');
-            document.getElementById('resumen-final').classList.add('visible');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            obtenerNombreUsuario(nombre => {
+                document.getElementById('resumen-final-titulo').textContent = `¡Felicidades, ${nombre}! Has dominado la estructura PEEL`;
+                document.getElementById('resumen-final').classList.add('visible');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
         }
 
         // Arrancar la app

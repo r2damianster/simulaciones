@@ -241,6 +241,35 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
 
 <script>
 /* ============================================
+   PERSONALIZACIÓN: NOMBRE DEL USUARIO
+   (solo en esta sesión del navegador, no se guarda permanentemente)
+   ============================================ */
+function obtenerNombreUsuario(callback) {
+  const guardado = sessionStorage.getItem('nombreEstudianteSim');
+  if (guardado) { callback(guardado); return; }
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
+  overlay.innerHTML = `
+    <div style="background:var(--card,#1e1e1e);color:var(--fg,#f1f1f1);padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--accent,#D4A853);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+      <h3 style="margin:0 0 12px;color:var(--accent,#D4A853)">¿Cómo te llamas?</h3>
+      <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.</p>
+      <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid #777;background:rgba(255,255,255,.05);color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
+      <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:var(--accent,#D4A853);color:#000;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  const input = overlay.querySelector('#inputNombreUsuario');
+  input.focus();
+  const confirmar = () => {
+    const nombre = input.value.trim() || 'Estudiante';
+    sessionStorage.setItem('nombreEstudianteSim', nombre);
+    overlay.remove();
+    callback(nombre);
+  };
+  overlay.querySelector('#btnConfirmarNombre').addEventListener('click', confirmar);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') confirmar(); });
+}
+
+/* ============================================
    DATOS DE TAREAS
    ============================================ */
 const TASKS = [
@@ -445,28 +474,30 @@ sendBtn.addEventListener('click', () => {
     modalBox.className = 'modal-box acc';
     const m = String(Math.floor(seconds / 60)).padStart(2, '0');
     const s = String(seconds % 60).padStart(2, '0');
-    modalBox.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-        <div style="width:40px;height:40px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-check" style="color:#fff;font-size:18px"></i></div>
-        <div>
-          <div style="font-weight:700;font-size:16px;color:var(--success)">Trabajo Aprobado</div>
-          <div style="font-size:11px;color:var(--muted)">Después de ${envioCount} intento${envioCount>1?'s':''} y ${m}:${s} de trabajo</div>
+    obtenerNombreUsuario(nombre => {
+      modalBox.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-check" style="color:#fff;font-size:18px"></i></div>
+          <div>
+            <div style="font-weight:700;font-size:16px;color:var(--success)">Trabajo Aprobado</div>
+            <div style="font-size:11px;color:var(--muted)">Después de ${envioCount} intento${envioCount>1?'s':''} y ${m}:${s} de trabajo</div>
+          </div>
         </div>
-      </div>
-      <div style="background:rgba(90,158,111,.08);border:1px solid rgba(90,158,111,.2);border-radius:8px;padding:16px;font-size:13.5px;line-height:1.7;color:var(--fg)">
-        <p style="margin-bottom:8px"><strong>De:</strong> Prof. Dra. Ana Belén Montoya</p>
-        <p style="margin-bottom:8px"><strong>Asunto:</strong> Aprobado — Formato APA 7</p>
-        <p style="margin-bottom:12px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
-        <p style="margin-bottom:8px">Estimada María Carmen,</p>
-        <p style="margin-bottom:8px">Tu trabajo cumple correctamente con todas las especificaciones de formato APA 7.ª edición. El manuscrito ha sido aceptado para evaluación de contenido.</p>
-        <p style="margin-bottom:8px">${envioCount === 1 ? 'Excelente trabajo desde el primer intento. Es raro ver un formato tan impecable.' : 'Veamos si la próxima vez puedes lograrlo desde el primer envío. Revisa el manual con más atención antes de entregar.'}</p>
-        <p>Saludos cordiales,<br><strong>Prof. Dra. Ana Belén Montoya</strong></p>
-      </div>
-      <div style="text-align:center;margin-top:20px">
-        <button onclick="closeModal()" style="background:var(--success);color:#fff;border:none;padding:10px 36px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:14px;transition:opacity .2s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">Cerrar</button>
-      </div>`;
-    modal.classList.add('on');
-    launchConfetti();
+        <div style="background:rgba(90,158,111,.08);border:1px solid rgba(90,158,111,.2);border-radius:8px;padding:16px;font-size:13.5px;line-height:1.7;color:var(--fg)">
+          <p style="margin-bottom:8px"><strong>De:</strong> Prof. Dra. Ana Belén Montoya</p>
+          <p style="margin-bottom:8px"><strong>Asunto:</strong> Aprobado — Formato APA 7</p>
+          <p style="margin-bottom:12px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
+          <p style="margin-bottom:8px">Estimado/a ${nombre},</p>
+          <p style="margin-bottom:8px">Tu trabajo cumple correctamente con todas las especificaciones de formato APA 7.ª edición. El manuscrito ha sido aceptado para evaluación de contenido.</p>
+          <p style="margin-bottom:8px">${envioCount === 1 ? 'Excelente trabajo desde el primer intento. Es raro ver un formato tan impecable.' : 'Veamos si la próxima vez puedes lograrlo desde el primer envío. Revisa el manual con más atención antes de entregar.'}</p>
+          <p>Saludos cordiales,<br><strong>Prof. Dra. Ana Belén Montoya</strong></p>
+        </div>
+        <div style="text-align:center;margin-top:20px">
+          <button onclick="closeModal()" style="background:var(--success);color:#fff;border:none;padding:10px 36px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:14px;transition:opacity .2s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">Cerrar</button>
+        </div>`;
+      modal.classList.add('on');
+      launchConfetti();
+    });
   } else {
     /* RECHAZADO */
     sendBtn.classList.add('shake-it');
