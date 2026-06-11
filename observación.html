@@ -391,6 +391,8 @@ const state = {
     noteFilter: 'todas',
     notes: [],
     observed: new Set(),
+    modesUsed: new Set(),
+    finished: false,
     startTime: Date.now(),
     eduTab: 0,
     leftOpen: true,
@@ -1126,6 +1128,7 @@ function observeCharacter(data) {
 
     const wasNew = !state.observed.has(data.id);
     state.observed.add(data.id);
+    state.modesUsed.add(state.mode);
     renderNotes();
     updateStats();
 
@@ -1139,11 +1142,85 @@ function observeCharacter(data) {
             setTimeout(() => showToast('Practica la distinción entre notas descriptivas, reflexivas y analíticas', 'fa-solid fa-graduation-cap'), 1200);
         }
         if (state.observed.size === charactersData.length) {
-            setTimeout(() => showToast('Has observado a todos los sujetos. Revisa tus apuntes y filtra por tipo.', 'fa-solid fa-star'), 1200);
+            if (state.modesUsed.size < 2) {
+                setTimeout(() => showToast('Has observado a todos los sujetos. Prueba ahora el otro modo de observación (participante/no participante) para completar la práctica.', 'fa-solid fa-star'), 1200);
+            } else {
+                setTimeout(() => showToast('Has observado a todos los sujetos. Revisa tus apuntes y filtra por tipo.', 'fa-solid fa-star'), 1200);
+            }
         }
     } else {
         showToast(`Nueva observación de ${data.name} con modo: ${state.mode === 'participante' ? 'Participante' : 'No participante'}`, 'fa-solid fa-rotate');
     }
+
+    checkCompletion();
+}
+
+// === Finalización ===
+function checkCompletion() {
+    if (state.finished) return;
+    if (state.observed.size === charactersData.length && state.modesUsed.size === 2) {
+        state.finished = true;
+        setTimeout(mostrarPantallaFinal, 1500);
+    }
+}
+
+function obtenerNombreUsuario(callback) {
+    const guardado = sessionStorage.getItem('nombreEstudianteSim');
+    if (guardado) { callback(guardado); return; }
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
+    overlay.innerHTML = `
+        <div style="background:var(--bg,#1C1917);color:var(--fg,#FEF3C7);padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--accent,#D97706);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+            <h3 style="margin:0 0 12px;color:var(--accent-light,#F59E0B)">¿Cómo te llamas?</h3>
+            <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.</p>
+            <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--accent-dark,#92400E);background:rgba(255,255,255,.05);color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
+            <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:var(--accent,#D97706);color:#1C1917;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+        </div>`;
+    document.body.appendChild(overlay);
+    const input = overlay.querySelector('#inputNombreUsuario');
+    input.focus();
+    const confirmar = () => {
+        const nombre = input.value.trim() || 'Observador/a';
+        sessionStorage.setItem('nombreEstudianteSim', nombre);
+        overlay.remove();
+        callback(nombre);
+    };
+    overlay.querySelector('#btnConfirmarNombre').addEventListener('click', confirmar);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') confirmar(); });
+}
+
+function mostrarPantallaFinal() {
+    obtenerNombreUsuario(nombre => {
+        const desc = state.notes.filter(n => n.type === 'descriptiva').length;
+        const refl = state.notes.filter(n => n.type === 'reflexiva').length;
+        const anal = state.notes.filter(n => n.type === 'analitica').length;
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
+        overlay.innerHTML = `
+            <div style="background:var(--bg,#1C1917);color:var(--fg,#FEF3C7);padding:36px;border-radius:14px;max-width:480px;width:90%;text-align:center;border:1px solid var(--accent,#D97706);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+                <i class="fa-solid fa-binoculars" style="font-size:2.4rem;color:var(--accent-light,#F59E0B);margin-bottom:14px;"></i>
+                <h2 style="margin:0 0 10px;color:var(--accent-light,#F59E0B)">¡Bien hecho, ${nombre}!</h2>
+                <p style="font-size:.95rem;opacity:.85;margin:0 0 18px;line-height:1.6">
+                    Has observado a los ${charactersData.length} sujetos del entorno y registrado apuntes en ambos modos
+                    (participante y no participante), aplicando los tres tipos de nota de campo.
+                </p>
+                <div style="display:flex;justify-content:center;gap:18px;margin-bottom:20px;font-size:.85rem;color:var(--fg-muted,#A8A29E)">
+                    <div><strong style="display:block;font-size:1.4rem;color:var(--fg,#FEF3C7)">${desc}</strong>Descriptivas</div>
+                    <div><strong style="display:block;font-size:1.4rem;color:var(--fg,#FEF3C7)">${refl}</strong>Reflexivas</div>
+                    <div><strong style="display:block;font-size:1.4rem;color:var(--fg,#FEF3C7)">${anal}</strong>Analíticas</div>
+                </div>
+                <p style="font-size:.85rem;opacity:.75;margin:0 0 20px;line-height:1.6">
+                    Reflexiona: ¿cómo cambió tu registro al pasar de observador externo a participante?
+                    ¿Qué notas dependen más de tu interpretación que de lo observado?
+                </p>
+                <div style="display:flex;gap:12px;justify-content:center">
+                    <button id="btn-cerrar-final" style="padding:10px 24px;border:1px solid var(--accent,#D97706);border-radius:6px;background:transparent;color:var(--fg,#FEF3C7);font-weight:700;cursor:pointer;font-size:.9rem">Seguir explorando</button>
+                    <a href="index.html" style="padding:10px 24px;border:none;border-radius:6px;background:var(--accent,#D97706);color:#1C1917;font-weight:700;cursor:pointer;font-size:.9rem;text-decoration:none;display:inline-flex;align-items:center"><i class="fa-solid fa-house" style="margin-right:6px"></i>Volver al inicio</a>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        overlay.querySelector('#btn-cerrar-final').addEventListener('click', () => overlay.remove());
+    });
 }
 
 function formatNote(text, type, charName) {
