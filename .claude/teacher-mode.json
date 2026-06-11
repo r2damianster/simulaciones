@@ -1,0 +1,14 @@
+{
+  "_doc": "Manifiesto de Modo Profesor. NO se carga en el navegador (CORS file://). Usado por Claude/hooks para rastrear que simulaciones integran teacher-mode.js y sus paneles [data-teacher-only].",
+  "password": "profearturito",
+  "script": "teacher-mode.js",
+  "simulations": {
+    "observación.html": { "enabled": false },
+    "financiamiento_etica.html": { "enabled": false },
+    "disenos.html": { "enabled": false },
+    "apa7.html": { "enabled": false },
+    "apa7_2.html": { "enabled": false },
+    "peel.html": { "enabled": false },
+    "evaluaciones_lectura.html": { "enabled": false }
+  }
+}
