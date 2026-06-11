@@ -288,16 +288,16 @@
                 ]
             },
 
-            // ================= EJERCICIO 2 (estructura con 2 evidencias) =================
+            // ================= EJERCICIO 2 (intermedio: cotidiano con respaldo académico, 2 evidencias) =================
             {
                 id: 2,
-                contextoTitulo: "📱 Escenario 2: Reunión de Padres y Docentes",
-                contextoTexto: "La dirección del colegio debate si prohibir el uso de celulares durante las clases. Te piden redactar un argumento técnico para presentarlo en la reunión. Atención: esta vez la estructura cambia, el párrafo necesita DOS evidencias antes de pasar a la explicación.",
-                tesis: "El uso de celulares durante las clases debe restringirse, ya que afecta negativamente la concentración y el rendimiento académico de los estudiantes.",
+                contextoTitulo: "📱 Escenario 2: Columna de Opinión sobre Bienestar Digital",
+                contextoTexto: "Te han invitado a escribir una columna de opinión para el periódico universitario sobre el impacto de las redes sociales en la salud mental de los jóvenes. Atención: esta vez la estructura cambia, el párrafo necesita DOS evidencias antes de pasar a la explicación.",
+                tesis: "El uso prolongado de redes sociales durante la adolescencia está asociado con un aumento de los niveles de ansiedad y una disminución de la autoestima, por lo que su regulación debe formar parte de la educación digital.",
                 ayuda: "Esta estructura usa dos evidencias (E1 y E2) que respaldan el mismo Punto antes de la Explicación y el Link.",
                 parrafos: [
                     {
-                        titulo: "Párrafo único: Concentración y rendimiento",
+                        titulo: "Párrafo único: Redes sociales y salud mental adolescente",
                         slots: [
                             { key: "p", label: "[P] Punto", clase: "label-p" },
                             { key: "e1", label: "[E1] Evidencia 1", clase: "label-e" },
@@ -308,15 +308,15 @@
                     }
                 ],
                 frases: [
-                    { id: "f_p", texto: "El acceso constante al celular durante las clases reduce significativamente la capacidad de los estudiantes para mantener la atención sostenida.", correcta: "e2-p1-p" },
-                    { id: "f_e1", texto: "Una investigación de la Universidad de Stanford encontró que los estudiantes que usaban el celular durante una clase obtuvieron, en promedio, un punto menos en sus exámenes que quienes no lo usaron.", correcta: "e2-p1-e1" },
-                    { id: "f_e2", texto: "Datos de la UNESCO (2023) revelan que los países que limitaron el uso de celulares en las aulas registraron una mejora del 14% en los resultados de comprensión lectora.", correcta: "e2-p1-e2" },
-                    { id: "f_exp", texto: "Esto ocurre porque el cerebro humano no puede procesar dos tareas complejas al mismo tiempo: cada notificación obliga a la mente a 'reiniciar' el proceso de atención hacia el contenido académico, lo cual reduce la retención de información.", correcta: "e2-p1-exp" },
-                    { id: "f_l", texto: "Por lo tanto, restringir el uso del celular en el aula no es una medida arbitraria, sino una decisión respaldada por evidencia que busca proteger el aprendizaje de los estudiantes.", correcta: "e2-p1-l" },
+                    { id: "f_p", texto: "El tiempo excesivo dedicado a las redes sociales durante la adolescencia se relaciona con un deterioro notable del bienestar emocional de los jóvenes.", correcta: "e2-p1-p" },
+                    { id: "f_e1", texto: "Un estudio longitudinal publicado en JAMA Psychiatry (2021) encontró que los adolescentes que pasaban más de tres horas diarias en redes sociales tenían el doble de probabilidades de presentar síntomas de ansiedad y depresión que quienes las usaban menos de una hora.", correcta: "e2-p1-e1" },
+                    { id: "f_e2", texto: "Una encuesta del Instituto Nacional de Estadística y Censos (2022) reveló que el 58% de los estudiantes de secundaria que usan redes sociales más de cuatro horas al día reportaron sentirse 'frecuentemente' insatisfechos con su propia imagen corporal.", correcta: "e2-p1-e2" },
+                    { id: "f_exp", texto: "Esto sucede porque las plataformas de redes sociales están diseñadas para maximizar el tiempo de uso mediante la comparación social constante, exponiendo a los adolescentes a versiones idealizadas de la vida de otras personas que generan una brecha entre su realidad y sus expectativas.", correcta: "e2-p1-exp" },
+                    { id: "f_l", texto: "Por lo tanto, incorporar contenidos de educación digital y alfabetización mediática en el currículo escolar es una medida necesaria para mitigar estos efectos sobre la salud mental juvenil.", correcta: "e2-p1-l" },
 
-                    { id: "f_t1", texto: "A mí me parece que los celulares son muy caros y no todos los estudiantes pueden comprar uno.", correcta: null },
-                    { id: "f_t2", texto: "Los celulares modernos tienen cámaras de muy alta resolución y baterías de larga duración.", correcta: null },
-                    { id: "f_t3", texto: "Es evidente que a los jóvenes de hoy les gusta mucho usar redes sociales.", correcta: null }
+                    { id: "f_t1", texto: "Las redes sociales más populares entre los adolescentes son Instagram, TikTok y YouTube.", correcta: null },
+                    { id: "f_t2", texto: "A mí me parece que los jóvenes deberían salir más y usar menos el celular.", correcta: null },
+                    { id: "f_t3", texto: "Por lo tanto, lo mejor sería prohibir por completo el acceso a internet a los menores de edad.", correcta: null }
                 ]
             },
 
@@ -350,16 +350,16 @@
                 ]
             },
 
-            // ================= EJERCICIO 4 (consolidación, dos párrafos) =================
+            // ================= EJERCICIO 4 (super académico: ensayo tipo artículo científico) =================
             {
                 id: 4,
-                contextoTitulo: "📚 Escenario 4: Foro Estudiantil sobre Tareas de Fin de Semana",
-                contextoTexto: "Participas en un foro estudiantil donde se debate si los docentes deberían dejar de asignar tareas durante los fines de semana. Redacta dos párrafos que combinen argumentos pedagógicos y familiares para defender tu postura.",
-                tesis: "Asignar tareas escolares durante los fines de semana no mejora el aprendizaje y, en cambio, reduce el tiempo de descanso y convivencia familiar de los estudiantes.",
-                ayuda: "Recuerda: <b>P</b> es la idea, <b>E</b> es el DATO, <b>Exp</b> es el PORQUÉ, y <b>L</b> es el cierre. Revisa que cada frase corresponda al párrafo correcto (pedagógico o familiar).",
+                contextoTitulo: "🎓 Escenario 4: Ensayo Académico — Inteligencia Artificial Generativa en la Universidad",
+                contextoTexto: "Como parte de un ensayo académico para una revista estudiantil de divulgación científica, debes argumentar sobre el rol de la inteligencia artificial generativa en la escritura académica universitaria. Se espera un registro formal, con respaldo bibliográfico y razonamiento riguroso en cada párrafo.",
+                tesis: "La integración de la inteligencia artificial generativa en los procesos de escritura académica universitaria exige el desarrollo de marcos de integridad académica que regulen su uso, en lugar de prohibiciones generalizadas que resultan inviables.",
+                ayuda: "Recuerda: <b>P</b> es la idea, <b>E</b> es el DATO, <b>Exp</b> es el PORQUÉ, y <b>L</b> es el cierre. Revisa que cada frase corresponda al párrafo correcto (epistemológico o de política institucional) y desconfía de los cierres que suenan formales pero contradicen la tesis.",
                 parrafos: [
                     {
-                        titulo: "Párrafo 1: Enfoque Pedagógico",
+                        titulo: "Párrafo 1: Dimensión Epistemológica",
                         slots: [
                             { key: "p", label: "[P] Punto", clase: "label-p" },
                             { key: "e", label: "[E] Evidencia", clase: "label-e" },
@@ -368,7 +368,7 @@
                         ]
                     },
                     {
-                        titulo: "Párrafo 2: Enfoque Familiar y Bienestar",
+                        titulo: "Párrafo 2: Dimensión de Política Institucional",
                         slots: [
                             { key: "p", label: "[P] Punto", clase: "label-p" },
                             { key: "e", label: "[E] Evidencia", clase: "label-e" },
@@ -378,20 +378,20 @@
                     }
                 ],
                 frases: [
-                    { id: "f_p1p", texto: "La evidencia pedagógica sugiere que las tareas asignadas para el fin de semana no generan un aprendizaje significativamente mayor que las actividades realizadas entre semana.", correcta: "e4-p1-p" },
-                    { id: "f_p1e", texto: "Un metaanálisis de Cooper, Robinson y Patall (2006) encontró que, a partir de cierto punto, la correlación entre la cantidad de tareas y el rendimiento académico se vuelve prácticamente nula.", correcta: "e4-p1-e" },
-                    { id: "f_p1exp", texto: "Esto ocurre porque, sin la guía directa del docente durante el fin de semana, los estudiantes tienden a memorizar procedimientos en lugar de comprenderlos, lo que produce un aprendizaje superficial y poco duradero.", correcta: "e4-p1-exp" },
-                    { id: "f_p1l", texto: "Por lo tanto, la carga de tareas en el fin de semana no se traduce en mejores resultados académicos, sino en horas de estudio poco efectivas.", correcta: "e4-p1-l" },
+                    { id: "f_p1p", texto: "La utilización indiscriminada de herramientas de inteligencia artificial generativa en la elaboración de trabajos académicos plantea un riesgo significativo para el desarrollo del pensamiento crítico en los estudiantes universitarios.", correcta: "e4-p1-p" },
+                    { id: "f_p1e", texto: "Una revisión sistemática publicada en Higher Education Research & Development (2023) encontró que el 61% de los estudiantes que delegaron sistemáticamente tareas de redacción argumentativa a sistemas de IA generativa mostraron una disminución medible en su capacidad de elaborar contraargumentos originales.", correcta: "e4-p1-e" },
+                    { id: "f_p1exp", texto: "Esto se explica porque el pensamiento crítico se desarrolla mediante la práctica deliberada de formular, sostener y revisar argumentos propios; cuando esta práctica es sustituida por la aceptación de un texto generado externamente, el estudiante pierde la oportunidad de ejercitar los procesos cognitivos que la escritura académica está diseñada para fortalecer.", correcta: "e4-p1-exp" },
+                    { id: "f_p1l", texto: "Por lo tanto, cualquier política institucional sobre IA generativa debe distinguir entre su uso como herramienta de apoyo al pensamiento y su uso como sustituto de este, ya que las consecuencias pedagógicas de ambos escenarios son radicalmente distintas.", correcta: "e4-p1-l" },
 
-                    { id: "f_p2p", texto: "Además, las tareas de fin de semana reducen el tiempo disponible para el descanso y la convivencia familiar, factores clave para el desarrollo socioemocional de los estudiantes.", correcta: "e4-p2-p" },
-                    { id: "f_p2e", texto: "Una encuesta aplicada a 500 familias por el departamento de orientación de un colegio en Quito (2022) mostró que el 72% de los padres considera que las tareas de fin de semana generan conflictos familiares.", correcta: "e4-p2-e" },
-                    { id: "f_p2exp", texto: "Esto sucede porque el tiempo que antes se dedicaba a actividades recreativas o familiares ahora se destina a completar trabajos escolares, lo que genera estrés tanto en los estudiantes como en los padres encargados de supervisarlos.", correcta: "e4-p2-exp" },
-                    { id: "f_p2l", texto: "En conclusión, eliminar las tareas de fin de semana no solo no perjudicaría el aprendizaje, sino que devolvería a las familias un tiempo valioso para el descanso y la convivencia.", correcta: "e4-p2-l" },
+                    { id: "f_p2p", texto: "Asimismo, la prohibición absoluta del uso de IA generativa en el ámbito universitario resulta una medida inviable e ineficaz frente a la realidad tecnológica actual.", correcta: "e4-p2-p" },
+                    { id: "f_p2e", texto: "Un informe de la UNESCO (2023) sobre IA generativa en la educación superior señala que, pese a las prohibiciones formales adoptadas por el 67% de las universidades encuestadas, más del 80% de los estudiantes reportó haber utilizado estas herramientas durante el último semestre académico.", correcta: "e4-p2-e" },
+                    { id: "f_p2exp", texto: "Esta brecha entre la normativa y la práctica real evidencia que las prohibiciones generalizadas no modifican el comportamiento de los estudiantes, sino que únicamente desplazan su uso hacia la clandestinidad, lo cual impide que las instituciones brinden orientación sobre un uso ético y metodológicamente adecuado de estas herramientas.", correcta: "e4-p2-exp" },
+                    { id: "f_p2l", texto: "En consecuencia, las universidades deberían optar por marcos regulatorios que definan con claridad los usos aceptables de la IA generativa, fomentando la transparencia declarativa por parte del estudiante y la evaluación de competencias que dichas herramientas no pueden sustituir.", correcta: "e4-p2-l" },
 
-                    { id: "f_t1", texto: "Está comprobado que a los niños no les gusta hacer tareas los fines de semana.", correcta: null },
-                    { id: "f_t2", texto: "Los fines de semana tienen dos días: sábado y domingo, en la mayoría de los países.", correcta: null },
-                    { id: "f_t3", texto: "Algunos profesores dejan demasiadas tareas porque no organizan bien su planificación semanal.", correcta: null },
-                    { id: "f_t4", texto: "Por lo tanto, los estudiantes deberían tener vacaciones durante todo el año escolar.", correcta: null }
+                    { id: "f_t1", texto: "Es bien sabido que la inteligencia artificial generativa, como ChatGPT, fue desarrollada por la empresa OpenAI en el año 2022.", correcta: null },
+                    { id: "f_t2", texto: "A muchos estudiantes les resulta más cómodo usar la inteligencia artificial porque ahorra tiempo en sus tareas.", correcta: null },
+                    { id: "f_t3", texto: "Por lo tanto, dado que la tecnología avanza más rápido que la normativa, cualquier intento de regulación llegará siempre demasiado tarde y carecerá de sentido.", correcta: null },
+                    { id: "f_t4", texto: "Esto demuestra que los estudiantes de generaciones anteriores tenían mejores habilidades de redacción que los actuales.", correcta: null }
                 ]
             }
         ];
