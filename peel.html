@@ -173,7 +173,7 @@
         <!-- BANCO DE FRASES -->
         <div class="banco-frases">
             <h3>📦 Banco de Frases (Arrastra de aquí)</h3>
-            <div id="banco"></div>
+            <div id="banco" ondragover="allowDrop(event)" ondrop="dropBanco(event)"></div>
         </div>
 
         <!-- ZONA DE CONSTRUCCIÓN -->
@@ -299,6 +299,16 @@
             slot.appendChild(fraseElement);
             fraseElement.classList.add('usada');
             fraseElement.style.opacity = '1'; // Restaurar opacidad
+        }
+
+        // Devolver frase desde un slot al banco
+        function dropBanco(e) {
+            e.preventDefault();
+            const fraseElement = document.getElementById(dragData);
+            if (!fraseElement) return;
+            fraseElement.classList.remove('usada');
+            fraseElement.style.opacity = '1';
+            document.getElementById('banco').appendChild(fraseElement);
         }
 
         // Comprobación estricta
