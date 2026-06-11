@@ -42,6 +42,18 @@
         .score { font-size: 3em; font-family: 'Share Tech Mono'; margin: 20px 0; }
         .score-good { color: var(--cyan); text-shadow: 0 0 20px rgba(0,243,255,0.5); }
         .score-bad { color: var(--red); text-shadow: 0 0 20px rgba(255,61,90,0.5); }
+
+        /* MODALES DE BRIEFING Y TENTACIÓN */
+        #briefing-modal, #choice-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 200; justify-content: center; align-items: center; }
+        .modal-info { background: var(--panel-bg); border: 1px solid var(--cyan); padding: 30px; max-width: 480px; text-align: left; font-size: 0.9rem; line-height: 1.6; }
+        .modal-info h2 { color: var(--cyan); font-family: 'Share Tech Mono'; margin-bottom: 15px; text-align:center; }
+        .modal-temptation { background: #1a0d05; border: 1px solid var(--yellow); padding: 30px; max-width: 480px; text-align: left; font-size: 0.9rem; line-height: 1.6; box-shadow: 0 0 30px rgba(255,235,59,0.2); }
+        .modal-temptation h2 { color: var(--yellow); font-family: 'Share Tech Mono'; margin-bottom: 15px; text-align:center; }
+        .modal-btn-row { display:flex; gap:10px; margin-top:20px; }
+        .modal-btn-row button { flex:1; padding: 12px; border:none; cursor:pointer; font-family:'Share Tech Mono'; font-weight:bold; }
+        .btn-tempt { background: var(--yellow); color:#000; }
+        .btn-honest { background: var(--green); color:#fff; }
+        .btn-start { background: var(--cyan); color:#000; width:100%; padding:12px; border:none; cursor:pointer; font-family:'Share Tech Mono'; font-weight:bold; margin-top:15px; }
     </style>
 </head>
 <body>
@@ -69,6 +81,10 @@
                 <div class="stat-label">Estado</div>
                 <div class="stat-value" id="status" style="font-size: 0.9rem; color: #8b949e;">EXPLORANDO</div>
             </div>
+            <div class="stat" id="deadline-stat" style="display:none;">
+                <div class="stat-label">Plazo Publicación</div>
+                <div class="stat-value" id="deadline" style="color: var(--yellow);">--:--</div>
+            </div>
         </div>
         <div id="log-area"></div>
         <div id="instructions">Haz clic en el mapa para mover a tu investigador hacia las zonas.</div>
@@ -81,6 +97,25 @@
             <div class="score" id="final-score-text"></div>
             <div id="breakdown" style="text-align: left; font-size: 0.8rem; color: #8b949e; margin: 20px 0;"></div>
             <button style="background: var(--red); color: white; border: none; padding: 10px 20px; cursor: pointer; font-family: 'Share Tech Mono';" onclick="location.reload()">REINICIAR</button>
+        </div>
+    </div>
+
+    <div id="briefing-modal">
+        <div class="modal-info">
+            <h2>📋 BRIEFING DE MISIÓN</h2>
+            <div id="briefing-text"></div>
+            <button class="btn-start" id="btnComenzar">COMENZAR SIMULACIÓN</button>
+        </div>
+    </div>
+
+    <div id="choice-modal">
+        <div class="modal-temptation" id="choice-box">
+            <h2 id="choice-title"></h2>
+            <div id="choice-text" style="margin-bottom:10px;"></div>
+            <div class="modal-btn-row">
+                <button class="btn-tempt" id="choice-accept"></button>
+                <button class="btn-honest" id="choice-reject"></button>
+            </div>
         </div>
     </div>
 
@@ -133,15 +168,28 @@
         choseTrap: false,
         sanctioned: false,
         rejectedByA: false,
-        ended: false
+        ended: false,
+        started: false,   // true tras cerrar el briefing
+        paused: false,    // true mientras hay un modal de elección abierto
+        // --- TENTACIONES Y DEUDA ÉTICA ---
+        plagio: false,        // T1: aceptó propuesta "fantasma" para la ONU
+        dataFraud: false,     // T2: aceptó "ajustar" datos en el laboratorio
+        offeredONU: false,
+        offeredLab: false,
+        // --- VENTANA DE PUBLICACIÓN (FASE 3) ---
+        pubTimer: 120,        // 2 minutos totales para publicar
+        pubTimerActive: false,
+        enteredQ1Early: false, // entró a Q1 dentro del primer minuto
+        publishedFast: false,  // publicó en FAST PUBLISH
+        temptedFast: false     // ya recibió la oferta del tentador en FAST PUBLISH
     };
 
     // --- DEFINICIÓN DE ZONAS (Porcentaje del canvas para que sea responsive) ---
     const zones = [
-        { id: 'onu', name: 'CONVOCATORIA ONU', x: 0.05, y: 0.05, w: 0.4, h: 0.4, color: '#0d2240', borderColor: '#58a6ff', slow: 1 },
-        { id: 'lab', name: 'LABORATORIO', x: 0.05, y: 0.55, w: 0.4, h: 0.4, color: '#0d1117', borderColor: '#484f58', slow: 1 },
-        { id: 'revistaA', name: 'REVISTA Q1 (Peer Review)', x: 0.55, y: 0.55, w: 0.4, h: 0.4, color: '#0a1f0a', borderColor: '#238636', slow: 0.3 }, // Zona LENTA
-        { id: 'revistaB', name: '⚡ FAST PUBLISH ⚡', x: 0.55, y: 0.05, w: 0.4, h: 0.4, color: '#2a2200', borderColor: '#ffeb3b', slow: 2 } // Zona RÁPIDA
+        { id: 'onu', name: 'CONVOCATORIA ONU', icon: '🇺🇳', x: 0.05, y: 0.05, w: 0.4, h: 0.4, color: '#0d2240', borderColor: '#58a6ff', slow: 1 },
+        { id: 'lab', name: 'LABORATORIO', icon: '🧪', x: 0.05, y: 0.55, w: 0.4, h: 0.4, color: '#0d1117', borderColor: '#484f58', slow: 1 },
+        { id: 'revistaA', name: 'REVISTA Q1 (Peer Review)', icon: '📗', x: 0.55, y: 0.55, w: 0.4, h: 0.4, color: '#0a1f0a', borderColor: '#238636', slow: 0.3 }, // Zona LENTA
+        { id: 'revistaB', name: '⚡ FAST PUBLISH ⚡', icon: '💸', x: 0.55, y: 0.05, w: 0.4, h: 0.4, color: '#2a2200', borderColor: '#ffeb3b', slow: 2 } // Zona RÁPIDA
     ];
 
     function getZoneRect(z) {
@@ -163,6 +211,7 @@
         }
 
         update() {
+            if (!state.started || state.paused) return;
             // Verificar zona actual
             let inNewZone = null;
             for (let z of zones) {
@@ -221,6 +270,14 @@
             }
             ctx.fill();
             ctx.shadowBlur = 0;
+
+            if (this.isPlayer) {
+                ctx.font = '14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🧑‍🔬', this.x, this.y - 1);
+                ctx.textBaseline = 'alphabetic';
+            }
         }
 
         npcThink() {
@@ -251,9 +308,12 @@
         npcs.push(new Entity(Math.random() * canvas.width, Math.random() * canvas.height));
     }
 
+    // Tentador: NPC especial que aparece en Fase 3 cerca de FAST PUBLISH
+    let tempter = null;
+
     // Control del ratón
     canvas.addEventListener('click', (e) => {
-        if (state.ended) return;
+        if (state.ended || !state.started || state.paused) return;
         const rect = canvas.getBoundingClientRect();
         player.targetX = e.clientX - rect.left;
         player.targetY = e.clientY - rect.top;
@@ -265,12 +325,21 @@
         prestige: document.getElementById('prestige'),
         status: document.getElementById('status'),
         log: document.getElementById('log-area'),
-        instructions: document.getElementById('instructions')
+        instructions: document.getElementById('instructions'),
+        deadline: document.getElementById('deadline'),
+        deadlineStat: document.getElementById('deadline-stat')
     };
 
     function updateHUD() {
         dom.credits.textContent = state.credits.toFixed(2);
         dom.prestige.textContent = state.prestige.toFixed(2);
+    }
+
+    function updateDeadlineDisplay() {
+        const m = Math.floor(state.pubTimer / 60);
+        const s = state.pubTimer % 60;
+        dom.deadline.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+        dom.deadline.style.color = state.pubTimer <= 20 ? 'var(--red)' : 'var(--yellow)';
     }
 
     function log(text, type = 'sys') {
@@ -282,6 +351,52 @@
     }
 
     function setInstructions(text) { dom.instructions.innerHTML = text; }
+
+    // --- MODAL DE ELECCIÓN (TENTACIONES) ---
+    function showChoiceModal({ title, text, acceptLabel, rejectLabel, onAccept, onReject }) {
+        state.paused = true;
+        const modal = document.getElementById('choice-modal');
+        document.getElementById('choice-title').textContent = title;
+        document.getElementById('choice-text').innerHTML = text;
+        const btnA = document.getElementById('choice-accept');
+        const btnR = document.getElementById('choice-reject');
+        btnA.textContent = acceptLabel;
+        btnR.textContent = rejectLabel;
+        modal.style.display = 'flex';
+
+        const cleanup = () => {
+            modal.style.display = 'none';
+            state.paused = false;
+            btnA.replaceWith(btnA.cloneNode(true));
+            btnR.replaceWith(btnR.cloneNode(true));
+        };
+        document.getElementById('choice-accept').addEventListener('click', () => { cleanup(); onAccept(); });
+        document.getElementById('choice-reject').addEventListener('click', () => { cleanup(); onReject(); });
+    }
+
+    // --- BRIEFING INICIAL ---
+    function showBriefing(nombre) {
+        const modal = document.getElementById('briefing-modal');
+        document.getElementById('briefing-text').innerHTML = `
+            <p>Bienvenido/a, <strong>${nombre}</strong>. Eres un/a investigador/a junior con la tesis a medio camino y el presupuesto del laboratorio agotado.</p>
+            <p style="margin-top:10px;">Tu objetivo: conseguir financiamiento, producir evidencia y publicar tus resultados en una <strong>revista indexada legítima</strong>.</p>
+            <p style="margin-top:10px;">Durante el camino recibirás <strong style="color:var(--yellow)">ofertas tentadoras</strong> que prometen atajos. Cada una tiene un costo ético, visible o invisible.</p>
+            <p style="margin-top:10px;">Mueve a tu personaje haciendo clic en el mapa. Presta atención a los avisos del terminal: el reloj no se detiene.</p>
+        `;
+        modal.style.display = 'flex';
+        document.getElementById('btnComenzar').addEventListener('click', () => {
+            modal.style.display = 'none';
+            state.started = true;
+            log('> SISTEMA DE GESTIÓN DE INVESTIGACIÓN INICIADO.', 'sys');
+            log('> AVISO: La convocatoria de la ONU está abierta. Diríjase a la zona azul.', 'onu');
+            // Forzar transición a fase 3 si llega a fase 2 sin elegir
+            setTimeout(() => {
+                if (state.phase === 2 && !state.choseTrap && !state.ended) {
+                    advanceToPhase3();
+                }
+            }, 15000);
+        }, { once: true });
+    }
 
     // --- LÓGICA DE ZONAS (TRIGGERS) ---
     let onuTimerInterval;
@@ -298,29 +413,25 @@
                 log('> CONVOCATORIA INICIADA. TIENE 30 SEGUNDOS PARA MANTENERSE EN LA ZONA Y REDACTAR.', 'onu');
                 setInstructions('Manténgase dentro del cuadro azul. No se salga.');
                 startOnuTimer();
+                offerGhostwriter();
             } else {
                 setInstructions('Redactando propuesta... Tiempo restante: ' + state.timer + 's');
             }
         }
 
-        if (zoneId === 'revistaB' && state.phase >= 2) {
-            triggerTrapZone();
-        }
-
-        if (zoneId === 'revistaA' && state.phase === 3) {
-            triggerGoodZone();
-        }
-
         if (zoneId === 'lab' && state.phase === 2) {
             triggerLab();
+        }
+
+        if (state.phase === 3) {
+            if (zoneId === 'revistaB') triggerFastPublishOffer();
+            if (zoneId === 'revistaA') triggerQ1Entry();
         }
     }
 
     function startOnuTimer() {
         onuTimerInterval = setInterval(() => {
-            if (player.currentZone !== 'onu' || state.ended) {
-                // Si sale de la zona, el tiempo corre igual, simulando que abandona el papeleo
-            }
+            if (state.paused || state.ended) return;
             state.timer--;
             if (state.timer <= 0) {
                 clearInterval(onuTimerInterval);
@@ -345,6 +456,35 @@
         log('> PROPUESTA ACEPTADA. +3.00 CRÉDITOS DEPOSITADOS.', 'onu');
         log('> FASE 2: VAYA AL LABORATORIO O BUSQUE DÓNDE PUBLICAR.', 'sys');
         setInstructions('Investigue en el Laboratorio (abajo izquierda) o busque publicar (derecha).');
+        // Avanza a fase 3 a los 15s si no eligió aún
+        setTimeout(() => {
+            if (state.phase === 2 && !state.ended) advanceToPhase3();
+        }, 15000);
+    }
+
+    // --- T1: oferta de "consultor académico" (plagio / propuesta fantasma) ---
+    function offerGhostwriter() {
+        if (state.offeredONU) return;
+        state.offeredONU = true;
+        setTimeout(() => {
+            if (state.ended || state.phase !== 1) return;
+            showChoiceModal({
+                title: '📩 Mensaje cifrado recibido',
+                text: `Un "consultor académico" te escribe:<br><em>"Te redacto la propuesta completa en 5 minutos. Ya fue aprobada en 3 convocatorias similares, solo con cambios cosméticos. Cobro el 15% de tu financiamiento si ganas."</em><br><br>¿Aceptas el atajo?`,
+                acceptLabel: 'Aceptar atajo',
+                rejectLabel: 'Redactar yo mismo',
+                onAccept: () => {
+                    state.plagio = true;
+                    log('> Aceptaste una propuesta "fantasma" preescrita por un tercero.', 'b');
+                    successONU();
+                },
+                onReject: () => {
+                    state.prestige += 5;
+                    updateHUD();
+                    log('> Decides redactar tu propia propuesta. Más esfuerzo, pero es tuya.', 'a');
+                }
+            });
+        }, 2000);
     }
 
     function triggerLab() {
@@ -354,85 +494,181 @@
         if (Math.random() > 0.7) {
             log('> ¡ALERTA! AUDITORÍA DE LA ONU EN CURSO. NO SE MUEVA A REVISTAS DUDOSAS.', 'warn');
         }
+        offerDataFraud();
     }
 
-    function triggerTrapZone() {
-        if (state.phase === 4 || state.choseTrap) return;
-        state.choseTrap = true;
-        state.credits -= 2;
-        state.sanctioned = true;
-        state.prestige -= 50;
-        state.phase = 4;
-        updateHUD();
-        
-        dom.status.textContent = 'PUBLICADO';
-        dom.status.style.color = '#ffeb3b';
-        
-        log('> ⚡ CONEXIÓN A FAST PUBLISH ESTABLECIDA.', 'b');
-        log('> Publicación procesada en 0.1 segundos.', 'b');
-        log('> Se han descontado 2.00 créditos automáticamente.', 'b');
-        log('> FIRMÓ DIGITALMENTE CLÁUSULA DE CONFIDENCIALIDAD.', 'b');
-        
+    // --- T2: oferta de "ajustar" datos (manipulación de resultados) ---
+    function offerDataFraud() {
+        if (state.offeredLab) return;
+        state.offeredLab = true;
         setTimeout(() => {
-            log('> [NOTICIA DEL SISTEMA] SANCION PÚBLICA: Su grupo ha sido vetado por mal uso de fondos. -50 Prestigio.', 'warn');
-            endGame(false, "Cayó en la revista depredadora. El diseño brillante y la velocidad le engañaron. Perdió su dinero y su reputación científica.");
-        }, 2000);
+            if (state.ended || state.phase < 2) return;
+            showChoiceModal({
+                title: '🧪 Tu asistente te susurra',
+                text: `<em>"Los datos no dan significancia... pero si ajustamos estos 3 valores atípicos, el p-valor baja de .08 a .03. Nadie revisa los datos crudos."</em><br><br>¿Ajustas los datos?`,
+                acceptLabel: 'Ajustar datos',
+                rejectLabel: 'Reportar datos reales',
+                onAccept: () => {
+                    state.dataFraud = true;
+                    state.prestige += 15;
+                    updateHUD();
+                    log('> Datos "ajustados". Los resultados ahora son significativos... en apariencia.', 'b');
+                },
+                onReject: () => {
+                    state.prestige += 10;
+                    updateHUD();
+                    log('> Reportas los resultados reales, incluido el hallazgo no significativo.', 'a');
+                }
+            });
+        }, 1500);
     }
 
-    function triggerGoodZone() {
-        if (state.phase !== 3 || state.choseTrap) return;
-        state.phase = 4;
-        dom.status.textContent = 'EN REVISIÓN...';
-        dom.status.style.color = '#3fb950';
-        player.waitTime = 180; // Forzar al jugador a esperar 3 segundos en el sitio (simula la lentitud)
-        
-        log('> Ingresando al sistema de Peer Review de la Revista Q1...', 'a');
-        log('> (El movimiento está ralentizado por la burocracia del portal)', 'a');
-        setInstructions('Espera dentro de la zona verde. No te muevas o pierdes el progreso.');
+    // --- FASE 3: ventana de publicación de 2 minutos ---
+    let pubTimerInterval;
 
-        setTimeout(() => {
-            if (player.currentZone === 'revistaA' && !state.choseTrap) {
-                log('> REVISIÓN COMPLETADA: "Su artículo requiere correcciones menores, pero el rigor es excelente."', 'a');
-                log('> ¡PUBLICACIÓN ACEPTADA! +100 PRESTIGIO.', 'a');
-                state.prestige += 100;
-                state.rejectedByA = false;
-                updateHUD();
-                endGame(true, "Resistió la tentación de la luz amarilla, soportó la ralentización burocrática y logró una publicación Q1 legítima.");
-            } else if (!state.choseTrap) {
-                log('> ERROR: Abandonó la zona de revisión. Manuscrito perdido.', 'warn');
-                endGame(false, "Se frustró con la lentitud de la Revista Q1 y se fue. Su investigación nunca se publicó.");
+    function advanceToPhase3() {
+        if (state.phase >= 3 || state.ended) return;
+        state.phase = 3;
+        log('> FASE 3: MANUSCRITO LISTO. TIENES 2 MINUTOS PARA PUBLICAR.', 'sys');
+        log('> Q1 (verde) solo acepta manuscritos en su primera ronda durante el primer minuto. FAST PUBLISH (amarillo) publica al instante, cuando sea.', 'sys');
+        setInstructions('Plazo de 2:00. Verde = revisión Q1 (entra en el primer minuto). Amarillo = FAST PUBLISH (instantáneo, riesgoso).');
+        dom.status.textContent = 'PLAZO ACTIVO';
+        dom.status.style.color = '#d29922';
+        dom.deadlineStat.style.display = '';
+        startPubTimer();
+        spawnTempter();
+    }
+
+    function startPubTimer() {
+        state.pubTimerActive = true;
+        updateDeadlineDisplay();
+        pubTimerInterval = setInterval(() => {
+            if (state.paused || state.ended) return;
+            state.pubTimer--;
+            updateDeadlineDisplay();
+            if (state.pubTimer === 60) {
+                log('> [NOTICIA DEL SISTEMA] La primera ronda de revisión de Q1 está por cerrar.', 'warn');
             }
-        }, 5000);
+            if (state.pubTimer <= 0) {
+                clearInterval(pubTimerInterval);
+                resolvePhase3();
+            }
+        }, 1000);
     }
 
-    // Forzar transición a fase 3
-    setTimeout(() => {
-        if (state.phase === 2 && !state.choseTrap && !state.ended) {
-            state.phase = 3;
-            log('> FASE 3: MANUSCRITO LISTO. DEBE ELEGIR REVISTA AHORA.', 'sys');
-            setInstructions('Zona Verde (Q1 - Lento) o Zona Amarilla (Express - Rápido).');
-            dom.status.textContent = 'ELECCIÓN CRÍTICA';
-            dom.status.style.color = '#d29922';
+    function spawnTempter() {
+        let r = getZoneRect(zones[3]); // FAST PUBLISH
+        tempter = { x: r.x + r.w / 2, y: r.y + r.h / 2, active: true };
+    }
+
+    function triggerQ1Entry() {
+        if (state.enteredQ1Early || state.publishedFast || state.ended) return;
+        if (state.pubTimer >= 60) {
+            state.enteredQ1Early = true;
+            log('> Manuscrito enviado a Revista Q1. Entró en cola de primera revisión.', 'a');
+            log('> (Proceso riguroso: espera el veredicto de la ONU al cierre del plazo.)', 'a');
+            setInstructions('Manuscrito en revisión Q1. Espera el cierre del plazo de publicación.');
+        } else {
+            log('> Llegaste a Q1, pero la primera ronda de revisión ya cerró (pasó el primer minuto).', 'warn');
+            setInstructions('Q1 ya cerró su primera ronda. El plazo sigue corriendo.');
         }
-    }, 15000); // A los 15 segundos se obliga a publicar
+    }
+
+    // --- T3: el tentador ofrece FAST PUBLISH ---
+    function triggerFastPublishOffer() {
+        if (state.publishedFast || state.enteredQ1Early || state.ended || state.temptedFast) return;
+        state.temptedFast = true;
+        showChoiceModal({
+            title: '😈 Un colega se acerca sonriendo',
+            text: `<em>"¿Para qué esperar meses de revisión por pares? A mí esta revista me publicó ayer. Sin revisores, sin demoras... solo necesitas tu tarjeta."</em><br><br>¿Publicas en FAST PUBLISH ahora mismo?`,
+            acceptLabel: 'Publicar ya',
+            rejectLabel: 'Rechazar la oferta',
+            onAccept: () => {
+                state.publishedFast = true;
+                state.choseTrap = true;
+                state.credits -= 2;
+                updateHUD();
+                dom.status.textContent = 'PUBLICADO (FAST)';
+                dom.status.style.color = '#ffeb3b';
+                log('> ⚡ CONEXIÓN A FAST PUBLISH ESTABLECIDA.', 'b');
+                log('> Publicación procesada en 0.1 segundos. -2.00 créditos.', 'b');
+                log('> FIRMASTE DIGITALMENTE CLÁUSULA DE CONFIDENCIALIDAD.', 'b');
+                log('> La ONU revisará tu rendición de cuentas al cierre del plazo.', 'sys');
+                if (tempter) tempter.active = false;
+            },
+            onReject: () => {
+                state.prestige += 5;
+                updateHUD();
+                log('> Le agradeces pero declinas. Se aleja decepcionado.', 'a');
+                if (tempter) tempter.active = false;
+            }
+        });
+    }
+
+    // --- VEREDICTO FINAL DE LA ONU AL CERRAR EL PLAZO ---
+    function resolvePhase3() {
+        if (state.ended) return;
+        state.phase = 4;
+        dom.deadlineStat.style.display = 'none';
+
+        if (state.publishedFast) {
+            dom.status.textContent = 'AUDITORÍA ONU';
+            dom.status.style.color = '#ff3d5a';
+            log('> [NOTICIA DEL SISTEMA] La ONU solicita rendición de cuentas: ¿en qué revista publicaste?', 'warn');
+            setTimeout(() => {
+                state.sanctioned = true;
+                state.prestige -= 50;
+                updateHUD();
+                log('> [NOTICIA DEL SISTEMA] SANCIÓN PÚBLICA: tu grupo ha sido vetado por mal uso de fondos. -50 Prestigio.', 'warn');
+                endGame(false, "Publicaste en una revista depredadora para ganar tiempo. Cuando la ONU pidió cuentas, el engaño quedó expuesto y perdiste tu reputación científica.");
+            }, 2500);
+        } else if (state.enteredQ1Early) {
+            dom.status.textContent = 'EN REVISIÓN...';
+            dom.status.style.color = '#3fb950';
+            log('> [NOTICIA DEL SISTEMA] La ONU revisa tu expediente: manuscrito en revisión por pares en Q1.', 'onu');
+            setTimeout(() => {
+                log('> [NOTICIA DEL SISTEMA] La ONU te FELICITA por seguir el proceso editorial correcto.', 'onu');
+            }, 1500);
+            setTimeout(() => {
+                state.prestige += 100;
+                updateHUD();
+                log('> REVISIÓN COMPLETADA: "Su artículo requiere correcciones menores, pero el rigor es excelente."', 'a');
+                log('> ¡PUBLICACIÓN ACEPTADA EN REVISTA Q1! +100 PRESTIGIO.', 'a');
+                endGame(true, "Resististe la tentación del atajo, completaste el proceso editorial de la Revista Q1 y obtuviste una publicación legítima.");
+            }, 3500);
+        } else {
+            dom.status.textContent = 'PLAZO VENCIDO';
+            dom.status.style.color = '#ff3d5a';
+            log('> ERROR: el plazo expiró sin publicación. El financiamiento se reasigna a otro equipo.', 'warn');
+            endGame(false, "El plazo de publicación expiró. Ni te arriesgaste con FAST PUBLISH ni llegaste a tiempo a la revisión de Q1: tu investigación quedó sin publicar.");
+        }
+    }
 
     function endGame(win, msg) {
         if(state.ended) return;
         state.ended = true;
         clearInterval(onuTimerInterval);
+        clearInterval(pubTimerInterval);
 
         obtenerNombreUsuario(nombre => {
             document.getElementById('final-modal').style.display = 'flex';
-            document.getElementById('revelation-text').innerText = `${nombre}, ${msg}`;
+
+            let ethicsNote = '';
+            if (state.plagio || state.dataFraud) {
+                ethicsNote = `<br><br><span style="color:var(--yellow)">Nota: aunque el resultado fue "${win ? 'exitoso' : 'fallido'}", aceptaste atajos que dejan una deuda ética en tu carrera.</span>`;
+            }
+            document.getElementById('revelation-text').innerHTML = `${nombre}, ${msg}${ethicsNote}`;
 
             let scoreClass = win ? 'score-good' : 'score-bad';
             document.getElementById('final-score-text').innerHTML = `<span class="${scoreClass}">${state.prestige.toFixed(2)} PTS</span>`;
 
             document.getElementById('breakdown').innerHTML = `
-                Créditos sobrantes: ${state.credits.toFixed(2)}<br>
-                Publicación Q1: ${win ? '+100.00' : '+0.00'}<br>
-                Revista Depredadora: ${state.choseTrap ? '+10.00 (Ilusorio)' : '+0.00'}<br>
-                Sanción ONU: ${state.sanctioned ? '-50.00' : '+0.00'}
+                Créditos restantes: ${state.credits.toFixed(2)}<br>
+                Publicación Q1 (+100): ${state.enteredQ1Early && !state.publishedFast ? 'SÍ' : 'NO'}<br>
+                Publicó en FAST PUBLISH: ${state.publishedFast ? 'SÍ' : 'NO'}<br>
+                Sanción ONU (-50): ${state.sanctioned ? 'SÍ' : 'NO'}<br>
+                Propuesta "fantasma" (plagio): ${state.plagio ? 'SÍ' : 'NO'}<br>
+                Datos "ajustados" (fraude): ${state.dataFraud ? 'SÍ' : 'NO'}
             `;
         });
     }
@@ -471,6 +707,20 @@
             ctx.font = '14px "Share Tech Mono"';
             ctx.textAlign = 'center';
             ctx.fillText(z.name, r.x + r.w/2, r.y + 20);
+
+            // Icono de zona
+            ctx.font = '46px sans-serif';
+            ctx.fillText(z.icon, r.x + r.w/2, r.y + r.h/2 + 16);
+        }
+
+        // Tentador (NPC especial, fase 3, zona FAST PUBLISH)
+        if (tempter && tempter.active) {
+            ctx.font = '32px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.shadowBlur = 12 + Math.sin(frameCount * 0.2) * 6;
+            ctx.shadowColor = '#ff3d5a';
+            ctx.fillText('😈', tempter.x, tempter.y);
+            ctx.shadowBlur = 0;
         }
 
         // Actualizar y dibujar NPCs
@@ -490,8 +740,18 @@
         player.update();
         player.draw();
 
+        // Tentador: se acerca al jugador en Fase 3
+        if (tempter && tempter.active && state.started && !state.paused) {
+            let dx = player.x - tempter.x, dy = player.y - tempter.y;
+            let dist = Math.hypot(dx, dy);
+            if (dist > 25) {
+                tempter.x += (dx / dist) * 1.2;
+                tempter.y += (dy / dist) * 1.2;
+            }
+        }
+
         // Check de éxito ONU (si pasa 3 segundos dentro de la zona sin salir)
-        if (state.phase === 1 && state.timerActive && player.currentZone === 'onu' && state.timer < 27) {
+        if (state.started && !state.paused && state.phase === 1 && state.timerActive && player.currentZone === 'onu' && state.timer < 27) {
              successONU();
         }
 
@@ -501,11 +761,13 @@
 
     // Reloj
     setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
-    
+
     // Inicio
-    log('> SISTEMA DE GESTIÓN DE INVESTIGACIÓN INICIADO.', 'sys');
-    log('> AVISO: La convocatoria de la ONU está abierta. Diríjase a la zona azul.', 'onu');
     gameLoop();
+    obtenerNombreUsuario(nombre => {
+        state.userName = nombre;
+        showBriefing(nombre);
+    });
 
 </script>
 </body>
