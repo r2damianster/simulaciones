@@ -220,6 +220,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
         <option value="none" selected>Ninguna</option>
         <option value="first">Primera linea</option>
         <option value="hanging">Sangria francesa</option>
+        <option value="both">Ambas</option>
       </select>
     </div>
     <div class="rib-gl">Sangria</div>
@@ -617,6 +618,7 @@ document.querySelectorAll('.align-b').forEach(b => {
   const v = e.target.value;
   if (v === 'first') { G.firstIndent = true; G.hangIndent = false; }
   else if (v === 'hanging') { G.hangIndent = true; G.firstIndent = false; }
+  else if (v === 'both') { G.firstIndent = true; G.hangIndent = true; }
   else { G.firstIndent = false; G.hangIndent = false; }
   render(); updateRibbon(); touchInteraction();
 });
