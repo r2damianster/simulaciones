@@ -17,6 +17,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `disenos.html` | Laboratorio ACME | Diseños experimentales — investigación conductual |
 | `apa7.html` | Simulación Formato APA 7 | Redacción académica — corrección de manuscrito con errores de formato APA 7.ª ed. |
 | `apa7_2.html` | Editor APA 7 — Cinta de herramientas | Redacción académica — editor estilo Word por fases, ribbon interactivo, desbloqueo secuencial |
+| `peel.html` | Constructor PEEL - Drag & Drop | Redacción argumentativa — estructura PEEL (Punto, Evidencia, Explicación, Link), arrastrar frases a slots correctos |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 
