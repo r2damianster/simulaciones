@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Lectora — Ciencias Naturales</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg: #0d0f12;
+            --surface: #151820;
+            --card: #1b1f2a;
+            --border: #2a3040;
+            --text: #e8e4dc;
+            --muted: #7a7f8e;
+            --accent: #d4a24e;
+            --accent-light: #f0c96e;
+            --accent-dim: rgba(212,162,78,0.12);
+            --success: #4ecdc4;
+            --success-dim: rgba(78,205,196,0.12);
+            --error: #e85d5d;
+            --error-dim: rgba(232,93,93,0.12);
+            --warning: #f0a040;
+            --warning-dim: rgba(240,160,64,0.12);
+            --paper: #f5f0e3;
+            --paper-line: #c0c8d8;
+            --paper-margin: rgba(210,120,120,0.45);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        h1, h2, h3 { font-family: 'DM Serif Display', serif; }
+
+        /* Orbes de fondo */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-orb-1 { width: 500px; height: 500px; background: #d4a24e; top: -150px; left: -100px; animation: orbFloat1 25s ease-in-out infinite; }
+        .bg-orb-2 { width: 400px; height: 400px; background: #4ecdc4; bottom: -100px; right: -80px; animation: orbFloat2 30s ease-in-out infinite; }
+        .bg-orb-3 { width: 300px; height: 300px; background: #d4a24e; top: 50%; left: 60%; animation: orbFloat3 20s ease-in-out infinite; }
+        @keyframes orbFloat1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(60px,40px); } }
+        @keyframes orbFloat2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-50px,-30px); } }
+        @keyframes orbFloat3 { 0%,100% { transform: translate(0,0); } 33% { transform: translate(-40px,30px); } 66% { transform: translate(30px,-20px); } }
+
+        /* Papel manuscrito */
+        .paper {
+            background: var(--paper);
+            background-image: repeating-linear-gradient(transparent, transparent 29px, var(--paper-line) 29px, var(--paper-line) 30px);
+            padding: 44px 28px 36px 62px;
+            position: relative;
+            border-radius: 3px;
+            box-shadow: 3px 4px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.08);
+            transform: rotate(var(--rot, 0deg));
+            transition: transform 0.4s ease;
+            animation: paperSlideIn 0.6s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        .paper::before {
+            content: '';
+            position: absolute;
+            left: 50px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--paper-margin);
+        }
+        @keyframes paperSlideIn {
+            from { opacity: 0; transform: translateY(24px) rotate(calc(var(--rot, 0deg) + 4deg)) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) rotate(var(--rot, 0deg)) scale(1); }
+        }
+        .paper-name {
+            font-family: 'Caveat', cursive;
+            font-size: 1.15rem;
+            font-weight: 600;
+            border-bottom: 1.5px solid #888;
+            display: inline-block;
+            padding-bottom: 1px;
+            margin-bottom: 2px;
+        }
+        .paper-meta {
+            font-family: 'Caveat', cursive;
+            font-size: 0.95rem;
+            color: #666;
+        }
+        .paper-title {
+            font-family: 'Caveat', cursive;
+            font-size: 1.55rem;
+            font-weight: 700;
+            margin-top: 14px;
+            margin-bottom: 8px;
+            text-decoration: underline;
+            text-decoration-color: rgba(0,0,0,0.15);
+            text-underline-offset: 4px;
+        }
+        .paper-body {
+            font-family: 'Caveat', cursive;
+            font-size: 1.35rem;
+            line-height: 31px;
+            color: var(--pen-color, #1a1a2a);
+        }
+        .paper[data-pen="blue"] .paper-body { color: #1a3a6a; }
+        .paper[data-pen="black"] .paper-body { color: #1a1a2a; }
+        .paper[data-pen="pencil"] .paper-body { color: #4a4a50; }
+
+        /* Chips de criterios */
+        .criterion-chip {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            user-select: none;
+        }
+        .criterion-chip:hover:not(.locked):not(.feedback-mode) {
+            border-color: rgba(212,162,78,0.4);
+            background: rgba(212,162,78,0.04);
+        }
+        .criterion-chip.selected {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+        }
+        .criterion-chip.selected .check-box {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .criterion-chip.selected .check-box i { opacity: 1; transform: scale(1); }
+        .criterion-chip.locked {
+            opacity: 0.3;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+        .check-box {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin-top: 1px;
+        }
+        .check-box i {
+            font-size: 11px;
+            color: #0d0f12;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s;
+        }
+        .criterion-code {
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .criterion-text { font-size: 0.92rem; line-height: 1.4; }
+        .criterion-help {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 4px;
+            line-height: 1.35;
+        }
+
+        /* Modo retroalimentación */
+        .criterion-chip.feedback-mode {
+            cursor: default;
+            padding: 14px 16px;
+        }
+        .criterion-chip.feedback-mode.correct {
+            border-color: var(--success);
+            background: var(--success-dim);
+        }
+        .criterion-chip.feedback-mode.wrong {
+            border-color: var(--error);
+            background: var(--error-dim);
+        }
+        .criterion-chip.feedback-mode.missed {
+            border-color: var(--warning);
+            background: var(--warning-dim);
+        }
+        .criterion-chip.feedback-mode.omitted-ok {
+            border-color: var(--border);
+            opacity: 0.45;
+        }
+        .feedback-icon {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-top: 1px;
+        }
+        .feedback-icon.correct { background: var(--success); color: #0d0f12; }
+        .feedback-icon.wrong { background: var(--error); color: #fff; }
+        .feedback-icon.missed { background: var(--warning); color: #0d0f12; }
+        .feedback-icon.omitted-ok { background: var(--border); color: var(--muted); }
+        .feedback-msg {
+            font-size: 0.82rem;
+            margin-top: 6px;
+            line-height: 1.45;
+            padding-left: 36px;
+        }
+        .feedback-msg.correct { color: var(--success); }
+        .feedback-msg.wrong { color: var(--error); }
+        .feedback-msg.missed { color: var(--warning); }
+
+        /* Nivel bloqueado */
+        .level-section.locked .level-title { color: var(--muted); }
+        .level-lock-icon { color: var(--muted); font-size: 0.85rem; }
+
+        /* Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            animation: modalIn 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        /* Barra de progreso */
+        .progress-track {
+            height: 4px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            border-radius: 4px;
+            transition: width 0.5s cubic-bezier(0.22,1,0.36,1);
+        }
+
+        /* Badge de nivel */
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .level-badge.literal { background: rgba(212,162,78,0.15); color: var(--accent); }
+        .level-badge.inferencial { background: rgba(78,205,196,0.15); color: var(--success); }
+        .level-badge.critico { background: rgba(232,93,93,0.15); color: var(--error); }
+
+        /* Botones */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #c49030);
+            color: #0d0f12;
+            font-weight: 700;
+            padding: 14px 32px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,162,78,0.3); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-secondary {
+            background: var(--card);
+            color: var(--text);
+            border: 2px solid var(--border);
+            padding: 12px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: color 0.2s;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .btn-link:hover { color: var(--accent); }
+
+        /* Step indicators */
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s;
+        }
+        .step-dot.active { background: var(--accent); box-shadow: 0 0 8px rgba(212,162,78,0.5); transform: scale(1.2); }
+        .step-dot.done { background: var(--success); }
+
+        /* Resumen final */
+        .summary-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 100px 60px;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        .summary-row:hover { background: rgba(255,255,255,0.03); }
+
+        /* Animación escalonada */
+        .stagger-in { animation: staggerFade 0.4s ease both; }
+        @keyframes staggerFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .eval-grid { grid-template-columns: 1fr !important; }
+            .paper { max-width: 100%; }
+        }
+        @media (max-width: 600px) {
+            .modal-card { padding: 28px 20px; }
+            .summary-row { grid-template-columns: 30px 1fr 70px 40px; font-size: 0.85rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Orbes de fondo -->
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+
+    <!-- Contenedor principal -->
+    <div id="app" style="position:relative; z-index:1; min-height:100vh;"></div>
+
+    <script>
+    // ============================================================
+    // DATOS DE LA SIMULACIÓN
+    // ============================================================
+
+    // Definición de criterios de la rúbrica
+    const criteria = {
+        L1: { code: 'L1', text: 'Identifica datos explícitos del texto', help: 'Menciona información que aparece directamente en el texto o en los datos proporcionados.', level: 'literal' },
+        L2: { code: 'L2', text: 'Usa vocabulario científico adecuado', help: 'Utiliza términos técnicos o científicos propios del tema de manera correcta.', level: 'literal' },
+        L3: { code: 'L3', text: 'Describe procesos o secuencias', help: 'Describe un proceso o secuencia de hechos tal como se presenta en la fuente.', level: 'literal' },
+        I1: { code: 'I1', text: 'Establece relaciones causa-efecto', help: 'Conecta dos o más hechos para establecer una relación de causa y efecto no explícita.', level: 'inferencial' },
+        I2: { code: 'I2', text: 'Infiere implicaciones o consecuencias', help: 'Deduce consecuencias o situaciones que van más allá de lo dicho directamente en el texto.', level: 'inferencial' },
+        I3: { code: 'I3', text: 'Interpreta datos o gráficos', help: 'Lee e interpreta datos cuantitativos, gráficos o tablas para extraer conclusiones.', level: 'inferencial' },
+        C1: { code: 'C1', text: 'Emite juicios valorativos fundamentados', help: 'Expresa una opinión o juicio sobre el contenido, apoyándose en evidencia o argumentos.', level: 'critico' },
+        C2: { code: 'C2', text: 'Propone alternativas o soluciones', help: 'Sugiere soluciones, alternativas o mejoras frente al problema planteado.', level: 'critico' },
+        C3: { code: 'C3', text: 'Evalúa la confiabilidad de las fuentes', help: 'Cuestiona la fuente, evalúa su confiabilidad o detecta sesgos y omisiones.', level: 'critico' },
+    };
+
+    // Escritos de los estudiantes
+    const evaluations = [
+        {
+            id: 1,
+            student: 'Matías Rodríguez',
+            grade: '3° básico',
+            topic: 'Los animales',
+            text: 'Los animales comen cosas distintas. Los leones comen carne porque son carnívoros. Las vacas comen pasto. Todos los animales necesitan agua para vivir porque si no toman agua se mueren. Yo vi un documental donde los monos comen frutas.',
+            pen: 'pencil',
+            rotation: '-0.6deg',
+            expected: new Set(['L1']),
+            feedback: {
+                L1: { expected: true, msg: 'Matías identifica datos explícitos: los leones comen carne, las vacas comen pasto y los animales necesitan agua.' },
+                L2: { expected: false, msg: 'Fíjate que Matías dice "comen cosas distintas" en vez de usar términos como "alimentación" o "herbívoro". Aunque menciona "carnívoro", el resto es muy coloquial.' },
+                L3: { expected: false, msg: 'Matías no describe ningún proceso ni secuencia. Solo enumera datos aislados sobre diferentes animales sin conectarlos.' },
+            }
+        },
+        {
+            id: 2,
+            student: 'Sofía Herrera',
+            grade: '4° básico',
+            topic: 'El ciclo del agua',
+            text: 'En el ciclo del agua primero el agua de los mares y ríos se evapora por el calor del sol. Después el vapor de agua sube y se condensa formando nubes. Cuando las nubes están muy pesadas se produce la precipitación, que es cuando llueve o nieva. El agua vuelve a la tierra y a los mares, y el ciclo vuelve a empezar.',
+            pen: 'blue',
+            rotation: '0.7deg',
+            expected: new Set(['L1', 'L2', 'L3']),
+            feedback: {
+                L1: { expected: true, msg: 'Sofía identifica correctamente todos los pasos del ciclo del agua que están explícitos en su escrito.' },
+                L2: { expected: true, msg: 'Sofía usa vocabulario científico preciso: "evapora", "condensa", "precipitación". Son términos propios del tema.' },
+                L3: { expected: true, msg: 'Sofía describe el proceso completo en orden secuencial: evaporación → condensación → precipitación → retorno.' },
+            }
+        },
+        {
+            id: 3,
+            student: 'Tomás Vargas',
+            grade: '5° básico',
+            topic: 'La fotosíntesis',
+            text: 'Las plantas hacen su propio alimento mediante la fotosíntesis. Para esto necesitan luz solar, agua y dióxido de carbono. Yo pienso que por eso las plantas que están debajo de un árbol grande crecen menos, porque reciben menos luz y no pueden hacer suficiente alimento. Si una planta no tiene luz, se pone amarilla y puede morir.',
+            pen: 'black',
+            rotation: '-0.9deg',
+            expected: new Set(['L1', 'L2', 'I1']),
+            feedback: {
+                L1: { expected: true, msg: 'Tomás identifica datos explícitos sobre la fotosíntesis: necesita luz solar, agua y dióxido de carbono.' },
+                L2: { expected: true, msg: 'Usa términos científicos adecuados: "fotosíntesis" y "dióxido de carbono" de manera correcta.' },
+                L3: { expected: false, msg: 'Tomás no describe un proceso paso a paso. Explica qué es la fotosíntesis pero no la secuencia en que ocurre.' },
+                I1: { expected: true, msg: 'Tomás establece una clara relación causa-efecto: menos luz → menos alimento → la planta crece menos y se pone amarilla.' },
+                I2: { expected: false, msg: 'Tomás no infiere implicaciones más allá de lo inmediato. No extrapola a otros contextos ni anticipa consecuencias futuras.' },
+                I3: { expected: false, msg: 'Tomás no interpreta ningún gráfico ni datos numéricos. Su razonamiento se basa en una observación general.' },
+            }
+        },
+        {
+            id: 4,
+            student: 'Isabella Muñoz',
+            grade: '6° básico',
+            topic: 'Contaminación del río',
+            text: 'Según los datos del gráfico, en el tramo del río que pasa junto a la fábrica de papel, la cantidad de peces bajó de 45 a solo 8 en tres años. Esto se debe a que la fábrica tira desechos químicos al agua, lo que reduce el oxígeno disuelto. Si la situación sigue así, en cinco años podría desaparecer toda la vida acuática en esa zona. Además, las personas que viven cerca ya no pueden pescar para comer.',
+            pen: 'blue',
+            rotation: '0.5deg',
+            expected: new Set(['L1', 'L2', 'L3', 'I1', 'I2']),
+            feedback: {
+                L1: { expected: true, msg: 'Isabella identifica datos explícitos del gráfico: la cantidad de peces bajó de 45 a 8 en tres años.' },
+                L2: { expected: true, msg: 'Usa vocabulario preciso: "desechos químicos", "oxígeno disuelto", "vida acuática".' },
+                L3: { expected: true, msg: 'Isabella interpreta los datos cuantitativos del gráfico (de 45 a 8 peces) y los relaciona con el contexto geográfico.' },
+                I1: { expected: true, msg: 'Establece la cadena causa-efecto: fábrica tira desechos → reduce oxígeno → mueren peces.' },
+                I2: { expected: true, msg: 'Infiere consecuencias futuras: "en cinco años podría desaparecer toda la vida acuática" y el impacto social: las personas ya no pueden pescar.' },
+                I3: { expected: false, msg: 'Aunque menciona datos del gráfico, Isabella no hace una interpretación profunda de los datos mismos (tendencias, comparaciones entre tramos), sino que los usa como apoyo para su argumento.' },
+            }
+        },
+        {
+            id: 5,
+            student: 'Diego Contreras',
+            grade: '7° básico',
+            topic: 'Cambio climático',
+            text: 'Leí un artículo que dice que el cambio climático es solo culpa de los humanos, pero yo no estoy de acuerdo con eso. Es verdad que las fábricas y los autos contaminan mucho, pero la Tierra ya había tenido cambios de temperatura antes, como la edad de hielo. Lo que sí me preocupa es que el artículo no dice nada sobre lo que pueden hacer los países más pobres que no tienen dinero para cambiar sus tecnologías.',
+            pen: 'black',
+            rotation: '-0.7deg',
+            expected: new Set(['L1', 'L2', 'I1', 'I2', 'C1', 'C3']),
+            feedback: {
+                L1: { expected: true, msg: 'Diego identifica datos explícitos del artículo: que culpa a los humanos del cambio climático.' },
+                L2: { expected: true, msg: 'Usa términos adecuados como "cambio climático" y "tecnologías" de forma correcta.' },
+                L3: { expected: false, msg: 'Diego no describe ningún proceso ni secuencia. Su texto es argumentativo, no descriptivo.' },
+                I1: { expected: true, msg: 'Diego relaciona la contaminación de fábricas y autos con el cambio climático como causa-efecto.' },
+                I2: { expected: true, msg: 'Infiere una implicación importante: los países pobres no pueden cambiar sus tecnologías, lo que sugiere una desigualdad en la responsabilidad ambiental.' },
+                I3: { expected: false, msg: 'Diego no interpreta datos ni gráficos. Su análisis es cualitativo y argumentativo, no basado en evidencia cuantitativa.' },
+                C1: { expected: true, msg: 'Diego emite un juicio valorativo fundamentado: no está de acuerdo con que sea "solo culpa de los humanos", argumentando que la Tierra ya tuvo cambios naturales.' },
+                C2: { expected: false, msg: 'Fíjate que Diego no propone ninguna alternativa o solución al problema. Solo señala lo que falta en el artículo.' },
+                C3: { expected: true, msg: 'Diego evalúa la confiabilidad del artículo al señalar una omisión importante: no menciona la situación de los países pobres, lo que revela un sesgo.' },
+            }
+        },
+        {
+            id: 6,
+            student: 'Camila Rojas',
+            grade: '8° básico',
+            topic: 'Alimentos transgénicos',
+            text: 'Después de leer dos textos sobre transgénicos, puedo decir que el texto del Ministerio de Salud es más confiable porque cita tres estudios científicos publicados en revistas revisadas por pares, mientras que el texto de la ONG ambiental solo presenta opiniones de personas sin formación científica. Sin embargo, el Ministerio no menciona los posibles efectos a largo plazo de los transgénicos en la salud, lo cual es una omisión grave. Mi propuesta es que se deberían realizar estudios de seguimiento de al menos 20 años antes de aprobar cualquier alimento transgénico para consumo humano, y que los resultados sean públicos.',
+            pen: 'blue',
+            rotation: '0.4deg',
+            expected: new Set(['L1', 'L2', 'L3', 'I1', 'I2', 'C1', 'C2', 'C3']),
+            feedback: {
+                L1: { expected: true, msg: 'Camila identifica datos explícitos de ambos textos: el Ministerio cita estudios, la ONG solo presenta opiniones.' },
+                L2: { expected: true, msg: 'Vocabulario técnico preciso: "revistas revisadas por pares", "estudios de seguimiento", "consumo humano".' },
+                L3: { expected: true, msg: 'Camila interpreta y compara datos cualitativos de dos fuentes, evaluando la evidencia que cada una presenta.' },
+                I1: { expected: true, msg: 'Establece relación causa-efecto entre el tipo de evidencia (estudios vs opiniones) y la confiabilidad de cada fuente.' },
+                I2: { expected: true, msg: 'Infiere implicaciones: la omisión del Ministerio sobre efectos a largo plazo es "grave", sugiriendo riesgos no considerados.' },
+                I3: { expected: false, msg: 'Aunque Camila analiza la evidencia de ambas fuentes, no interpreta datos cuantitativos ni gráficos propiamente dichos. Su análisis es cualitativo.' },
+                C1: { expected: true, msg: 'Emite un juicio valorativo claro y fundamentado: el Ministerio es más confiable, pero tiene una omisión grave.' },
+                C2: { expected: true, msg: 'Propone una solución concreta: estudios de seguimiento de 20 años con resultados públicos antes de aprobar transgénicos.' },
+                C3: { expected: true, msg: 'Evalúa la confiabilidad comparando dos fuentes con criterios explícitos: citación de estudios, revisión por pares, formación de los autores.' },
+            }
+        },
+    ];
+
+    // ============================================================
+    // ESTADO DE LA APLICACIÓN
+    // ============================================================
+    const state = {
+        screen: 'welcome',        // 'welcome' | 'eval' | 'summary'
+        currentEval: 0,           // 0-5
+        selected: new Set(),      // Criterios seleccionados
+        submitted: false,         // Si ya se envió la evaluación actual
+        showLevelModal: false,    // Si se muestra el modal de transición
+        nextLevel: null,          // Siguiente nivel a desbloquear
+        results: [],              // Resultados de cada evaluación
+        unlockedLevels: ['literal'], // Niveles desbloqueados
+    };
+
+    // ============================================================
+    // FUNCIONES DE RENDERIZADO
+    // ============================================================
+
+    function getLevelForEval(index) {
+        if (index < 2) return 'literal';
+        if (index < 4) return 'inferencial';
+        return 'critico';
+    }
+
+    function getLevelLabel(level) {
+        return { literal: 'Literal', inferencial: 'Inferencial', critico: 'Crítico' }[level];
+    }
+
+    function getLevelIcon(level) {
+        return { literal: 'fa-book-open', inferencial: 'fa-magnifying-glass', critico: 'fa-scale-balanced' }[level];
+    }
+
+    function render() {
+        const app = document.getElementById('app');
+        if (state.screen === 'welcome') {
+            app.innerHTML = renderWelcome();
+        } else if (state.screen === 'eval') {
+            app.innerHTML = renderEval();
+        } else if (state.screen === 'summary') {
+            app.innerHTML = renderSummary();
+        }
+        // Modal de transición de nivel (se superpone)
+        if (state.showLevelModal) {
+            app.innerHTML += renderLevelModal();
+        }
+        attachEvents();
+    }
+
+    function renderWelcome() {
+        return `
+        <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;">
+            <div style="max-width:640px; width:100%; text-align:center;">
+                <div style="margin-bottom:32px;">
+                    <div style="width:80px; height:80px; border-radius:20px; background:var(--accent-dim); display:inline-flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                        <i class="fa-solid fa-pen-ruler" style="font-size:32px; color:var(--accent);"></i>
+                    </div>
+                    <h1 style="font-size:2.4rem; line-height:1.2; margin-bottom:12px;">Evaluación Lectora en<br>Ciencias Naturales</h1>
+                    <p style="color:var(--muted); font-size:1.05rem; line-height:1.6; max-width:480px; margin:0 auto;">
+                        Simula la evaluación de escritos de estudiantes escolares usando una rúbrica de comprensión lectora progresiva.
+                    </p>
+                </div>
+
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:40px;">
+                    <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 14px;">
+                        <div style="width:40px; height:40px; border-radius:10px; background:var(--accent-dim); display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;">
+                            <i class="fa-solid fa-book-open" style="color:var(--accent); font-size:16px;"></i>
+                        </div>
+                        <div style="font-weight:700; font-size:0.9rem; margin-bottom:4px;">Literal</div>
+                        <div style="color:var(--muted); font-size:0.78rem; line-height:1.4;">Datos explícitos, vocabulario, descripción de procesos</div>
+                    </div>
+                    <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 14px;">
+                        <div style="width:40px; height:40px; border-radius:10px; background:var(--success-dim); display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;">
+                            <i class="fa-solid fa-magnifying-glass" style="color:var(--success); font-size:16px;"></i>
+                        </div>
+                        <div style="font-weight:700; font-size:0.9rem; margin-bottom:4px;">Inferencial</div>
+                        <div style="color:var(--muted); font-size:0.78rem; line-height:1.4;">Causa-efecto, implicaciones, interpretación de datos</div>
+                    </div>
+                    <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 14px;">
+                        <div style="width:40px; height:40px; border-radius:10px; background:var(--error-dim); display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;">
+                            <i class="fa-solid fa-scale-balanced" style="color:var(--error); font-size:16px;"></i>
+                        </div>
+                        <div style="font-weight:700; font-size:0.9rem; margin-bottom:4px;">Crítico</div>
+                        <div style="color:var(--muted); font-size:0.78rem; line-height:1.4;">Juicios valorativos, propuestas, evaluación de fuentes</div>
+                    </div>
+                </div>
+
+                <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:32px; text-align:left;">
+                    <div style="font-weight:600; font-size:0.9rem; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-circle-info" style="color:var(--accent);"></i>
+                        Cómo funciona
+                    </div>
+                    <ul style="color:var(--muted); font-size:0.88rem; line-height:1.7; padding-left:18px;">
+                        <li>Evaluarás <strong style="color:var(--text);">6 escritos</strong> de estudiantes de 3° a 8° básico.</li>
+                        <li>La rúbrica comienza con criterios <strong style="color:var(--accent);">literales</strong> y se amplía progresivamente.</li>
+                        <li>Al final de cada evaluación recibirás <strong style="color:var(--text);">retroalimentación específica</strong> por cada criterio.</li>
+                        <li>Los textos están presentados con <strong style="color:var(--text);">caligrafía simulada</strong> para mayor realismo.</li>
+                    </ul>
+                </div>
+
+                <button class="btn-primary" id="btn-start" style="font-size:1.05rem; padding:16px 48px;">
+                    Comenzar evaluación <i class="fa-solid fa-arrow-right" style="margin-left:8px;"></i>
+                </button>
+            </div>
+        </div>`;
+    }
+
+    function renderEval() {
+        const ev = evaluations[state.currentEval];
+        const level = getLevelForEval(state.currentEval);
+        const progress = ((state.currentEval) / 6) * 100;
+
+        // Determinar qué criterios mostrar y si están bloqueados
+        const levels = ['literal', 'inferencial', 'critico'];
+        let rubricHTML = '';
+
+        levels.forEach(lv => {
+            const isUnlocked = state.unlockedLevels.includes(lv);
+            const levelCriteria = Object.entries(criteria).filter(([_, c]) => c.level === lv);
+            const isActive = lv === level;
+
+            rubricHTML += `
+            <div class="level-section ${isUnlocked ? '' : 'locked'}" style="margin-bottom:16px;">
+                <div class="level-title" style="display:flex; align-items:center; gap:8px; margin-bottom:10px; font-weight:700; font-size:0.82rem; letter-spacing:0.5px; text-transform:uppercase; ${isActive ? 'color:var(--text);' : ''}">
+                    <span class="level-badge ${lv}" style="font-size:0.7rem; padding:3px 10px;">
+                        <i class="fa-solid ${getLevelIcon(lv)}"></i> ${getLevelLabel(lv)}
+                    </span>
+                    ${!isUnlocked ? '<span class="level-lock-icon"><i class="fa-solid fa-lock"></i> Se desbloqueará más adelante</span>' : ''}
+                </div>
+                <div style="display:flex; flex-direction:column; gap:8px;">`;
+
+            levelCriteria.forEach(([key, c], i) => {
+                const isSelected = state.selected.has(key);
+                const delay = i * 60;
+                if (state.submitted) {
+                    // Modo retroalimentación
+                    const fb = ev.feedback[key];
+                    let fbClass = 'omitted-ok';
+                    let iconClass = 'omitted-ok';
+                    let iconSymbol = '<i class="fa-solid fa-minus"></i>';
+                    let msgHTML = '';
+
+                    if (fb.expected && isSelected) {
+                        fbClass = 'correct'; iconClass = 'correct'; iconSymbol = '<i class="fa-solid fa-check"></i>';
+                        msgHTML = `<div class="feedback-msg correct">${fb.msg}</div>`;
+                    } else if (!fb.expected && isSelected) {
+                        fbClass = 'wrong'; iconClass = 'wrong'; iconSymbol = '<i class="fa-solid fa-xmark"></i>';
+                        msgHTML = `<div class="feedback-msg wrong">${fb.msg}</div>`;
+                    } else if (fb.expected && !isSelected) {
+                        fbClass = 'missed'; iconClass = 'missed'; iconSymbol = '<i class="fa-solid fa-exclamation"></i>';
+                        msgHTML = `<div class="feedback-msg missed">Te faltó marcar este criterio. ${fb.msg}</div>`;
+                    }
+
+                    rubricHTML += `
+                    <div class="criterion-chip feedback-mode ${fbClass} stagger-in" style="animation-delay:${delay}ms;">
+                        <div class="feedback-icon ${iconClass}">${iconSymbol}</div>
+                        <div style="flex:1;">
+                            <div class="criterion-code">${c.code}</div>
+                            <div class="criterion-text">${c.text}</div>
+                            ${msgHTML}
+                        </div>
+                    </div>`;
+                } else {
+                    // Modo selección
+                    rubricHTML += `
+                    <div class="criterion-chip ${isSelected ? 'selected' : ''} ${!isUnlocked ? 'locked' : ''} stagger-in"
+                         style="animation-delay:${delay}ms;"
+                         data-criterion="${key}"
+                         role="checkbox"
+                         aria-checked="${isSelected}"
+                         aria-label="${c.text}"
+                         tabindex="${isUnlocked ? 0 : -1}">
+                        <div class="check-box"><i class="fa-solid fa-check"></i></div>
+                        <div style="flex:1;">
+                            <div class="criterion-code">${c.code}</div>
+                            <div class="criterion-text">${c.text}</div>
+                            <div class="criterion-help"><i class="fa-solid fa-circle-question" style="margin-right:4px; opacity:0.6;"></i>${c.help}</div>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            rubricHTML += `</div></div>`;
+        });
+
+        // Puntuación de la evaluación actual (si ya se envió)
+        let scoreHTML = '';
+        if (state.submitted) {
+            const ev2 = evaluations[state.currentEval];
+            let correct = 0;
+            let total = 0;
+            const availableCriteria = Object.keys(criteria).filter(k => state.unlockedLevels.includes(criteria[k].level));
+            availableCriteria.forEach(k => {
+                const fb = ev2.feedback[k];
+                if (fb.expected && state.selected.has(k)) correct++;
+                if (!fb.expected && !state.selected.has(k)) correct++;
+                total++;
+            });
+            const pct = Math.round((correct / total) * 100);
+            const color = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--error)';
+            scoreHTML = `
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 20px; margin-bottom:16px; display:flex; align-items:center; gap:16px;">
+                <div style="font-size:2rem; font-weight:800; color:${color}; font-family:'DM Serif Display',serif;">${pct}%</div>
+                <div>
+                    <div style="font-weight:600; font-size:0.9rem;">Precisión en esta evaluación</div>
+                    <div style="color:var(--muted); font-size:0.82rem;">${correct} de ${total} criterios bien identificados</div>
+                </div>
+            </div>`;
+        }
+
+        // Botón de acción
+        let actionHTML = '';
+        if (!state.submitted) {
+            actionHTML = `<button class="btn-primary" id="btn-submit" ${state.selected.size === 0 ? 'disabled' : ''}>
+                <i class="fa-solid fa-paper-plane" style="margin-right:8px;"></i> Enviar evaluación
+            </button>`;
+        } else {
+            const isLast = state.currentEval >= 5;
+            actionHTML = `<button class="btn-primary" id="btn-next">
+                ${isLast ? 'Ver resumen final' : 'Siguiente evaluación'} <i class="fa-solid fa-arrow-right" style="margin-left:8px;"></i>
+            </button>`;
+        }
+
+        return `
+        <div style="min-height:100vh; display:flex; flex-direction:column;">
+            <!-- Header -->
+            <header style="padding:16px 24px; border-bottom:1px solid var(--border); background:rgba(13,15,18,0.8); backdrop-filter:blur(12px); position:sticky; top:0; z-index:50;">
+                <div style="max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <i class="fa-solid fa-pen-ruler" style="color:var(--accent); font-size:18px;"></i>
+                        <span style="font-family:'DM Serif Display',serif; font-size:1.1rem;">Evaluación Lectora</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span class="level-badge ${level}"><i class="fa-solid ${getLevelIcon(level)}"></i> ${getLevelLabel(level)}</span>
+                        <span style="color:var(--muted); font-size:0.85rem;">${state.currentEval + 1} / 6</span>
+                    </div>
+                    <button class="btn-link" id="btn-restart">Reiniciar</button>
+                </div>
+                <div style="max-width:1200px; margin:10px auto 0;">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${progress}%;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:6px;">
+                        ${evaluations.map((_, i) => `<div class="step-dot ${i < state.currentEval ? 'done' : ''} ${i === state.currentEval ? 'active' : ''}"></div>`).join('')}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenido principal -->
+            <main style="flex:1; padding:28px 24px; max-width:1200px; margin:0 auto; width:100%;">
+                <div class="eval-grid" style="display:grid; grid-template-columns:2fr 3fr; gap:28px; align-items:start;">
+                    <!-- Papel del estudiante -->
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                            <i class="fa-solid fa-file-lines" style="color:var(--accent); font-size:14px;"></i>
+                            <span style="font-weight:600; font-size:0.88rem; color:var(--muted);">Escrito del estudiante</span>
+                        </div>
+                        <div class="paper" style="--rot:${ev.rotation};" data-pen="${ev.pen}">
+                            <div class="paper-name">${ev.student}</div>
+                            <div class="paper-meta">${ev.grade} — Ciencias Naturales</div>
+                            <div class="paper-title">${ev.topic}</div>
+                            <div class="paper-body">${ev.text}</div>
+                        </div>
+                    </div>
+
+                    <!-- Rúbrica -->
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                            <i class="fa-solid fa-clipboard-check" style="color:var(--accent); font-size:14px;"></i>
+                            <span style="font-weight:600; font-size:0.88rem; color:var(--muted);">${state.submitted ? 'Retroalimentación' : 'Rúbrica de evaluación'}</span>
+                        </div>
+                        ${scoreHTML}
+                        <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px;">
+                            ${rubricHTML}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón de acción -->
+                <div style="display:flex; justify-content:center; margin-top:28px;">
+                    ${actionHTML}
+                </div>
+            </main>
+        </div>`;
+    }
+
+    function renderLevelModal() {
+        const level = state.nextLevel;
+        const colors = {
+            inferencial: { bg: 'var(--success-dim)', border: 'var(--success)', color: 'var(--success)', icon: 'fa-magnifying-glass' },
+            critico: { bg: 'var(--error-dim)', border: 'var(--error)', color: 'var(--error)', icon: 'fa-scale-balanced' },
+        };
+        const c = colors[level];
+        const msgs = {
+            inferencial: 'Hasta ahora has evaluado criterios literales. Ahora incorporaremos los <strong>criterios inferenciales</strong>, que evalúan la capacidad del estudiante para ir más allá de lo explícito: establecer relaciones causa-efecto, inferir consecuencias e interpretar datos.',
+            critico: 'Ya manejas los niveles literal e inferencial. Ahora sumaremos los <strong>criterios críticos</strong>, que evalúan si el estudiante es capaz de juzgar con fundamentos, proponer soluciones y evaluar la confiabilidad de las fuentes.',
+        };
+
+        return `
+        <div class="modal-overlay" id="level-modal">
+            <div class="modal-card">
+                <div style="width:64px; height:64px; border-radius:16px; background:${c.bg}; display:inline-flex; align-items:center; justify-content:center; margin-bottom:20px; border:2px solid ${c.border};">
+                    <i class="fa-solid ${c.icon}" style="font-size:26px; color:${c.color};"></i>
+                </div>
+                <h2 style="font-size:1.6rem; margin-bottom:8px;">Nivel desbloqueado</h2>
+                <div style="display:inline-block; margin-bottom:16px;">
+                    <span class="level-badge ${level}" style="font-size:0.9rem; padding:6px 18px;">
+                        <i class="fa-solid ${c.icon}"></i> ${getLevelLabel(level)}
+                    </span>
+                </div>
+                <p style="color:var(--muted); font-size:0.95rem; line-height:1.65; margin-bottom:28px;">
+                    ${msgs[level]}
+                </p>
+                <button class="btn-primary" id="btn-continue-level">
+                    Entendido, continuar <i class="fa-solid fa-arrow-right" style="margin-left:8px;"></i>
+                </button>
+            </div>
+        </div>`;
+    }
+
+    function renderSummary() {
+        // Calcular resultados
+        let totalCorrect = 0;
+        let totalPossible = 0;
+        let evalsCorrect = 0;
+
+        const rows = state.results.map((r, i) => {
+            const ev = evaluations[i];
+            const level = getLevelForEval(i);
+            let correct = 0;
+            let total = 0;
+            const availableCriteria = Object.keys(criteria).filter(k => r.unlockedLevels.includes(criteria[k].level));
+            availableCriteria.forEach(k => {
+                const fb = ev.feedback[k];
+                if (fb.expected && r.selected.has(k)) correct++;
+                if (!fb.expected && !r.selected.has(k)) correct++;
+                total++;
+            });
+            const pct = Math.round((correct / total) * 100);
+            totalCorrect += correct;
+            totalPossible += total;
+            if (pct >= 80) evalsCorrect++;
+
+            const pctColor = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--error)';
+            const pctIcon = pct >= 80 ? 'fa-circle-check' : pct >= 50 ? 'fa-circle-exclamation' : 'fa-circle-xmark';
+
+            return `
+            <div class="summary-row">
+                <div style="text-align:center; font-weight:700; color:var(--muted);">${i + 1}</div>
+                <div>
+                    <div style="font-weight:600; font-size:0.92rem;">${ev.student}</div>
+                    <div style="color:var(--muted); font-size:0.8rem;">${ev.grade} — ${ev.topic}</div>
+                </div>
+                <div style="text-align:center;">
+                    <span class="level-badge ${level}" style="font-size:0.7rem; padding:3px 10px;">
+                        <i class="fa-solid ${getLevelIcon(level)}"></i> ${getLevelLabel(level)}
+                    </span>
+                </div>
+                <div style="text-align:center;">
+                    <i class="fa-solid ${pctIcon}" style="color:${pctColor}; font-size:18px;"></i>
+                </div>
+            </div>`;
+        }).join('');
+
+        const overallPct = Math.round((totalCorrect / totalPossible) * 100);
+        const overallColor = overallPct >= 80 ? 'var(--success)' : overallPct >= 50 ? 'var(--warning)' : 'var(--error)';
+
+        const messages = {
+            high: 'Excelente desempeño como evaluador. Demuestras una comprensión sólida de los distintos niveles de lectura y sabes identificar con precisión los criterios en cada escrito.',
+            mid: 'Buen desempeño con margen de mejora. Revisa aquellos criterios donde hubo dudas, especialmente en la distinción entre lo que el estudiante hace y lo que no hace en su escrito.',
+            low: 'Te recomendamos repasar la rúbrica con atención. Es importante distinguir entre lo que está explícito en el texto y lo que requiere una interpretación más profunda del evaluador.',
+        };
+        const msgKey = overallPct >= 80 ? 'high' : overallPct >= 50 ? 'mid' : 'low';
+
+        return `
+        <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;">
+            <div style="max-width:700px; width:100%;">
+                <div style="text-align:center; margin-bottom:36px;">
+                    <div style="width:80px; height:80px; border-radius:20px; background:var(--accent-dim); display:inline-flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                        <i class="fa-solid fa-chart-column" style="font-size:32px; color:var(--accent);"></i>
+                    </div>
+                    <h1 style="font-size:2rem; margin-bottom:8px;">Resumen Final</h1>
+                    <p style="color:var(--muted); font-size:0.95rem;">Tu desempeño como evaluador de comprensión lectora</p>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:28px;">
+                    <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:center;">
+                        <div style="font-size:2.2rem; font-weight:800; color:var(--success); font-family:'DM Serif Display',serif;">${evalsCorrect}/6</div>
+                        <div style="color:var(--muted); font-size:0.82rem; margin-top:4px;">Evaluaciones acertadas</div>
+                    </div>
+                    <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:center;">
+                        <div style="font-size:2.2rem; font-weight:800; color:${overallColor}; font-family:'DM Serif Display',serif;">${overallPct}%</div>
+                        <div style="color:var(--muted); font-size:0.82rem; margin-top:4px;">Precisión general</div>
+                    </div>
+                    <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:center;">
+                        <div style="font-size:2.2rem; font-weight:800; color:var(--accent); font-family:'DM Serif Display',serif;">${totalCorrect}/${totalPossible}</div>
+                        <div style="color:var(--muted); font-size:0.82rem; margin-top:4px;">Criterios correctos</div>
+                    </div>
+                </div>
+
+                <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:8px 0; margin-bottom:24px;">
+                    <div style="padding:12px 16px; border-bottom:1px solid var(--border); display:grid; grid-template-columns:40px 1fr 100px 60px; gap:12px;">
+                        <div style="font-weight:700; font-size:0.75rem; color:var(--muted); text-align:center;">#</div>
+                        <div style="font-weight:700; font-size:0.75rem; color:var(--muted);">Estudiante</div>
+                        <div style="font-weight:700; font-size:0.75rem; color:var(--muted); text-align:center;">Nivel</div>
+                        <div style="font-weight:700; font-size:0.75rem; color:var(--muted); text-align:center;">Resultado</div>
+                    </div>
+                    ${rows}
+                </div>
+
+                <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:28px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                        <i class="fa-solid fa-lightbulb" style="color:var(--accent);"></i>
+                        <span style="font-weight:700; font-size:0.9rem;">Reflexión</span>
+                    </div>
+                    <p style="color:var(--muted); font-size:0.9rem; line-height:1.65;">${messages[msgKey]}</p>
+                </div>
+
+                <div style="display:flex; justify-content:center; gap:12px;">
+                    <button class="btn-secondary" id="btn-restart-summary">
+                        <i class="fa-solid fa-rotate-left" style="margin-right:6px;"></i> Reiniciar simulación
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // ============================================================
+    // EVENTOS
+    // ============================================================
+
+    function attachEvents() {
+        // Botón de inicio
+        const btnStart = document.getElementById('btn-start');
+        if (btnStart) btnStart.addEventListener('click', () => {
+            state.screen = 'eval';
+            state.currentEval = 0;
+            state.selected = new Set();
+            state.submitted = false;
+            state.unlockedLevels = ['literal'];
+            state.results = [];
+            render();
+        });
+
+        // Criterios (clic)
+        document.querySelectorAll('.criterion-chip:not(.locked):not(.feedback-mode)').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const key = chip.dataset.criterion;
+                if (!key || state.submitted) return;
+                if (state.selected.has(key)) {
+                    state.selected.delete(key);
+                } else {
+                    state.selected.add(key);
+                }
+                render();
+            });
+            // Accesibilidad: Enter y Space
+            chip.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    chip.click();
+                }
+            });
+        });
+
+        // Enviar evaluación
+        const btnSubmit = document.getElementById('btn-submit');
+        if (btnSubmit) btnSubmit.addEventListener('click', () => {
+            if (state.selected.size === 0) return;
+            // Guardar resultado
+            state.results.push({
+                selected: new Set(state.selected),
+                unlockedLevels: [...state.unlockedLevels],
+            });
+            state.submitted = true;
+            render();
+        });
+
+        // Siguiente evaluación
+        const btnNext = document.getElementById('btn-next');
+        if (btnNext) btnNext.addEventListener('click', () => {
+            const nextEval = state.currentEval + 1;
+            if (nextEval >= 6) {
+                // Ir a resumen
+                state.screen = 'summary';
+                render();
+                return;
+            }
+            // Verificar si hay transición de nivel
+            const nextLevel = getLevelForEval(nextEval);
+            const currentLevel = getLevelForEval(state.currentEval);
+            if (nextLevel !== currentLevel) {
+                // Mostrar modal de transición
+                state.nextLevel = nextLevel;
+                state.showLevelModal = true;
+                state.currentEval = nextEval;
+                state.selected = new Set();
+                state.submitted = false;
+                state.unlockedLevels.push(nextLevel);
+                render();
+            } else {
+                state.currentEval = nextEval;
+                state.selected = new Set();
+                state.submitted = false;
+                render();
+            }
+        });
+
+        // Continuar desde modal de nivel
+        const btnContinue = document.getElementById('btn-continue-level');
+        if (btnContinue) btnContinue.addEventListener('click', () => {
+            state.showLevelModal = false;
+            state.nextLevel = null;
+            render();
+        });
+
+        // Reiniciar
+        const btnRestart = document.getElementById('btn-restart');
+        if (btnRestart) btnRestart.addEventListener('click', resetAll);
+        const btnRestartSummary = document.getElementById('btn-restart-summary');
+        if (btnRestartSummary) btnRestartSummary.addEventListener('click', resetAll);
+    }
+
+    function resetAll() {
+        state.screen = 'welcome';
+        state.currentEval = 0;
+        state.selected = new Set();
+        state.submitted = false;
+        state.showLevelModal = false;
+        state.nextLevel = null;
+        state.results = [];
+        state.unlockedLevels = ['literal'];
+        render();
+    }
+
+    // ============================================================
+    // INICIALIZACIÓN
+    // ============================================================
+    render();
+    </script>
+</body>
+</html>
