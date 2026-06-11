@@ -64,6 +64,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 - Los textos pedagógicos deben mantener rigor científico (nivel universitario/posgrado).
 - Codificación: **UTF-8** siempre. Verificar que las tildes y ñ queden correctas.
 - No commitear sin instrucción explícita.
+- **Toda nueva simulación** debe: (1) enlazarse en `index.html` (tarjeta en `#simulaciones`, sim-grid), (2) listarse en la tabla "Simulaciones activas" de este archivo, (3) incluir botón/enlace `href="index.html"` para volver al inicio. Un hook (`PostToolUse:Write` → `.claude/hooks/check-sim-link.js`) recuerda esto automáticamente al crear el archivo.
 
 ---
 

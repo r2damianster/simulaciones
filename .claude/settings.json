@@ -6,5 +6,20 @@
       "Bash(git diff *)",
       "Bash(python *)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"c:/Users/User/Documents/Desarrollo Web/Simulaciones/.claude/hooks/check-sim-link.js\"",
+            "timeout": 10,
+            "statusMessage": "Verificando enlace de simulación..."
+          }
+        ]
+      }
+    ]
   }
 }
