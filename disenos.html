@@ -927,6 +927,15 @@
         </div>
     </section>
 
+    <section class="fade-in mb-16" id="sec-final" style="display:none;">
+        <div class="exp-card text-center" style="border-color:var(--fg-bright); padding:40px;">
+            <i class="fa-solid fa-flask-vial" style="font-size:2.5rem;color:var(--fg-bright);margin-bottom:16px;"></i>
+            <h2 id="final-titulo" style="font-family:'Orbitron',sans-serif;color:var(--fg-bright);font-size:1.4rem;margin-bottom:12px;letter-spacing:1px;">PROTOCOLO COMPLETADO</h2>
+            <p style="color:var(--fg);max-width:560px;margin:0 auto;line-height:1.7;">Has ejecutado los tres diseños y comparado su capacidad de inferencia causal. Solo el experimento puro, con asignacion aleatoria y grupo control equivalente, permite atribuir causalidad.</p>
+            <a href="index.html" class="home-btn" style="display:inline-flex;margin-top:24px;"><i class="fa-solid fa-house mr-2"></i>Volver al inicio</a>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="text-center py-8 border-t border-[var(--border)]">
         <p class="text-xs text-[var(--fg-dim)]">
@@ -1071,6 +1080,35 @@ function createBarChart(container, data) {
 }
 
 // =============================================
+// PERSONALIZACION: NOMBRE DEL USUARIO
+// (solo en esta sesion del navegador, no se guarda permanentemente)
+// =============================================
+function obtenerNombreUsuario(callback) {
+    const guardado = sessionStorage.getItem('nombreEstudianteSim');
+    if (guardado) { callback(guardado); return; }
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:99999;';
+    overlay.innerHTML = `
+        <div style="background:var(--bg-card,#0c1a0c);color:var(--fg,#b8e8b8);padding:32px;border-radius:8px;max-width:380px;width:90%;text-align:center;border:1px solid var(--fg-bright,#00ff41);font-family:inherit;box-shadow:0 0 30px rgba(0,255,65,.2)">
+            <h3 style="margin:0 0 12px;color:var(--fg-bright,#00ff41);font-family:'Orbitron',sans-serif;font-size:1rem;letter-spacing:1px;">IDENTIFIQUESE, SUJETO</h3>
+            <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesion del navegador y no se guarda ni se envia a ningun servidor.</p>
+            <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:4px;border:1px solid var(--border-bright,#2a5a2a);background:var(--bg,#060d06);color:var(--fg,#b8e8b8);margin-bottom:16px;box-sizing:border-box;font-size:1rem">
+            <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:4px;background:var(--fg-bright,#00ff41);color:#000;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+        </div>`;
+    document.body.appendChild(overlay);
+    const input = overlay.querySelector('#inputNombreUsuario');
+    input.focus();
+    const confirmar = () => {
+        const nombre = input.value.trim() || 'Sujeto';
+        sessionStorage.setItem('nombreEstudianteSim', nombre);
+        overlay.remove();
+        callback(nombre);
+    };
+    overlay.querySelector('#btnConfirmarNombre').addEventListener('click', confirmar);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') confirmar(); });
+}
+
+// =============================================
 // EJECUCION DE EXPERIMENTOS
 // =============================================
 const experimentState = { pre: false, quasi: false, pure: false };
@@ -1110,6 +1148,17 @@ async function runExperiment(type) {
 
     btn.classList.remove('running');
     btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>COMPLETADO';
+
+    if (experimentState.pre && experimentState.quasi && experimentState.pure) {
+        await delay(600);
+        obtenerNombreUsuario(nombre => {
+            const finalSection = document.getElementById('sec-final');
+            document.getElementById('final-titulo').textContent = `PROTOCOLO COMPLETADO, SUJETO ${nombre.toUpperCase()}`;
+            finalSection.style.display = '';
+            finalSection.classList.add('visible');
+            finalSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    }
 }
 
 async function runPreExperiment(panel) {
