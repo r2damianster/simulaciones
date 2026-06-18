@@ -906,10 +906,8 @@ function responderP1(elUsuarioDijoProb){
   btns.forEach(b => b.disabled = true);
 
   // Marcar botones
-  btns[0].classList.add(elUsuarioDijoProb === true ? (acierto ? 'correct' : 'wrong') : '');
-  btns[1].classList.add(elUsuarioDijoProb === false ? (acierto ? 'correct' : 'wrong') : '');
+  btns[elUsuarioDijoProb ? 0 : 1].classList.add(acierto ? 'correct' : 'wrong');
   if(!acierto){
-    // Marcar el correcto
     btns[esProbReal ? 0 : 1].classList.add('correct');
   }
 
