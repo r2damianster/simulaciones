@@ -19,6 +19,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `apa7_2.html` | Editor APA 7 — Cinta de herramientas | Redacción académica — editor estilo Word por fases, ribbon interactivo, desbloqueo secuencial |
 | `peel.html` | Constructor PEEL - Drag & Drop | Redacción argumentativa — estructura PEEL (Punto, Evidencia, Explicación, Link), arrastrar frases a slots correctos |
 | `evaluaciones_lectura.html` | Evaluación Lectora — Ciencias Naturales | Comprensión lectora — rúbrica progresiva (literal, inferencial, crítico) sobre escritos de estudiantes de 3° a 8° básico |
+| `muestreo.html` | Simulador de Muestreos | Estadística — técnicas probabilísticas y no probabilísticas, simulaciones visuales con poblaciones de plantas, personas y fábricas |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 

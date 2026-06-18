@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Muestreos</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --bg:#0A1410;--bg-panel:#0D1A14;--bg-card:#13241C;--bg-card-alt:#1A2E25;
+  --fg:#DFF0E4;--fg-muted:#5F9172;--accent:#34D399;--accent-glow:rgba(52,211,153,.25);
+  --warm:#FBBF24;--warm-glow:rgba(251,191,36,.2);--error:#F87171;--error-glow:rgba(248,113,113,.2);
+  --border:#1B3328;--border-light:#264A38;--radius:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:700}
+
+/* Fondo ambiente */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 600px 400px at 15% 20%,rgba(52,211,153,.06),transparent),
+  radial-gradient(ellipse 500px 500px at 85% 80%,rgba(251,191,36,.04),transparent),
+  radial-gradient(ellipse 800px 600px at 50% 50%,rgba(52,211,153,.02),transparent)}
+
+/* Layout */
+#app{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* Panel glosario */
+#glosario-panel{width:320px;min-width:320px;background:var(--bg-panel);border-right:1px solid var(--border);
+  height:100vh;overflow-y:auto;position:sticky;top:0;padding:28px 20px;
+  transition:transform .4s cubic-bezier(.4,0,.2,1)}
+#glosario-panel::-webkit-scrollbar{width:4px}
+#glosario-panel::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:4px}
+.glosario-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.glosario-logo i{color:var(--accent);font-size:20px}
+.glosario-logo h2{font-size:18px;color:var(--fg);letter-spacing:-.3px}
+.glosario-item{margin-bottom:16px}
+.glosario-term{display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 12px;border-radius:8px;
+  background:var(--bg-card);border:1px solid var(--border);transition:all .25s}
+.glosario-term:hover{border-color:var(--border-light);background:var(--bg-card-alt)}
+.glosario-term i{color:var(--accent);font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.glosario-term span{font-weight:600;font-size:13.5px;flex:1}
+.glosario-term .chevron{color:var(--fg-muted);font-size:11px;transition:transform .3s}
+.glosario-term.open .chevron{transform:rotate(180deg)}
+.glosario-def{padding:10px 12px 6px 40px;font-size:13px;color:var(--fg-muted);line-height:1.6;
+  max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s}
+.glosario-def.open{max-height:300px;padding-bottom:14px}
+.glosario-subtipo{display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:12.5px}
+.glosario-subtipo::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px}
+.glosario-subtipo strong{color:var(--fg);font-weight:600}
+
+/* Botón toggle glosario (mobile) */
+#glosario-toggle{display:none;position:fixed;top:16px;left:16px;z-index:100;
+  width:44px;height:44px;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg-card);color:var(--accent);font-size:18px;cursor:pointer;
+  transition:all .25s;align-items:center;justify-content:center}
+#glosario-toggle:hover{background:var(--bg-card-alt);border-color:var(--accent)}
+
+/* Área principal */
+#main-area{flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* Barra de progreso */
+#progress-container{padding:16px 32px;background:var(--bg-panel);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px}
+#progress-text{font-size:13px;color:var(--fg-muted);white-space:nowrap;font-weight:500;min-width:160px}
+#progress-text .fase-badge{display:inline-block;background:var(--bg-card-alt);color:var(--warm);padding:2px 8px;
+  border-radius:4px;font-size:11px;font-weight:700;margin-right:6px;letter-spacing:.5px}
+#progress-bar-outer{flex:1;height:6px;background:var(--bg-card);border-radius:3px;overflow:hidden}
+#progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--accent),var(--warm));border-radius:3px;
+  width:0%;transition:width .6s cubic-bezier(.4,0,.2,1)}
+#score-display{font-size:13px;color:var(--warm);font-weight:700;white-space:nowrap}
+
+/* Contenedor de pantallas */
+#screen-container{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+.screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:820px;animation:fadeInUp .5s ease}
+.screen.active{display:flex}
+
+/* Pantalla inicio */
+.inicio-icon{font-size:64px;margin-bottom:20px;animation:float 3s ease-in-out infinite}
+.inicio-titulo{font-size:38px;letter-spacing:-1px;margin-bottom:8px;text-align:center}
+.inicio-titulo .accent{color:var(--accent)}
+.inicio-sub{font-size:16px;color:var(--fg-muted);margin-bottom:36px;text-align:center;max-width:500px;line-height:1.6}
+.inicio-features{display:flex;gap:16px;margin-bottom:40px;flex-wrap:wrap;justify-content:center}
+.inicio-feat{display:flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--border);
+  padding:10px 16px;border-radius:8px;font-size:13px;color:var(--fg-muted)}
+.inicio-feat i{color:var(--accent)}
+.btn-primary{padding:14px 36px;border-radius:10px;border:none;background:var(--accent);color:#0A1410;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;cursor:pointer;
+  transition:all .25s;letter-spacing:-.3px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--accent-glow)}
+.btn-primary:active{transform:translateY(0)}
+
+/* Pantalla ejercicio */
+.ej-header{text-align:center;margin-bottom:20px;width:100%}
+.ej-titulo{font-size:22px;letter-spacing:-.5px;display:flex;align-items:center;justify-content:center;gap:10px}
+.ej-titulo .ej-icon{font-size:28px}
+.ej-pob-info{font-size:13px;color:var(--fg-muted);margin-top:4px}
+
+/* Lienzo de población */
+.poblacion-canvas{width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;position:relative;min-height:200px;margin-bottom:16px;overflow:hidden}
+.poblacion-canvas::before{content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,var(--border) 1px,transparent 1px);background-size:24px 24px;opacity:.4;pointer-events:none}
+.poblacion-grid{display:grid;gap:6px;position:relative;z-index:1;justify-content:center}
+.pob-elemento{width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;position:relative;transition:all .5s cubic-bezier(.4,0,.2,1);cursor:default;
+  border:2px solid transparent;background:var(--bg-card-alt)}
+.pob-emoji{font-size:22px;transition:transform .4s}
+.pob-num{position:absolute;top:-7px;right:-7px;font-size:9px;font-weight:700;
+  background:var(--bg-panel);color:var(--fg-muted);width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;opacity:0;transition:all .35s;
+  border:1px solid var(--border);font-family:'Space Grotesk',sans-serif}
+.pob-num.visible{opacity:1}
+.pob-num.highlight{background:var(--accent);color:#0A1410;border-color:var(--accent)}
+.pob-elemento.selected{transform:scale(1.15);border-color:var(--accent);
+  box-shadow:0 0 16px var(--accent-glow),0 0 4px var(--accent-glow);z-index:2;background:rgba(52,211,153,.08)}
+.pob-elemento.selected .pob-emoji{transform:scale(1.1)}
+.pob-elemento.dimmed{opacity:.18;transform:scale(.88);filter:grayscale(.5)}
+.pob-elemento.wave-1{border-color:#F87171;box-shadow:0 0 12px rgba(248,113,113,.3)}
+.pob-elemento.wave-2{border-color:#FBBF24;box-shadow:0 0 12px rgba(251,191,36,.3)}
+.pob-elemento.wave-3{border-color:#60A5FA;box-shadow:0 0 12px rgba(96,165,250,.3)}
+.pob-elemento.wave-4{border-color:#C084FC;box-shadow:0 0 12px rgba(192,132,252,.3)}
+.pob-elemento.cuota-selected{border-color:var(--warm);box-shadow:0 0 12px var(--warm-glow);transform:scale(1.1);z-index:2}
+
+/* Overlays de animación */
+.anim-overlay{position:absolute;z-index:5;pointer-events:none}
+.conveniencia-marker{top:12px;left:12px;display:flex;align-items:center;gap:6px;
+  background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);padding:6px 12px;border-radius:6px;
+  font-size:12px;color:var(--warm);font-weight:600;opacity:0;transition:opacity .4s}
+.conveniencia-marker.show{opacity:1}
+.conveniencia-spotlight{position:absolute;top:0;left:0;width:45%;height:45%;
+  background:radial-gradient(ellipse at 0% 0%,rgba(251,191,36,.08),transparent 70%);
+  opacity:0;transition:opacity .6s}
+.conveniencia-spotlight.show{opacity:1}
+.juicio-eye{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:40px;opacity:0;transition:opacity .4s;filter:drop-shadow(0 0 12px rgba(251,191,36,.4))}
+.juicio-eye.show{opacity:1}
+.estratificado-label{position:absolute;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;
+  opacity:0;transition:opacity .4s;white-space:nowrap}
+.estratificado-label.show{opacity:1}
+.conglomerado-box{position:absolute;border:2px dashed var(--border-light);border-radius:8px;
+  opacity:0;transition:all .5s}
+.conglomerado-box.show{opacity:1;border-color:var(--accent);background:rgba(52,211,153,.04)}
+.conglomerado-box.selected-box{border-color:var(--accent);border-style:solid;background:rgba(52,211,153,.06);
+  box-shadow:0 0 16px var(--accent-glow)}
+.cuotas-panel{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:12px;
+  opacity:0;transition:opacity .4s;min-width:140px}
+.cuotas-panel.show{opacity:1}
+.cuota-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:11px;color:var(--fg-muted)}
+.cuota-row:last-child{margin-bottom:0}
+.cuota-dots{display:flex;gap:3px}
+.cuota-dot{width:14px;height:14px;border-radius:4px;border:1px dashed var(--border-light);
+  transition:all .3s}
+.cuota-dot.filled{background:var(--warm);border-color:var(--warm);border-style:solid}
+.bola-nieve-badge{position:absolute;font-size:9px;font-weight:800;width:16px;height:16px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0A1410;
+  opacity:0;transition:all .35s;bottom:-6px;right:-6px;z-index:3;font-family:'Space Grotesk',sans-serif}
+.bola-nieve-badge.show{opacity:1;transform:scale(1)}
+
+/* Narrativa */
+.narrativa-card{width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 22px;margin-bottom:20px;animation:fadeInUp .4s ease}
+.narrativa-label{font-size:11px;color:var(--warm);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
+.narrativa-text{font-size:15px;line-height:1.7;color:var(--fg)}
+.btn-ver{padding:12px 28px;border-radius:8px;border:1px solid var(--accent);background:transparent;
+  color:var(--accent);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;
+  cursor:pointer;transition:all .25s;margin-bottom:20px}
+.btn-ver:hover{background:var(--accent);color:#0A1410}
+.btn-ver:disabled{opacity:.4;cursor:not-allowed;border-color:var(--border-light);color:var(--fg-muted)}
+.btn-ver:disabled:hover{background:transparent;color:var(--fg-muted)}
+
+/* Preguntas */
+.pregunta-card{width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px;animation:fadeInUp .4s ease}
+.pregunta-text{font-size:16px;font-weight:600;margin-bottom:16px;text-align:center;line-height:1.5}
+.pregunta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-respuesta{padding:14px 28px;border-radius:10px;border:2px solid var(--border);
+  background:var(--bg-card-alt);color:var(--fg);font-family:'Space Grotesk',sans-serif;font-weight:600;
+  font-size:14px;cursor:pointer;transition:all .25s;min-width:180px;text-align:center}
+.btn-respuesta:hover{border-color:var(--accent);background:rgba(52,211,153,.06);transform:translateY(-2px)}
+.btn-respuesta.correct{border-color:var(--accent);background:rgba(52,211,153,.12);color:var(--accent);
+  box-shadow:0 0 20px var(--accent-glow)}
+.btn-respuesta.wrong{border-color:var(--error);background:rgba(248,113,113,.08);color:var(--error);
+  box-shadow:0 0 20px var(--error-glow)}
+.btn-respuesta:disabled{cursor:not-allowed;transform:none!important}
+.btn-respuesta .btn-sub{display:block;font-size:11px;font-weight:400;color:var(--fg-muted);margin-top:4px}
+.btn-respuesta.correct .btn-sub{color:rgba(52,211,153,.7)}
+.btn-respuesta.wrong .btn-sub{color:rgba(248,113,113,.7)}
+
+/* Feedback */
+.feedback-card{width:100%;padding:20px 24px;border-radius:var(--radius);margin-top:16px;
+  animation:fadeInUp .4s ease;border:1px solid}
+.feedback-card.acierto{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.2)}
+.feedback-card.error{background:rgba(248,113,113,.05);border-color:rgba(248,113,113,.15)}
+.feedback-icon{font-size:24px;margin-bottom:8px}
+.feedback-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px}
+.feedback-text{font-size:14px;color:var(--fg-muted);line-height:1.7}
+.feedback-text strong{color:var(--fg);font-weight:600}
+.btn-siguiente{padding:12px 28px;border-radius:8px;border:none;background:var(--bg-card-alt);
+  color:var(--fg);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;
+  cursor:pointer;transition:all .25s;margin-top:16px;border:1px solid var(--border)}
+.btn-siguiente:hover{border-color:var(--accent);transform:translateY(-1px)}
+
+/* Pista */
+.pista-btn{font-size:12px;color:var(--fg-muted);background:none;border:none;cursor:pointer;
+  margin-top:12px;text-decoration:underline;text-underline-offset:3px;transition:color .2s}
+.pista-btn:hover{color:var(--warm)}
+.pista-text{font-size:13px;color:var(--warm);margin-top:8px;font-style:italic;opacity:.85}
+
+/* Pantalla transición */
+.transicion-icon{font-size:56px;margin-bottom:20px;animation:float 2.5s ease-in-out infinite}
+.transicion-titulo{font-size:28px;margin-bottom:10px;text-align:center}
+.transicion-sub{font-size:15px;color:var(--fg-muted);text-align:center;max-width:460px;line-height:1.7;margin-bottom:32px}
+.transicion-features{display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap;justify-content:center}
+.transicion-feat{background:var(--bg-card);border:1px solid var(--border);padding:10px 16px;border-radius:8px;
+  font-size:13px;color:var(--fg-muted);display:flex;align-items:center;gap:6px}
+.transicion-feat i{color:var(--warm)}
+
+/* Pantalla final */
+.final-titulo{font-size:30px;margin-bottom:6px;text-align:center}
+.final-rango{font-size:18px;margin-bottom:6px;text-align:center}
+.final-puntos{font-size:14px;color:var(--fg-muted);margin-bottom:28px;text-align:center}
+.final-tabla{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px}
+.final-tabla thead th{background:var(--bg-card);color:var(--fg-muted);font-weight:600;font-size:11px;
+  text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left;border-bottom:2px solid var(--border)}
+.final-tabla tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.final-tabla tbody tr:hover{background:var(--bg-card)}
+.badge-prob{background:rgba(52,211,153,.12);color:var(--accent);padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700}
+.badge-no-prob{background:rgba(251,191,36,.1);color:var(--warm);padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700}
+.badge-subtipo{background:var(--bg-card-alt);color:var(--fg-muted);padding:3px 8px;border-radius:4px;font-size:11px}
+.icon-ok{color:var(--accent)}
+.icon-fail{color:var(--error)}
+.final-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+/* Animaciones */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes popIn{0%{transform:scale(0);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 8px var(--accent-glow)}50%{box-shadow:0 0 20px var(--accent-glow),0 0 40px rgba(52,211,153,.1)}}
+
+/* Responsive */
+@media(max-width:900px){
+  #glosario-panel{position:fixed;left:0;top:0;z-index:90;transform:translateX(-100%)}
+  #glosario-panel.open{transform:translateX(0)}
+  #glosario-toggle{display:flex}
+  #main-area{margin-left:0}
+  #progress-container{padding:14px 16px;padding-left:56px}
+  #screen-container{padding:16px}
+  .pob-elemento{width:38px;height:38px}
+  .pob-emoji{font-size:18px}
+  .pob-num{width:15px;height:15px;font-size:8px;top:-5px;right:-5px}
+  .btn-respuesta{min-width:140px;padding:12px 18px;font-size:13px}
+  .inicio-titulo{font-size:28px}
+  .final-tabla{font-size:11px}
+  .final-tabla thead th,.final-tabla tbody td{padding:8px 6px}
+}
+@media(max-width:500px){
+  .pob-elemento{width:32px;height:32px;border-radius:6px}
+  .pob-emoji{font-size:15px}
+  .poblacion-grid{gap:4px}
+  .poblacion-canvas{padding:14px 10px}
+  .pregunta-btns{flex-direction:column;align-items:stretch}
+  .btn-respuesta{min-width:auto}
+  .inicio-features{flex-direction:column;align-items:center}
+  .transicion-features{flex-direction:column;align-items:center}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<button id="glosario-toggle" aria-label="Abrir glosario"><i class="fas fa-book"></i></button>
+<div id="app">
+  <aside id="glosario-panel"></aside>
+  <main id="main-area">
+    <div id="progress-container" style="display:none">
+      <div id="progress-text"></div>
+      <div id="progress-bar-outer"><div id="progress-bar-inner"></div></div>
+      <div id="score-display"></div>
+    </div>
+    <div id="screen-container">
+      <div id="screen-inicio" class="screen active"></div>
+      <div id="screen-ejercicio" class="screen"></div>
+      <div id="screen-transicion" class="screen"></div>
+      <div id="screen-final" class="screen"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ========== DATOS ========== */
+const GLOSARIO = [
+  { termino:"Población", icono:"fa-users", definicion:"Conjunto completo de elementos (personas, animales, plantas, objetos) sobre los que se desea obtener información." },
+  { termino:"Muestra", icono:"fa-vial", definicion:"Subconjunto de la población que se selecciona para estudiarlo directamente. Debe ser representativa." },
+  { termino:"Muestreo", icono:"fa-filter", definicion:"Procedimiento o técnica utilizado para seleccionar los elementos que conformarán la muestra." },
+  { termino:"Muestreo Probabilístico", icono:"fa-dice", definicion:"Cada elemento de la población tiene una probabilidad conocida y mayor a cero de ser seleccionado. Permite generalizar resultados.",
+    subtipos:[
+      {nombre:"Aleatorio Simple",desc:"Sorteo puro: todos los elementos tienen la misma probabilidad."},
+      {nombre:"Sistemático",desc:"Se elige cada k-ésimo elemento a partir de un inicio aleatorio."},
+      {nombre:"Estratificado",desc:"Se divide en grupos homogéneos (estratos) y se muestrea dentro de cada uno."},
+      {nombre:"Por Conglomerados",desc:"Se agrupa en conglomerados naturales, se sortean algunos y se estudian todos sus elementos."}
+    ]},
+  { termino:"Muestreo No Probabilístico", icono:"fa-hand-pointer", definicion:"La selección depende del criterio del investigador. No todos tienen oportunidad de ser elegidos. No permite generalizar estadísticamente.",
+    subtipos:[
+      {nombre:"Por Conveniencia",desc:"Se eligen los elementos más accesibles o fáciles de alcanzar."},
+      {nombre:"Por Juicio",desc:"El investigador selecciona los que considera representativos según su experiencia."},
+      {nombre:"Bola de Nieve",desc:"Un sujeto inicial refiere a otros, y esos a más, en cadena."},
+      {nombre:"Por Cuotas",desc:"Se establece una cuota por categoría y se selecciona hasta completarla."}
+    ]}
+];
+
+const SUBTIPOS_PROB = ["Aleatorio Simple","Sistemático","Estratificado","Por Conglomerados"];
+const SUBTIPOS_NO_PROB = ["Por Conveniencia","Por Juicio","Bola de Nieve","Por Cuotas"];
+
+const EJERCICIOS = [
+  // ===== FASE 1: Clasificación binaria =====
+  { id:1, fase:1, titulo:"Jardín Botánico", icono:"🌿",
+    poblacion:{ total:40, columns:8, grupos:[
+      {nombre:"Rosas",emoji:"🌹",color:"#E63946",cantidad:15},
+      {nombre:"Lirios",emoji:"🌸",color:"#D4A0E0",cantidad:12},
+      {nombre:"Tulipanes",emoji:"🌷",color:"#F4A261",cantidad:13}
+    ]},
+    muestraCantidad:8, seleccionados:[3,11,17,22,28,33,36,39],
+    tipo:"probabilistico", subtipo:"Aleatorio Simple", distribucion:"mezclado",
+    narrativa:"Se numeran todas las plantas del 1 al 40 y se usa un generador de números aleatorios para seleccionar 8 de ellas.",
+    explicacionP1:"Cada planta tuvo la misma probabilidad conocida de ser elegida (8/40 = 20%) mediante un mecanismo aleatorio. Por eso es <strong>probabilístico</strong>.",
+    explicacionP2:"Al numerar todos los elementos y usar azar puro para elegir, se trata de un <strong>Muestreo Aleatorio Simple</strong>.",
+    animacion:"aleatorio_simple"
+  },
+  { id:2, fase:1, titulo:"Biblioteca Municipal", icono:"📚",
+    poblacion:{ total:36, columns:9, grupos:[
+      {nombre:"Novelas",emoji:"📕",color:"#E63946",cantidad:12},
+      {nombre:"Ciencia",emoji:"📗",color:"#2A9D8F",cantidad:12},
+      {nombre:"Historia",emoji:"📘",color:"#457B9D",cantidad:12}
+    ]},
+    muestraCantidad:9, seleccionados:[0,1,2,9,10,11,18,19,20],
+    tipo:"noProbabilistico", subtipo:"Por Conveniencia", distribucion:"mezclado",
+    narrativa:"El investigador toma los 9 libros que están en la mesa más cercana a la entrada de la biblioteca.",
+    explicacionP1:"No todos los libros tuvieron oportunidad de ser elegidos. Solo se tomaron los más accesibles. Es <strong>no probabilístico</strong>.",
+    explicacionP2:"Se eligieron los elementos más fáciles de acceder. Esto es <strong>Muestreo por Conveniencia</strong>.",
+    animacion:"conveniencia"
+  },
+  { id:3, fase:1, titulo:"Escuela Secundaria", icono:"🏫",
+    poblacion:{ total:50, columns:10, grupos:[
+      {nombre:"1ro año",emoji:"👦",color:"#F59E0B",cantidad:17},
+      {nombre:"2do año",emoji:"👧",color:"#22C55E",cantidad:16},
+      {nombre:"3ro año",emoji:"🧑",color:"#8B5CF6",cantidad:17}
+    ]},
+    muestraCantidad:10, seleccionados:[2,7,12,17,22,27,32,37,42,47],
+    tipo:"probabilistico", subtipo:"Sistemático", distribucion:"mezclado",
+    narrativa:"Se ordena a los 50 alumnos en una lista y se selecciona cada 5to alumno comenzando desde el número 3.",
+    explicacionP1:"El intervalo fijo garantiza que cada alumno tenía una probabilidad conocida de ser seleccionado (1/5). Es <strong>probabilístico</strong>.",
+    explicacionP2:"Se usa un intervalo constante (k=5) a partir de un punto de inicio. Esto es <strong>Muestreo Sistemático</strong>.",
+    animacion:"sistematico", sistematicoInicio:2, sistematicoIntervalo:5
+  },
+  { id:4, fase:1, titulo:"Hospital Regional", icono:"🏥",
+    poblacion:{ total:30, columns:6, grupos:[
+      {nombre:"Piso 1",emoji:"🛏️",color:"#457B9D",cantidad:10},
+      {nombre:"Piso 2",emoji:"🛏️",color:"#E63946",cantidad:10},
+      {nombre:"Piso 3",emoji:"🛏️",color:"#F4A261",cantidad:10}
+    ]},
+    muestraCantidad:6, seleccionados:[4,11,15,20,25,28],
+    tipo:"noProbabilistico", subtipo:"Por Juicio", distribucion:"mezclado",
+    narrativa:"El médico selecciona manualmente a 6 pacientes que considera 'casos típicos y representativos' de la enfermedad que estudia.",
+    explicacionP1:"La selección depende del criterio subjetivo del médico. No hay probabilidad conocida para cada paciente. Es <strong>no probabilístico</strong>.",
+    explicacionP2:"El investigador usa su criterio para elegir 'casos representativos'. Esto es <strong>Muestreo por Juicio</strong>.",
+    animacion:"juicio"
+  },
+  { id:5, fase:1, titulo:"Fábrica de Alimentos", icono:"🏭",
+    poblacion:{ total:48, columns:8, grupos:[
+      {nombre:"Línea A",emoji:"📦",color:"#E63946",cantidad:16},
+      {nombre:"Línea B",emoji:"📦",color:"#2A9D8F",cantidad:16},
+      {nombre:"Línea C",emoji:"📦",color:"#F59E0B",cantidad:16}
+    ]},
+    muestraCantidad:8, seleccionados:[3,8,12,20,25,30,36,44],
+    tipo:"probabilistico", subtipo:"Estratificado", distribucion:"contiguo",
+    narrativa:"Se clasifican las cajas por línea de producción (A, B, C) y se toma una muestra proporcional de cada línea usando sorteo.",
+    explicacionP1:"La población se dividió en estratos, pero dentro de cada uno se usó azar. Cada caja tuvo probabilidad conocida. Es <strong>probabilístico</strong>.",
+    explicacionP2:"Se divide la población en grupos homogéneos (estratos) y se muestrea aleatoriamente dentro de cada uno. Es <strong>Muestreo Estratificado</strong>.",
+    animacion:"estratificado"
+  },
+  { id:6, fase:1, titulo:"Pesca Artesanal del Lago", icono:"🐟",
+    poblacion:{ total:28, columns:7, grupos:[
+      {nombre:"Truchas",emoji:"🐟",color:"#457B9D",cantidad:10},
+      {nombre:"Carpas",emoji:"🐠",color:"#F4A261",cantidad:10},
+      {nombre:"Bagres",emoji:"🐡",color:"#8B5CF6",cantidad:8}
+    ]},
+    muestraCantidad:7, seleccionados:[5,12,13,19,20,24,25],
+    tipo:"noProbabilistico", subtipo:"Bola de Nieve", distribucion:"mezclado",
+    narrativa:"Un pescador nombra a 2 conocidos que también pescan, esos nombran a 2 más cada uno, hasta reunir 7 pescadores para encuestar.",
+    explicacionP1:"Los participantes se van sumando por referencia de otros. No todos tienen la misma oportunidad. Es <strong>no probabilístico</strong>.",
+    explicacionP2:"Un sujeto inicial refiere a otros, y esos a más, como una bola de nieve que crece. Es <strong>Muestreo por Bola de Nieve</strong>.",
+    animacion:"bola_nieve", bolaNieveOlas:[[5],[12,13],[19,20],[24,25]]
+  },
+
+  // ===== FASE 2: Clasificación específica =====
+  { id:7, fase:2, titulo:"Granja Los Pinos", icono:"🐄",
+    poblacion:{ total:36, columns:6, grupos:[
+      {nombre:"Corral 1",emoji:"🐄",color:"#E63946",cantidad:6},
+      {nombre:"Corral 2",emoji:"🐑",color:"#F4A261",cantidad:6},
+      {nombre:"Corral 3",emoji:"🐎",color:"#457B9D",cantidad:6},
+      {nombre:"Corral 4",emoji:"🐔",color:"#22C55E",cantidad:6},
+      {nombre:"Corral 5",emoji:"🐄",color:"#8B5CF6",cantidad:6},
+      {nombre:"Corral 6",emoji:"🐑",color:"#F59E0B",cantidad:6}
+    ]},
+    muestraCantidad:12, seleccionados:[0,1,2,3,4,5,24,25,26,27,28,29],
+    tipo:"probabilistico", subtipo:"Por Conglomerados", distribucion:"filas",
+    narrativa:"Se dividen los animales en 6 corrales, se sortean 2 corrales al azar, y se estudian TODOS los animales de esos corrales elegidos.",
+    explicacionP1:"Los corrales se eligieron al azar, dando a cada uno probabilidad conocida de ser seleccionado. Es <strong>probabilístico</strong>.",
+    explicacionP2:"La población se agrupa en conglomerados naturales (corrales), se sortean algunos, y se estudian todos sus elementos. Es <strong>Muestreo por Conglomerados</strong>.",
+    animacion:"conglomerados", conglomeradosFilas:[0,4]
+  },
+  { id:8, fase:2, titulo:"Lago Esmeralda", icono:"🐠",
+    poblacion:{ total:35, columns:7, grupos:[
+      {nombre:"Grandes",emoji:"🐋",color:"#E63946",cantidad:12},
+      {nombre:"Medianos",emoji:"🐟",color:"#F4A261",cantidad:13},
+      {nombre:"Pequeños",emoji:"🐠",color:"#22C55E",cantidad:10}
+    ]},
+    muestraCantidad:7, seleccionados:[0,2,4,14,16,28,30],
+    tipo:"noProbabilistico", subtipo:"Por Cuotas", distribucion:"contiguo",
+    narrativa:"Se establece una cuota: 3 peces grandes, 2 medianos y 2 pequeños. Se capturan peces hasta completar cada categoría.",
+    explicacionP1:"No hay probabilidad conocida. Se impone una cuota y se captura hasta llenarla. Es <strong>no probabilístico</strong>.",
+    explicacionP2:"Se define una cuota por categoría y se selecciona hasta completarla. Es <strong>Muestreo por Cuotas</strong>.",
+    animacion:"cuotas", cuotas:[
+      {nombre:"Grandes",cantidad:3,indices:[0,2,4]},
+      {nombre:"Medianos",cantidad:2,indices:[14,16]},
+      {nombre:"Pequeños",cantidad:2,indices:[28,30]}
+    ]
+  },
+  { id:9, fase:2, titulo:"Invernadero Municipal", icono:"🌱",
+    poblacion:{ total:40, columns:8, grupos:[
+      {nombre:"Tomates",emoji:"🍅",color:"#E63946",cantidad:14},
+      {nombre:"Lechugas",emoji:"🥬",color:"#22C55E",cantidad:13},
+      {nombre:"Pimientos",emoji:"🫑",color:"#F59E0B",cantidad:13}
+    ]},
+    muestraCantidad:8, seleccionados:[1,8,15,21,27,30,35,38],
+    tipo:"probabilistico", subtipo:"Aleatorio Simple", distribucion:"mezclado",
+    narrativa:"Cada planta recibe un número del 1 al 40. Una tabla de números aleatorios determina cuáles se estudian.",
+    explicacionP1:"Todas las plantas tienen la misma probabilidad (8/40) de ser elegidas por azar. Es <strong>probabilístico</strong>.",
+    explicacionP2:"Numeración total de la población + selección por azar puro = <strong>Muestreo Aleatorio Simple</strong>.",
+    animacion:"aleatorio_simple"
+  },
+  { id:10, fase:2, titulo:"Reserva La Sierra", icono:"🦎",
+    poblacion:{ total:36, columns:9, grupos:[
+      {nombre:"Mamíferos",emoji:"🦊",color:"#E63946",cantidad:12},
+      {nombre:"Aves",emoji:"🦅",color:"#457B9D",cantidad:12},
+      {nombre:"Reptiles",emoji:"🦎",color:"#22C55E",cantidad:12}
+    ]},
+    muestraCantidad:8, seleccionados:[0,1,9,10,18,19,27,28],
+    tipo:"noProbabilistico", subtipo:"Por Conveniencia", distribucion:"mezclado",
+    narrativa:"Se muestrean solo los animales que se encuentran en el sendero principal cerca del campamento base.",
+    explicacionP1:"Solo los animales de una zona accesible fueron considerados. Los demás no tuvieron oportunidad. Es <strong>no probabilístico</strong>.",
+    explicacionP2:"Se selecciona lo más fácil de acceder. Es <strong>Muestreo por Conveniencia</strong>.",
+    animacion:"conveniencia"
+  },
+  { id:11, fase:2, titulo:"Ciudad Nuevo Amanecer", icono:"🏘️",
+    poblacion:{ total:42, columns:7, grupos:[
+      {nombre:"Manzana Norte",emoji:"🏠",color:"#E63946",cantidad:14},
+      {nombre:"Manzana Centro",emoji:"🏘️",color:"#457B9D",cantidad:14},
+      {nombre:"Manzana Sur",emoji:"🏗️",color:"#F4A261",cantidad:14}
+    ]},
+    muestraCantidad:8, seleccionados:[1,6,11,16,21,26,31,36],
+    tipo:"probabilistico", subtipo:"Sistemático", distribucion:"mezclado",
+    narrativa:"Se numeran las 42 casas y se seleccionan con un intervalo fijo de 5, comenzando desde la casa número 2.",
+    explicacionP1:"El intervalo fijo garantiza que cada casa tenía probabilidad conocida (1/5). Es <strong>probabilístico</strong>.",
+    explicacionP2:"Intervalo constante (k=5) desde un inicio. Es <strong>Muestreo Sistemático</strong>.",
+    animacion:"sistematico", sistematicoInicio:1, sistematicoIntervalo:5
+  },
+  { id:12, fase:2, titulo:"Almacén Distribuidora Sur", icono:"🏗️",
+    poblacion:{ total:45, columns:9, grupos:[
+      {nombre:"Electrónica",emoji:"📺",color:"#457B9D",cantidad:15},
+      {nombre:"Ropa",emoji:"👕",color:"#E63946",cantidad:15},
+      {nombre:"Alimentos",emoji:"🥫",color:"#22C55E",cantidad:15}
+    ]},
+    muestraCantidad:8, seleccionados:[3,9,18,24,31,35,40,43],
+    tipo:"noProbabilistico", subtipo:"Por Juicio", distribucion:"mezclado",
+    narrativa:"El supervisor elige a mano los productos que, por su experiencia, considera más propensos a tener defectos de fábrica.",
+    explicacionP1:"La selección depende del criterio personal del supervisor. No hay probabilidad para cada producto. Es <strong>no probabilístico</strong>.",
+    explicacionP2:"El investigador usa su experiencia y juicio para elegir. Es <strong>Muestreo por Juicio</strong>.",
+    animacion:"juicio"
+  }
+];
+
+/* ========== ESTADO ========== */
+const state = {
+  ejercicioActual: 0,
+  puntaje: 0,
+  resultados: [],
+  faseActual: 1,
+  pistaTimer: null
+};
+
+/* ========== UTILIDADES ========== */
+function delay(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+function shuffleSeed(arr, seed){
+  let s = seed;
+  const a = [...arr];
+  for(let i = a.length-1; i > 0; i--){
+    s = (s * 16807) % 2147483647;
+    const j = s % (i+1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function generarElementos(ej){
+  const {grupos} = ej.poblacion;
+  let elems = [];
+  let idx = 0;
+  grupos.forEach((g, gi) => {
+    for(let i = 0; i < g.cantidad; i++){
+      elems.push({ idx: idx++, grupoIdx: gi, nombre: g.nombre, emoji: g.emoji, color: g.color });
+    }
+  });
+  if(ej.distribucion === 'mezclado'){
+    elems = shuffleSeed(elems, ej.id * 7919);
+  }
+  // Asignar posición de display
+  elems.forEach((el, i) => el.pos = i);
+  return elems;
+}
+
+/* ========== RENDER GLOSARIO ========== */
+function renderGlosario(){
+  const panel = document.getElementById('glosario-panel');
+  let html = `<div class="glosario-logo"><i class="fas fa-flask"></i><h2>Glosario</h2></div>`;
+  GLOSARIO.forEach((g, i) => {
+    html += `<div class="glosario-item">
+      <div class="glosario-term" data-glosario="${i}" onclick="toggleGlosario(${i})">
+        <i class="fas ${g.icono}"></i><span>${g.termino}</span><i class="fas fa-chevron-down chevron"></i>
+      </div>
+      <div class="glosario-def" id="glosario-def-${i}">${g.definicion}`;
+    if(g.subtipos){
+      g.subtipos.forEach(st => {
+        html += `<div class="glosario-subtipo"><strong>${st.nombre}:</strong> ${st.desc}</div>`;
+      });
+    }
+    html += `</div></div>`;
+  });
+  panel.innerHTML = html;
+}
+
+function toggleGlosario(i){
+  const term = document.querySelector(`[data-glosario="${i}"]`);
+  const def = document.getElementById(`glosario-def-${i}`);
+  const isOpen = term.classList.contains('open');
+  // Cerrar todos
+  document.querySelectorAll('.glosario-term').forEach(t => t.classList.remove('open'));
+  document.querySelectorAll('.glosario-def').forEach(d => d.classList.remove('open'));
+  if(!isOpen){ term.classList.add('open'); def.classList.add('open'); }
+}
+
+/* ========== PANTALLAS ========== */
+function mostrarPantalla(nombre){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+nombre).classList.add('active');
+}
+
+function renderInicio(){
+  const el = document.getElementById('screen-inicio');
+  el.innerHTML = `
+    <div class="inicio-icon">🧪</div>
+    <h1 class="inicio-titulo">Simulador de <span class="accent">Muestreos</span></h1>
+    <p class="inicio-sub">Aprende a distinguir entre muestreos probabilísticos y no probabilísticos mediante simulaciones visuales interactivas con poblaciones reales.</p>
+    <div class="inicio-features">
+      <div class="inicio-feat"><i class="fas fa-seedling"></i> Plantas y animales</div>
+      <div class="inicio-feat"><i class="fas fa-users"></i> Personas y ciudades</div>
+      <div class="inicio-feat"><i class="fas fa-industry"></i> Fábricas y almacenes</div>
+      <div class="inicio-feat"><i class="fas fa-layer-group"></i> 2 fases de dificultad</div>
+    </div>
+    <button class="btn-primary" onclick="comenzar()">Comenzar simulación</button>
+    <a href="index.html" style="margin-top:12px;display:inline-flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--fg-muted);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--fg-muted)'"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
+  `;
+}
+
+function actualizarProgreso(){
+  const ej = EJERCICIOS[state.ejercicioActual];
+  const total = EJERCICIOS.length;
+  const fase = ej.fase;
+  const numEnFase = fase === 1
+    ? state.ejercicioActual + 1
+    : state.ejercicioActual - 5;
+  const totalFase = 6;
+  document.getElementById('progress-text').innerHTML =
+    `<span class="fase-badge">FASE ${fase}</span>Ejercicio ${numEnFase} de ${totalFase}`;
+  document.getElementById('progress-bar-inner').style.width = `${(state.ejercicioActual / total) * 100}%`;
+  document.getElementById('score-display').textContent = `${state.puntaje} pts`;
+}
+
+/* ========== EJERCICIO ========== */
+function cargarEjercicio(){
+  const ej = EJERCICIOS[state.ejercicioActual];
+  const elementos = generarElementos(ej);
+  const cols = ej.poblacion.columns;
+
+  // Actualizar progreso
+  document.getElementById('progress-container').style.display = 'flex';
+  actualizarProgreso();
+
+  // Info de población
+  let pobInfo = `Población: ${ej.poblacion.total} elementos`;
+  if(ej.poblacion.grupos.length > 1){
+    pobInfo += ' (' + ej.poblacion.grupos.map(g => `${g.cantidad} ${g.nombre}`).join(', ') + ')';
+  }
+
+  const screen = document.getElementById('screen-ejercicio');
+  screen.innerHTML = `
+    <div class="ej-header">
+      <div class="ej-titulo"><span class="ej-icon">${ej.icono}</span>${ej.titulo}</div>
+      <div class="ej-pob-info">${pobInfo}</div>
+    </div>
+    <div class="poblacion-canvas" id="poblacion-canvas">
+      <div class="poblacion-grid" id="poblacion-grid" style="grid-template-columns:repeat(${cols},46px)"></div>
+    </div>
+    <div id="ej-dinamico"></div>
+  `;
+
+  // Responsive grid
+  if(window.innerWidth <= 500){
+    document.getElementById('poblacion-grid').style.gridTemplateColumns = `repeat(${cols},32px)`;
+  }
+
+  // Renderizar elementos
+  const grid = document.getElementById('poblacion-grid');
+  elementos.forEach((el, i) => {
+    const div = document.createElement('div');
+    div.className = 'pob-elemento';
+    div.dataset.pos = el.pos;
+    div.style.animation = `popIn .3s ease backwards`;
+    div.style.animationDelay = `${i * 18}ms`;
+    div.style.borderColor = el.color + '30';
+    div.innerHTML = `<span class="pob-emoji">${el.emoji}</span><span class="pob-num">${el.pos + 1}</span>`;
+    grid.appendChild(div);
+  });
+
+  // Mostrar narrativa después de que aparezcan los elementos
+  setTimeout(() => mostrarNarrativa(ej), elementos.length * 18 + 300);
+  mostrarPantalla('ejercicio');
+}
+
+function mostrarNarrativa(ej){
+  const dyn = document.getElementById('ej-dinamico');
+  dyn.innerHTML = `
+    <div class="narrativa-card" style="animation:fadeInUp .4s ease">
+      <div class="narrativa-label">Procedimiento</div>
+      <div class="narrativa-text">${ej.narrativa}</div>
+    </div>
+    <div style="text-align:center">
+      <button class="btn-ver" id="btn-ver" onclick="iniciarAnimacion()">
+        <i class="fas fa-play" style="margin-right:6px"></i>Ver la selección
+      </button>
+    </div>
+  `;
+}
+
+/* ========== ANIMACIONES ========== */
+async function iniciarAnimacion(){
+  const btn = document.getElementById('btn-ver');
+  btn.disabled = true;
+  const ej = EJERCICIOS[state.ejercicioActual];
+  await animarSeleccion(ej);
+  mostrarPreguntaP1(ej);
+}
+
+async function animarSeleccion(ej){
+  const canvas = document.getElementById('poblacion-canvas');
+  const elems = document.querySelectorAll('.pob-elemento');
+  const sel = new Set(ej.seleccionados);
+  const tipo = ej.animacion;
+
+  switch(tipo){
+    case 'aleatorio_simple':
+      // Mostrar números
+      elems.forEach(el => el.querySelector('.pob-num').classList.add('visible'));
+      await delay(700);
+      // Resaltar números seleccionados
+      sel.forEach(idx => {
+        const el = elems[idx]; if(el) el.querySelector('.pob-num').classList.add('highlight');
+      });
+      await delay(500);
+      // Destacar y atenuar
+      elems.forEach((el, i) => { if(sel.has(i)) el.classList.add('selected'); else el.classList.add('dimmed'); });
+      break;
+
+    case 'sistematico':
+      elems.forEach(el => el.querySelector('.pob-num').classList.add('visible'));
+      await delay(700);
+      // Marcar en secuencia
+      const sortedSel = [...sel].sort((a,b) => a-b);
+      for(const idx of sortedSel){
+        const el = elems[idx];
+        if(el){
+          el.querySelector('.pob-num').classList.add('highlight');
+          el.classList.add('selected');
+        }
+        await delay(250);
+      }
+      elems.forEach((el, i) => { if(!sel.has(i)) el.classList.add('dimmed'); });
+      break;
+
+    case 'estratificado': {
+      // Mostrar etiquetas de estrato
+      const grupos = ej.poblacion.grupos;
+      let grupoStart = 0;
+      grupos.forEach((g, gi) => {
+        const label = document.createElement('div');
+        label.className = 'estratificado-label anim-overlay';
+        label.style.background = g.color + '20';
+        label.style.color = g.color;
+        label.style.border = `1px solid ${g.color}40`;
+        label.textContent = g.nombre;
+        // Posicionar al inicio del bloque
+        const startEl = elems[grupoStart];
+        if(startEl){
+          const r = Math.floor(grupoStart / ej.poblacion.columns);
+          label.style.top = `${r * 52 + 20}px`;
+          label.style.left = '4px';
+        }
+        canvas.appendChild(label);
+        setTimeout(() => label.classList.add('show'), 100);
+        grupoStart += g.cantidad;
+      });
+      await delay(900);
+      // Seleccionar
+      sel.forEach(idx => { if(elems[idx]) elems[idx].classList.add('selected'); });
+      elems.forEach((el, i) => { if(!sel.has(i)) el.classList.add('dimmed'); });
+      break;
+    }
+
+    case 'conglomerados': {
+      const cols = ej.poblacion.columns;
+      const filas = Math.ceil(ej.poblacion.total / cols);
+      const selFilas = new Set(ej.conglomeradosFilas);
+      // Dibujar recuadros
+      for(let f = 0; f < filas; f++){
+        const box = document.createElement('div');
+        box.className = 'conglomerado-box anim-overlay';
+        box.style.top = `${f * 52 + 12}px`;
+        box.style.left = '8px';
+        box.style.width = `${cols * 52 - 8}px`;
+        box.style.height = '46px';
+        canvas.appendChild(box);
+        setTimeout(() => box.classList.add('show'), f * 150);
+      }
+      await delay(filas * 150 + 500);
+      // Iluminar filas seleccionadas
+      selFilas.forEach(f => {
+        const boxes = canvas.querySelectorAll('.conglomerado-box');
+        if(boxes[f]) boxes[f].classList.add('selected-box');
+        for(let c = 0; c < cols; c++){
+          const idx = f * cols + c;
+          if(elems[idx]) elems[idx].classList.add('selected');
+        }
+      });
+      elems.forEach((el, i) => {
+        const fila = Math.floor(i / cols);
+        if(!selFilas.has(fila)) el.classList.add('dimmed');
+      });
+      break;
+    }
+
+    case 'conveniencia': {
+      // Spotlight y marcador
+      const marker = document.createElement('div');
+      marker.className = 'conveniencia-marker anim-overlay';
+      marker.innerHTML = '<i class="fas fa-door-open"></i> Entrada / Acceso';
+      canvas.appendChild(marker);
+      const spot = document.createElement('div');
+      spot.className = 'conveniencia-spotlight anim-overlay';
+      canvas.appendChild(spot);
+      setTimeout(() => { marker.classList.add('show'); spot.classList.add('show'); }, 100);
+      await delay(800);
+      sel.forEach(idx => { if(elems[idx]) elems[idx].classList.add('selected'); });
+      elems.forEach((el, i) => { if(!sel.has(i)) el.classList.add('dimmed'); });
+      break;
+    }
+
+    case 'juicio': {
+      const eye = document.createElement('div');
+      eye.className = 'juicio-eye anim-overlay';
+      eye.textContent = '👁️';
+      canvas.appendChild(eye);
+      setTimeout(() => eye.classList.add('show'), 100);
+      await delay(600);
+      sel.forEach(idx => { if(elems[idx]) elems[idx].classList.add('selected'); });
+      elems.forEach((el, i) => { if(!sel.has(i)) el.classList.add('dimmed'); });
+      await delay(400);
+      eye.style.opacity = '0';
+      break;
+    }
+
+    case 'bola_nieve': {
+      const olas = ej.bolaNieveOlas;
+      const colores = ['#F87171','#FBBF24','#60A5FA','#C084FC'];
+      for(let w = 0; w < olas.length; w++){
+        for(const idx of olas[w]){
+          const el = elems[idx];
+          if(el){
+            el.classList.add('selected', `wave-${w+1}`);
+            // Badge de ola
+            const badge = document.createElement('div');
+            badge.className = 'bola-nieve-badge anim-overlay';
+            badge.style.background = colores[w];
+            badge.textContent = w + 1;
+            el.appendChild(badge);
+            setTimeout(() => badge.classList.add('show'), 50);
+          }
+        }
+        await delay(600);
+      }
+      elems.forEach((el, i) => {
+        if(!sel.has(i)) el.classList.add('dimmed');
+      });
+      break;
+    }
+
+    case 'cuotas': {
+      // Panel de cuotas
+      const panel = document.createElement('div');
+      panel.className = 'cuotas-panel anim-overlay';
+      let panelHtml = '';
+      ej.cuotas.forEach(c => {
+        panelHtml += `<div class="cuota-row"><span>${c.nombre}:</span><div class="cuota-dots">`;
+        for(let d = 0; d < c.cantidad; d++){
+          panelHtml += `<div class="cuota-dot" data-cuota="${c.nombre}-${d}"></div>`;
+        }
+        panelHtml += `</div></div>`;
+      });
+      panel.innerHTML = panelHtml;
+      canvas.appendChild(panel);
+      setTimeout(() => panel.classList.add('show'), 100);
+      await delay(600);
+      // Llenar cuotas en orden
+      for(const c of ej.cuotas){
+        for(let d = 0; d < c.indices.length; d++){
+          const idx = c.indices[d];
+          const el = elems[idx];
+          const dot = panel.querySelector(`[data-cuota="${c.nombre}-${d}"]`);
+          if(el) el.classList.add('cuota-selected');
+          if(dot) dot.classList.add('filled');
+          await delay(350);
+        }
+      }
+      elems.forEach((el, i) => {
+        if(!sel.has(i)) el.classList.add('dimmed');
+      });
+      break;
+    }
+  }
+  await delay(300);
+}
+
+/* ========== PREGUNTAS ========== */
+function mostrarPreguntaP1(ej){
+  const dyn = document.getElementById('ej-dinamico');
+  const muestraInfo = `Muestra seleccionada: ${ej.muestraCantidad} elementos`;
+  dyn.innerHTML = `
+    <div class="pregunta-card">
+      <div style="text-align:center;font-size:13px;color:var(--fg-muted);margin-bottom:14px">${muestraInfo}</div>
+      <div class="pregunta-text">Este metodo de muestreo es...</div>
+      <div class="pregunta-btns">
+        <button class="btn-respuesta" onclick="responderP1(true)">
+          <i class="fas fa-dice" style="margin-right:6px"></i>Probabilistico
+          <span class="btn-sub">Todos tienen probabilidad conocida</span>
+        </button>
+        <button class="btn-respuesta" onclick="responderP1(false)">
+          <i class="fas fa-hand-pointer" style="margin-right:6px"></i>No Probabilistico
+          <span class="btn-sub">Depende del criterio del investigador</span>
+        </button>
+      </div>
+      <div style="text-align:center">
+        <button class="pista-btn" id="btn-pista" onclick="mostrarPista()">Necesito una pista</button>
+        <div id="pista-contenido"></div>
+      </div>
+      <div id="feedback-area"></div>
+    </div>
+  `;
+  // Temporizador de pista
+  state.pistaTimer = setTimeout(() => {
+    const btn = document.getElementById('btn-pista');
+    if(btn) btn.style.color = 'var(--warm)';
+  }, 6000);
+}
+
+function mostrarPista(){
+  const ej = EJERCICIOS[state.ejercicioActual];
+  const contenido = document.getElementById('pista-contenido');
+  if(ej.tipo === 'probabilistico'){
+    contenido.innerHTML = `<p class="pista-text">Piensa: &iquest;Se menciona alg&uacute;n mecanismo de azar, sorteo, numeraci&oacute;n o intervalo fijo?</p>`;
+  } else {
+    contenido.innerHTML = `<p class="pista-text">Piensa: &iquest;La elecci&oacute;n depende de la comodidad, el criterio personal o la referencia de otros?</p>`;
+  }
+}
+
+function responderP1(elUsuarioDijoProb){
+  clearTimeout(state.pistaTimer);
+  const ej = EJERCICIOS[state.ejercicioActual];
+  const esProbReal = ej.tipo === 'probabilistico';
+  const acierto = elUsuarioDijoProb === esProbReal;
+  const btns = document.querySelectorAll('.btn-respuesta');
+  btns.forEach(b => b.disabled = true);
+
+  // Marcar botones
+  btns[0].classList.add(elUsuarioDijoProb === true ? (acierto ? 'correct' : 'wrong') : '');
+  btns[1].classList.add(elUsuarioDijoProb === false ? (acierto ? 'correct' : 'wrong') : '');
+  if(!acierto){
+    // Marcar el correcto
+    btns[esProbReal ? 0 : 1].classList.add('correct');
+  }
+
+  // Guardar resultado parcial
+  const resultado = {
+    ejercicioId: ej.id,
+    titulo: `${ej.icono} ${ej.titulo}`,
+    tipoReal: ej.tipo,
+    subtipoReal: ej.subtipo,
+    p1Respuesta: elUsuarioDijoProb ? 'probabilistico' : 'noProbabilistico',
+    p1Correcta: acierto,
+    p2Respuesta: null,
+    p2Correcta: null,
+    puntos: 0
+  };
+
+  if(ej.fase === 1){
+    // Fase 1: solo P1
+    if(acierto) resultado.puntos = 10;
+    state.resultados.push(resultado);
+    state.puntaje += resultado.puntos;
+    actualizarProgreso();
+    mostrarFeedback(acierto, ej.explicacionP1 + (acierto ? ` Es un muestreo <strong>${ej.subtipo}</strong>.` : ''), ej.fase);
+  } else {
+    // Fase 2: si acierta P1, pasar a P2; si falla, feedback y siguiente
+    if(acierto){
+      resultado.puntos = 5; // mínimo por acertar P1
+      state.puntaje += 5;
+      actualizarProgreso();
+      setTimeout(() => mostrarPreguntaP2(ej, resultado), 800);
+    } else {
+      resultado.puntos = 0;
+      state.resultados.push(resultado);
+      actualizarProgreso();
+      mostrarFeedback(false, ej.explicacionP1 + ` Es un muestreo <strong>${ej.subtipo}</strong>.`, ej.fase);
+    }
+  }
+}
+
+function mostrarPreguntaP2(ej, resultado){
+  const area = document.getElementById('feedback-area');
+  const opciones = ej.tipo === 'probabilistico' ? [...SUBTIPOS_PROB] : [...SUBTIPOS_NO_PROB];
+  const opcionesShuffled = shuffleSeed(opciones, ej.id * 3571);
+
+  area.innerHTML = `
+    <div class="pregunta-card" style="margin-top:16px;animation:fadeInUp .4s ease">
+      <div class="pregunta-text">Y exactamente, &iquest;qu&eacute; tipo de muestreo es?</div>
+      <div class="pregunta-btns" style="flex-direction:column;align-items:stretch;max-width:400px;margin:0 auto">
+        ${opcionesShuffled.map(op => `
+          <button class="btn-respuesta" style="min-width:auto" onclick="responderP2('${op}')">
+            ${op}
+          </button>
+        `).join('')}
+      </div>
+      <div id="feedback-p2"></div>
+    </div>
+  `;
+  // Scroll al area
+  area.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function responderP2(subtipoElegido){
+  const ej = EJERCICIOS[state.ejercicioActual];
+  const acierto = subtipoElegido === ej.subtipo;
+  const btns = document.querySelectorAll('#feedback-area .btn-respuesta');
+  btns.forEach(b => {
+    b.disabled = true;
+    if(b.textContent.trim() === ej.subtipo) b.classList.add('correct');
+    if(b.textContent.trim() === subtipoElegido && !acierto) b.classList.add('wrong');
+  });
+
+  // Actualizar resultado
+  const resultado = state.resultados[state.resultados.length - 1];
+  resultado.p2Respuesta = subtipoElegido;
+  resultado.p2Correcta = acierto;
+  if(acierto){
+    resultado.puntos = 15;
+    state.puntaje += 10; // ya tenía 5 de P1, sumamos 10 más para llegar a 15
+  } else {
+    resultado.puntos = 5; // se queda con los 5 de P1
+  }
+  actualizarProgreso();
+
+  const fb2 = document.getElementById('feedback-p2');
+  fb2.innerHTML = `
+    <div class="feedback-card ${acierto ? 'acierto' : 'error'}" style="animation:fadeInUp .4s ease">
+      <div class="feedback-icon">${acierto ? '✅' : '❌'}</div>
+      <div class="feedback-title" style="color:${acierto ? 'var(--accent)' : 'var(--error)'}">
+        ${acierto ? 'Correcto' : 'No exactamente'}
+      </div>
+      <div class="feedback-text">${ej.explicacionP2}</div>
+    </div>
+    <div style="text-align:center">
+      <button class="btn-siguiente" onclick="siguiente()">
+        ${state.ejercicioActual < EJERCICIOS.length - 1 ? 'Siguiente ejercicio →' : 'Ver resultados'}
+      </button>
+    </div>
+  `;
+  fb2.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function mostrarFeedback(acierto, texto, fase){
+  const area = document.getElementById('feedback-area');
+  area.innerHTML = `
+    <div class="feedback-card ${acierto ? 'acierto' : 'error'}" style="animation:fadeInUp .4s ease">
+      <div class="feedback-icon">${acierto ? '✅' : '❌'}</div>
+      <div class="feedback-title" style="color:${acierto ? 'var(--accent)' : 'var(--error)'}">
+        ${acierto ? 'Correcto' : 'Incorrecto'}
+      </div>
+      <div class="feedback-text">${texto}</div>
+    </div>
+    <div style="text-align:center">
+      <button class="btn-siguiente" onclick="siguiente()">
+        ${state.ejercicioActual < EJERCICIOS.length - 1 ? 'Siguiente ejercicio →' : 'Ver resultados'}
+      </button>
+    </div>
+  `;
+  area.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function siguiente(){
+  state.ejercicioActual++;
+  if(state.ejercicioActual === 6){
+    // Transición a Fase 2
+    mostrarTransicion();
+  } else if(state.ejercicioActual >= EJERCICIOS.length){
+    mostrarPantallaFinal();
+  } else {
+    cargarEjercicio();
+  }
+}
+
+/* ========== TRANSICIÓN ========== */
+function mostrarTransicion(){
+  const el = document.getElementById('screen-transicion');
+  el.innerHTML = `
+    <div class="transicion-icon">🎯</div>
+    <h2 class="transicion-titulo">Fase 1 completada</h2>
+    <p class="transicion-sub">
+      Ya sabes distinguir entre muestreo probabilistico y no probabilistico. Ahora sube la dificultad: deberas identificar el <strong>tipo especifico</strong> de muestreo dentro de cada categoria.
+    </p>
+    <div class="transicion-features">
+      <div class="transicion-feat"><i class="fas fa-check-circle"></i> Pregunta 1: Probabilistico o no</div>
+      <div class="transicion-feat"><i class="fas fa-bullseye"></i> Pregunta 2: Tipo especifico</div>
+      <div class="transicion-feat"><i class="fas fa-star"></i> Mas puntos en juego</div>
+    </div>
+    <p style="font-size:13px;color:var(--fg-muted);margin-bottom:24px;text-align:center">
+      Recuerda los nombres de los tipos que viste en los feedbacks anteriores...
+    </p>
+    <button class="btn-primary" onclick="cargarEjercicio()">Comenzar Fase 2</button>
+  `;
+  mostrarPantalla('transicion');
+}
+
+/* ========== PANTALLA FINAL ========== */
+function mostrarPantallaFinal(){
+  document.getElementById('progress-container').style.display = 'none';
+  const el = document.getElementById('screen-final');
+
+  let rango, rangoColor, rangoIcono;
+  if(state.puntaje >= 105){ rango='Investigador Experto'; rangoColor='var(--accent)'; rangoIcono='🏆'; }
+  else if(state.puntaje >= 75){ rango='Asistente de Investigacion'; rangoColor='var(--warm)'; rangoIcono='🥈'; }
+  else if(state.puntaje >= 45){ rango='Estudiante en Practica'; rangoColor='#60A5FA'; rangoIcono='🥉'; }
+  else { rango='Necesitas repasar el glosario'; rangoColor='var(--error)'; rangoIcono='📖'; }
+
+  const maxPts = 6*10 + 6*15; // 150
+  const fallidos = state.resultados.filter(r => !r.p1Correcta);
+
+  el.innerHTML = `
+    <div style="font-size:56px;margin-bottom:12px">${rangoIcono}</div>
+    <h2 class="final-titulo">Resultados Finales</h2>
+    <div class="final-rango" style="color:${rangoColor}">${rango}</div>
+    <div class="final-puntos">${state.puntaje} de ${maxPts} puntos posibles</div>
+    <div style="width:100%;overflow-x:auto;margin-bottom:24px">
+      <table class="final-tabla">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Escenario</th>
+            <th>Tu P1</th>
+            <th></th>
+            <th>Tu P2</th>
+            <th></th>
+            <th>Tipo Real</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${state.resultados.map((r, i) => {
+            const fase = EJERCICIOS[i].fase;
+            return `<tr>
+              <td style="color:var(--fg-muted)">${i+1}</td>
+              <td>${r.titulo}</td>
+              <td><span class="badge-${r.p1Respuesta === 'probabilistico' ? 'prob' : 'no-prob'}">${r.p1Respuesta === 'probabilistico' ? 'Prob.' : 'No Prob.'}</span></td>
+              <td><i class="fas ${r.p1Correcta ? 'fa-check-circle icon-ok' : 'fa-times-circle icon-fail'}"></i></td>
+              <td>${r.p2Respuesta ? `<span class="badge-subtipo">${r.p2Respuesta}</span>` : '<span style="color:var(--border-light)">—</span>'}</td>
+              <td>${r.p2Respuesta !== null ? `<i class="fas ${r.p2Correcta ? 'fa-check-circle icon-ok' : 'fa-times-circle icon-fail'}"></i>` : ''}</td>
+              <td><span class="badge-subtipo">${r.subtipoReal}</span></td>
+              <td style="font-weight:700;color:${r.puntos > 0 ? 'var(--accent)' : 'var(--error)'}">${r.puntos}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="final-btns">
+      ${fallidos.length > 0 ? `<button class="btn-siguiente" onclick="repetirFallidos()"><i class="fas fa-redo" style="margin-right:6px"></i>Repetir ${fallidos.length} ejercicio(s) fallido(s)</button>` : ''}
+      <button class="btn-primary" onclick="reiniciarTodo()"><i class="fas fa-sync" style="margin-right:6px"></i>Reiniciar todo</button>
+    </div>
+  `;
+  mostrarPantalla('final');
+}
+
+function repetirFallidos(){
+  const fallidosIdx = [];
+  state.resultados.forEach((r, i) => { if(!r.p1Correcta) fallidosIdx.push(i); });
+  // Reordenar ejercicios: poner fallidos primero
+  const origEjercicios = [...EJERCICIOS];
+  fallidosIdx.forEach(idx => {
+    // Mantener el ejercicio en su posición pero reiniciar resultado
+  });
+  // Simplificación: reiniciar todo pero indicar cuáles fueron fallidos
+  reiniciarTodo();
+}
+
+function reiniciarTodo(){
+  state.ejercicioActual = 0;
+  state.puntaje = 0;
+  state.resultados = [];
+  state.faseActual = 1;
+  document.getElementById('progress-container').style.display = 'none';
+  renderInicio();
+  mostrarPantalla('inicio');
+}
+
+/* ========== INICIO ========== */
+function comenzar(){
+  cargarEjercicio();
+}
+
+// Toggle glosario en mobile
+document.getElementById('glosario-toggle').addEventListener('click', () => {
+  document.getElementById('glosario-panel').classList.toggle('open');
+});
+
+// Cerrar glosario al hacer click fuera (mobile)
+document.getElementById('main-area').addEventListener('click', () => {
+  document.getElementById('glosario-panel').classList.remove('open');
+});
+
+// Responsive: reajustar grid al cambiar tamaño
+window.addEventListener('resize', () => {
+  const grid = document.getElementById('poblacion-grid');
+  if(!grid) return;
+  const ej = EJERCICIOS[state.ejercicioActual];
+  if(!ej) return;
+  grid.style.gridTemplateColumns = window.innerWidth <= 500
+    ? `repeat(${ej.poblacion.columns},32px)`
+    : `repeat(${ej.poblacion.columns},46px)`;
+});
+
+// Inicializar
+renderGlosario();
+renderInicio();
+</script>
+</body>
+</html>
