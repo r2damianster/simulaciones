@@ -3,6 +3,7 @@
 // Cuando se crea un nuevo archivo .html de simulacion en la raiz del proyecto,
 // recuerda a Claude: 1) enlazarlo en index.html (sim-grid + tabla CLAUDE.md)
 // 2) agregar boton "volver al inicio" (href="index.html") dentro del propio archivo.
+// 3) incluir funcion obtenerNombreUsuario() para pedir nombre antes de resultados finales.
 
 const fs = require('fs');
 const path = require('path');
@@ -43,7 +44,12 @@ process.stdin.on('end', () => {
       issues.push(`- "${fileName}" no tiene boton/enlace "volver al inicio" (href="index.html").`);
     }
 
-    // 3) Verificar fila en CLAUDE.md
+    // 3) Verificar patron obtenerNombreUsuario (nombre en pantalla final)
+    if (!fileContent.includes('obtenerNombreUsuario')) {
+      issues.push(`- "${fileName}" no tiene obtenerNombreUsuario() — agregar para pedir nombre antes de mostrar resultados finales (ver peel.html como referencia).`);
+    }
+
+    // 4) Verificar fila en CLAUDE.md
     const claudeMdPath = path.join(cwd, 'CLAUDE.md');
     if (fs.existsSync(claudeMdPath)) {
       const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
