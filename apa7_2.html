@@ -216,12 +216,8 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
   <!-- Sangría -->
   <div class="rib-group">
     <div class="rib-gc">
-      <select class="rib-sel" id="selIndent" title="Tipo de sangria" style="width:120px">
-        <option value="none" selected>Ninguna</option>
-        <option value="first">Primera linea</option>
-        <option value="hanging">Sangria francesa</option>
-        <option value="both">Ambas</option>
-      </select>
+      <button class="rib-btn" id="btnFirstIndent" title="Sangria primera linea (parrafos del cuerpo)" style="width:auto;padding:0 6px;font-size:10px">1.ª linea</button>
+      <button class="rib-btn" id="btnHangIndent" title="Sangria francesa (entradas de referencia)" style="width:auto;padding:0 6px;font-size:10px">Francesa</button>
     </div>
     <div class="rib-gl">Sangria</div>
   </div>
@@ -265,7 +261,6 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
       <button class="rib-tool" id="btnEtal" title='Reemplazar "y otros" por "et al."'>et al.</button>
       <button class="rib-tool" id="btnDoi" title="Agregar enlaces DOI a las referencias">DOI</button>
       <button class="rib-tool" id="btnAlpha" title="Ordenar referencias alfabeticamente"><i class="fa-solid fa-arrow-down-a-z" style="margin-right:3px"></i>A-Z</button>
-      <button class="rib-tool" id="btnJournalItalic" title="Cursiva para nombres de revista y número de volumen"><i class="fa-solid fa-italic" style="margin-right:3px"></i>Cursiva rev.</button>
     </div>
     <div class="rib-gl">Herramientas APA</div>
   </div>
@@ -335,11 +330,11 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
     <div class="lock-ico"><i class="fa-solid fa-lock"></i><span>Completa el cuerpo primero</span></div>
     <h2 class="refs-h" data-sel="ref-heading">Referencias</h2>
     <div id="refsList">
-      <p class="ref-e" data-key="torres">Torres, R., Navarro, M., y Delgado, P. (2023). <span class="atitle">Efectos diferenciales de la tecnologia en cognicion adolescente</span>. <span class="jname">Revista de Psicologia Educativa</span>, <span class="vnum">29</span>(3), 145-162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span></p>
-      <p class="ref-e" data-key="garcia">Garcia, M., y Lopez, C. (2019). <span class="atitle">Pantallas y desarrollo cognitivo: una perspectiva diferenciada</span>. <span class="jname">Infancia y Aprendizaje</span>, <span class="vnum">42</span>(4), 890-912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span></p>
-      <p class="ref-e" data-key="chen">Chen, W., Park, S., y Muller, H. (2022). <span class="atitle">Metodologias de revision sistematica en investigacion cognitiva</span>. <span class="jname">Psychological Methods</span>, <span class="vnum">27</span>(1), 34-52. <span class="doi-l">https://doi.org/10.1037/met0000412</span></p>
-      <p class="ref-e" data-key="martinez">Martinez, A., Ruiz, B., y Santos, L. (2020). <span class="atitle">Redes sociales y atencion sostenida en adolescentes</span>. <span class="jname">Journal of Adolescent Psychology</span>, <span class="vnum">45</span>(2), 78-95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span></p>
-      <p class="ref-e" data-key="fernandez">Fernandez, J. (2021). <span class="atitle">Habilidades digitales y competencias del siglo XXI en jovenes</span>. <span class="jname">Comunicar</span>, <span class="vnum">69</span>, 23-38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span></p>
+      <p class="ref-e" data-key="torres">Torres, R., Navarro, M., y Delgado, P. (2023). <span class="atitle" data-sel="atitle">Efectos diferenciales de la tecnologia en cognicion adolescente</span>. <span class="jname" data-sel="jname">Revista de Psicologia Educativa</span>, <span class="vnum" data-sel="vnum">29</span>(3), 145-162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span></p>
+      <p class="ref-e" data-key="garcia">Garcia, M., y Lopez, C. (2019). <span class="atitle" data-sel="atitle">Pantallas y desarrollo cognitivo: una perspectiva diferenciada</span>. <span class="jname" data-sel="jname">Infancia y Aprendizaje</span>, <span class="vnum" data-sel="vnum">42</span>(4), 890-912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span></p>
+      <p class="ref-e" data-key="chen">Chen, W., Park, S., y Muller, H. (2022). <span class="atitle" data-sel="atitle">Metodologias de revision sistematica en investigacion cognitiva</span>. <span class="jname" data-sel="jname">Psychological Methods</span>, <span class="vnum" data-sel="vnum">27</span>(1), 34-52. <span class="doi-l">https://doi.org/10.1037/met0000412</span></p>
+      <p class="ref-e" data-key="martinez">Martinez, A., Ruiz, B., y Santos, L. (2020). <span class="atitle" data-sel="atitle">Redes sociales y atencion sostenida en adolescentes</span>. <span class="jname" data-sel="jname">Journal of Adolescent Psychology</span>, <span class="vnum" data-sel="vnum">45</span>(2), 78-95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span></p>
+      <p class="ref-e" data-key="fernandez">Fernandez, J. (2021). <span class="atitle" data-sel="atitle">Habilidades digitales y competencias del siglo XXI en jovenes</span>. <span class="jname" data-sel="jname">Comunicar</span>, <span class="vnum" data-sel="vnum">69</span>, 23-38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span></p>
     </div>
   </div>
 
@@ -399,8 +394,7 @@ const G = {
   pageNum:false, header:false, pageBreak:false,
   bullets:true, firstIndent:false, hangIndent:false,
   bodyBold:true, citations:false, etAl:false,
-  journalItalic:false, volumeItalic:false,
-  articleCase:'upper', doi:false, alphaOrder:false
+  doi:false, alphaOrder:false
 };
 
 /* Formato por tipo de elemento seleccionable */
@@ -411,20 +405,25 @@ const TF = {
   h1:           { bold:false, italic:true,  underline:true,  align:'left',   case:'upper' },
   h2:           { bold:false, italic:false, underline:false, align:'center', case:'upper' },
   paragraph:    { bold:true,  italic:false, underline:false, align:'left',   case:'none' },
-  'ref-heading':{ bold:false, italic:false, underline:true,  align:'left',   case:'upper' }
+  'ref-heading':{ bold:false, italic:false, underline:true,  align:'left',   case:'upper' },
+  atitle:       { bold:false, italic:false, underline:false, align:'left',   case:'upper' },
+  jname:        { bold:false, italic:false, underline:false, align:'left',   case:'none' },
+  vnum:         { bold:false, italic:false, underline:false, align:'left',   case:'none' }
 };
 
 /* Mapa tipo de elemento → selector CSS */
 const SEL_MAP = {
   title:'.tit', author:'.autor-t', affiliation:'.afil-t',
-  h1:'.h1', h2:'.h2', paragraph:'.parr', 'ref-heading':'.refs-h'
+  h1:'.h1', h2:'.h2', paragraph:'.parr', 'ref-heading':'.refs-h',
+  atitle:'.atitle', jname:'.jname', vnum:'.vnum'
 };
 
 /* Etiquetas legibles */
 const TYPE_LABEL = {
   title:'Titulo', author:'Autor', affiliation:'Afiliacion',
   h1:'Encabezado Nivel 1', h2:'Encabezado Nivel 2',
-  paragraph:'Parrafo', 'ref-heading':'Encabezado Referencias'
+  paragraph:'Parrafo', 'ref-heading':'Encabezado Referencias',
+  atitle:'Titulo de articulo', jname:'Nombre de revista', vnum:'Numero de volumen'
 };
 
 let selType = null;       // Tipo de elemento seleccionado
@@ -498,14 +497,6 @@ function render() {
   paper.querySelectorAll('.yot').forEach(el => el.style.display = G.etAl ? 'none' : 'inline');
   paper.querySelectorAll('.etal').forEach(el => el.style.display = G.etAl ? 'inline' : 'none');
 
-  /* Cursivas revistas y volúmenes */
-  paper.querySelectorAll('.jname').forEach(el => el.style.fontStyle = G.journalItalic ? 'italic' : 'normal');
-  paper.querySelectorAll('.vnum').forEach(el => el.style.fontStyle = G.volumeItalic ? 'italic' : 'normal');
-
-  /* Mayúsculas en títulos de artículos */
-  const caseMapG = { upper:'uppercase', lower:'lowercase', sentence:'none', title:'capitalize', none:'none' };
-  paper.querySelectorAll('.atitle').forEach(el => el.style.textTransform = caseMapG[G.articleCase] || 'none');
-
   /* DOI */
   paper.querySelectorAll('.doi-l').forEach(el => el.style.display = G.doi ? 'inline' : 'none');
 
@@ -560,7 +551,8 @@ function updateRibbon() {
   $('btnEtal').classList.toggle('on', G.etAl);
   $('btnDoi').classList.toggle('on', G.doi);
   $('btnAlpha').classList.toggle('on', G.alphaOrder);
-  $('btnJournalItalic').classList.toggle('on', G.journalItalic);
+  $('btnFirstIndent').classList.toggle('on', G.firstIndent);
+  $('btnHangIndent').classList.toggle('on', G.hangIndent);
 
   /* Estado de selección en barra */
   const stSel = $('stSel');
@@ -642,15 +634,9 @@ document.querySelectorAll('.align-b').forEach(b => {
 /* Viñetas */
  $('btnBullets').addEventListener('click', () => { G.bullets = !G.bullets; render(); updateRibbon(); touchInteraction(); });
 
-/* Sangría */
- $('selIndent').addEventListener('change', e => {
-  const v = e.target.value;
-  if (v === 'first') { G.firstIndent = true; G.hangIndent = false; }
-  else if (v === 'hanging') { G.hangIndent = true; G.firstIndent = false; }
-  else if (v === 'both') { G.firstIndent = true; G.hangIndent = true; }
-  else { G.firstIndent = false; G.hangIndent = false; }
-  render(); updateRibbon(); touchInteraction();
-});
+/* Sangría — independientes: primera linea afecta solo parrafos del cuerpo, francesa solo referencias */
+ $('btnFirstIndent').addEventListener('click', () => { G.firstIndent = !G.firstIndent; render(); updateRibbon(); touchInteraction(); });
+ $('btnHangIndent').addEventListener('click', () => { G.hangIndent = !G.hangIndent; render(); updateRibbon(); touchInteraction(); });
 
 /* Márgenes */
  $('selMargins').addEventListener('change', e => { G.margins = e.target.value; render(); touchInteraction(); });
@@ -682,7 +668,6 @@ document.querySelectorAll('.align-b').forEach(b => {
 
 /* Ordenar A-Z */
  $('btnAlpha').addEventListener('click', () => { G.alphaOrder = !G.alphaOrder; render(); updateRibbon(); touchInteraction(); });
- $('btnJournalItalic').addEventListener('click', () => { G.journalItalic = !G.journalItalic; G.volumeItalic = G.journalItalic; render(); updateRibbon(); touchInteraction(); });
 
 /* =============================================
    VERIFICACIÓN DE FASES
@@ -704,8 +689,8 @@ function checkPhase(n) {
   if (n === 3) {
     return TF['ref-heading'].align === 'center' && TF['ref-heading'].bold &&
       !TF['ref-heading'].underline && TF['ref-heading'].case !== 'upper' &&
-      G.hangIndent && G.journalItalic && G.volumeItalic &&
-      G.articleCase === 'sentence' && G.doi && G.alphaOrder;
+      G.hangIndent && TF.jname.italic && TF.vnum.italic &&
+      TF.atitle.case === 'sentence' && G.doi && G.alphaOrder;
   }
   return false;
 }
@@ -746,8 +731,8 @@ const PHASE_REQS = {
     { label:'"Referencias" centrado, negrita, sin subrayado/MAYUSCULAS',
       ok:() => TF['ref-heading'].align==='center' && TF['ref-heading'].bold && !TF['ref-heading'].underline && TF['ref-heading'].case!=='upper' },
     { label:'Sangria francesa en referencias',          ok:() => G.hangIndent },
-    { label:'Revistas y volumenes en cursiva',          ok:() => G.journalItalic && G.volumeItalic },
-    { label:'Titulos en mayuscula tipo oracion',        ok:() => G.articleCase==='sentence' },
+    { label:'Revistas y volumenes en cursiva',          ok:() => TF.jname.italic && TF.vnum.italic },
+    { label:'Titulos en mayuscula tipo oracion',        ok:() => TF.atitle.case==='sentence' },
     { label:'Enlaces DOI agregados',                    ok:() => G.doi },
     { label:'Referencias en orden alfabetico',          ok:() => G.alphaOrder },
   ],
@@ -1001,8 +986,8 @@ function getPhaseErrors(p) {
     if(TF['ref-heading'].underline) e.push('"Referencias" no debe estar subrayado.');
     if(TF['ref-heading'].case==='upper') e.push('"Referencias" no debe estar en MAYUSCULAS.');
     if(!G.hangIndent) e.push('Las referencias no tienen sangria francesa.');
-    if(!G.journalItalic||!G.volumeItalic) e.push('Los nombres de revistas y volumenes deben ir en cursiva.');
-    if(G.articleCase!=='sentence') e.push('Los titulos de articulos deben usar mayusculula de tipo oracion.');
+    if(!TF.jname.italic||!TF.vnum.italic) e.push('Los nombres de revistas y volumenes deben ir en cursiva.');
+    if(TF.atitle.case!=='sentence') e.push('Los titulos de articulos deben usar mayusculula de tipo oracion.');
     if(!G.doi) e.push('Faltan los enlaces DOI en las referencias.');
     if(!G.alphaOrder) e.push('Las referencias no estan ordenadas alfabeticamente.');
   }
