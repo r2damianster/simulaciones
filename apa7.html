@@ -194,6 +194,9 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
         <p class="parr">Las habilidades de multitarea digital han mejorado significativamente en comparación con generaciones anteriores.</p>
       </div>
 
+      <!-- Marca de salto de página -->
+      <div class="break-mark">— salto de página —</div>
+
       <!-- MÉTODO -->
       <h2 class="h1">MÉTODO</h2>
       <h3 class="h2">PARTICIPANTES</h3>
@@ -202,15 +205,24 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
       <h3 class="h2">PROCEDIMIENTO</h3>
       <p class="parr">La búsqueda se realizó en las bases de datos PubMed, PsycINFO y Web of Science. Los investigadores <span class="wcita">(según Chen y colaboradores, 2022)</span><span class="rcita">(Chen <span class="yot">y colaboradores</span><span class="etal">et al.</span>, 2022)</span> aplicaron un protocolo de revisión sistemática siguiendo las directrices PRISMA, evaluando la calidad metodológica mediante la escala de Newcastle-Ottawa.</p>
 
+      <!-- Marca de salto de página -->
+      <div class="break-mark">— salto de página —</div>
+
       <!-- RESULTADOS -->
       <h2 class="h1">RESULTADOS</h2>
       <p class="parr">Los resultados revelan un panorama <span class="ubold">complejo</span> y matizado. Por un lado, se identificó una correlación negativa moderada (r = -0.34) entre el tiempo de uso de redes sociales y el rendimiento en tareas de atención sostenida. Por otro lado, el uso de herramientas digitales educativas mostró una correlación positiva (r = 0.28) con la memoria de trabajo visual.</p>
       <p class="parr">Los análisis de subgrupos realizados por <span class="wcita">(Torres y otros, 2023)</span><span class="rcita">(Torres <span class="yot">y otros</span><span class="etal">et al.</span>, 2023)</span> indicaron que el tipo de actividad tecnológica es un factor moderador crucial: las actividades pasivas (como ver videos) se asociaron con peores resultados cognitivos, mientras que las actividades interactivas (como programación o creación de contenido) mostraron efectos neutros o positivos.</p>
 
+      <!-- Marca de salto de página -->
+      <div class="break-mark">— salto de página —</div>
+
       <!-- DISCUSIÓN -->
       <h2 class="h1">DISCUSIÓN</h2>
       <p class="parr">Los hallazgos de esta revisión sistemática sugieren que el impacto de la tecnología en el desarrollo cognitivo adolescente no es uniforme, sino que depende de múltiples variables como el tipo de uso, la duración de la exposición y el contexto en el que se utiliza la tecnología. Estos resultados son consistentes con los planteamientos de <span class="wcita">(véase García y López, 2019)</span><span class="rcita">(García y López, 2019)</span> sobre la necesidad de adoptar una perspectiva diferenciada.</p>
       <p class="parr">Se recomienda que futuras investigaciones adopten diseños longitudinales de mayor duración y utilicen medidas neurocognitivas objetivas. Asimismo, los resultados subrayan la importancia de desarrollar programas de alfabetización digital que promuevan un uso <span class="ubold">responsable</span> y activo de la tecnología por parte de los adolescentes.</p>
+
+      <!-- Marca de salto de página -->
+      <div class="break-mark">— salto de página —</div>
 
       <!-- REFERENCIAS -->
       <h2 class="refs-h">REFERENCIAS</h2>
@@ -282,7 +294,7 @@ const TASKS = [
   { id:'sin-esp',   cat:'formato', label:'Eliminar espacio adicional entre párrafos',               css:'t-sin-espacio',fb:'Hay espacios adicionales entre párrafos. Deben eliminarse; el interlineado doble es suficiente.' },
   { id:'margenes',  cat:'formato', label:'Establecer márgenes de 2.54 cm (1 pulgada)',              css:'t-margenes', fb:'Los márgenes no son de 2.54 cm en todos los lados. Verifica la configuración de página.' },
   { id:'pnum',      cat:'formato', label:'Agregar número de página en esquina superior derecha',    css:'t-pnum',     fb:'No hay número de página en la esquina superior derecha. Todas las páginas deben estar numeradas.' },
-  { id:'salto',     cat:'formato', label:'Insertar salto de página después de la portada',          css:'t-salto',    fb:'Falta el salto de página después de la portada. El cuerpo debe comenzar en una nueva página.' },
+  { id:'salto',     cat:'formato', label:'Insertar salto de página entre cada apartado',            css:'t-salto',    fb:'Falta el salto de página entre apartados. Cada encabezado de Nivel 1 (Introducción, Método, Resultados, Discusión, Referencias) debe iniciar en una nueva página.' },
   { id:'rhead',     cat:'encab',   label:'Agregar encabezado con título abreviado en mayúsculas',   css:'t-rhead',    fb:'Falta el encabezado con el título abreviado en mayúsculas en el margen superior.' },
   { id:'sangria',   cat:'cuerpo',  label:'Aplicar sangría de 1.27 cm en la primera línea',         css:'t-sangria',  fb:'Los párrafos no tienen sangría de 1.27 cm en la primera línea. Es obligatorio en APA 7.' },
   { id:'h1',        cat:'cuerpo',  label:'Encabezados Nivel 1: centrados, en negrita',              css:'t-h1',       fb:'Los encabezados de Nivel 1 deben estar centrados y en negrita, sin subrayado ni mayúsculas.' },
