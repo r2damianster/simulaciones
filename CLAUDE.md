@@ -69,7 +69,8 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 - Los textos pedagógicos deben mantener rigor científico (nivel universitario/posgrado).
 - Codificación: **UTF-8** siempre. Verificar que las tildes y ñ queden correctas.
 - No commitear sin instrucción explícita.
-- **Toda nueva simulación** debe: (1) enlazarse en `index.html` (tarjeta en `#simulaciones`, sim-grid), (2) listarse en la tabla "Simulaciones activas" de este archivo, (3) incluir botón/enlace `href="index.html"` para volver al inicio. Un hook (`PostToolUse:Write` → `.claude/hooks/check-sim-link.js`) recuerda esto automáticamente al crear el archivo.
+- **Toda nueva simulación** debe: (1) enlazarse en `index.html` (tarjeta en `#simulaciones`, sim-grid con clase CSS propia), (2) listarse en la tabla "Simulaciones activas" de este archivo, (3) incluir botón/enlace `href="index.html"` para volver al inicio, (4) implementar captura de nombre del estudiante. Un hook (`PostToolUse:Write` → `.claude/hooks/check-sim-link.js`) recuerda esto automáticamente al crear el archivo.
+- **Captura de nombre obligatoria en pantalla final:** toda simulación debe incluir la función `obtenerNombreUsuario(callback)` que: usa `sessionStorage.getItem/setItem('nombreEstudianteSim')` para no preguntar dos veces en la misma sesión; si no hay nombre guardado, muestra un overlay modal con input + botón "Continuar"; llama `callback(nombre)` al confirmar. La pantalla final (`endGame()`, `showFinalScreen()` o equivalente) debe llamar `obtenerNombreUsuario(nombre => { ... })` y personalizar el mensaje con el nombre. Colores del overlay deben respetar la paleta de la simulación (usar variables CSS de la simulación para borde y acento).
 
 ---
 

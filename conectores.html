@@ -399,9 +399,35 @@
             { connectorType: "Conclusión", correctConnector: "En definitiva", categoryOptions: ["Adición", "Ejemplificación", "Causalidad", "Conclusión"], wordOptions: ["En definitiva", "A modo de ejemplo", "Por el contrario", "Luego"], sentence: "el modelo virtual no reemplaza al presencial, sino que actúa como una herramienta complementaria indispensable." }
         ];
 
+        // ── NOMBRE DEL ESTUDIANTE ──
+        function obtenerNombreUsuario(callback) {
+            const guardado = sessionStorage.getItem('nombreEstudianteSim');
+            if (guardado) { callback(guardado); return; }
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:99999;';
+            overlay.innerHTML = `
+                <div style="background:#252530;color:#e0e0e0;padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--accent-gold);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+                    <h3 style="margin:0 0 12px;color:var(--accent-gold)">¿Cómo te llamas?</h3>
+                    <p style="font-size:.85rem;opacity:.75;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión y no se envía a ningún servidor.</p>
+                    <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid #666;background:rgba(255,255,255,.05);color:#e0e0e0;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
+                    <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:var(--accent-gold);color:#000;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+                </div>`;
+            document.body.appendChild(overlay);
+            const input = overlay.querySelector('#inputNombreUsuario');
+            input.focus();
+            const confirmar = () => {
+                const nombre = input.value.trim() || 'Estudiante';
+                sessionStorage.setItem('nombreEstudianteSim', nombre);
+                overlay.remove();
+                callback(nombre);
+            };
+            overlay.querySelector('#btnConfirmarNombre').addEventListener('click', confirmar);
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') confirmar(); });
+        }
+
         let currentAxleIndex = null;
         let currentStep = 1;
-        
+
         // SISTEMA DE PUNTUACIÓN
         let score = 100;
         const PENALTY = 5;
@@ -571,28 +597,29 @@
 
         // PANTALLA FINAL
         function showFinalScreen() {
-            const finalScoreEl = document.getElementById('finalScore');
-            const finalMsgEl = document.getElementById('finalMessage');
-            
-            finalScoreEl.innerText = score + " / 100";
-            
-            // Determinar rango
-            if (score === 100) {
-                finalScoreEl.className = "grade-excellent";
-                finalMsgEl.innerText = "¡Perfecto! Dominio absoluto de la sintaxis y lógica argumentativa.";
-            } else if (score >= 80) {
-                finalScoreEl.className = "grade-excellent";
-                finalMsgEl.innerText = "¡Excelente! Muy buen reconocimiento de conectores académicos.";
-            } else if (score >= 60) {
-                finalScoreEl.className = "grade-good";
-                finalMsgEl.innerText = "Aceptable. Tienes claridad conceptual, pero fallas en el vocabulario específico.";
-            } else {
-                finalScoreEl.className = "grade-bad";
-                finalMsgEl.innerText = "Deficiente. Necesitas repasar las categorías de conectores y sus funciones.";
-            }
+            obtenerNombreUsuario(nombre => {
+                const finalScoreEl = document.getElementById('finalScore');
+                const finalMsgEl = document.getElementById('finalMessage');
 
-            document.getElementById('overlay').classList.add('show');
-            document.getElementById('finalPanel').classList.add('show');
+                finalScoreEl.innerText = score + " / 100";
+
+                if (score === 100) {
+                    finalScoreEl.className = "grade-excellent";
+                    finalMsgEl.innerText = `¡Perfecto, ${nombre}! Dominio absoluto de la sintaxis y lógica argumentativa.`;
+                } else if (score >= 80) {
+                    finalScoreEl.className = "grade-excellent";
+                    finalMsgEl.innerText = `¡Excelente, ${nombre}! Muy buen reconocimiento de conectores académicos.`;
+                } else if (score >= 60) {
+                    finalScoreEl.className = "grade-good";
+                    finalMsgEl.innerText = `${nombre}, tienes claridad conceptual, pero fallas en el vocabulario específico.`;
+                } else {
+                    finalScoreEl.className = "grade-bad";
+                    finalMsgEl.innerText = `${nombre}, necesitas repasar las categorías de conectores y sus funciones.`;
+                }
+
+                document.getElementById('overlay').classList.add('show');
+                document.getElementById('finalPanel').classList.add('show');
+            });
         }
 
         function closeOptions() {
