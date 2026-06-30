@@ -727,8 +727,10 @@ const PHASE_REQS = {
   ],
   3: [
     { label:'Sangria francesa en referencias',          ok:() => G.hangIndent },
-    { label:'Revistas y volumenes en cursiva (selecciona el nombre de la revista o el numero de volumen en una referencia y aplica Cursiva)',
-      ok:() => TF.jname.italic && TF.vnum.italic },
+    { label:'Nombre de revista en cursiva (selecciona el nombre de la revista en una referencia y aplica Cursiva)',
+      ok:() => TF.jname.italic },
+    { label:'Numero de volumen en cursiva (selecciona el numero de volumen — aparte de la revista — y aplica Cursiva)',
+      ok:() => TF.vnum.italic },
     { label:'Enlaces DOI agregados',                    ok:() => G.doi },
     { label:'Referencias en orden alfabetico',          ok:() => G.alphaOrder },
   ],
@@ -804,7 +806,7 @@ const HINTS = {
   3: [
     'El encabezado "Referencias" ya hereda el formato de los encabezados Nivel 1 — si esos quedaron bien, este tambien.',
     'Aplica sangria francesa a las entradas de referencia.',
-    'Selecciona el nombre de una revista o un numero de volumen y aplica Cursiva (boton I).',
+    'Selecciona el nombre de la revista y aplica Cursiva (boton I). Luego selecciona el numero de volumen, aparte, y aplicalo tambien — son dos clics distintos.',
     'Agrega los enlaces DOI a cada referencia.',
     'Ordena las referencias alfabeticamente por apellido del primer autor.'
   ]
@@ -978,7 +980,8 @@ function getPhaseErrors(p) {
   }
   if (p===3) {
     if(!G.hangIndent) e.push('Las referencias no tienen sangria francesa.');
-    if(!TF.jname.italic||!TF.vnum.italic) e.push('Los nombres de revistas y volumenes deben ir en cursiva (selecciona el nombre de revista o el numero de volumen y aplica Cursiva).');
+    if(!TF.jname.italic) e.push('El nombre de la revista no esta en cursiva (selecciona solo el nombre de la revista y aplica Cursiva).');
+    if(!TF.vnum.italic) e.push('El numero de volumen no esta en cursiva (selecciona solo el numero de volumen, aparte de la revista, y aplica Cursiva).');
     if(!G.doi) e.push('Faltan los enlaces DOI en las referencias.');
     if(!G.alphaOrder) e.push('Las referencias no estan ordenadas alfabeticamente.');
   }
