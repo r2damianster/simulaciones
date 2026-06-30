@@ -328,7 +328,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
   <!-- FASE 3: REFERENCIAS -->
   <div class="doc-sec locked" data-phase="3">
     <div class="lock-ico"><i class="fa-solid fa-lock"></i><span>Completa el cuerpo primero</span></div>
-    <h2 class="refs-h" data-sel="ref-heading">Referencias</h2>
+    <h2 class="refs-h">Referencias</h2>
     <div id="refsList">
       <p class="ref-e" data-key="torres">Torres, R., Navarro, M., y Delgado, P. (2023). <span class="atitle" data-sel="atitle">Efectos diferenciales de la tecnologia en cognicion adolescente</span>. <span class="jname" data-sel="jname">Revista de Psicologia Educativa</span>, <span class="vnum" data-sel="vnum">29</span>(3), 145-162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span></p>
       <p class="ref-e" data-key="garcia">Garcia, M., y Lopez, C. (2019). <span class="atitle" data-sel="atitle">Pantallas y desarrollo cognitivo: una perspectiva diferenciada</span>. <span class="jname" data-sel="jname">Infancia y Aprendizaje</span>, <span class="vnum" data-sel="vnum">42</span>(4), 890-912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span></p>
@@ -405,16 +405,17 @@ const TF = {
   h1:           { bold:false, italic:true,  underline:true,  align:'left',   case:'upper' },
   h2:           { bold:false, italic:false, underline:false, align:'center', case:'upper' },
   paragraph:    { bold:true,  italic:false, underline:false, align:'left',   case:'none' },
-  'ref-heading':{ bold:false, italic:false, underline:true,  align:'left',   case:'upper' },
   atitle:       { bold:false, italic:false, underline:false, align:'left',   case:'upper' },
   jname:        { bold:false, italic:false, underline:false, align:'left',   case:'none' },
   vnum:         { bold:false, italic:false, underline:false, align:'left',   case:'none' }
 };
 
-/* Mapa tipo de elemento → selector CSS */
+/* Mapa tipo de elemento → selector CSS.
+   "Referencias" es un encabezado Nivel 1 mas (misma regla APA), por eso
+   comparte selector y formato con h1 — no es un tipo aparte. */
 const SEL_MAP = {
   title:'.tit', author:'.autor-t', affiliation:'.afil-t',
-  h1:'.h1', h2:'.h2', paragraph:'.parr', 'ref-heading':'.refs-h',
+  h1:'.h1, .refs-h', h2:'.h2', paragraph:'.parr',
   atitle:'.atitle', jname:'.jname', vnum:'.vnum'
 };
 
@@ -422,7 +423,7 @@ const SEL_MAP = {
 const TYPE_LABEL = {
   title:'Titulo', author:'Autor', affiliation:'Afiliacion',
   h1:'Encabezado Nivel 1', h2:'Encabezado Nivel 2',
-  paragraph:'Parrafo', 'ref-heading':'Encabezado Referencias',
+  paragraph:'Parrafo',
   atitle:'Titulo de articulo', jname:'Nombre de revista', vnum:'Numero de volumen'
 };
 
@@ -687,10 +688,7 @@ function checkPhase(n) {
     return G.firstIndent && !G.bullets && !G.bodyBold && G.citations && G.etAl;
   }
   if (n === 3) {
-    return TF['ref-heading'].align === 'center' && TF['ref-heading'].bold &&
-      !TF['ref-heading'].underline && TF['ref-heading'].case !== 'upper' &&
-      G.hangIndent && TF.jname.italic && TF.vnum.italic &&
-      TF.atitle.case === 'sentence' && G.doi && G.alphaOrder;
+    return G.hangIndent && TF.jname.italic && TF.vnum.italic && G.doi && G.alphaOrder;
   }
   return false;
 }
@@ -728,11 +726,9 @@ const PHASE_REQS = {
     { label:'"et al." en lugar de "y otros"',           ok:() => G.etAl },
   ],
   3: [
-    { label:'"Referencias" centrado, negrita, sin subrayado/MAYUSCULAS',
-      ok:() => TF['ref-heading'].align==='center' && TF['ref-heading'].bold && !TF['ref-heading'].underline && TF['ref-heading'].case!=='upper' },
     { label:'Sangria francesa en referencias',          ok:() => G.hangIndent },
-    { label:'Revistas y volumenes en cursiva',          ok:() => TF.jname.italic && TF.vnum.italic },
-    { label:'Titulos en mayuscula tipo oracion',        ok:() => TF.atitle.case==='sentence' },
+    { label:'Revistas y volumenes en cursiva (selecciona el nombre de la revista o el numero de volumen en una referencia y aplica Cursiva)',
+      ok:() => TF.jname.italic && TF.vnum.italic },
     { label:'Enlaces DOI agregados',                    ok:() => G.doi },
     { label:'Referencias en orden alfabetico',          ok:() => G.alphaOrder },
   ],
@@ -806,10 +802,9 @@ const HINTS = {
     'Reemplaza "y otros" por "et al." en citas con tres o mas autores.'
   ],
   3: [
-    'El encabezado "Referencias" debe ir centrado y en negrita.',
+    'El encabezado "Referencias" ya hereda el formato de los encabezados Nivel 1 — si esos quedaron bien, este tambien.',
     'Aplica sangria francesa a las entradas de referencia.',
-    'Los nombres de revistas y numeros de volumen van en cursiva.',
-    'Los titulos de articulos usan mayusculula de tipo oracion.',
+    'Selecciona el nombre de una revista o un numero de volumen y aplica Cursiva (boton I).',
     'Agrega los enlaces DOI a cada referencia.',
     'Ordena las referencias alfabeticamente por apellido del primer autor.'
   ]
@@ -982,12 +977,8 @@ function getPhaseErrors(p) {
     if(!G.etAl) e.push('Se usa "y otros" en lugar de "et al." en citas con 3+ autores.');
   }
   if (p===3) {
-    if(TF['ref-heading'].align!=='center'||!TF['ref-heading'].bold) e.push('"Referencias" debe estar centrado y en negrita.');
-    if(TF['ref-heading'].underline) e.push('"Referencias" no debe estar subrayado.');
-    if(TF['ref-heading'].case==='upper') e.push('"Referencias" no debe estar en MAYUSCULAS.');
     if(!G.hangIndent) e.push('Las referencias no tienen sangria francesa.');
-    if(!TF.jname.italic||!TF.vnum.italic) e.push('Los nombres de revistas y volumenes deben ir en cursiva.');
-    if(TF.atitle.case!=='sentence') e.push('Los titulos de articulos deben usar mayusculula de tipo oracion.');
+    if(!TF.jname.italic||!TF.vnum.italic) e.push('Los nombres de revistas y volumenes deben ir en cursiva (selecciona el nombre de revista o el numero de volumen y aplica Cursiva).');
     if(!G.doi) e.push('Faltan los enlaces DOI en las referencias.');
     if(!G.alphaOrder) e.push('Las referencias no estan ordenadas alfabeticamente.');
   }
