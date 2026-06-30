@@ -36,6 +36,14 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
 .paper.t-h1 .h1{font-weight:700;text-align:center;text-transform:none;text-decoration:none;font-style:normal}
 .paper.t-h2 .h2{font-weight:700;text-align:left;text-transform:none}
 .paper.t-refs-head .refs-h{font-weight:700;text-align:center;text-transform:none;text-decoration:none;font-style:normal}
+.revista-banner{display:none;background:#fff3cd;color:#856404;border:1px solid #ffe58f;border-radius:6px;padding:8px 12px;font-size:11px;line-height:1.5;margin-bottom:14px}
+.paper.revista-mode{column-count:2;column-gap:30px;column-rule:1px solid rgba(0,0,0,.12)}
+.paper.revista-mode .revista-banner{display:block;column-span:all}
+.paper.revista-mode .portada,.paper.revista-mode .break-mark{column-span:all}
+.paper.revista-mode .h1,.paper.revista-mode .refs-h{text-align:left;font-weight:700;text-transform:none;text-decoration:none;font-style:normal;font-size:1em}
+.paper.revista-mode .parr{margin-bottom:4px}
+.mode-btn{background:transparent;border:none;color:var(--muted);font-size:11px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:all .2s}
+.mode-btn.on{background:var(--accent);color:#000}
 .paper.t-hang .ref-e{text-indent:-1.27cm;padding-left:1.27cm}
 .paper.t-cursiva .jname{font-style:italic}
 .paper.t-cursiva .vnum{font-style:italic}
@@ -138,6 +146,10 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
       <div style="font-family:'Crimson Pro',serif;font-weight:700;font-size:18px;line-height:1.1">Simulacion APA 7</div>
       <div style="font-size:11px;color:var(--muted)">Formatacion de manuscrito academico</div>
     </div>
+    <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.05);border-radius:8px;padding:3px;margin-left:8px" title="Vista comparativa: formato APA real vs. ejemplo ilustrativo de plantilla de revista">
+      <button id="btnModoReal" class="mode-btn on" onclick="setRevistaMode(false)">APA real</button>
+      <button id="btnModoRevista" class="mode-btn" onclick="setRevistaMode(true)">Plantilla de revista (ejemplo)</button>
+    </div>
   </div>
   <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
     <div style="text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Tiempo</div><div id="timer" style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">00:00</div></div>
@@ -158,6 +170,8 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
   <!-- Vista del documento -->
   <section class="doc-col" style="flex:1;overflow-y:auto;padding:24px;display:flex;justify-content:center;background:rgba(20,18,16,.4)">
     <div class="paper" id="paper">
+
+      <div class="revista-banner"><i class="fa-solid fa-circle-info" style="margin-right:6px"></i>Vista ilustrativa: formato de plantilla de revista (doble columna, títulos Nivel 2). Cada revista define su propio estilo — esto <strong>no</strong> es parte de la norma APA 7 evaluada en este ejercicio.</div>
 
       <!-- Encabezado y número de página -->
       <div class="rhead">IMPACTO TECNOLOGÍA ADOLESCENTES</div>
@@ -574,6 +588,22 @@ sendBtn.addEventListener('click', () => {
 
 function closeModal() {
   modal.classList.remove('on');
+}
+
+/* ============================================
+   TOGGLE: APA REAL vs PLANTILLA DE REVISTA (ejemplo ilustrativo)
+   ============================================ */
+function setRevistaMode(on) {
+  paper.classList.toggle('revista-mode', on);
+  document.getElementById('btnModoReal').classList.toggle('on', !on);
+  document.getElementById('btnModoRevista').classList.toggle('on', on);
+
+  const taskCol = document.querySelector('.task-col');
+  taskCol.style.opacity = on ? '.4' : '1';
+  taskCol.style.pointerEvents = on ? 'none' : 'auto';
+  sendBtn.disabled = on;
+  sendBtn.style.opacity = on ? '.4' : '1';
+  sendBtn.style.cursor = on ? 'not-allowed' : 'pointer';
 }
 modal.addEventListener('click', (e) => {
   if (e.target === modal) closeModal();
