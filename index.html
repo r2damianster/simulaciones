@@ -306,6 +306,7 @@
         .sim-out.peel:hover { border-color: rgba(52,152,219,0.4); box-shadow: 0 24px 60px rgba(52,152,219,0.08); }
         .sim-out.eval:hover { border-color: rgba(212,162,78,0.4); box-shadow: 0 24px 60px rgba(212,162,78,0.08); }
         .sim-out.mue:hover  { border-color: rgba(52,211,153,0.4);  box-shadow: 0 24px 60px rgba(52,211,153,0.08); }
+        .sim-out.con:hover  { border-color: rgba(212,175,55,0.45); box-shadow: 0 24px 60px rgba(212,175,55,0.09); }
 
         .sim-in {
             border-radius: calc(1.75rem - 4px); background: var(--card);
@@ -359,6 +360,13 @@
             content: ''; position: absolute; inset: 0;
             background: radial-gradient(circle at 50% 60%, rgba(52,211,153,0.25) 0%, transparent 65%);
         }
+        .con .sim-thumb {
+            background: linear-gradient(135deg, #1a1a1d 0%, rgba(44,44,52,0.6) 100%);
+        }
+        .con .sim-thumb::after {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 50% 60%, rgba(212,175,55,0.28) 0%, transparent 65%);
+        }
 
         .sim-body { padding: 24px 28px 28px; }
 
@@ -371,6 +379,7 @@
         .des .sim-tag { background: rgba(0,255,65,0.1);   color: var(--emerald); }
         .eval .sim-tag { background: rgba(212,162,78,0.14); color: #d4a24e; }
         .mue  .sim-tag { background: rgba(52,211,153,0.12);  color: var(--emerald); }
+        .con  .sim-tag { background: rgba(212,175,55,0.12);  color: #d4af37; }
 
         .sim-title {
             font-family: var(--serif); font-size: 1.18rem; font-weight: 700;
@@ -779,6 +788,25 @@
                             <div class="sim-title">Simulador de Muestreos</div>
                             <p class="sim-desc">Distingue entre técnicas probabilísticas y no probabilísticas mediante simulaciones visuales con poblaciones reales de plantas, personas y fábricas.</p>
                             <a class="btn-sim" href="muestreo.html" onclick="trackAndGo('simlab_mue','muestreo.html');return false;">
+                                Iniciar Simulación
+                                <span class="btn-sim-ico">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Conectores Argumentativos -->
+                <div class="sim-out con reveal d3" onclick="trackAndGo('simlab_con','conectores.html')">
+                    <div class="sim-in">
+                        <div class="sim-thumb">
+                            <span class="sim-thumb-icon">⚙️</span>
+                        </div>
+                        <div class="sim-body">
+                            <span class="sim-tag">Redacción Académica</span>
+                            <div class="sim-title">Máquina de Engranajes Argumentativos</div>
+                            <p class="sim-desc">Conecta enunciados académicos eligiendo el tipo de relación lógica y el conector exacto. Cada error resta puntos en este desafío de nivel avanzado.</p>
+                            <a class="btn-sim" href="conectores.html" onclick="trackAndGo('simlab_con','conectores.html');return false;">
                                 Iniciar Simulación
                                 <span class="btn-sim-ico">→</span>
                             </a>

@@ -20,6 +20,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `peel.html` | Constructor PEEL - Drag & Drop | Redacción argumentativa — estructura PEEL (Punto, Evidencia, Explicación, Link), arrastrar frases a slots correctos |
 | `evaluaciones_lectura.html` | Evaluación Lectora — Ciencias Naturales | Comprensión lectora — rúbrica progresiva (literal, inferencial, crítico) sobre escritos de estudiantes de 3° a 8° básico |
 | `muestreo.html` | Simulador de Muestreos | Estadística — técnicas probabilísticas y no probabilísticas, simulaciones visuales con poblaciones de plantas, personas y fábricas |
+| `conectores.html` | Máquina de Engranajes Argumentativos | Redacción académica — conectores discursivos (adición, causalidad, contraste, ejemplificación, orden temporal, conclusión); mecánica 2-paso: tipo de relación → conector exacto; puntuación sobre 100, -5 por error |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 
@@ -48,6 +49,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 | `apa7.html` | `#141210` (dark warm) | `#D4A853` (gold) | Editorial académico / Tailwind |
 | `apa7_2.html` | `#1E1E1E` (VS Code dark) | `#D4A853` (gold) | Editor de código / Word-like ribbon |
 | `evaluaciones_lectura.html` | `#0d0f12` (dark slate) | `#D4A24E` (gold) | Editorial caligráfico / papel manuscrito, Tailwind |
+| `conectores.html` | `#1a1a1d` (dark industrial) | `#d4af37` (gold) + `#39ff14` (neon green) | Mecánica industrial / engranajes |
 
 ### Patrones de código JS
 
