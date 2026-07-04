@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Constructor PEEL - Drag & Drop</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="description" content="Simulación pedagógica interactiva de redacción argumentativa: construye párrafos PEEL (Punto, Evidencia, Explicación, Link) arrastrando frases. SimLab ULEAM.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
             --bg: #f4f7f6;
@@ -17,6 +19,10 @@
             --l-color: #8e44ad;
             --trash-color: #95a5a6;
             --border: #dcdde1;
+            --sim-home-fg: #3498db;
+            --sim-home-bg: rgba(52,152,219,0.12);
+            --sim-home-bd: rgba(52,152,219,0.22);
+            --sim-home-hi: #3498db;
         }
 
         body {
@@ -213,11 +219,20 @@
             font-weight: bold;
         }
         .btn-volver:hover { background: #2980b9; }
+
+        .sim-home{position:fixed;top:14px;left:14px;z-index:100;width:40px;height:40px;
+          display:flex;align-items:center;justify-content:center;text-decoration:none;
+          color:var(--sim-home-fg);background:var(--sim-home-bg);
+          border:1px solid var(--sim-home-bd);border-radius:10px;
+          transition:transform .2s, color .2s}
+        .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
     </style>
 </head>
 <body>
 
-    <a href="index.html" title="Volver al inicio" style="position:fixed;top:15px;left:15px;z-index:100;color:var(--primary);font-size:22px;text-decoration:none;background:var(--panel);width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.1)"><i class="fa-solid fa-house"></i></a>
+    <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+      <i class="fa-solid fa-house" aria-hidden="true"></i>
+    </a>
 
     <h1>🧩 Constructor de Textos PEEL</h1>
     <p class="subtitulo">Arrastra las frases del banco y suéltalas en la estructura correcta. ¡Cuidado con las trampas! Completa los 4 ejercicios para dominar la estructura PEEL.</p>
@@ -670,6 +685,7 @@
         }
 
         function finalizarSimulacion() {
+            localStorage.setItem('simlab_peel', Date.now());
             document.getElementById(`ejercicio-${ejerciciosDB.length}`).classList.add('oculto');
             obtenerNombreUsuario(nombre => {
                 document.getElementById('resumen-final-titulo').textContent = `¡Felicidades, ${nombre}! Has dominado la estructura PEEL`;

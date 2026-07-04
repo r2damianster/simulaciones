@@ -4,11 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simulación Formato APA 7</title>
+<meta name="description" content="Simulación pedagógica interactiva de formato APA 7: corrige un manuscrito con errores de portada, encabezados, citas y referencias. SimLab ULEAM.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-:root{--bg:#141210;--fg:#E8E0D4;--muted:#8A8078;--accent:#D4A853;--card:#1E1B18;--border:#2E2A26;--error:#C75050;--success:#5A9E6F;--paper:#FAFAF8;--paper-text:#1A1A1A}
+:root{--bg:#141210;--fg:#E8E0D4;--muted:#8A8078;--accent:#D4A853;--card:#1E1B18;--border:#2E2A26;--error:#C75050;--success:#5A9E6F;--paper:#FAFAF8;--paper-text:#1A1A1A;--sim-home-fg:#D4A853;--sim-home-bg:rgba(212,168,83,0.12);--sim-home-bd:rgba(212,168,83,0.22);--sim-home-hi:#fbbf24}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -127,10 +129,21 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
   .task-col{width:100%!important;max-height:40vh;border-right:none!important;border-bottom:1px solid var(--border)}
   .doc-col{width:100%!important}
 }
+.sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
+  display:flex;align-items:center;justify-content:center;text-decoration:none;
+  color:var(--sim-home-fg);background:var(--sim-home-bg);
+  border:1px solid var(--sim-home-bd);border-radius:10px;
+  transition:transform .2s, color .2s}
+.sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
+
+<!-- Back-link -->
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+  <i class="fa-solid fa-house" aria-hidden="true"></i>
+</a>
 
 <!-- Fondo decorativo -->
 <div class="bg-glow bg-glow-1"></div>
@@ -140,11 +153,10 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
 <!-- Barra superior -->
 <header style="background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100">
   <div style="display:flex;align-items:center;gap:12px">
-    <a href="index.html" title="Volver al inicio" style="color:var(--muted);font-size:18px;text-decoration:none;display:flex;align-items:center;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><i class="fa-solid fa-house"></i></a>
     <i class="fa-solid fa-graduation-cap" style="color:var(--accent);font-size:20px"></i>
     <div>
-      <div style="font-family:'Crimson Pro',serif;font-weight:700;font-size:18px;line-height:1.1">Simulacion APA 7</div>
-      <div style="font-size:11px;color:var(--muted)">Formatacion de manuscrito academico</div>
+      <div style="font-family:'Crimson Pro',serif;font-weight:700;font-size:18px;line-height:1.1">Simulación APA 7</div>
+      <div style="font-size:11px;color:var(--muted)">Formateación de manuscrito académico</div>
     </div>
     <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.05);border-radius:8px;padding:3px;margin-left:8px" title="Vista comparativa: formato APA real vs. ejemplo ilustrativo de plantilla de revista">
       <button id="btnModoReal" class="mode-btn on" onclick="setRevistaMode(false)">APA real</button>
@@ -497,6 +509,7 @@ sendBtn.addEventListener('click', () => {
 
   if (pendientes.length === 0) {
     /* APROBADO */
+    localStorage.setItem('simlab_apa', Date.now());
     modalBox.className = 'modal-box acc';
     const m = String(Math.floor(seconds / 60)).padStart(2, '0');
     const s = String(seconds % 60).padStart(2, '0');

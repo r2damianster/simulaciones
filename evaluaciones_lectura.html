@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evaluación Lectora — Ciencias Naturales</title>
+    <meta name="description" content="Simulación pedagógica interactiva de evaluación lectora: evalúa escritos de estudiantes aplicando rúbrica progresiva de comprensión literal, inferencial y crítica. SimLab ULEAM.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,6 +29,10 @@
             --paper: #f5f0e3;
             --paper-line: #c0c8d8;
             --paper-margin: rgba(210,120,120,0.45);
+            --sim-home-fg: #D4A24E;
+            --sim-home-bg: rgba(212,162,78,0.12);
+            --sim-home-bd: rgba(212,162,78,0.22);
+            --sim-home-hi: #fbbf24;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -368,6 +374,13 @@
             .summary-row { grid-template-columns: 30px 1fr 70px 40px; font-size: 0.85rem; }
         }
 
+        .sim-home{position:fixed;top:14px;left:14px;z-index:100;width:40px;height:40px;
+          display:flex;align-items:center;justify-content:center;text-decoration:none;
+          color:var(--sim-home-fg);background:var(--sim-home-bg);
+          border:1px solid var(--sim-home-bd);border-radius:10px;
+          transition:transform .2s, color .2s}
+        .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
@@ -379,7 +392,9 @@
     <div class="bg-orb bg-orb-2"></div>
     <div class="bg-orb bg-orb-3"></div>
 
-    <a href="index.html" title="Volver al inicio" style="position:fixed;top:15px;left:15px;z-index:100;color:var(--accent);font-size:20px;text-decoration:none;background:var(--card);border:1px solid var(--border);width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3)"><i class="fa-solid fa-house"></i></a>
+    <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+      <i class="fa-solid fa-house" aria-hidden="true"></i>
+    </a>
 
     <!-- Contenedor principal -->
     <div id="app" style="position:relative; z-index:1; min-height:100vh;"></div>
@@ -1026,6 +1041,7 @@
             const nextEval = state.currentEval + 1;
             if (nextEval >= 6) {
                 // Ir a resumen
+                localStorage.setItem('simlab_eval', Date.now());
                 obtenerNombreUsuario(nombre => {
                     state.nombreUsuario = nombre;
                     state.screen = 'summary';

@@ -35,6 +35,12 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 - **Iconos CDN**: Font Awesome 6.5
 - **CSS framework opcional**: Tailwind CDN (en `disenos.html` y `apa7.html`)
 
+### Index.html — Contadores dinámicos
+
+- **Contador de simulaciones:** Actualizado dinámicamente desde el DOM con `document.querySelectorAll('.sim-out').length` (nunca hardcodeado).
+- **Contador de lanzamientos:** Suma todos los `.sim-out[data-key]` desde localStorage, automáticamente incluye nuevas simulaciones.
+- **Seguimiento de progreso:** Las 9 sims escriben `localStorage.setItem('simlab_done_<key>', Date.now())` en pantalla final; index.html lee estas claves y muestra badge «✓ Completada» en tarjetas.
+
 ---
 
 ## Convenciones de diseño
@@ -49,6 +55,8 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 | `apa7.html` | `#141210` (dark warm) | `#D4A853` (gold) | Editorial académico / Tailwind |
 | `apa7_2.html` | `#1E1E1E` (VS Code dark) | `#D4A853` (gold) | Editor de código / Word-like ribbon |
 | `evaluaciones_lectura.html` | `#0d0f12` (dark slate) | `#D4A24E` (gold) | Editorial caligráfico / papel manuscrito, Tailwind |
+| `muestreo.html` | `#0A1410` (dark green) | `#34D399` (emerald) | Paisaje ecológico / naturaleza orgánica |
+| `peel.html` | `#1a1a2e` (dark blue) | `#3498db` (blue) | Construcción modular / arquitectura |
 | `conectores.html` | `#1a1a1d` (dark industrial) | `#d4af37` (gold) + `#39ff14` (neon green) | Mecánica industrial / engranajes |
 
 ### Patrones de código JS
@@ -58,6 +66,105 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 - Botones dinámicos vía `addButton(label, callback)`
 - Fases numeradas: `startPhase1()`, `startPhase2()`, `startPhase3()`
 - Fin de juego: `endGame()` muestra modal con veredicto y puntaje
+
+---
+
+## Snippets canónicos
+
+### Back-link unificado (fijo esquina superior izquierda)
+
+Todas las simulaciones tienen un back-link canónico en **posición fija top:14px left:14px**, con variables CSS parametrizadas por paleta de cada sim:
+
+```html
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+  <i class="fa-solid fa-house" aria-hidden="true"></i>
+</a>
+```
+
+Cada simulación define en `:root`:
+```css
+:root {
+  --sim-home-fg: #D97706;           /* color texto normal */
+  --sim-home-bg: rgba(217,119,6,0.15); /* fondo */
+  --sim-home-bd: rgba(217,119,6,0.3);  /* borde */
+  --sim-home-hi: #F59E0B;           /* color hover */
+}
+```
+
+CSS común (incluir en todas):
+```css
+.sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
+  display:flex;align-items:center;justify-content:center;text-decoration:none;
+  color:var(--sim-home-fg, #888);background:var(--sim-home-bg, rgba(0,0,0,.35));
+  border:1px solid var(--sim-home-bd, rgba(255,255,255,.15));border-radius:10px;
+  transition:transform .2s, color .2s}
+.sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi, #fff);transform:scale(1.06)}
+```
+
+### Progreso del estudiante (localStorage)
+
+En la **función de pantalla final** de cada simulación (inmediatamente antes del return o al inicio), insertar:
+```javascript
+localStorage.setItem('simlab_done_CLAVE', Date.now());
+```
+
+Donde `CLAVE` es:
+- observación.html: `simlab_obs`
+- financiamiento_etica.html: `simlab_fin`
+- disenos.html: `simlab_des`
+- apa7.html: `simlab_apa`
+- apa7_2.html: `simlab_apa2`
+- peel.html: `simlab_peel`
+- evaluaciones_lectura.html: `simlab_eval`
+- muestreo.html: `simlab_mue`
+- conectores.html: `simlab_con`
+
+En `index.html`, el JavaScript lee estas claves y muestra badge «✓ Completada» en las tarjetas correspondientes.
+
+### Obtenernobraestudiantr (sessionStorage)
+
+Todas las 9 simulaciones reutilizan una función **idéntica** (duplicada intencionalmente por autosuficiencia):
+
+```javascript
+function obtenerNombreUsuario(callback) {
+  const nombre = sessionStorage.getItem('nombreEstudianteSim');
+  if (nombre) {
+    callback(nombre);
+    return;
+  }
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.72);
+    display:flex;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(5px)`;
+  const modal = document.createElement('div');
+  modal.style.cssText = `background:var(--card, #222);border:1px solid var(--border, rgba(255,255,255,0.1));
+    border-radius:12px;padding:32px;max-width:400px;text-align:center;`;
+  modal.innerHTML = `
+    <p style="font-size:16px;color:var(--txt, #fff);margin-bottom:24px;font-weight:600">¿Cómo te llamas?</p>
+    <input type="text" id="input-nombre" style="width:100%;padding:10px 14px;border:1px solid var(--border, rgba(255,255,255,0.2));
+      border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg, #111);color:var(--txt, #fff);margin-bottom:16px"
+      placeholder="Ingresa tu nombre" autocomplete="off">
+    <p style="font-size:12px;color:var(--txt-3, #999);margin-bottom:20px">No te preguntaremos otra vez en esta sesión.</p>
+    <button id="btn-continuar" style="background:var(--accent, #818cf8);color:var(--bg, #000);border:none;
+      padding:10px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">Continuar</button>
+  `;
+  modal.appendChild(modal);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  const inputNombre = modal.querySelector('#input-nombre');
+  const btnContinuar = modal.querySelector('#btn-continuar');
+  const submit = () => {
+    const nombre = inputNombre.value.trim() || 'Estudiante';
+    sessionStorage.setItem('nombreEstudianteSim', nombre);
+    overlay.remove();
+    callback(nombre);
+  };
+  btnContinuar.addEventListener('click', submit);
+  inputNombre.addEventListener('keypress', e => e.key === 'Enter' && submit());
+  inputNombre.focus();
+}
+```
+
+**Uso en pantalla final:** `obtenerNombreUsuario(nombre => { /* usa 'nombre' aquí */ })`
 
 ---
 

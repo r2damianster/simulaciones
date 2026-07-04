@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simulador de Muestreos</title>
+<meta name="description" content="Simulación pedagógica interactiva de estadística y muestreo: distingue técnicas probabilísticas y no probabilísticas mediante simulaciones visuales. SimLab ULEAM.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -12,6 +14,7 @@
   --fg:#DFF0E4;--fg-muted:#5F9172;--accent:#34D399;--accent-glow:rgba(52,211,153,.25);
   --warm:#FBBF24;--warm-glow:rgba(251,191,36,.2);--error:#F87171;--error-glow:rgba(248,113,113,.2);
   --border:#1B3328;--border-light:#264A38;--radius:12px;
+  --sim-home-fg:#34d399;--sim-home-bg:rgba(52,211,153,0.12);--sim-home-bd:rgba(52,211,153,0.22);--sim-home-hi:#34d399;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;scroll-behavior:smooth}
@@ -267,12 +270,21 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   .transicion-features{flex-direction:column;align-items:center}
 }
 
+.sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
+  display:flex;align-items:center;justify-content:center;text-decoration:none;
+  color:var(--sim-home-fg);background:var(--sim-home-bg);
+  border:1px solid var(--sim-home-bd);border-radius:10px;
+  transition:transform .2s, color .2s}
+.sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
 </style>
 </head>
 <body>
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+  <i class="fa-solid fa-house" aria-hidden="true"></i>
+</a>
 <button id="glosario-toggle" aria-label="Abrir glosario"><i class="fas fa-book"></i></button>
 <div id="app">
   <aside id="glosario-panel"></aside>
@@ -601,7 +613,6 @@ function renderInicio(){
       <div class="inicio-feat"><i class="fas fa-layer-group"></i> 2 fases de dificultad</div>
     </div>
     <button class="btn-primary" onclick="comenzar()">Comenzar simulación</button>
-    <a href="index.html" style="margin-top:12px;display:inline-flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--fg-muted);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--fg-muted)'"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
   `;
 }
 
@@ -1074,11 +1085,11 @@ function mostrarTransicion(){
     <div class="transicion-icon">🎯</div>
     <h2 class="transicion-titulo">Fase 1 completada</h2>
     <p class="transicion-sub">
-      Ya sabes distinguir entre muestreo probabilistico y no probabilistico. Ahora sube la dificultad: deberas identificar el <strong>tipo especifico</strong> de muestreo dentro de cada categoria.
+      Ya sabes distinguir entre muestreo probabilístico y no probabilístico. Ahora sube la dificultad: deberás identificar el <strong>tipo específico</strong> de muestreo dentro de cada categoría.
     </p>
     <div class="transicion-features">
-      <div class="transicion-feat"><i class="fas fa-check-circle"></i> Pregunta 1: Probabilistico o no</div>
-      <div class="transicion-feat"><i class="fas fa-bullseye"></i> Pregunta 2: Tipo especifico</div>
+      <div class="transicion-feat"><i class="fas fa-check-circle"></i> Pregunta 1: Probabilístico o no</div>
+      <div class="transicion-feat"><i class="fas fa-bullseye"></i> Pregunta 2: Tipo específico</div>
       <div class="transicion-feat"><i class="fas fa-star"></i> Mas puntos en juego</div>
     </div>
     <p style="font-size:13px;color:var(--fg-muted);margin-bottom:24px;text-align:center">
@@ -1091,6 +1102,7 @@ function mostrarTransicion(){
 
 /* ========== PANTALLA FINAL ========== */
 function mostrarPantallaFinal(){
+  localStorage.setItem('simlab_mue', Date.now());
   obtenerNombreUsuario(nombre => {
     state.nombreUsuario = nombre;
     _renderPantallaFinal();

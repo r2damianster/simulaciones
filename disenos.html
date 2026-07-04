@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratorio ACME - Investigación Conductual</title>
+    <meta name="description" content="Simulación pedagógica interactiva de diseños experimentales: diseña y ejecuta experimentos conductuales en un laboratorio virtual cyberpunk. SimLab ULEAM.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -25,18 +27,22 @@
             --pre-color: #ff4444;
             --quasi-color: #ffaa00;
             --pure-color: #00ff41;
+            --sim-home-fg: #00ff41;
+            --sim-home-bg: rgba(0,255,65,0.1);
+            --sim-home-bd: rgba(0,255,65,0.2);
+            --sim-home-hi: #00ff41;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         .home-btn {
             position: fixed; top: 14px; left: 14px; z-index: 50;
-            width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
-            border: 1px solid var(--border-bright); border-radius: 8px;
-            color: var(--fg-bright); background: var(--bg-card);
-            text-decoration: none; font-size: 16px; transition: all .2s;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--sim-home-bd); border-radius: 10px;
+            color: var(--sim-home-fg); background: var(--sim-home-bg);
+            text-decoration: none; font-size: 16px; transition: transform .2s, color .2s;
         }
-        .home-btn:hover { background: var(--bg-card-alt); box-shadow: 0 0 12px rgba(0,255,65,0.25); }
+        .home-btn:hover { color: var(--sim-home-hi); transform: scale(1.06); }
 
         body {
             font-family: 'Share Tech Mono', monospace;
@@ -490,8 +496,8 @@
         </div>
         <h1 class="text-3xl md:text-5xl mb-4">LABORATORIO ACME</h1>
         <p class="text-[var(--fg-dim)] text-sm max-w-2xl mx-auto leading-relaxed">
-            Simulacion interactiva de disenos experimentales con sujetos de prueba BRAIN (Sujeto A) y PINKY (Sujeto B).
-            Identifica los criterios metodologicos en cada tipo de investigacion.
+            Simulación interactiva de diseños experimentales con sujetos de prueba BRAIN (Sujeto A) y PINKY (Sujeto B).
+            Identifica los criterios metodológicos en cada tipo de investigación.
         </p>
         <div class="mt-4 text-[var(--fg-dim)] text-xs">
             SISTEMA ACTIVO <span class="blink text-[var(--fg-bright)]">_</span>
@@ -931,7 +937,7 @@
         <div class="exp-card text-center" style="border-color:var(--fg-bright); padding:40px;">
             <i class="fa-solid fa-flask-vial" style="font-size:2.5rem;color:var(--fg-bright);margin-bottom:16px;"></i>
             <h2 id="final-titulo" style="font-family:'Orbitron',sans-serif;color:var(--fg-bright);font-size:1.4rem;margin-bottom:12px;letter-spacing:1px;">PROTOCOLO COMPLETADO</h2>
-            <p style="color:var(--fg);max-width:560px;margin:0 auto;line-height:1.7;">Has ejecutado los tres diseños y comparado su capacidad de inferencia causal. Solo el experimento puro, con asignacion aleatoria y grupo control equivalente, permite atribuir causalidad.</p>
+            <p style="color:var(--fg);max-width:560px;margin:0 auto;line-height:1.7;">Has ejecutado los tres diseños y comparado su capacidad de inferencia causal. Solo el experimento puro, con asignación aleatoria y grupo control equivalente, permite atribuir causalidad.</p>
             <a href="index.html" class="home-btn" style="display:inline-flex;margin-top:24px;"><i class="fa-solid fa-house mr-2"></i>Volver al inicio</a>
         </div>
     </section>
@@ -1150,6 +1156,7 @@ async function runExperiment(type) {
     btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>COMPLETADO';
 
     if (experimentState.pre && experimentState.quasi && experimentState.pure) {
+        localStorage.setItem('simlab_des', Date.now());
         await delay(600);
         obtenerNombreUsuario(nombre => {
             const finalSection = document.getElementById('sec-final');

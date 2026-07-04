@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Observación en Investigación Social — Simulación 3D</title>
+    <meta name="description" content="Simulación pedagógica interactiva sobre observación en investigación social: domina tipos de observación, notas de campo y gestión de sesgos en un entorno 3D. SimLab ULEAM.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -23,6 +25,10 @@
             --radius: 14px;
             --font-display: 'Playfair Display', serif;
             --font-body: 'Source Sans 3', sans-serif;
+            --sim-home-fg: #D97706;
+            --sim-home-bg: rgba(217,119,6,0.15);
+            --sim-home-bd: rgba(217,119,6,0.3);
+            --sim-home-hi: #F59E0B;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -274,12 +280,25 @@
             .stats-row { gap: 0.6rem; }
         }
 
+        /* === Back-link canónico === */
+        .sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
+          display:flex;align-items:center;justify-content:center;text-decoration:none;
+          color:var(--sim-home-fg);background:var(--sim-home-bg);
+          border:1px solid var(--sim-home-bd);border-radius:10px;
+          transition:transform .2s, color .2s}
+        .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
 <body>
+
+<!-- Back-link -->
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+  <i class="fa-solid fa-house" aria-hidden="true"></i>
+</a>
 
 <!-- Intro -->
 <div id="intro">
@@ -301,7 +320,6 @@
         <span>Observación de Campo</span>
     </div>
     <div class="actions">
-        <a href="index.html" class="icon-btn" title="Volver al inicio" aria-label="Volver al inicio" style="text-decoration:none"><i class="fa-solid fa-house"></i></a>
         <button class="icon-btn active" id="btn-left" title="Panel educativo" aria-label="Mostrar panel educativo"><i class="fa-solid fa-book-open"></i></button>
         <button class="icon-btn active" id="btn-right" title="Apuntes de campo" aria-label="Mostrar apuntes de campo"><i class="fa-solid fa-note-sticky"></i></button>
         <button class="icon-btn" id="btn-help" title="Ayuda" aria-label="Ayuda"><i class="fa-solid fa-circle-question"></i></button>
@@ -1190,6 +1208,7 @@ function obtenerNombreUsuario(callback) {
 }
 
 function mostrarPantallaFinal() {
+    localStorage.setItem('simlab_obs', Date.now());
     obtenerNombreUsuario(nombre => {
         const desc = state.notes.filter(n => n.type === 'descriptiva').length;
         const refl = state.notes.filter(n => n.type === 'reflexiva').length;

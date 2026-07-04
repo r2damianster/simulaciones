@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>El Enjambre de la Ciencia</title>
+    <meta name="description" content="Simulación pedagógica interactiva de ética académica: navega entre revistas depredadoras, gestiona fondos ONU/CEDIA y toma decisiones éticas bajo presión. SimLab ULEAM.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto:wght@300;700;900&display=swap');
 
-        :root { --bg-dark: #05070a; --panel-bg: #0d1117; --text-main: #c9d1d9; --cyan: #00f3ff; --green: #238636; --yellow: #ffeb3b; --red: #ff3d5a; }
+        :root { --bg-dark: #05070a; --panel-bg: #0d1117; --text-main: #c9d1d9; --cyan: #00f3ff; --green: #238636; --yellow: #ffeb3b; --red: #ff3d5a; --sim-home-fg: #00f3ff; --sim-home-bg: rgba(0,243,255,0.1); --sim-home-bd: rgba(0,243,255,0.2); --sim-home-hi: #00ffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg-dark); color: var(--text-main); font-family: 'Roboto', sans-serif; overflow: hidden; height: 100vh; display: flex; }
         
@@ -54,9 +56,19 @@
         .btn-tempt { background: var(--yellow); color:#000; }
         .btn-honest { background: var(--green); color:#fff; }
         .btn-start { background: var(--cyan); color:#000; width:100%; padding:12px; border:none; cursor:pointer; font-family:'Share Tech Mono'; font-weight:bold; margin-top:15px; }
+        .sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
+          display:flex;align-items:center;justify-content:center;text-decoration:none;
+          color:var(--sim-home-fg);background:var(--sim-home-bg);
+          border:1px solid var(--sim-home-bd);border-radius:10px;
+          transition:transform .2s, color .2s}
+        .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
     </style>
 </head>
 <body>
+
+    <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+      <i class="fa-solid fa-house" aria-hidden="true"></i>
+    </a>
 
     <div id="map-container">
         <canvas id="canvas"></canvas>
@@ -64,7 +76,6 @@
 
     <div id="terminal-container">
         <div id="terminal-header">
-            <a href="index.html" title="Volver al inicio" style="color:var(--cyan);text-decoration:none;font-weight:600">&larr; INICIO</a>
             <span>TERMINAL_INVESTIGADOR // NODE_01</span>
             <span id="clock"></span>
         </div>
@@ -650,6 +661,7 @@
         clearInterval(onuTimerInterval);
         clearInterval(pubTimerInterval);
 
+        localStorage.setItem('simlab_fin', Date.now());
         obtenerNombreUsuario(nombre => {
             document.getElementById('final-modal').style.display = 'flex';
 

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Máquina de Engranajes - Sistema de Puntuación</title>
+    <meta name="description" content="Simulación pedagógica interactiva de conectores argumentativos: conecta enunciados académicos eligiendo tipo de relación lógica y conector exacto. SimLab ULEAM.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
     <style>
         :root {
             --bg-color: #1a1a1d;
@@ -13,6 +15,10 @@
             --accent-green: #39ff14;
             --accent-red: #ff3131;
             --text-color: #e0e0e0;
+            --sim-home-fg: #d4af37;
+            --sim-home-bg: rgba(212,175,55,0.12);
+            --sim-home-bd: rgba(212,175,55,0.22);
+            --sim-home-hi: #d4af37;
         }
 
         body {
@@ -432,6 +438,13 @@
         }
         #startMachineBtn:hover { background: #e8c558; transform: translateY(-2px); }
 
+        .sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
+          display:flex;align-items:center;justify-content:center;text-decoration:none;
+          color:var(--sim-home-fg);background:var(--sim-home-bg);
+          border:1px solid var(--sim-home-bd);border-radius:10px;
+          transition:transform .2s, color .2s}
+        .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+
         @media (max-width: 900px) {
             .manual-grid { grid-template-columns: 1fr; }
             .manual-panel { max-width: 92%; }
@@ -445,9 +458,10 @@
 </head>
 <body>
 
-    <div style="text-align:right; margin-bottom:10px;">
-        <a href="index.html" style="color:#888; font-size:0.85rem; text-decoration:none; border:1px solid #444; padding:6px 14px; border-radius:20px; transition:all 0.2s;" onmouseover="this.style.color='#d4af37';this.style.borderColor='#d4af37'" onmouseout="this.style.color='#888';this.style.borderColor='#444'">← Volver al inicio</a>
-    </div>
+    <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+      <i class="fa-solid fa-house" aria-hidden="true"></i>
+    </a>
+
     <h1>Máquina de Engranajes Argumentativos</h1>
     <p class="subtitle">Nivel Avanzado: Puntuación sobre 100. Cada error resta 5 puntos.</p>
     <p class="subtitle" style="font-size:0.8rem;">Pulsa <strong style="color:var(--accent-gold)">📖</strong> en cualquier momento para consultar el manual de conectores.</p>
@@ -769,6 +783,7 @@
 
         // PANTALLA FINAL
         function showFinalScreen() {
+            localStorage.setItem('simlab_con', Date.now());
             obtenerNombreUsuario(nombre => {
                 const finalScoreEl = document.getElementById('finalScore');
                 const finalMsgEl = document.getElementById('finalMessage');
