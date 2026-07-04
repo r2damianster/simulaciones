@@ -19,6 +19,17 @@
             "statusMessage": "Verificando enlace de simulación..."
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"c:/Users/User/Documents/Desarrollo Web/Simulaciones/.claude/hooks/check-fa-icons.js\"",
+            "timeout": 10,
+            "statusMessage": "Verificando iconos Font Awesome..."
+          }
+        ]
       }
     ]
   }
