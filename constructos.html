@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SimulAI — Alucinaciones en la Investigación</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--bg:#080c14;--fg:#e2e8f0;--muted:#64748b;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.07);--ai-green:#10a37f;--ai-dark:#1a1f2e;--sidebar:#171a24;--user-bubble:#1e3a4f;--scopus:#f97316;--ok:#10b981;--err:#ef4444;--warn:#fbbf24}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow:hidden}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ===== INTRO ===== */
+#screen-intro{position:fixed;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;transition:opacity .6s,transform .6s}
+#screen-intro.hidden{opacity:0;pointer-events:none;transform:scale(1.05)}
+.intro-content{display:flex;align-items:center;gap:3rem;max-width:960px;padding:2rem;flex-wrap:wrap;justify-content:center}
+.intro-text{flex:1;min-width:280px}
+.intro-illust{flex:1;min-width:300px;max-width:460px}
+.intro-illust svg{width:100%;height:auto;filter:drop-shadow(0 20px 40px rgba(0,0,0,.4));animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ===== MODAL ONBOARDING ===== */
+#onboard-overlay{position:fixed;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(4,6,10,.85);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .5s}
+#onboard-overlay.active{opacity:1;pointer-events:all}
+.onboard-card{background:#11151f;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:2.2rem;max-width:440px;width:90%;box-shadow:0 30px 80px rgba(0,0,0,.5);transform:translateY(20px);transition:transform .5s}
+#onboard-overlay.active .onboard-card{transform:translateY(0)}
+.onboard-avatar-preview{width:80px;height:80px;border-radius:50%;margin:0 auto 1.2rem;overflow:hidden;border:2px solid rgba(255,255,255,.1);transition:all .3s}
+.onboard-avatar-preview svg{width:100%;height:100%}
+.onboard-field{margin-bottom:1rem}
+.onboard-field label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.5px}
+.onboard-field input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.65rem .9rem;color:var(--fg);font-size:.9rem;font-family:'IBM Plex Sans',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
+.onboard-field input:focus{border-color:var(--ai-green);box-shadow:0 0 0 3px rgba(16,163,127,.12)}
+.onboard-field input::placeholder{color:rgba(255,255,255,.15)}
+.onboard-field .field-error{font-size:.7rem;color:var(--err);margin-top:.3rem;display:none}
+.onboard-field.has-error .field-error{display:block}
+.onboard-field.has-error input{border-color:var(--err)}
+.gender-options{display:flex;gap:.6rem}
+.gender-opt{flex:1;padding:.7rem .5rem;border-radius:10px;border:1px solid var(--border);background:var(--card);cursor:pointer;text-align:center;transition:all .2s}
+.gender-opt:hover{border-color:rgba(16,163,127,.3);background:rgba(16,163,127,.04)}
+.gender-opt.selected{border-color:var(--ai-green);background:rgba(16,163,127,.08);box-shadow:0 0 12px rgba(16,163,127,.08)}
+.gender-opt .g-icon{font-size:1.3rem;margin-bottom:.3rem;display:block}
+.gender-opt .g-label{font-size:.78rem;font-weight:600}
+.onboard-submit{width:100%;background:var(--ai-green);color:#000;border:none;border-radius:8px;padding:.75rem;font-weight:700;font-size:.95rem;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all .2s;margin-top:.5rem}
+.onboard-submit:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(16,163,127,.3)}
+.onboard-submit:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ===== NAVEGADOR ===== */
+#browser-wrapper{position:fixed;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .6s .2s}
+#browser-wrapper.active{opacity:1;pointer-events:all}
+.browser-frame{width:100%;max-width:1100px;height:92vh;background:#0d1117;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 80px rgba(0,0,0,.6),0 0 120px rgba(16,163,127,.05);display:flex;flex-direction:column;position:relative}
+.browser-topbar{background:#161b22;padding:.55rem .8rem;display:flex;align-items:center;gap:.75rem;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;z-index:10}
+.browser-dots{display:flex;gap:7px}
+.browser-dots span{width:12px;height:12px;border-radius:50%}
+.dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+.browser-tabs{display:flex;gap:2px;flex:1;justify-content:center}
+.browser-tab{padding:.3rem 1rem;border-radius:6px;font-size:.75rem;color:var(--muted);cursor:default;display:flex;align-items:center;gap:.4rem;transition:all .2s}
+.browser-tab.active{background:rgba(255,255,255,.06);color:var(--fg)}
+.browser-tab i{font-size:.65rem}
+.browser-url{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:6px;padding:.25rem .7rem;font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;margin:0 .5rem;flex-shrink:0;min-width:0}
+.browser-url i{color:var(--ok);font-size:.6rem}
+.browser-url span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.browser-actions{display:flex;gap:.6rem;color:var(--muted);font-size:.75rem}
+.browser-body{flex:1;display:flex;overflow:hidden;position:relative}
+
+/* Cursor mouse */
+#mouse-cursor{position:absolute;z-index:50;pointer-events:none;transition:left .5s cubic-bezier(.25,.46,.45,.94),top .5s cubic-bezier(.25,.46,.45,.94);filter:drop-shadow(1px 2px 3px rgba(0,0,0,.5));opacity:0}
+#mouse-cursor.visible{opacity:1}
+#mouse-cursor.mouse-click svg{transform:scale(.85)}
+#mouse-cursor svg{transition:transform .1s}
+
+/* Sidebar */
+.cg-sidebar{width:220px;background:var(--sidebar);border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-user{padding:.8rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid rgba(255,255,255,.05)}
+.sidebar-avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0}
+.sidebar-avatar svg{width:100%;height:100%}
+.sidebar-name{font-size:.8rem;font-weight:600}
+.sidebar-email{font-size:.65rem;color:var(--muted)}
+.sidebar-chats{padding:.5rem;flex:1}
+.sidebar-chat-item{padding:.45rem .6rem;border-radius:6px;font-size:.72rem;color:var(--muted);margin-bottom:2px;cursor:default;white-space:overflow;overflow:hidden;text-overflow:ellipsis}
+.sidebar-chat-item.active{background:rgba(255,255,255,.06);color:var(--fg)}
+.sidebar-new{margin:.5rem;padding:.5rem;border:1px dashed rgba(255,255,255,.1);border-radius:6px;text-align:center;font-size:.72rem;color:var(--muted);cursor:default}
+
+/* Chat */
+.cg-main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.chat-messages{flex:1;overflow-y:auto;padding:1.5rem 2rem;display:flex;flex-direction:column;gap:1.2rem}
+.chat-msg{display:flex;gap:.75rem;max-width:750px;animation:msgIn .4s ease}
+.chat-msg.user-msg{align-self:flex-end;flex-direction:row-reverse}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg-avatar{width:30px;height:30px;border-radius:50%;flex-shrink:0;overflow:hidden}
+.msg-avatar svg{width:100%;height:100%}
+.msg-content{flex:1;min-width:0}
+.msg-name{font-size:.7rem;font-weight:600;color:var(--muted);margin-bottom:.3rem}
+.user-msg .msg-name{text-align:right}
+.msg-bubble{padding:.75rem 1rem;border-radius:12px;font-size:.88rem;line-height:1.65}
+.user-msg .msg-bubble{background:var(--user-bubble);border-bottom-right-radius:4px}
+.ai-msg .msg-bubble{background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
+.chat-input-area{padding:.8rem 1.5rem 1.2rem;border-top:1px solid rgba(255,255,255,.05);background:var(--sidebar);position:relative}
+.chat-input-box{background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.6rem .8rem;display:flex;align-items:center;gap:.5rem;transition:border-color .2s}
+.chat-input-box:focus-within{border-color:rgba(255,255,255,.2)}
+.chat-input-box input{flex:1;background:none;border:none;outline:none;color:var(--fg);font-size:.85rem;font-family:'IBM Plex Sans',sans-serif}
+.chat-input-box input::placeholder{color:rgba(255,255,255,.2)}
+.chat-input-box button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:.2rem;transition:color .2s}
+.chat-input-box button:hover{color:var(--fg)}
+.typing-cursor{display:inline-block;width:2px;height:1em;background:var(--ai-green);margin-left:1px;animation:blink .6s step-end infinite;vertical-align:text-bottom}
+@keyframes blink{50%{opacity:0}}
+.typing-hands{position:absolute;bottom:3.8rem;right:2.5rem;z-index:5;opacity:0;transition:opacity .3s;pointer-events:none}
+.typing-hands.active{opacity:1}
+.typing-hands svg{width:80px;height:auto}
+.thinking-dots{display:flex;gap:5px;padding:.5rem 0}
+.thinking-dots span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:dotBounce .6s ease infinite}
+.thinking-dots span:nth-child(2){animation-delay:.15s}
+.thinking-dots span:nth-child(3){animation-delay:.3s}
+@keyframes dotBounce{0%,100%{transform:translateY(0);opacity:.3}50%{transform:translateY(-6px);opacity:1}}
+
+/* Opciones */
+.options-container{display:grid;gap:.6rem;margin-top:.3rem}
+.option-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;opacity:0;transform:translateY(12px)}
+.option-card.show{opacity:1;transform:translateY(0)}
+.option-card:hover:not(.verified-false):not(.selected){background:rgba(255,255,255,.06);border-color:rgba(16,163,127,.3);transform:translateY(-1px)}
+.option-card.selected{border-color:var(--ai-green);background:rgba(16,163,127,.08);box-shadow:0 0 16px rgba(16,163,127,.08)}
+.option-card.verified-false{opacity:.4;cursor:default;border-color:rgba(239,68,68,.2)}
+.option-card.verified-false.show{opacity:.4}
+.option-card .badge-false{position:absolute;top:.6rem;right:.6rem;background:rgba(239,68,68,.12);color:var(--err);font-size:.65rem;font-weight:600;padding:.15rem .5rem;border-radius:99px;border:1px solid rgba(239,68,68,.25)}
+.construct-tag{display:inline-block;background:rgba(16,163,127,.1);color:var(--ai-green);font-size:.7rem;font-weight:600;padding:.1rem .45rem;border-radius:4px;margin-bottom:.35rem}
+.option-title{font-weight:600;font-size:.88rem;margin-bottom:.3rem;line-height:1.35}
+.option-desc{color:var(--muted);font-size:.78rem;line-height:1.5}
+.verify-bar{text-align:center;padding:.8rem 0 0;opacity:0;transition:opacity .3s}
+.verify-bar.show{opacity:1}
+.verify-btn{background:var(--scopus);color:#fff;border:none;border-radius:8px;padding:.6rem 1.6rem;font-weight:600;font-size:.85rem;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:.4rem}
+.verify-btn:hover{background:#ea580c;transform:translateY(-1px);box-shadow:0 6px 20px rgba(249,115,22,.25)}
+.verify-label{font-size:.7rem;color:var(--muted);margin-top:.35rem}
+
+/* Scopus */
+.scopus-view{flex:1;overflow-y:auto;display:none;flex-direction:column}
+.scopus-view.active{display:flex}
+.scopus-header{background:linear-gradient(135deg,#1a0f00,#2a1500);border-bottom:1px solid rgba(249,115,22,.15);padding:.8rem 1.2rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;flex-shrink:0}
+.scopus-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem;color:var(--scopus)}
+.scopus-search{flex:1;min-width:200px;display:flex;gap:.4rem}
+.scopus-search input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(249,115,22,.15);border-radius:6px;padding:.5rem .8rem;color:var(--fg);font-size:.85rem;outline:none;font-family:'IBM Plex Sans',sans-serif}
+.scopus-search input:focus{border-color:var(--scopus);box-shadow:0 0 0 2px rgba(249,115,22,.1)}
+.scopus-search button{background:var(--scopus);color:#fff;border:none;border-radius:6px;padding:.5rem 1rem;font-weight:600;cursor:pointer;font-size:.85rem;transition:all .2s}
+.scopus-search button:hover{background:#ea580c}
+.scopus-search button:disabled{opacity:.4;cursor:not-allowed}
+.scopus-filters{background:rgba(249,115,22,.02);padding:.4rem 1.2rem;display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.72rem;color:var(--muted);border-bottom:1px solid rgba(249,115,22,.08);flex-shrink:0}
+.scopus-filters strong{color:var(--fg)}
+.scopus-body{flex:1;padding:1.2rem;overflow-y:auto}
+.results-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.results-table th{text-align:left;padding:.5rem .7rem;border-bottom:2px solid rgba(249,115,22,.25);color:var(--scopus);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+.results-table td{padding:.6rem .7rem;border-bottom:1px solid var(--border);vertical-align:top}
+.results-table tbody tr:hover{background:rgba(249,115,22,.03)}
+.title-cell{font-weight:500;max-width:320px}
+.cite-count{color:var(--scopus);font-weight:700;text-align:center}
+.zero-results{text-align:center;padding:2.5rem 1rem}
+.zero-count{font-family:'Space Grotesk',sans-serif;font-size:4.5rem;font-weight:700;color:var(--err);line-height:1}
+.zero-label{color:var(--muted);margin-top:.4rem;font-size:.9rem}
+.explain-box{border-radius:8px;padding:1rem;margin-top:1.2rem;font-size:.84rem;line-height:1.65}
+.explain-box.error{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15)}
+.explain-box.success{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15)}
+.tip-box{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.15);border-radius:8px;padding:.8rem 1rem;margin-top:.8rem;font-size:.8rem;line-height:1.6}
+.scan-bar{height:3px;background:linear-gradient(90deg,transparent,var(--scopus),transparent);border-radius:2px;animation:scan 1.5s ease-in-out infinite;margin:0 auto 1rem;width:50%}
+@keyframes scan{0%{transform:translateX(-100%);opacity:0}50%{opacity:1}100%{transform:translateX(100%);opacity:0}}
+@keyframes shake{0%,100%{transform:translateX(0)}15%{transform:translateX(-6px)}30%{transform:translateX(6px)}45%{transform:translateX(-4px)}60%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+.shake{animation:shake .45s ease}
+
+/* Final */
+.final-view{flex:1;overflow-y:auto;display:none;flex-direction:column;align-items:center;padding:2rem}
+.final-view.active{display:flex}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center;min-width:120px}
+.stat-num{font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:700;line-height:1}
+.stat-label{color:var(--muted);font-size:.7rem;margin-top:.2rem;text-transform:uppercase;letter-spacing:.5px}
+.lesson-item{display:flex;gap:.6rem;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.84rem;line-height:1.55}
+.lesson-item:last-child{border-bottom:none}
+.lesson-icon{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;margin-top:2px}
+.round-pill{display:inline-flex;align-items:center;gap:.5rem;background:rgba(16,163,127,.06);border:1px solid rgba(16,163,127,.15);border-radius:99px;padding:.2rem .7rem;font-size:.7rem;color:var(--ai-green);font-weight:600}
+.round-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.1)}
+.round-dot.done{background:var(--ok)}
+.round-dot.now{background:var(--ai-green);box-shadow:0 0 6px rgba(16,163,127,.5)}
+.attempts-text{font-size:.7rem;color:var(--muted)}
+
+/* Toast */
+#toast-container{position:fixed;top:1.5rem;right:1.5rem;z-index:100;display:flex;flex-direction:column;gap:.4rem}
+.toast{padding:.6rem 1rem;border-radius:6px;font-size:.8rem;font-weight:500;animation:toastIn .3s ease;max-width:350px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.toast-error{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#fca5a5}
+.toast-success{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#6ee7b7}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
+@media(max-width:768px){.cg-sidebar{display:none}.chat-messages{padding:1rem}.intro-content{flex-direction:column;text-align:center}.browser-frame{height:95vh;border-radius:0}#browser-wrapper{padding:0}.onboard-card{padding:1.5rem}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+<div id="toast-container" role="alert" aria-live="polite"></div>
+
+<!-- ===== INTRO ===== -->
+<div id="screen-intro">
+<div class="intro-content">
+<div class="intro-text">
+    <div style="display:inline-block;background:rgba(16,163,127,.08);border:1px solid rgba(16,163,127,.2);border-radius:99px;padding:.2rem .75rem;font-size:.68rem;color:var(--ai-green);font-weight:600;letter-spacing:.5px;margin-bottom:1rem">SIMULACION INTERACTIVA</div>
+    <h1 style="font-size:clamp(2.2rem,5vw,3.5rem);font-weight:700;letter-spacing:-1.5px;line-height:1.1;margin-bottom:.6rem">Simul<span style="color:var(--ai-green)">AI</span></h1>
+    <p style="font-size:1rem;color:var(--muted);max-width:380px;line-height:1.7;margin-bottom:1.5rem">Cuando la inteligencia artificial <span style="color:var(--err);font-weight:600">inventa</span> la ciencia. Aprende a detectar alucinaciones en temas de investigacion.</p>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.9rem;text-align:left;margin-bottom:1.5rem;font-size:.8rem;color:var(--muted);line-height:1.7">
+        <div style="font-weight:600;color:var(--fg);margin-bottom:.4rem"><i class="fas fa-laptop" style="color:var(--ai-green);margin-right:.3rem"></i>Que vas a hacer</div>
+        <ol style="padding-left:1.1rem">
+            <li>Preguntaras temas a una IA</li>
+            <li>Elegiras un constructo que te guste</li>
+            <li>Lo verificaras en Scopus</li>
+            <li>Si no existe... volveras a intentar</li>
+        </ol>
+    </div>
+    <button id="btn-start" style="background:var(--ai-green);color:#000;border:none;border-radius:8px;padding:.7rem 2rem;font-weight:700;font-size:.95rem;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(16,163,127,.3)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <i class="fas fa-play" style="margin-right:.4rem;font-size:.75rem"></i> Entrar al chat
+    </button>
+</div>
+<div class="intro-illust">
+<svg viewBox="0 0 480 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="60" y="230" width="360" height="10" rx="4" fill="#2a2520"/>
+    <rect x="90" y="240" width="10" height="65" rx="2" fill="#231f1b"/>
+    <rect x="380" y="240" width="10" height="65" rx="2" fill="#231f1b"/>
+    <rect x="150" y="108" width="180" height="115" rx="6" fill="#1e2233" stroke="#2a2f3d" stroke-width="1.5"/>
+    <rect x="157" y="115" width="166" height="98" rx="3" fill="#0d1117"/>
+    <rect x="165" y="124" width="45" height="4" rx="2" fill="#10a37f" opacity=".5"/>
+    <rect x="165" y="133" width="130" height="3" rx="1.5" fill="rgba(255,255,255,.07)"/>
+    <rect x="165" y="140" width="105" height="3" rx="1.5" fill="rgba(255,255,255,.05)"/>
+    <rect x="165" y="152" width="35" height="4" rx="2" fill="rgba(6,182,212,.3)"/>
+    <rect x="165" y="161" width="140" height="3" rx="1.5" fill="rgba(255,255,255,.07)"/>
+    <rect x="165" y="168" width="95" height="3" rx="1.5" fill="rgba(255,255,255,.05)"/>
+    <rect x="165" y="175" width="120" height="3" rx="1.5" fill="rgba(255,255,255,.04)"/>
+    <rect x="245" y="182" width="2" height="5" rx="1" fill="#10a37f"><animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/></rect>
+    <rect x="220" y="223" width="40" height="7" fill="#2a2f3d"/>
+    <rect x="205" y="228" width="70" height="5" rx="2" fill="#2a2f3d"/>
+    <rect x="175" y="229" width="130" height="6" rx="2" fill="#161b22"/>
+    <rect x="185" y="231" width="110" height="2" rx="1" fill="rgba(255,255,255,.03)"/>
+    <path d="M205 228 C205 190 225 165 245 158 C265 165 285 190 285 228" fill="#3d5a80"/>
+    <rect x="238" y="142" width="14" height="20" rx="4" fill="#c9956b"/>
+    <ellipse cx="245" cy="126" rx="27" ry="29" fill="#c9956b"/>
+    <path d="M218 120 C218 93 230 84 245 82 C260 84 272 93 272 120 L272 108 C272 95 262 88 245 86 C228 88 218 95 218 108Z" fill="#1a1208"/>
+    <ellipse cx="272" cy="128" rx="5" ry="6.5" fill="#b8845e"/>
+    <ellipse cx="258" cy="125" rx="3" ry="3.5" fill="white"/>
+    <circle cx="259" cy="125.5" r="1.8" fill="#1a1a1a"/>
+    <circle cx="259.5" cy="125" r=".5" fill="white"/>
+    <path d="M253 119 Q258 117 263 118.5" stroke="#1a1208" stroke-width="1.3" fill="none"/>
+    <path d="M265 128 Q267 132 264 134" stroke="#a87b55" stroke-width=".9" fill="none"/>
+    <path d="M256 138 Q261 140 264 139" stroke="#a87b55" stroke-width=".9" fill="none"/>
+    <path d="M210 195 Q192 215 187 227" stroke="#3d5a80" stroke-width="13" fill="none" stroke-linecap="round"/>
+    <circle cx="186" cy="229" r="6.5" fill="#c9956b"/>
+    <path d="M280 195 Q296 215 300 227" stroke="#3d5a80" stroke-width="13" fill="none" stroke-linecap="round"/>
+    <circle cx="301" cy="229" r="6.5" fill="#c9956b"/>
+    <rect x="395" y="212" width="20" height="20" rx="3.5" fill="#5c4a3a"/>
+    <path d="M415 217 Q423 217 423 224 Q423 230 415 230" stroke="#5c4a3a" stroke-width="2" fill="none"/>
+    <path d="M401 210 Q399 205 402 200" stroke="rgba(255,255,255,.1)" stroke-width="1" fill="none"><animate attributeName="d" values="M401 210 Q399 205 402 200;M401 210 Q403 204 400 199;M401 210 Q399 205 402 200" dur="3s" repeatCount="indefinite"/></path>
+    <path d="M408 210 Q410 204 407 198" stroke="rgba(255,255,255,.07)" stroke-width="1" fill="none"><animate attributeName="d" values="M408 210 Q410 204 407 198;M408 210 Q406 203 409 197;M408 210 Q410 204 407 198" dur="2.5s" repeatCount="indefinite"/></path>
+    <rect x="42" y="198" width="22" height="28" rx="3" fill="#5c4a3a"/>
+    <path d="M53 198 Q43 180 38 170" stroke="#2d6a4f" stroke-width="2.2" fill="none"/>
+    <path d="M53 198 Q53 175 58 165" stroke="#40916c" stroke-width="2.2" fill="none"/>
+    <path d="M53 198 Q63 183 68 173" stroke="#2d6a4f" stroke-width="2.2" fill="none"/>
+    <ellipse cx="38" cy="168" rx="5.5" ry="7.5" fill="#2d6a4f" transform="rotate(-20 38 168)"/>
+    <ellipse cx="58" cy="163" rx="4.5" ry="8" fill="#40916c" transform="rotate(5 58 163)"/>
+    <ellipse cx="68" cy="171" rx="5.5" ry="7.5" fill="#2d6a4f" transform="rotate(20 68 171)"/>
+    <rect x="80" y="218" width="48" height="5.5" rx="1" fill="#e07a5f"/>
+    <rect x="80" y="223.5" width="48" height="5.5" rx="1" fill="#3d405b"/>
+    <rect x="80" y="229" width="48" height="5.5" rx="1" fill="#81b29a"/>
+    <rect x="157" y="115" width="166" height="98" rx="3" fill="rgba(16,163,127,.02)"/>
+</svg>
+</div>
+</div>
+</div>
+
+<!-- ===== ONBOARDING ===== -->
+<div id="onboard-overlay">
+<div class="onboard-card">
+    <div style="text-align:center;margin-bottom:1.2rem">
+        <div class="onboard-avatar-preview" id="avatar-preview"></div>
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:.2rem">Antes de empezar</h3>
+        <p style="font-size:.8rem;color:var(--muted)">Personaliza tu experiencia en la simulacion</p>
+    </div>
+    <div class="onboard-field" id="field-nombre">
+        <label for="inp-nombre">Nombre</label>
+        <input type="text" id="inp-nombre" placeholder="Ej: Maria" maxlength="30" autocomplete="given-name">
+        <div class="field-error">Ingresa tu nombre</div>
+    </div>
+    <div class="onboard-field" id="field-apellido">
+        <label for="inp-apellido">Apellido</label>
+        <input type="text" id="inp-apellido" placeholder="Ej: Gonzalez" maxlength="30" autocomplete="family-name">
+        <div class="field-error">Ingresa tu apellido</div>
+    </div>
+    <div class="onboard-field" id="field-genero">
+        <label>Genero</label>
+        <div class="gender-options">
+            <div class="gender-opt" data-g="m" tabindex="0" role="radio" aria-checked="false">
+                <span class="g-icon"><i class="fas fa-mars" style="color:#60a5fa"></i></span>
+                <span class="g-label">Masculino</span>
+            </div>
+            <div class="gender-opt" data-g="f" tabindex="0" role="radio" aria-checked="false">
+                <span class="g-icon"><i class="fas fa-venus" style="color:#f472b6"></i></span>
+                <span class="g-label">Femenino</span>
+            </div>
+            <div class="gender-opt" data-g="nb" tabindex="0" role="radio" aria-checked="false">
+                <span class="g-icon"><i class="fas fa-genderless" style="color:#a78bfa"></i></span>
+                <span class="g-label">No binario</span>
+            </div>
+        </div>
+        <div class="field-error">Selecciona una opcion</div>
+    </div>
+    <button class="onboard-submit" id="btn-onboard" disabled>
+        <i class="fas fa-arrow-right" style="margin-right:.3rem"></i> Comenzar simulacion
+    </button>
+</div>
+</div>
+
+<!-- ===== NAVEGADOR ===== -->
+<div id="browser-wrapper">
+<div class="browser-frame">
+    <div class="browser-topbar">
+        <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+        <div class="browser-tabs">
+            <div class="browser-tab active" id="tab-chat"><i class="fas fa-comment-dots"></i> ChatGPT</div>
+            <div class="browser-tab" id="tab-scopus"><i class="fas fa-database"></i> Scopus</div>
+        </div>
+        <div class="browser-url"><i class="fas fa-lock"></i><span id="url-text">chat.openai.com</span></div>
+        <div class="browser-actions"><i class="fas fa-chevron-left"></i><i class="fas fa-chevron-right"></i><i class="fas fa-redo-alt"></i></div>
+    </div>
+    <div class="browser-body">
+        <svg id="mouse-cursor" width="18" height="22" viewBox="0 0 18 22" style="position:absolute;top:100px;left:300px">
+            <path d="M1 1L1 18L6 13L11 21L14 19.5L9 12L15 11Z" fill="white" stroke="#333" stroke-width="1.2" stroke-linejoin="round"/>
+        </svg>
+        <div class="cg-sidebar" id="cg-sidebar">
+            <div class="sidebar-user">
+                <div class="sidebar-avatar" id="sidebar-avatar"></div>
+                <div><div class="sidebar-name" id="sidebar-name">—</div><div class="sidebar-email" id="sidebar-email">—</div></div>
+            </div>
+            <div class="sidebar-new"><i class="fas fa-plus" style="margin-right:.3rem"></i> Nuevo chat</div>
+            <div class="sidebar-chats">
+                <div class="sidebar-chat-item active" id="sidebar-chat-title">Temas de investigacion...</div>
+                <div class="sidebar-chat-item" style="color:rgba(255,255,255,.2)">Analisis de datos SPSS</div>
+                <div class="sidebar-chat-item" style="color:rgba(255,255,255,.2)">Marco teorico tesis</div>
+                <div class="sidebar-chat-item" style="color:rgba(255,255,255,.2)">Revision literaria ML</div>
+            </div>
+        </div>
+        <div class="cg-main" id="view-chat">
+            <div style="padding:.6rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+                <div style="display:flex;align-items:center;gap:.6rem">
+                    <div class="round-pill" id="round-pill"></div>
+                    <div class="attempts-text" id="attempts-text"></div>
+                </div>
+                <div style="font-size:.7rem;color:var(--muted)">GPT-4o</div>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-area">
+                <div class="typing-hands" id="typing-hands">
+                    <svg viewBox="0 0 80 45" fill="none"><path d="M15 40 Q10 30 12 20 Q14 12 20 10 Q26 12 28 20 Q30 28 25 40" fill="#c9956b" stroke="#b8845e" stroke-width=".5"/><path d="M55 40 Q50 30 52 20 Q54 12 60 10 Q66 12 68 20 Q70 28 65 40" fill="#c9956b" stroke="#b8845e" stroke-width=".5"/><rect x="5" y="38" width="30" height="6" rx="3" fill="#161b22"/><rect x="45" y="38" width="30" height="6" rx="3" fill="#161b22"/><rect x="0" y="42" width="80" height="3" rx="1.5" fill="#1e2233"/></svg>
+                </div>
+                <div class="chat-input-box">
+                    <button><i class="fas fa-paperclip"></i></button>
+                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." readonly>
+                    <button><i class="fas fa-microphone"></i></button>
+                </div>
+                <div style="text-align:center;font-size:.6rem;color:rgba(255,255,255,.15);margin-top:.4rem">SimulAI puede cometer errores. Verifica siempre en bases de datos reales.</div>
+            </div>
+        </div>
+        <div class="scopus-view" id="view-scopus">
+            <div class="scopus-header">
+                <div class="scopus-logo">Scopus</div>
+                <div class="scopus-search"><input type="text" id="scopus-input" readonly aria-label="Busqueda"><button id="btn-search">Buscar</button></div>
+            </div>
+            <div class="scopus-filters"><span>Tipo: <strong>Articulo, Revision</strong></span><span>Idioma: <strong>Espanol, Ingles</strong></span><span>Anos: <strong>2000-2024</strong></span></div>
+            <div class="scopus-body" id="scopus-body"><div style="text-align:center;padding:3rem 1rem;color:var(--muted)"><i class="fas fa-search" style="font-size:1.5rem;opacity:.3;margin-bottom:.8rem;display:block"></i><p style="font-size:.85rem">Haz clic en "Buscar" para verificar el constructo</p></div></div>
+        </div>
+        <div class="final-view" id="view-final"></div>
+    </div>
+</div>
+</div>
+
+<script>
+/* ===== DATOS ===== */
+const ROUNDS=[
+{area:"Educacion y Aprendizaje",userQuery:"Necesito un tema de investigacion sobre factores que influyen en el rendimiento estudiantil universitario. Algo novedoso pero con base teorica solida.",aiMsg:"Basandome en analisis de tendencias recientes en literatura educativa, te propongo estos temas. Cada uno incluye un constructo central:",options:[
+{title:"Neuroaprendizaje inverso y su impacto en la retencion de conocimientos",construct:"Neuroaprendizaje inverso",desc:"Explora como el proceso inverso de neuroaprendizaje puede mejorar la memoria a largo plazo. Segun Gonzalez y Martinez (2023), este enfoque revolucionario muestra resultados prometedores.",real:false,why:"'Neuroaprendizaje inverso' no existe en la literatura. La IA tomo 'neuroaprendizaje' (termino divulgativo) y le anadio 'inverso' para crear la ilusion de novedad. La cita 'Gonzalez y Martinez (2023)' es inventada."},
+{title:"Autoeficacia academica como predictor del rendimiento en estudiantes de ingenieria",construct:"Autoeficacia academica",desc:"Analiza como la percepcion de capacidad propia influye en el desempeno. Basado en la teoria de Bandura (1997) con amplia evidencia empirica.",real:true,count:3847,articles:[{t:"Academic self-efficacy and academic performance: A meta-analytic review",a:"Pajares, F.",s:"Journal of Educational Psychology",y:2019,c:245},{t:"Self-efficacy beliefs and academic success: A quantitative synthesis",a:"Multon, K.D., Brown, S.D., Lent, R.W.",s:"Psychological Bulletin",y:2018,c:412},{t:"Academic self-efficacy in engineering students: A longitudinal study",a:"Villanueva, M.R., Bostic, J., Huber, C.",s:"European Journal of Engineering Education",y:2020,c:87},{t:"Self-efficacy and academic performance in first-year university students",a:"Chemers, M.M., Hu, L.T., Garcia, B.F.",s:"Journal of Educational Psychology",y:2017,c:534}]},
+{title:"Zona de desarrollo proximal extendida en entornos virtuales de aprendizaje",construct:"Zona de desarrollo proximal extendida",desc:"Investiga como la ZDP de Vygotsky se extiende en plataformas digitales. Este constructo emergente fue propuesto por Ramirez et al. (2022).",real:false,why:"La ZDP de Vygotsky SI es real. Pero 'Zona de Desarrollo Proximal Extendida' no existe como variante. La IA anadio 'extendida' para simular una actualizacion al contexto digital. Cita fabricada."},
+{title:"Metacognicion somatica y la regulacion del aprendizaje autorregulado",construct:"Metacognicion somatica",desc:"Examina la conexion entre conciencia corporal y procesos metacognitivos. Perspectiva innovadora propuesta por Fernandez y Liu (2023).",real:false,why:"'Metacognicion somatica' no existe. La IA fusiono 'metacognicion' (Flavell, 1979) con 'somatico' (terapia corporal) creando un termino que suena sofisticado pero es una alucinacion."}
+]},
+{area:"Psicologia Organizacional",userQuery:"Busco un tema de investigacion sobre bienestar y rendimiento en el contexto laboral corporativo. Algo con valor practico.",aiMsg:"Excelente area de estudio. Te propongo estos temas con sus constructos teoricos centrales:",options:[
+{title:"Burnout inverso proactivo: cuando el exceso de energia laboral genera agotamiento",construct:"Burnout inverso proactivo",desc:"Un nuevo enfoque que estudia como la sobre-motivacion puede llevar a formas atipicas de desgaste. Propuesto por Morales y Chen (2024).",real:false,why:"Completamente inventado. El burnout (Maslach, 1981) es real, pero 'inverso proactivo' son adjetivos contradictorios anadidos para generar curiosidad sin base cientifica."},
+{title:"Engagement laboral y su relacion con la satisfaccion del cliente en servicios",construct:"Engagement laboral",desc:"Analiza como el nivel de implicacion de los empleados impacta la experiencia del cliente. Basado en el modelo UWES de Schaufeli y Bakker (2003).",real:true,count:5621,articles:[{t:"Work engagement: A quantitative review and test of its relations with performance",a:"Rich, B.L., Lepine, J.A., Crawford, E.R.",s:"Personnel Psychology",y:2010,c:1892},{t:"The measurement of engagement and burnout: A confirmatory factor analytic approach",a:"Schaufeli, W.B., Salanova, M.",s:"Journal of Happiness Studies",y:2007,c:3567},{t:"Employee engagement and customer satisfaction: A meta-analysis",a:"Anitha, J.",s:"International Journal of Business and Management",y:2014,c:423},{t:"Work engagement and performance: A meta-analytic review",a:"Bakker, A.B., Demerouti, E.",s:"Current Directions in Psychological Science",y:2018,c:876}]},
+{title:"Capital psicologico difuso en equipos de trabajo distribuidos globalmente",construct:"Capital psicologico difuso",desc:"Explora como el PsyCap se dispersa en equipos multiculturales. Segun Patel y Nguyen (2023).",real:false,why:"'Capital psicologico' (Luthans, 2007) SI existe. Pero 'difuso' es un adjetivo anadido sin justificacion. 'Patel y Nguyen (2023)' es una cita fabricada."},
+{title:"Liderazgo transformacional cuantico en organizaciones agiles",construct:"Liderazgo transformacional cuantico",desc:"Estudia principios cuanticos aplicados al liderazgo transformacional. Perspectiva pionera de Kim y Santos (2024).",real:false,why:"'Liderazgo transformacional' (Bass, 1985) es valido. 'Cuantico' fue anadido como buzzword sin base en la teoria del liderazgo. Alucinacion clasica."}
+]},
+{area:"Tecnologia y Educacion",userQuery:"Me interesa investigar como la tecnologia digital afecta la ensenanza en educacion superior. Quiero conectar tecnologia con pedagogia.",aiMsg:"Tema muy relevante. Aqui tienes propuestas con constructos bien articulados:",options:[
+{title:"Competencia algoritmica emocional en docentes universitarios",construct:"Competencia algoritmica emocional",desc:"Investiga la capacidad de gestionar emociones al interactuar con sistemas algoritmicos. Segun Torres y Wang (2023).",real:false,why:"No existe. La IA mezclo 'competencia digital', 'inteligencia emocional' y 'algoritmica' para crear un termino tecnologico que suena plausible pero es ficticio."},
+{title:"Flujo cognitivo distribuido en ambientes de aprendizaje inmersivo",construct:"Flujo cognitivo distribuido",desc:"Analiza como el estado de flujo se distribuye entre estudiante y tecnologia inmersiva. Propuesto por Nakamura y Silva (2022).",real:false,why:"'Flujo' (Csikszentmihalyi) y 'cognicion distribuida' (Hutchins) son reales por separado. Pero fusionados como 'flujo cognitivo distribuido' no existe en la literatura."},
+{title:"Hibridacion digital pedagogica en la educacion post-pandemica",construct:"Hibridacion digital pedagogica",desc:"Estudia procesos de integracion pedagogica profunda en modelos hibridos. Marco emergente segun Lopez y Ahmed (2024).",real:false,why:"'Educacion hibrida' y 'blended learning' son reales. Pero 'hibridacion digital pedagogica' como constructo teorico especifico no aparece en la literatura indexada."},
+{title:"Competencia digital docente y su impacto en la integracion tecnologica en el aula",construct:"Competencia digital docente",desc:"Evalua como la competencia digital de los profesores determina el uso efectivo de la tecnologia. Basado en DigCompEdu (Redecker, 2017).",real:true,count:4215,articles:[{t:"Teachers' digital competence: An overview of the DigCompEdu framework",a:"Redecker, C.",s:"European Journal of Education",y:2017,c:1876},{t:"Digital competence in higher education research: Systematic review",a:"Cabero-Almenara, J. et al.",s:"Comunicar",y:2020,c:534},{t:"Teacher digital competence framework: A comprehensive review",a:"Siddiq, F., Scherer, R., Tondeur, J.",s:"Teaching and Teacher Education",y:2022,c:289},{t:"Digital competence of educators: Development and evaluation",a:"Ghomi, M., Redecker, C.",s:"European Journal of Education",y:2019,c:643}]}
+]}
+];
+
+const TIPS=[
+"Los constructos validos suelen tener un autor reconocido (Bandura, Maslach, Vygotsky). Si la IA no nombra uno real, es alerta.",
+"Busca el constructo entre comillas dobles en Scopus. Cero resultados = probablemente no existe.",
+"Desconfia de constructos que combinan terminos de campos muy diferentes ('cuantico' + 'liderazgo').",
+"Las IA crean variantes anadiendo adjetivos ('extendido', 'difuso', 'inverso'). Verifica siempre el original.",
+"Revisa si el constructo aparece en revisiones sistematicas o meta-analisis.",
+"Si la IA menciona una cita muy reciente (2023-2024) como 'estudio seminal', es sospechoso.",
+"Adjetivos contradictorios juntos ('inverso proactivo') son bandera roja: la IA los genera para sonar intelectual.",
+"Los constructos reales tienen multiples autores, revistas reconocidas, y cientos de citaciones."
+];
+
+/* ===== PERFIL USUARIO ===== */
+let USER={nombre:'',apellido:'',genero:null};
+
+/* ===== AVATARES POR GÉNERO ===== */
+function makeAvatar(g, size){
+    // g: 'm', 'f', 'nb' — devuelve SVG string
+    const skin='#c9956b',skinShadow='#b8845e',hairM='#1a1208',hairF='#2c1810',bgM='#1e3a5f',bgF='#5e2a4a',bgNB='#3b2f63';
+    if(g==='m') return `<svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="${bgM}"/><rect x="${size*.37}" y="${size*.47}" width="${size*.26}" height="${size*.15}" rx="${size*.04}" fill="${hairM}"/><ellipse cx="${size*.5}" cy="${size*.42}" rx="${size*.18}" ry="${size*.19}" fill="${skin}"/><path d="M${size*.33} ${size*.4}C${size*.33} ${size*.27} ${size*.4} ${size*.23} ${size*.5} ${size*.22}C${size*.6} ${size*.23} ${size*.67} ${size*.27} ${size*.67} ${size*.4}L${size*.67} ${size*.35}C${size*.67} ${size*.29} ${size*.6} ${size*.25} ${size*.5} ${size*.24}C${size*.4} ${size*.25} ${size*.33} ${size*.29} ${size*.33} ${size*.35}Z" fill="${hairM}"/><ellipse cx="${size*.42}" cy="${size*.4}" rx="${size*.03}" ry="${size*.035}" fill="white"/><circle cx="${size*.425}" cy="${size*.405}" r="${size*.018}" fill="#1a1a1a"/><circle cx="${size*.43}" cy="${size*.398}" r="${size*.005}" fill="white"/><path d="M${size*.36} ${size*.37}Q${size*.41} ${size*.355} ${size*.46} ${size*.365}" stroke="${hairM}" stroke-width="${size*.012}" fill="none"/><path d="M${size*.48} ${size*.45}Q${size*.5} ${size*.47} ${size*.52} ${size*.455}" stroke="${skinShadow}" stroke-width="${size*.008}" fill="none"/></svg>`;
+    if(g==='f') return `<svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="${bgF}"/><ellipse cx="${size*.5}" cy="${size*.42}" rx="${size*.19}" ry="${size*.2}" fill="${skin}"/><path d="M${size*.31} ${size*.38}C${size*.31} ${size*.22} ${size*.38} ${size*.16} ${size*.5} ${size*.15}C${size*.62} ${size*.16} ${size*.69} ${size*.22} ${size*.69} ${size*.38}L${size*.71} ${size*.32}C${size*.71} ${size*.18} ${size*.63} ${size*.12} ${size*.5} ${size*.11}C${size*.37} ${size*.12} ${size*.29} ${size*.18} ${size*.29} ${size*.32}Z" fill="${hairF}"/><path d="M${size*.29} ${size*.32}Q${size*.26} ${size*.42} ${size*.28} ${size*.55}" stroke="${hairF}" stroke-width="${size*.05}" fill="none" stroke-linecap="round"/><path d="M${size*.71} ${size*.32}Q${size*.74} ${size*.42} ${size*.72} ${size*.55}" stroke="${hairF}" stroke-width="${size*.05}" fill="none" stroke-linecap="round"/><ellipse cx="${size*.43}" cy="${size*.4}" rx="${size*.032}" ry="${size*.038}" fill="white"/><circle cx="${size*.435}" cy="${size*.405}" r="${size*.019}" fill="#1a1a1a"/><circle cx="${size*.44}" cy="${size*.398}" r="${size*.005}" fill="white"/><path d="M${size*.37} ${size*.365}Q${size*.42} ${size*.35} ${size*.47} ${size*.36}" stroke="${hairF}" stroke-width="${size*.01}" fill="none"/><path d="M${size*.48} ${size*.45}Q${size*.5} ${size*.47} ${size*.52} ${size*.45}" stroke="${skinShadow}" stroke-width="${size*.008}" fill="none"/><circle cx="${size*.56}" cy="${size*.41}" r="${size*.025}" fill="${skinShadow}" opacity=".3"/></svg>`;
+    // No binario
+    return `<svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="${bgNB}"/><ellipse cx="${size*.5}" cy="${size*.42}" rx="${size*.18}" ry="${size*.19}" fill="${skin}"/><path d="M${size*.32} ${size*.36}C${size*.32} ${size*.22} ${size*.39} ${size*.17} ${size*.5} ${size*.16}C${size*.61} ${size*.17} ${size*.68} ${size*.22} ${size*.68} ${size*.36}L${size*.68} ${size*.3}C${size*.68} ${size*.24} ${size*.61} ${size*.19} ${size*.5} ${size*.18}C${size*.39} ${size*.19} ${size*.32} ${size*.24} ${size*.32} ${size*.3}Z" fill="#4a3728"/><path d="M${size*.35} ${size*.3}Q${size*.33} ${size*.25} ${size*.36} ${size*.2}" stroke="#4a3728" stroke-width="${size*.025}" fill="none" stroke-linecap="round"/><path d="M${size*.65} ${size*.3}Q${size*.67} ${size*.25} ${size*.64} ${size*.2}" stroke="#4a3728" stroke-width="${size*.025}" fill="none" stroke-linecap="round"/><ellipse cx="${size*.43}" cy="${size*.4}" rx="${size*.03}" ry="${size*.035}" fill="white"/><circle cx="${size*.435}" cy="${size*.405}" r="${size*.018}" fill="#1a1a1a"/><circle cx="${size*.44}" cy="${size*.398}" r="${size*.005}" fill="white"/><ellipse cx="${size*.57}" cy="${size*.4}" rx="${size*.03}" ry="${size*.035}" fill="white"/><circle cx="${size*.565}" cy="${size*.405}" r="${size*.018}" fill="#1a1a1a"/><circle cx="${size*.57}" cy="${size*.398}" r="${size*.005}" fill="white"/><path d="M${size*.47} ${size*.46}Q${size*.5} ${size*.475} ${size*.53} ${size*.46}" stroke="${skinShadow}" stroke-width="${size*.008}" fill="none"/></svg>`;
+}
+
+const AVATAR_AI=`<svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="15" fill="#1a1f2e"/><circle cx="15" cy="15" r="2.5" fill="#10a37f"/><g stroke="#10a37f" stroke-width="1.3" fill="none"><path d="M15 12.5A2.5 2.5 0 0117.5 15"/><path d="M17.5 15A2.5 2.5 0 0115 17.5"/><path d="M15 17.5A2.5 2.5 0 0112.5 15"/><path d="M12.5 15A2.5 2.5 0 0115 12.5"/></g><g stroke="#10a37f" stroke-width=".8" fill="none" opacity=".5"><path d="M15 9.5A5.5 5.5 0 0120.5 15"/><path d="M20.5 15A5.5 5.5 0 0115 20.5"/><path d="M15 20.5A5.5 5.5 0 019.5 15"/><path d="M9.5 15A5.5 5.5 0 0115 9.5"/></g></svg>`;
+
+/* ===== ESTADO ===== */
+let S={round:0,sel:null,att:[0,0,0],fail:[0,0,0],vFalse:[],tips:[],done:[false,false,false],rendered:false};
+
+/* ===== UTILIDADES ===== */
+const $=id=>document.getElementById(id);
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+function showToast(m,t='info'){const c=$('toast-container'),d=document.createElement('div');d.className=`toast toast-${t}`;d.innerHTML=m;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .3s'},3500);setTimeout(()=>d.remove(),3900)}
+function typeText(el,text,spd=16){return new Promise(res=>{let i=0;el.innerHTML='';const cur=document.createElement('span');cur.className='typing-cursor';cur.textContent='|';el.appendChild(cur);(function tick(){if(i<text.length){el.insertBefore(document.createTextNode(text[i]),cur);i++;setTimeout(tick,spd+Math.random()*6)}else{setTimeout(()=>{cur.remove();res()},250)}})()})}
+async function moveCursor(x,y,click=false){const c=$('mouse-cursor');c.classList.add('visible');c.style.left=x+'px';c.style.top=y+'px';await delay(550);if(click){c.classList.add('mouse-click');await delay(120);c.classList.remove('mouse-click')}}
+function hideCursor(){$('mouse-cursor').classList.remove('visible')}
+function scrollChat(){const m=$('chat-messages');m.scrollTop=m.scrollHeight}
+function userName(){return USER.nombre+' '+USER.apellido}
+function userInitials(){return (USER.nombre[0]||'')+''+(USER.apellido[0]||'')}
+function userEmail(){return (USER.nombre.toLowerCase()+'.'+USER.apellido.toLowerCase()).replace(/\s/g,'')+'@universidad.edu'}
+
+function updateRoundUI(){
+    let dots='';for(let i=0;i<3;i++){let cls=i<S.round?'done':i===S.round?'now':'';dots+=`<span class="round-dot ${cls}"></span>`}
+    $('round-pill').innerHTML=`${dots} <span style="margin-left:.3rem">Ronda ${S.round+1}/3 — ${ROUNDS[S.round].area}</span>`;
+    const a=S.att[S.round];$('attempts-text').textContent=a>0?`${a} intento${a>1?'s':''}`:'';
+}
+
+/* ===== ONBOARDING ===== */
+function updateOnboardPreview(){
+    const g=USER.genero;
+    if(g)$('avatar-preview').innerHTML=makeAvatar(g,80);
+    else $('avatar-preview').innerHTML=`<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="40" fill="rgba(255,255,255,.04)"/><text x="40" y="46" text-anchor="middle" font-size="28" fill="rgba(255,255,255,.15)" font-family="'Space Grotesk',sans-serif">?</text></svg>`;
+    // Validar todo
+    const ok=USER.nombre.trim().length>0&&USER.apellido.trim().length>0&&USER.genero!==null;
+    $('btn-onboard').disabled=!ok;
+}
+
+ $('inp-nombre').addEventListener('input',e=>{USER.nombre=e.target.value;$('field-nombre').classList.remove('has-error');updateOnboardPreview()});
+ $('inp-apellido').addEventListener('input',e=>{USER.apellido=e.target.value;$('field-apellido').classList.remove('has-error');updateOnboardPreview()});
+
+document.querySelectorAll('.gender-opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+        document.querySelectorAll('.gender-opt').forEach(o=>{o.classList.remove('selected');o.setAttribute('aria-checked','false')});
+        opt.classList.add('selected');opt.setAttribute('aria-checked','true');
+        USER.genero=opt.dataset.g;
+        $('field-genero').classList.remove('has-error');
+        updateOnboardPreview();
+    });
+    opt.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();opt.click()}});
+});
+
+ $('btn-onboard').addEventListener('click',()=>{
+    let valid=true;
+    if(!USER.nombre.trim()){$('field-nombre').classList.add('has-error');valid=false}
+    if(!USER.apellido.trim()){$('field-apellido').classList.add('has-error');valid=false}
+    if(!USER.genero){$('field-genero').classList.add('has-error');valid=false}
+    if(!valid)return;
+
+    // Aplicar datos al navegador
+    $('sidebar-avatar').innerHTML=makeAvatar(USER.genero,32);
+    $('sidebar-name').textContent=userName();
+    $('sidebar-email').textContent=userEmail();
+
+    // Cerrar onboard, mostrar navegador
+    $('onboard-overlay').classList.remove('active');
+    setTimeout(()=>{
+        $('screen-intro').classList.add('hidden');
+        setTimeout(()=>{
+            $('browser-wrapper').classList.add('active');
+            setTimeout(()=>startChatRound(),400);
+        },300);
+    },400);
+});
+
+ $('btn-start').addEventListener('click',()=>{
+    $('onboard-overlay').classList.add('active');
+    updateOnboardPreview();
+    setTimeout(()=>$('inp-nombre').focus(),500);
+});
+
+/* ===== FLUJO CHAT ===== */
+async function startChatRound(){
+    const round=ROUNDS[S.round];S.sel=null;S.vFalse=[];S.rendered=false;updateRoundUI();
+    $('view-chat').style.display='flex';$('view-scopus').classList.remove('active');$('view-final').classList.remove('active');
+    $('cg-sidebar').style.display='flex';$('tab-chat').classList.add('active');$('tab-scopus').classList.remove('active');
+    $('url-text').textContent='chat.openai.com';
+    $('chat-messages').innerHTML='';$('chat-input').value='';
+    document.querySelectorAll('.options-container,.verify-bar').forEach(e=>e.remove());
+
+    $('typing-hands').classList.add('active');
+    $('chat-input').value=round.userQuery;
+    await moveCursor(480,0,true);await delay(600);
+    $('typing-hands').classList.remove('active');await delay(200);hideCursor();
+
+    addMsg('user',round.userQuery);scrollChat();
+    await delay(600);
+    const thinkingEl=addMsg('ai','thinking');scrollChat();
+    await delay(1800);
+    thinkingEl.innerHTML='';
+    await typeText(thinkingEl,round.aiMsg,14);scrollChat();await delay(300);
+    renderOptions();S.rendered=true;
+}
+
+function addMsg(type,content){
+    const div=document.createElement('div');div.className=`chat-msg ${type==='user'?'user-msg':'ai-msg'}`;
+    const avatar=type==='user'?makeAvatar(USER.genero,30):AVATAR_AI;
+    const name=type==='user'?userName():'ChatGPT';
+    div.innerHTML=`<div class="msg-avatar">${avatar}</div><div class="msg-content"><div class="msg-name">${name}</div><div class="msg-bubble">${content}</div></div>`;
+    $('chat-messages').appendChild(div);return div.querySelector('.msg-bubble');
+}
+
+function renderOptions(){
+    document.querySelectorAll('.options-container,.verify-bar').forEach(e=>e.remove());
+    const round=ROUNDS[S.round],container=document.createElement('div');container.className='options-container';
+    const wrapper=document.createElement('div');wrapper.className='chat-msg ai-msg';
+    wrapper.innerHTML=`<div class="msg-avatar">${AVATAR_AI}</div><div class="msg-content"><div class="msg-name">ChatGPT</div></div>`;
+    const cd=wrapper.querySelector('.msg-content');cd.appendChild(container);
+    const vbar=document.createElement('div');vbar.className='verify-bar';vbar.id='verify-section';
+    vbar.innerHTML=`<button class="verify-btn" id="btn-verify"><i class="fas fa-search"></i> Verificar en Scopus</button><div class="verify-label" id="verify-label"></div>`;
+    cd.appendChild(vbar);$('chat-messages').appendChild(wrapper);
+    round.options.forEach((opt,i)=>{
+        const card=document.createElement('div');card.className='option-card';
+        if(S.vFalse.includes(i))card.classList.add('verified-false');
+        let badge=S.vFalse.includes(i)?'<div class="badge-false"><i class="fas fa-times" style="margin-right:2px"></i>No existe</div>':'';
+        card.innerHTML=`${badge}<div class="construct-tag"><i class="fas fa-flask" style="margin-right:3px;font-size:.6rem"></i>${opt.construct}</div><div class="option-title">${opt.title}</div><div class="option-desc">${opt.desc}</div>`;
+        if(!S.vFalse.includes(i))card.addEventListener('click',()=>selectOpt(i));
+        container.appendChild(card);setTimeout(()=>card.classList.add('show'),80+i*120);
+    });
+    vbar.querySelector('#btn-verify').addEventListener('click',goToScopus);scrollChat();
+}
+
+function selectOpt(idx){
+    S.sel=idx;document.querySelectorAll('.option-card').forEach((c,i)=>c.classList.toggle('selected',i===idx));
+    const vbar=$('verify-section');vbar.classList.add('show');
+    $('verify-label').textContent=`Constructo: "${ROUNDS[S.round].options[idx].construct}"`;scrollChat();
+}
+
+/* ===== SCOPUS ===== */
+async function goToScopus(){
+    if(S.sel===null)return;S.att[S.round]++;updateRoundUI();const opt=ROUNDS[S.round].options[S.sel];
+    $('tab-scopus').classList.add('active');$('tab-chat').classList.remove('active');
+    $('url-text').textContent='scopus.com/results/...';
+    $('view-chat').style.display='none';$('view-scopus').classList.add('active');$('cg-sidebar').style.display='none';
+    $('scopus-input').value=`"${opt.construct}"`;
+    $('scopus-body').innerHTML='<div style="text-align:center;padding:3rem 1rem;color:var(--muted)"><i class="fas fa-search" style="font-size:1.5rem;opacity:.3;margin-bottom:.8rem;display:block"></i><p style="font-size:.85rem">Haz clic en "Buscar" para verificar</p></div>';
+    $('btn-search').disabled=false;$('btn-search').textContent='Buscar';
+    await moveCursor(620,55,true);hideCursor();
+}
+
+ $('btn-search').addEventListener('click',executeSearch);
+ $('scopus-input').addEventListener('keydown',e=>{if(e.key==='Enter')executeSearch()});
+
+async function executeSearch(){
+    const btn=$('btn-search'),body=$('scopus-body'),opt=ROUNDS[S.round].options[S.sel];
+    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:3px"></i>Buscando...';
+    body.innerHTML='<div style="padding:2rem 0"><div class="scan-bar"></div><div style="text-align:center;color:var(--muted);font-size:.85rem"><i class="fas fa-circle-notch fa-spin" style="margin-right:4px"></i>Consultando base de datos Scopus...</div></div>';
+    await delay(2200);opt.real?showReal(opt):showZero(opt);
+}
+
+function showReal(opt){
+    const body=$('scopus-body');
+    let rows=opt.articles.map((a,i)=>`<tr style="animation:msgIn .35s ease ${i*.08}s both"><td style="color:var(--muted);font-weight:600;width:28px">${i+1}</td><td class="title-cell">${a.t}</td><td style="color:var(--muted);min-width:100px;font-size:.75rem">${a.a}</td><td style="color:var(--muted);font-size:.73rem;min-width:110px">${a.s}</td><td style="width:45px;text-align:center">${a.y}</td><td class="cite-count" style="width:55px;text-align:center">${a.c}</td></tr>`).join('');
+    body.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;flex-wrap:wrap;gap:.4rem"><div><span style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;color:var(--ok)">${opt.count.toLocaleString()}</span><span style="color:var(--muted);font-size:.85rem;margin-left:.4rem">resultados</span></div><div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:5px;padding:.25rem .6rem;font-size:.75rem;color:var(--ok);font-weight:600"><i class="fas fa-check-circle" style="margin-right:3px"></i>Verificado</div></div><div style="overflow-x:auto"><table class="results-table"><thead><tr><th>#</th><th>Titulo</th><th>Autores</th><th>Revista</th><th>Ano</th><th style="text-align:center">Cit.</th></tr></thead><tbody>${rows}</tbody></table></div><div class="explain-box success"><div style="font-weight:700;color:var(--ok);margin-bottom:.3rem"><i class="fas fa-check-circle" style="margin-right:3px"></i>Constructo valido</div><div>"${opt.construct}" esta legitimado en la literatura academica con multiples publicaciones y citaciones.</div></div><div style="text-align:center;margin-top:1.2rem"><button onclick="nextRound()" class="verify-btn" style="background:var(--ok)">${S.round<2?'<i class="fas fa-arrow-right" style="margin-right:3px"></i> Siguiente ronda':'<i class="fas fa-flag-checkered" style="margin-right:3px"></i> Ver resultados'}</button></div>`;
+    S.done[S.round]=true;showToast('<i class="fas fa-check-circle" style="margin-right:3px"></i>Constructo verificado','success');
+}
+
+function showZero(opt){
+    const body=$('scopus-body');S.fail[S.round]++;if(!S.vFalse.includes(S.sel))S.vFalse.push(S.sel);
+    let ti;do{ti=Math.floor(Math.random()*TIPS.length)}while(S.tips.includes(ti)&&S.tips.length<TIPS.length);
+    if(!S.tips.includes(ti))S.tips.push(ti);
+    const rem=ROUNDS[S.round].options.filter((o,i)=>!S.vFalse.includes(i)&&!o.real).length;
+    body.innerHTML=`<div class="zero-results shake"><div class="zero-count">0</div><div class="zero-label">Sin resultados para: <strong style="color:var(--fg)">"${opt.construct}"</strong></div></div><div class="explain-box error"><div style="font-weight:700;color:var(--err);margin-bottom:.3rem"><i class="fas fa-exclamation-triangle" style="margin-right:3px"></i>Constructo no encontrado</div><div>${opt.why}</div></div><div class="tip-box"><div style="font-weight:600;color:var(--warn);font-size:.78rem;margin-bottom:.3rem"><i class="fas fa-lightbulb" style="margin-right:3px"></i>Tip</div><div>${TIPS[ti]}</div></div>${rem===0?'<div style="text-align:center;margin-top:.8rem;padding:.4rem .8rem;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:5px;font-size:.78rem;color:var(--ok);font-weight:600"><i class="fas fa-info-circle" style="margin-right:3px"></i>Solo queda una opcion sin verificar</div>':''}<div style="text-align:center;margin-top:1.2rem"><button onclick="backToChat()" class="verify-btn" style="background:rgba(255,255,255,.08);border:1px solid var(--border)"><i class="fas fa-arrow-left" style="margin-right:3px"></i> Volver al chat</button></div>`;
+    showToast('<i class="fas fa-exclamation-triangle" style="margin-right:3px"></i>Este constructo no existe','error');
+}
+
+function backToChat(){
+    $('tab-chat').classList.add('active');$('tab-scopus').classList.remove('active');$('url-text').textContent='chat.openai.com';
+    $('view-scopus').classList.remove('active');$('view-chat').style.display='flex';$('cg-sidebar').style.display='flex';
+    S.sel=null;renderOptions();updateRoundUI();scrollChat();
+}
+
+function nextRound(){if(S.round<2){S.round++;startChatRound()}else{showFinal()}}
+
+/* ===== FINAL ===== */
+function showFinal(){
+    $('view-scopus').classList.remove('active');$('view-chat').style.display='none';$('cg-sidebar').style.display='none';
+    $('tab-chat').classList.remove('active');$('tab-scopus').classList.remove('active');$('url-text').textContent='simulai.app/resultados';
+    const fv=$('view-final');fv.classList.add('active');
+    const ta=S.att.reduce((a,b)=>a+b,0),tf=S.fail.reduce((a,b)=>a+b,0),pr=S.fail.filter(f=>f===0).length;
+    let lessons=[];
+    if(tf>0){lessons.push({i:'fa-eye',c:'var(--scopus)',bg:'rgba(249,115,22,.1)',t:'Las alucinaciones pueden ser extremadamente convincentes, con citas y descripciones que parecen legitimas.'});lessons.push({i:'fa-shield-alt',c:'var(--ai-green)',bg:'rgba(16,163,127,.1)',t:'La unica forma confiable de verificar un constructo es buscarlo en bases de datos indexadas.'})}
+    lessons.push({i:'fa-puzzle-piece',c:'var(--err)',bg:'rgba(239,68,68,.1)',t:'La IA crea variantes de constructos reales anadiendo adjetivos ("extendido", "difuso", "inverso"). Esos terminos NO existen.'});
+    lessons.push({i:'fa-book',c:'var(--ok)',bg:'rgba(16,185,129,.1)',t:'Los constructos reales tienen multiples autores, revistas reconocidas, y miles de citaciones.'});
+    lessons.push({i:'fa-user-graduate',c:'var(--warn)',bg:'rgba(251,191,36,.1)',t:'Como investigador, la responsabilidad de verificar la validez de los constructos es tuya, no de la IA.'});
+    const tipsHtml=S.tips.length?S.tips.map((t,idx)=>`<div style="display:flex;gap:.5rem;padding:.4rem 0;font-size:.8rem;line-height:1.55;border-bottom:1px solid var(--border)"><span style="color:var(--warn);font-weight:700;flex-shrink:0">${idx+1}.</span><span>${TIPS[t]}</span></div>`).join(''):'<div style="font-size:.8rem;color:var(--muted)">No se necesitaron tips (rondas perfectas)</div>';
+    fv.innerHTML=`<div style="text-align:center;max-width:600px;width:100%"><div style="width:70px;height:70px;border-radius:50%;overflow:hidden;margin:0 auto .8rem;border:2px solid rgba(255,255,255,.1)">${makeAvatar(USER.genero,70)}</div><h2 style="font-size:1.5rem;font-weight:700;letter-spacing:-.5px;margin-bottom:.2rem">${userName()}</h2><p style="color:var(--muted);font-size:.85rem;margin-bottom:1.5rem">Simulacion completada</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.5rem"><div class="stat-card"><div class="stat-num" style="color:var(--scopus)">${ta}</div><div class="stat-label">Busquedas</div></div><div class="stat-card"><div class="stat-num" style="color:var(--err)">${tf}</div><div class="stat-label">Alucinaciones</div></div><div class="stat-card"><div class="stat-num" style="color:var(--ok)">${pr}/3</div><div class="stat-label">Perfectas</div></div></div><div style="text-align:left;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin-bottom:1rem"><h3 style="font-size:.9rem;font-weight:700;margin-bottom:.8rem"><i class="fas fa-lightbulb" style="color:var(--warn);margin-right:.3rem"></i>Lecciones aprendidas</h3>${lessons.map(l=>`<div class="lesson-item"><div class="lesson-icon" style="background:${l.bg};color:${l.c}"><i class="fas ${l.i}"></i></div><div>${l.t}</div></div>`).join('')}</div><div style="text-align:left;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin-bottom:1.5rem"><h3 style="font-size:.9rem;font-weight:700;margin-bottom:.8rem"><i class="fas fa-shield-alt" style="color:var(--ai-green);margin-right:.3rem"></i>Tips acumulados</h3>${tipsHtml}</div><button onclick="resetSim()" class="verify-btn" style="background:var(--ai-green)"><i class="fas fa-redo" style="margin-right:.3rem"></i> Reiniciar simulacion</button></div>`;
+}
+
+function resetSim(){
+    S={round:0,sel:null,att:[0,0,0],fail:[0,0,0],vFalse:[],tips:[],done:[false,false,false],rendered:false};
+    USER={nombre:'',apellido:'',genero:null};
+    $('view-final').classList.remove('active');$('browser-wrapper').classList.remove('active');
+    $('screen-intro').classList.remove('hidden');
+    $('inp-nombre').value='';$('inp-apellido').value='';
+    document.querySelectorAll('.gender-opt').forEach(o=>{o.classList.remove('selected');o.setAttribute('aria-checked','false')});
+    document.querySelectorAll('.onboard-field').forEach(f=>f.classList.remove('has-error'));
+}
+
+/* ===== CANVAS ===== */
+(function(){const c=$('bg-canvas'),ctx=c.getContext('2d');let w,h,nodes=[];function resize(){w=c.width=innerWidth;h=c.height=innerHeight;nodes=[];for(let i=0;i<35;i++)nodes.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+.5})}function draw(){ctx.clearRect(0,0,w,h);for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(16,163,127,${(1-d/150)*.06})`;ctx.lineWidth=.5;ctx.stroke()}}for(const n of nodes){ctx.beginPath();ctx.arc(n.x,n.y,Math.max(.5,n.r),0,Math.PI*2);ctx.fillStyle='rgba(148,163,184,.1)';ctx.fill()}}function update(){for(const n of nodes){n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;n.x=Math.max(0,Math.min(w,n.x));n.y=Math.max(0,Math.min(h,n.y))}}resize();(function loop(){update();draw();requestAnimationFrame(loop)})();addEventListener('resize',resize)})();
+</script>
+</body>
+</html>

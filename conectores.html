@@ -235,7 +235,15 @@
         }
         .cinta-vacia { color: #555; font-size: 0.85rem; font-style: italic; padding: 8px 4px; }
 
-        .gear-row {
+        /* ── FLUJO SERPENTINA: filas que se envuelven en zigzag, sin desbordar a la derecha ── */
+        .machine-rows {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+        }
+        .gear-row-line {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -243,6 +251,13 @@
             position: relative;
             width: 100%;
         }
+        .gear-row-line.reversa { flex-direction: row-reverse; }
+
+        /* Conector de transición entre renglones: aloja el eje REAL (funcional) + flecha de giro */
+        .row-connector { display: flex; align-items: center; width: 100%; }
+        .row-connector.connector-right { justify-content: flex-end; padding-right: 40px; }
+        .row-connector.connector-left  { justify-content: flex-start; padding-left: 40px; }
+        .row-connector-arrow { font-size: 1.6rem; color: var(--accent-gold); opacity: 0.7; margin: 0 6px; }
 
         .gear-unit {
             display: flex;
@@ -263,6 +278,11 @@
             margin-bottom: 20px;
             line-height: 1.4;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .sentence-inicio::before {
+            content: '▶ INICIO DEL PÁRRAFO';
+            display: block; font-size: 0.6rem; color: var(--accent-green);
+            margin-bottom: 5px; letter-spacing: 0.5px; font-weight: 700;
         }
 
         /* CSS Gears */
@@ -866,29 +886,46 @@
         let score = 100;
         const PENALTY = 5;
 
+        // Cuántas unidades (engranaje+eje) caben por línea antes de saltar a la siguiente,
+        // en zigzag, para que nada quede oculto fuera del contenedor.
+        const ITEMS_PER_ROW = 3;
+
         function buildMachine() {
             const machine = document.getElementById('machine');
             machine.innerHTML = '';
-            const row = document.createElement('div');
-            row.className = 'gear-row';
+            const rowsWrap = document.createElement('div');
+            rowsWrap.className = 'machine-rows';
+
+            let currentRow = null;
+            let currentRowIdx = -1;
 
             machineData.forEach((item, index) => {
+                const rowIdx = Math.floor(index / ITEMS_PER_ROW);
+                if (rowIdx !== currentRowIdx) {
+                    if (currentRow) rowsWrap.appendChild(currentRow);
+                    currentRow = document.createElement('div');
+                    currentRow.className = 'gear-row-line' + (rowIdx % 2 === 1 ? ' reversa' : '');
+                    currentRowIdx = rowIdx;
+                }
+
                 const unit = document.createElement('div');
                 unit.className = 'gear-unit';
                 const box = document.createElement('div');
-                box.className = 'sentence-box';
+                // El primer engranaje simula el inicio del párrafo: no pide conector, ya está en marcha.
+                box.className = 'sentence-box' + (index === 0 ? ' sentence-inicio' : '');
                 box.innerText = item.sentence;
                 const gear = document.createElement('div');
-                gear.className = 'gear';
+                gear.className = 'gear' + (index === 0 ? ' active spinning-cw' : '');
                 gear.id = `gear-${index}`;
                 const hole = document.createElement('div');
                 hole.className = 'gear-hole';
                 gear.appendChild(hole);
                 unit.appendChild(box);
                 unit.appendChild(gear);
-                row.appendChild(unit);
+                currentRow.appendChild(unit);
 
                 if (index < machineData.length - 1) {
+                    const nextRowIdx = Math.floor((index + 1) / ITEMS_PER_ROW);
                     const axle = document.createElement('div');
                     axle.className = 'axle-container';
                     axle.id = `axle-${index}`;
@@ -900,10 +937,29 @@
                     label.innerText = "Eje";
                     axle.appendChild(wire);
                     axle.appendChild(label);
-                    row.appendChild(axle);
+
+                    if (nextRowIdx === rowIdx) {
+                        // Mismo renglón: eje normal, en línea.
+                        currentRow.appendChild(axle);
+                    } else {
+                        // Transición entre renglones: cierra el actual y coloca el eje real
+                        // (sigue siendo clicable) junto a la flecha de giro, en zigzag.
+                        rowsWrap.appendChild(currentRow);
+                        const eraReversa = rowIdx % 2 === 1;
+                        const turnWrap = document.createElement('div');
+                        turnWrap.className = 'row-connector ' + (eraReversa ? 'connector-left' : 'connector-right');
+                        const arrow = document.createElement('span');
+                        arrow.className = 'row-connector-arrow';
+                        arrow.textContent = eraReversa ? '⤶' : '⤵';
+                        if (eraReversa) { turnWrap.appendChild(arrow); turnWrap.appendChild(axle); }
+                        else { turnWrap.appendChild(axle); turnWrap.appendChild(arrow); }
+                        rowsWrap.appendChild(turnWrap);
+                        currentRow = null;
+                    }
                 }
             });
-            machine.appendChild(row);
+            if (currentRow) rowsWrap.appendChild(currentRow);
+            machine.appendChild(rowsWrap);
         }
 
         function openOptions(axleIndex) {
