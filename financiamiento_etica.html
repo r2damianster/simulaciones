@@ -7,61 +7,154 @@
     <meta name="description" content="Simulación pedagógica interactiva de ética académica: navega entre revistas depredadoras, gestiona fondos ONU/CEDIA y toma decisiones éticas bajo presión. SimLab ULEAM.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto:wght@300;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-        :root { --bg-dark: #05070a; --panel-bg: #0d1117; --text-main: #c9d1d9; --cyan: #00f3ff; --green: #238636; --yellow: #ffeb3b; --red: #ff3d5a; --sim-home-fg: #00f3ff; --sim-home-bg: rgba(0,243,255,0.1); --sim-home-bd: rgba(0,243,255,0.2); --sim-home-hi: #00ffff; }
+        :root { --bg-dark: #14110d; --panel-bg: #1d1812; --text-main: #d8cdb8; --cyan: #7ba7c9; --gold: #D4A24E; --green: #4a8f5f; --yellow: #d9a441; --red: #c75050; --sim-home-fg: #D4A24E; --sim-home-bg: rgba(212,162,78,0.12); --sim-home-bd: rgba(212,162,78,0.22); --sim-home-hi: #fbbf24; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg-dark); color: var(--text-main); font-family: 'Roboto', sans-serif; overflow: hidden; height: 100vh; display: flex; }
-        
-        /* LAYOUT SPLIT */
-        #map-container { flex: 2; position: relative; border-right: 1px solid #21262d; }
+        body {
+            background: var(--bg-dark);
+            background-image:
+                radial-gradient(ellipse 550px 450px at 8% 0%, rgba(212,162,78,0.06), transparent),
+                radial-gradient(ellipse 450px 400px at 95% 95%, rgba(123,167,201,0.05), transparent);
+            color: var(--text-main); font-family: 'DM Sans', sans-serif; overflow: hidden; height: 100vh; display: flex;
+        }
+
+        /* LAYOUT SPLIT — el mapa vive dentro de un "monitor" de escritorio */
+        #map-container {
+            flex: 2; position: relative; border-right: 1px solid #332c22;
+            padding: 14px; background: #0e0b08;
+        }
+        #map-monitor {
+            position: relative; width: 100%; height: 100%;
+            border: 3px solid #3a3226; border-radius: 10px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5);
+            background: #010409; overflow: hidden;
+        }
+        #map-monitor::before {
+            content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.6);
+            border-radius: 8px;
+        }
+        .monitor-corner {
+            position: absolute; width: 8px; height: 8px; border-radius: 50%;
+            background: #4a4030; z-index: 4;
+        }
+        .monitor-corner.tl { top: 6px; left: 6px; }
+        .monitor-corner.tr { top: 6px; right: 6px; }
+        .monitor-corner.bl { bottom: 6px; left: 6px; }
+        .monitor-corner.br { bottom: 6px; right: 6px; }
         #canvas { width: 100%; height: 100%; display: block; background: #010409; }
-        
+
         #terminal-container { flex: 1; display: flex; flex-direction: column; background: var(--panel-bg); }
-        
-        #terminal-header { padding: 10px 15px; border-bottom: 1px solid #21262d; font-family: 'Share Tech Mono', monospace; color: #484f58; display: flex; justify-content: space-between; font-size: 0.8rem; }
-        
-        #hud { padding: 15px; display: flex; gap: 15px; border-bottom: 1px solid #21262d; }
-        .stat { flex: 1; background: #161b22; padding: 10px; border-radius: 4px; border: 1px solid #21262d; }
-        .stat-label { font-size: 0.7rem; color: #484f58; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; color: var(--cyan); margin-top: 5px; }
-        
-        #log-area { flex: 1; padding: 15px; overflow-y: auto; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; line-height: 1.5; scrollbar-width: thin; scrollbar-color: #21262d var(--panel-bg); }
+
+        #terminal-header { padding: 10px 15px; border-bottom: 1px solid #332c22; font-family: 'Share Tech Mono', monospace; color: #8a7d5f; display: flex; justify-content: space-between; font-size: 0.8rem; }
+
+        #hud { padding: 15px; display: flex; gap: 15px; border-bottom: 1px solid #332c22; flex-wrap: wrap; }
+        .stat { flex: 1; min-width: 110px; background: #241f18; padding: 10px; border-radius: 6px; border: 1px solid #332c22; }
+        .stat-label { font-size: 0.7rem; color: #8a7d5f; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; color: var(--gold); margin-top: 5px; }
+
+        #log-area { flex: 1; padding: 15px; overflow-y: auto; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; line-height: 1.5; scrollbar-width: thin; scrollbar-color: #332c22 var(--panel-bg); }
         .log-entry { margin-bottom: 8px; opacity: 0.9; animation: fadeIn 0.3s; }
-        .log-sys { color: #484f58; }
-        .log-onu { color: #58a6ff; }
-        .log-a { color: #3fb950; font-style: italic; } /* Aburrido */
+        .log-sys { color: #8a7d5f; }
+        .log-onu { color: var(--cyan); }
+        .log-a { color: var(--green); font-style: italic; } /* Aburrido */
         .log-b { color: var(--yellow); font-weight: bold; }
         .log-warn { color: var(--red); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        #instructions { padding: 15px; border-top: 1px solid #21262d; background: #161b22; font-size: 0.8rem; color: #8b949e; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+        #instructions { padding: 15px; border-top: 1px solid #332c22; background: #241f18; font-size: 0.8rem; color: #a89878; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
 
         /* MODAL FINAL */
-        #final-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; }
-        .modal { background: var(--panel-bg); border: 1px solid var(--red); padding: 40px; max-width: 500px; text-align: center; }
-        .modal h2 { color: var(--red); font-family: 'Share Tech Mono'; margin-bottom: 20px; }
+        #final-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+        .modal { background: var(--panel-bg); border: 1px solid var(--red); border-radius: 10px; padding: 40px; max-width: 500px; width: 100%; text-align: center; }
+        .modal h2 { color: var(--red); font-family: 'DM Serif Display', serif; font-weight: 400; margin-bottom: 20px; }
         .score { font-size: 3em; font-family: 'Share Tech Mono'; margin: 20px 0; }
-        .score-good { color: var(--cyan); text-shadow: 0 0 20px rgba(0,243,255,0.5); }
-        .score-bad { color: var(--red); text-shadow: 0 0 20px rgba(255,61,90,0.5); }
+        .score-good { color: var(--gold); text-shadow: 0 0 20px rgba(212,162,78,0.4); }
+        .score-bad { color: var(--red); text-shadow: 0 0 20px rgba(199,80,80,0.4); }
 
-        /* MODALES DE BRIEFING Y TENTACIÓN */
-        #briefing-modal, #choice-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 200; justify-content: center; align-items: center; }
-        .modal-info { background: var(--panel-bg); border: 1px solid var(--cyan); padding: 30px; max-width: 480px; text-align: left; font-size: 0.9rem; line-height: 1.6; }
-        .modal-info h2 { color: var(--cyan); font-family: 'Share Tech Mono'; margin-bottom: 15px; text-align:center; }
-        .modal-temptation { background: #1a0d05; border: 1px solid var(--yellow); padding: 30px; max-width: 480px; text-align: left; font-size: 0.9rem; line-height: 1.6; box-shadow: 0 0 30px rgba(255,235,59,0.2); }
-        .modal-temptation h2 { color: var(--yellow); font-family: 'Share Tech Mono'; margin-bottom: 15px; text-align:center; }
+        /* MODALES DE BRIEFING Y TENTACIÓN — estilo carta / documento con membrete */
+        #briefing-modal, #choice-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 200; justify-content: center; align-items: center; padding: 20px; }
+        .modal-info, .modal-temptation {
+            background: #f0e9d8; color: #2a2418; border-radius: 6px;
+            max-width: 480px; width: 100%; text-align: left; font-size: 0.92rem; line-height: 1.6;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6); position: relative; overflow: hidden;
+        }
+        .carta-membrete {
+            display: flex; align-items: center; gap: 12px; padding: 14px 24px;
+            font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+            letter-spacing: 0.5px; text-transform: uppercase;
+        }
+        .modal-info .carta-membrete { background: var(--cyan); color: #0a1620; }
+        .modal-temptation .carta-membrete { background: var(--yellow); color: #2a1d05; }
+        .carta-sello {
+            width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem;
+            background: rgba(0,0,0,0.15);
+        }
+        .carta-cuerpo { padding: 24px 28px 28px; }
+        .modal-info h2, .modal-temptation h2 {
+            font-family: 'DM Serif Display', serif; font-weight: 400; font-style: italic;
+            font-size: 1.4rem; margin-bottom: 15px; text-align: left; color: #2a2418;
+        }
+        .modal-info p, .modal-temptation p { font-style: italic; }
         .modal-btn-row { display:flex; gap:10px; margin-top:20px; }
-        .modal-btn-row button { flex:1; padding: 12px; border:none; cursor:pointer; font-family:'Share Tech Mono'; font-weight:bold; }
-        .btn-tempt { background: var(--yellow); color:#000; }
+        .modal-btn-row button {
+            flex:1; padding: 13px; border:none; border-radius: 100px; cursor:pointer;
+            font-family:'DM Sans', sans-serif; font-weight:700; transition: transform 0.2s;
+        }
+        .modal-btn-row button:hover { transform: translateY(-2px); }
+        .btn-tempt { background: var(--yellow); color:#2a1d05; }
         .btn-honest { background: var(--green); color:#fff; }
-        .btn-start { background: var(--cyan); color:#000; width:100%; padding:12px; border:none; cursor:pointer; font-family:'Share Tech Mono'; font-weight:bold; margin-top:15px; }
+        .btn-start {
+            background: var(--cyan); color:#0a1620; width:100%; padding:13px; border:none; border-radius: 100px;
+            cursor:pointer; font-family:'DM Sans', sans-serif; font-weight:700; margin-top:15px; transition: transform 0.2s;
+        }
+        .btn-start:hover { transform: translateY(-2px); }
+
+        /* Sello de goma — se estampa sobre la carta al decidir */
+        .sello-goma {
+            position: absolute; top: 50%; left: 50%; z-index: 10;
+            transform: translate(-50%,-50%) scale(2.5) rotate(-18deg);
+            opacity: 0; pointer-events: none;
+            font-family: 'Share Tech Mono', monospace; font-weight: 700;
+            font-size: 1.6rem; letter-spacing: 3px; padding: 10px 26px;
+            border: 5px solid currentColor; border-radius: 10px;
+        }
+        .sello-goma.estampar {
+            animation: estamparSello 0.55s cubic-bezier(0.2,1.4,0.4,1) forwards;
+        }
+        @keyframes estamparSello {
+            0% { opacity: 0; transform: translate(-50%,-50%) scale(2.5) rotate(-18deg); }
+            60% { opacity: 0.95; transform: translate(-50%,-50%) scale(0.92) rotate(-14deg); }
+            100% { opacity: 0.9; transform: translate(-50%,-50%) scale(1) rotate(-14deg); }
+        }
+        .sello-goma.aceptar { color: var(--green); }
+        .sello-goma.rechazar { color: var(--red); }
         .sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
           display:flex;align-items:center;justify-content:center;text-decoration:none;
           color:var(--sim-home-fg);background:var(--sim-home-bg);
           border:1px solid var(--sim-home-bd);border-radius:10px;
           transition:transform .2s, color .2s}
         .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            body { flex-direction: column; overflow-y: auto; height: auto; min-height: 100vh; }
+            #map-container { flex: none; height: 42vh; padding: 8px; border-right: none; border-bottom: 1px solid #332c22; }
+            #terminal-container { flex: none; min-height: 58vh; }
+            #hud { gap: 8px; padding: 10px; }
+            .stat { min-width: 0; padding: 8px 6px; }
+            .stat-label { font-size: 0.62rem; }
+            .stat-value { font-size: 1rem; }
+            #terminal-header { font-size: 0.7rem; padding: 8px 12px; }
+            #log-area { font-size: 0.78rem; padding: 10px; }
+            #instructions { font-size: 0.72rem; padding: 10px; min-height: 40px; }
+            .modal-info, .modal-temptation, .modal { max-width: 92vw; }
+            .carta-cuerpo { padding: 18px 20px 22px; }
+            .modal-info h2, .modal-temptation h2 { font-size: 1.2rem; }
+            .sello-goma { font-size: 1.1rem; padding: 8px 18px; letter-spacing: 2px; }
+        }
     </style>
 </head>
 <body>
@@ -71,7 +164,13 @@
     </a>
 
     <div id="map-container">
-        <canvas id="canvas"></canvas>
+        <div id="map-monitor">
+            <canvas id="canvas"></canvas>
+            <span class="monitor-corner tl"></span>
+            <span class="monitor-corner tr"></span>
+            <span class="monitor-corner bl"></span>
+            <span class="monitor-corner br"></span>
+        </div>
     </div>
 
     <div id="terminal-container">
@@ -90,7 +189,7 @@
             </div>
             <div class="stat">
                 <div class="stat-label">Estado</div>
-                <div class="stat-value" id="status" style="font-size: 0.9rem; color: #8b949e;">EXPLORANDO</div>
+                <div class="stat-value" id="status" style="font-size: 0.9rem; color: #a89878;">EXPLORANDO</div>
             </div>
             <div class="stat" id="deadline-stat" style="display:none;">
                 <div class="stat-label">Plazo Publicación</div>
@@ -103,29 +202,39 @@
 
     <div id="final-modal">
         <div class="modal">
-            <h2>SIMULACIÓN TERMINADA</h2>
-            <div id="revelation-text" style="font-size: 0.9rem; line-height: 1.6; color: #ff8a9e; margin-bottom: 20px;"></div>
+            <h2>Simulación Terminada</h2>
+            <div id="revelation-text" style="font-size: 0.9rem; line-height: 1.6; color: #d97a7a; margin-bottom: 20px;"></div>
             <div class="score" id="final-score-text"></div>
-            <div id="breakdown" style="text-align: left; font-size: 0.8rem; color: #8b949e; margin: 20px 0;"></div>
-            <button style="background: var(--red); color: white; border: none; padding: 10px 20px; cursor: pointer; font-family: 'Share Tech Mono';" onclick="location.reload()">REINICIAR</button>
+            <div id="breakdown" style="text-align: left; font-size: 0.8rem; color: #a89878; margin: 20px 0;"></div>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
+                <button style="background: var(--red); color: white; border: none; border-radius:100px; padding: 12px 26px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight:700;" onclick="location.reload()">↺ Reiniciar</button>
+                <a href="index.html" style="background: var(--panel-bg); color: var(--text-main); border: 1px solid #332c22; border-radius:100px; padding: 12px 26px; text-decoration:none; font-family: 'DM Sans', sans-serif; font-weight:700; display:inline-flex; align-items:center;">← Volver al inicio</a>
+            </div>
         </div>
     </div>
 
     <div id="briefing-modal">
         <div class="modal-info">
-            <h2>📋 BRIEFING DE MISIÓN</h2>
-            <div id="briefing-text"></div>
-            <button class="btn-start" id="btnComenzar">COMENZAR SIMULACIÓN</button>
+            <div class="carta-membrete"><span class="carta-sello">🏛️</span> Oficina de Coordinación de Investigación — Memo Interno</div>
+            <div class="carta-cuerpo">
+                <h2>Briefing de misión</h2>
+                <div id="briefing-text"></div>
+                <button class="btn-start" id="btnComenzar">COMENZAR SIMULACIÓN</button>
+            </div>
         </div>
     </div>
 
     <div id="choice-modal">
         <div class="modal-temptation" id="choice-box">
-            <h2 id="choice-title"></h2>
-            <div id="choice-text" style="margin-bottom:10px;"></div>
-            <div class="modal-btn-row">
-                <button class="btn-tempt" id="choice-accept"></button>
-                <button class="btn-honest" id="choice-reject"></button>
+            <div class="sello-goma" id="selloGoma"></div>
+            <div class="carta-membrete"><span class="carta-sello">✉️</span> Mensaje recibido</div>
+            <div class="carta-cuerpo">
+                <h2 id="choice-title"></h2>
+                <div id="choice-text" style="margin-bottom:10px;"></div>
+                <div class="modal-btn-row">
+                    <button class="btn-tempt" id="choice-accept"></button>
+                    <button class="btn-honest" id="choice-reject"></button>
+                </div>
             </div>
         </div>
     </div>
@@ -139,11 +248,11 @@
         const overlay = document.createElement('div');
         overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
         overlay.innerHTML = `
-            <div style="background:#1e2329;color:#e6edf3;padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid #2f81f7;font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.5)">
-                <h3 style="margin:0 0 12px;color:#2f81f7">¿Cómo te llamas?</h3>
+            <div style="background:#1d1812;color:#d8cdb8;padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--gold, #D4A24E);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+                <h3 style="margin:0 0 12px;color:var(--gold, #D4A24E);font-family:'DM Serif Display',serif;font-weight:400">¿Cómo te llamas?</h3>
                 <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.</p>
-                <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid #777;background:rgba(255,255,255,.05);color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
-                <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:#2f81f7;color:#fff;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+                <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid #4a4030;background:rgba(255,255,255,.05);color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
+                <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:100px;background:var(--gold, #D4A24E);color:#1a1610;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
             </div>`;
         document.body.appendChild(overlay);
         const input = overlay.querySelector('#inputNombreUsuario');
@@ -197,10 +306,10 @@
 
     // --- DEFINICIÓN DE ZONAS (Porcentaje del canvas para que sea responsive) ---
     const zones = [
-        { id: 'onu', name: 'CONVOCATORIA ONU', icon: '🇺🇳', x: 0.05, y: 0.05, w: 0.4, h: 0.4, color: '#0d2240', borderColor: '#58a6ff', slow: 1 },
-        { id: 'lab', name: 'LABORATORIO', icon: '🧪', x: 0.05, y: 0.55, w: 0.4, h: 0.4, color: '#0d1117', borderColor: '#484f58', slow: 1 },
-        { id: 'revistaA', name: 'REVISTA Q1 (Peer Review)', icon: '📗', x: 0.55, y: 0.55, w: 0.4, h: 0.4, color: '#0a1f0a', borderColor: '#238636', slow: 0.3 }, // Zona LENTA
-        { id: 'revistaB', name: '⚡ FAST PUBLISH ⚡', icon: '💸', x: 0.55, y: 0.05, w: 0.4, h: 0.4, color: '#2a2200', borderColor: '#ffeb3b', slow: 2 } // Zona RÁPIDA
+        { id: 'onu', name: 'CONVOCATORIA ONU', icon: '🇺🇳', x: 0.05, y: 0.05, w: 0.4, h: 0.4, color: '#141d24', borderColor: '#7ba7c9', slow: 1 },
+        { id: 'lab', name: 'LABORATORIO', icon: '🧪', x: 0.05, y: 0.55, w: 0.4, h: 0.4, color: '#1a1610', borderColor: '#6b5f47', slow: 1 },
+        { id: 'revistaA', name: 'REVISTA Q1 (Peer Review)', icon: '📗', x: 0.55, y: 0.55, w: 0.4, h: 0.4, color: '#141d16', borderColor: '#4a8f5f', slow: 0.3 }, // Zona LENTA
+        { id: 'revistaB', name: '⚡ FAST PUBLISH ⚡', icon: '💸', x: 0.55, y: 0.05, w: 0.4, h: 0.4, color: '#241d10', borderColor: '#d9a441', slow: 2 } // Zona RÁPIDA
     ];
 
     function getZoneRect(z) {
@@ -272,11 +381,11 @@
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = '#ffeb3b';
             } else if (this.state === 'success') {
-                ctx.fillStyle = '#3fb950';
+                ctx.fillStyle = '#4a8f5f';
                 ctx.shadowBlur = 10;
-                ctx.shadowColor = '#3fb950';
+                ctx.shadowColor = '#4a8f5f';
             } else {
-                ctx.fillStyle = '#484f58';
+                ctx.fillStyle = '#6b5f47';
                 ctx.shadowBlur = 0;
             }
             ctx.fill();
@@ -371,18 +480,27 @@
         document.getElementById('choice-text').innerHTML = text;
         const btnA = document.getElementById('choice-accept');
         const btnR = document.getElementById('choice-reject');
+        const sello = document.getElementById('selloGoma');
         btnA.textContent = acceptLabel;
         btnR.textContent = rejectLabel;
+        sello.className = 'sello-goma';
+        sello.textContent = '';
         modal.style.display = 'flex';
 
-        const cleanup = () => {
-            modal.style.display = 'none';
-            state.paused = false;
-            btnA.replaceWith(btnA.cloneNode(true));
-            btnR.replaceWith(btnR.cloneNode(true));
+        // Estampa un sello de goma sobre la carta antes de cerrarla y resolver la decisión
+        const estamparYCerrar = (texto, claseColor, callback) => {
+            sello.textContent = texto;
+            sello.className = `sello-goma estampar ${claseColor}`;
+            setTimeout(() => {
+                modal.style.display = 'none';
+                state.paused = false;
+                btnA.replaceWith(btnA.cloneNode(true));
+                btnR.replaceWith(btnR.cloneNode(true));
+                callback();
+            }, 650);
         };
-        document.getElementById('choice-accept').addEventListener('click', () => { cleanup(); onAccept(); });
-        document.getElementById('choice-reject').addEventListener('click', () => { cleanup(); onReject(); });
+        document.getElementById('choice-accept').addEventListener('click', () => estamparYCerrar('ACEPTADO', 'aceptar', onAccept));
+        document.getElementById('choice-reject').addEventListener('click', () => estamparYCerrar('RECHAZADO', 'rechazar', onReject));
     }
 
     // --- BRIEFING INICIAL ---
@@ -692,7 +810,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // Dibujar Grid de fondo
-        ctx.strokeStyle = '#21262d';
+        ctx.strokeStyle = '#241f18';
         ctx.lineWidth = 1;
         for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
         for(let i=0; i<canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }

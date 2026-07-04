@@ -6,14 +6,15 @@
     <title>Máquina de Engranajes - Sistema de Puntuación</title>
     <meta name="description" content="Simulación pedagógica interactiva de conectores argumentativos: conecta enunciados académicos eligiendo tipo de relación lógica y conector exacto. SimLab ULEAM.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #1a1a1d;
-            --metal-dark: #2c2c34;
-            --metal-light: #4a4a55;
+            --bg-color: #171310;
+            --metal-dark: #2e2820;
+            --metal-light: #5a4e3a;
             --accent-gold: #d4af37;
-            --accent-green: #39ff14;
-            --accent-red: #ff3131;
+            --accent-green: #34D399;
+            --accent-red: #C75050;
             --text-color: #e0e0e0;
             --sim-home-fg: #d4af37;
             --sim-home-bg: rgba(212,175,55,0.12);
@@ -24,6 +25,9 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
+            background-image:
+                radial-gradient(ellipse 550px 450px at 10% 0%, rgba(212,175,55,0.06), transparent),
+                radial-gradient(ellipse 450px 400px at 95% 90%, rgba(52,211,153,0.04), transparent);
             color: var(--text-color);
             margin: 0;
             padding: 20px;
@@ -33,10 +37,12 @@
         h1 {
             text-align: center;
             color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            font-family: 'DM Serif Display', serif;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0.5px;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            text-shadow: 0 0 16px rgba(212, 175, 55, 0.35);
         }
 
         .subtitle {
@@ -48,7 +54,7 @@
 
         /* MARCADOR DE PUNTUACIÓN */
         #scoreboard {
-            background: #111;
+            background: #100d0a;
             border: 2px solid var(--metal-light);
             border-radius: 10px;
             padding: 15px 30px;
@@ -87,16 +93,80 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 60px;
-            padding: 40px 20px;
-            background: radial-gradient(circle, #2a2a35 0%, #1a1a1d 100%);
+            gap: 40px;
+            padding: 30px 20px 40px;
+            background: radial-gradient(circle, #2a2419 0%, #171310 100%);
             border: 2px solid var(--metal-dark);
             border-radius: 20px;
             box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
             max-width: 1200px;
             margin: 0 auto;
             overflow: hidden;
+            position: relative;
         }
+
+        /* ── OPERARIO Y PALANCA ── */
+        .operario-station {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .palanca-grupo {
+            transform-origin: 102px 130px;
+            transition: transform 0.5s cubic-bezier(.34,1.56,.64,1);
+            transform: rotate(-18deg);
+        }
+        .palanca-grupo.tirada { transform: rotate(20deg); }
+        .palanca-grupo.atascada { animation: palancaAtascada 0.4s ease-in-out; }
+        @keyframes palancaAtascada {
+            0%, 100% { transform: rotate(-18deg); }
+            25% { transform: rotate(-24deg); }
+            75% { transform: rotate(-10deg); }
+        }
+        .brazo-operario {
+            transform-origin: 62px 92px;
+            transition: transform 0.5s cubic-bezier(.34,1.56,.64,1);
+            transform: rotate(0deg);
+        }
+        .brazo-operario.tirada { transform: rotate(-16deg); }
+        .operario-vapor {
+            position: absolute; top: 4px; left: 30px; font-size: 1.4rem; opacity: 0; pointer-events: none;
+        }
+        .operario-vapor.puff { animation: vaporPuff 0.9s ease-out; }
+        @keyframes vaporPuff {
+            0% { opacity: 0; transform: translateY(0) scale(0.6); }
+            30% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-34px) scale(1.5); }
+        }
+
+        /* ── CINTA DE PRODUCCIÓN ── */
+        .cinta-wrap { max-width: 1200px; margin: 20px auto 0; }
+        .cinta-label {
+            font-size: 0.78rem; color: #8a7d5f; margin-bottom: 8px;
+            text-transform: uppercase; letter-spacing: 1.5px; text-align: center;
+        }
+        .cinta-produccion {
+            display: flex; gap: 10px; overflow-x: auto;
+            padding: 16px; background: #100d0a;
+            border: 2px solid var(--metal-light);
+            border-radius: 10px; min-height: 66px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.7);
+        }
+        .cinta-ticket {
+            flex-shrink: 0; background: #f0e9d8; color: #2a2418;
+            padding: 10px 16px; border-radius: 2px;
+            font-family: 'Courier New', monospace; font-weight: 700;
+            font-size: 0.78rem; letter-spacing: 0.5px;
+            box-shadow: 1px 2px 6px rgba(0,0,0,0.5);
+            border-top: 3px dashed #a08a5a;
+            animation: ticketEject 0.5s cubic-bezier(.34,1.56,.64,1) both;
+            white-space: nowrap;
+        }
+        @keyframes ticketEject {
+            from { transform: translateY(-24px) scale(0.75); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .cinta-vacia { color: #555; font-size: 0.85rem; font-style: italic; padding: 8px 4px; }
 
         .gear-row {
             display: flex;
@@ -184,12 +254,12 @@
         }
 
         .axle-label {
-            background: #333;
-            border: 1px dashed #666;
+            background: #241f18;
+            border: 1px dashed #6a5c3e;
             padding: 5px 10px;
             border-radius: 15px;
             font-size: 0.8rem;
-            color: #888;
+            color: #a89878;
             z-index: 10;
             transition: all 0.3s;
             min-width: 60px;
@@ -203,9 +273,9 @@
         }
 
         /* Estados */
-        .gear.active { background: #2d4a2d; box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 0 20px rgba(57, 255, 20, 0.2); }
-        .gear.active::before, .gear.active::after { background: #2d4a2d; }
-        
+        .gear.active { background: #234a3a; box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 0 20px rgba(52, 211, 153, 0.25); }
+        .gear.active::before, .gear.active::after { background: #234a3a; }
+
         .gear.error { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; background: #4a2d2d; }
         .gear.error::before, .gear.error::after { background: #4a2d2d; }
 
@@ -226,7 +296,7 @@
             position: fixed;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            background: #252530;
+            background: #241f18;
             border: 2px solid var(--accent-gold);
             border-radius: 15px;
             padding: 30px;
@@ -248,7 +318,7 @@
         .step-dot {
             width: 12px; height: 12px;
             border-radius: 50%;
-            background: #444;
+            background: #4a4030;
             transition: all 0.3s;
         }
         .step-dot.active { background: var(--accent-gold); box-shadow: 0 0 10px var(--accent-gold); }
@@ -257,9 +327,11 @@
         .modal-base h3 {
             margin-top: 0;
             color: var(--accent-gold);
-            border-bottom: 1px solid #444;
+            font-family: 'DM Serif Display', serif;
+            font-weight: 400;
+            border-bottom: 1px solid #4a4030;
             padding-bottom: 10px;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
         }
 
         .options-grid {
@@ -472,7 +544,39 @@
         <div id="scoreValue">100</div>
     </div>
 
-    <div class="machine-container" id="machine"></div>
+    <div class="machine-container">
+        <div class="operario-station">
+            <svg viewBox="0 0 140 160" width="110" height="126" aria-hidden="true">
+                <rect x="95" y="130" width="14" height="26" rx="3" fill="#5a4a2a"/>
+                <ellipse cx="102" cy="156" rx="22" ry="6" fill="#000" opacity="0.35"/>
+                <g class="palanca-grupo" id="palancaGrupo">
+                    <rect x="99" y="70" width="6" height="60" rx="3" fill="#d4af37"/>
+                    <circle cx="102" cy="66" r="10" fill="#e8c558" stroke="#8a6a1a" stroke-width="2"/>
+                </g>
+                <g class="operario-cuerpo">
+                    <rect x="30" y="118" width="10" height="30" rx="4" fill="#3a3428"/>
+                    <rect x="48" y="118" width="10" height="30" rx="4" fill="#3a3428"/>
+                    <rect x="22" y="80" width="44" height="42" rx="10" fill="#5a4e3a"/>
+                    <rect x="22" y="80" width="44" height="14" rx="6" fill="#d4af37" opacity="0.85"/>
+                    <circle cx="44" cy="66" r="16" fill="#e0b088"/>
+                    <path d="M28 62 a16 16 0 0 1 32 0 z" fill="#d4af37"/>
+                    <rect x="26" y="60" width="36" height="6" rx="3" fill="#b8941f"/>
+                    <g class="brazo-operario" id="brazoOperario">
+                        <rect x="62" y="88" width="38" height="9" rx="4" fill="#e0b088"/>
+                    </g>
+                </g>
+            </svg>
+            <div class="operario-vapor" id="operarioVapor">💨</div>
+        </div>
+        <div id="machine"></div>
+    </div>
+
+    <div class="cinta-wrap">
+        <div class="cinta-label">🧾 Cinta de producción — conectores estampados</div>
+        <div class="cinta-produccion" id="cintaProduccion">
+            <div class="cinta-vacia" id="cintaVacia">Aún no se ha estampado ningún conector...</div>
+        </div>
+    </div>
 
     <div class="overlay" id="overlay"></div>
     
@@ -592,8 +696,8 @@
             const overlay = document.createElement('div');
             overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:99999;';
             overlay.innerHTML = `
-                <div style="background:#252530;color:#e0e0e0;padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--accent-gold);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.7)">
-                    <h3 style="margin:0 0 12px;color:var(--accent-gold)">¿Cómo te llamas?</h3>
+                <div style="background:#241f18;color:#e0e0e0;padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--accent-gold);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+                    <h3 style="margin:0 0 12px;color:var(--accent-gold);font-family:'DM Serif Display',serif;font-weight:400">¿Cómo te llamas?</h3>
                     <p style="font-size:.85rem;opacity:.75;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión y no se envía a ningún servidor.</p>
                     <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid #666;background:rgba(255,255,255,.05);color:#e0e0e0;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
                     <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:var(--accent-gold);color:#000;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
@@ -704,11 +808,46 @@
 
         function validateStep1(selected, correct) {
             if (selected === correct) {
+                tirarPalanca();
                 currentStep = 2;
                 updatePanelUI();
             } else {
                 triggerError("Tipo incorrecto. Analiza la relación entre las ideas.", correct);
             }
+        }
+
+        // El operario tira de la palanca: engranajes internos giran y se abre el compartimiento de conectores
+        function tirarPalanca() {
+            const palanca = document.getElementById('palancaGrupo');
+            const brazo = document.getElementById('brazoOperario');
+            palanca.classList.add('tirada');
+            brazo.classList.add('tirada');
+            setTimeout(() => {
+                palanca.classList.remove('tirada');
+                brazo.classList.remove('tirada');
+            }, 550);
+        }
+
+        // Al fallar, la palanca se traba y el operario libera vapor de frustración
+        function palancaAtascada() {
+            const palanca = document.getElementById('palancaGrupo');
+            const vapor = document.getElementById('operarioVapor');
+            palanca.classList.add('atascada');
+            vapor.classList.add('puff');
+            setTimeout(() => palanca.classList.remove('atascada'), 400);
+            setTimeout(() => vapor.classList.remove('puff'), 900);
+        }
+
+        // Estampa el conector elegido como un ticket en la cinta de producción
+        function estamparTicket(connector) {
+            const cinta = document.getElementById('cintaProduccion');
+            const vacia = document.getElementById('cintaVacia');
+            if (vacia) vacia.remove();
+            const ticket = document.createElement('div');
+            ticket.className = 'cinta-ticket';
+            ticket.textContent = connector.toUpperCase();
+            cinta.appendChild(ticket);
+            cinta.scrollLeft = cinta.scrollWidth;
         }
 
         function validateStep2(selected, correct, type) {
@@ -723,6 +862,7 @@
             // RESTAR PUNTOS
             score = Math.max(0, score - PENALTY);
             updateScoreDisplay(true); // true = mostrar animación roja
+            palancaAtascada();
 
             const gearLeft = document.getElementById(`gear-${currentAxleIndex}`);
             const gearRight = document.getElementById(`gear-${currentAxleIndex + 1}`);
@@ -738,7 +878,8 @@
 
         function triggerSuccess(type, word) {
             document.getElementById('optionsPanel').classList.remove('show');
-            
+            estamparTicket(word);
+
             const gearLeft = document.getElementById(`gear-${currentAxleIndex}`);
             const gearRight = document.getElementById(`gear-${currentAxleIndex + 1}`);
             const axle = document.getElementById(`axle-${currentAxleIndex}`);

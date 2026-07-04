@@ -15,22 +15,22 @@
             --bg-card: #0c1a0c;
             --bg-card-alt: #0f200f;
             --fg: #b8e8b8;
-            --fg-bright: #00ff41;
+            --fg-bright: #34D399;
             --fg-dim: #4a7a4a;
             --accent: #ffb800;
             --danger: #ff3344;
-            --success: #00ff41;
+            --success: #34D399;
             --partial: #ffb800;
             --na: #555;
             --border: #1a3a1a;
             --border-bright: #2a5a2a;
             --pre-color: #ff4444;
             --quasi-color: #ffaa00;
-            --pure-color: #00ff41;
-            --sim-home-fg: #00ff41;
-            --sim-home-bg: rgba(0,255,65,0.1);
-            --sim-home-bd: rgba(0,255,65,0.2);
-            --sim-home-hi: #00ff41;
+            --pure-color: #34D399;
+            --sim-home-fg: #34D399;
+            --sim-home-bg: rgba(52,211,153,0.1);
+            --sim-home-bd: rgba(52,211,153,0.2);
+            --sim-home-hi: #34D399;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -57,8 +57,8 @@
             position: fixed;
             inset: 0;
             background-image:
-                linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+                linear-gradient(rgba(52,211,153,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52,211,153,0.03) 1px, transparent 1px);
             background-size: 40px 40px;
             z-index: 0;
             pointer-events: none;
@@ -91,13 +91,13 @@
         /* Header */
         .lab-header {
             border-bottom: 2px solid var(--border-bright);
-            background: linear-gradient(180deg, rgba(0,255,65,0.05) 0%, transparent 100%);
+            background: linear-gradient(180deg, rgba(52,211,153,0.05) 0%, transparent 100%);
         }
         .lab-header h1 {
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
             color: var(--fg-bright);
-            text-shadow: 0 0 20px rgba(0,255,65,0.4), 0 0 60px rgba(0,255,65,0.1);
+            text-shadow: 0 0 20px rgba(52,211,153,0.4), 0 0 60px rgba(52,211,153,0.1);
             letter-spacing: 3px;
         }
         .lab-header .subtitle {
@@ -124,7 +124,7 @@
             color: var(--quasi-color);
         }
         .badge-pure {
-            background: rgba(0,255,65,0.15);
+            background: rgba(52,211,153,0.15);
             border: 1px solid var(--pure-color);
             color: var(--pure-color);
         }
@@ -168,9 +168,9 @@
             flex-shrink: 0;
         }
         .status-yes {
-            background: rgba(0,255,65,0.15);
+            background: rgba(52,211,153,0.15);
             color: var(--success);
-            border: 1px solid rgba(0,255,65,0.3);
+            border: 1px solid rgba(52,211,153,0.3);
         }
         .status-no {
             background: rgba(255,51,68,0.15);
@@ -225,8 +225,8 @@
         /* Botón ejecutar */
         .btn-run {
             font-family: 'Share Tech Mono', monospace;
-            background: rgba(0,255,65,0.08);
-            border: 1px solid rgba(0,255,65,0.3);
+            background: rgba(52,211,153,0.08);
+            border: 1px solid rgba(52,211,153,0.3);
             color: var(--fg-bright);
             padding: 10px 24px;
             border-radius: 4px;
@@ -238,9 +238,9 @@
             overflow: hidden;
         }
         .btn-run:hover:not(:disabled) {
-            background: rgba(0,255,65,0.18);
+            background: rgba(52,211,153,0.18);
             border-color: var(--fg-bright);
-            box-shadow: 0 0 20px rgba(0,255,65,0.15);
+            box-shadow: 0 0 20px rgba(52,211,153,0.15);
         }
         .btn-run:disabled {
             opacity: 0.4;
@@ -250,7 +250,7 @@
             animation: pulse-border 1s ease-in-out infinite;
         }
         @keyframes pulse-border {
-            0%, 100% { border-color: rgba(0,255,65,0.3); }
+            0%, 100% { border-color: rgba(52,211,153,0.3); }
             50% { border-color: var(--fg-bright); }
         }
 
@@ -324,8 +324,8 @@
             color: var(--partial);
         }
         .callout-success {
-            background: rgba(0,255,65,0.06);
-            border: 1px solid rgba(0,255,65,0.25);
+            background: rgba(52,211,153,0.06);
+            border: 1px solid rgba(52,211,153,0.25);
             color: var(--fg);
         }
         .callout-danger {
@@ -391,13 +391,62 @@
             transition: width 1.5s ease-out;
         }
 
-        /* Personajes SVG */
+        /* Personajes SVG — jaula de laboratorio */
         .character-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
+            position: relative;
+            padding: 10px 8px 6px;
+            border-radius: 10px;
         }
+        .character-container.jaula {
+            background: repeating-linear-gradient(90deg,
+                rgba(52,211,153,0.09) 0px, rgba(52,211,153,0.09) 2px,
+                transparent 2px, transparent 11px);
+            border: 1px solid var(--border-bright);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        .character-container .mouse-svg {
+            animation: mouseIdle 3.2s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+        @keyframes mouseIdle {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.025) rotate(-0.6deg); }
+        }
+        .character-container.reaccion-activa .mouse-svg {
+            animation: mouseActivo 0.5s ease-in-out 3;
+        }
+        @keyframes mouseActivo {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.09) translateY(-6px); }
+        }
+        .character-container.sorteo .mouse-svg {
+            animation: mouseSorteo 0.6s ease-in-out 2;
+        }
+        @keyframes mouseSorteo {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-8deg) scale(1.04); }
+            75% { transform: rotate(8deg) scale(1.04); }
+        }
+        .character-container.sin-actividad {
+            opacity: 0.35;
+            filter: grayscale(0.8);
+        }
+        .character-container.sin-actividad::after {
+            content: '';
+        }
+        .cage-status {
+            font-size: 0.62rem;
+            letter-spacing: 0.5px;
+            color: var(--fg-dim);
+            min-height: 14px;
+            text-align: center;
+        }
+        .cage-status.status-warning { color: var(--danger); }
+        .cage-status.status-success { color: var(--success); }
         .character-name {
             font-family: 'Orbitron', sans-serif;
             font-size: 0.75rem;
@@ -414,8 +463,8 @@
             font-weight: bold;
         }
         .group-exp {
-            background: rgba(0,255,65,0.1);
-            border: 1px solid rgba(0,255,65,0.3);
+            background: rgba(52,211,153,0.1);
+            border: 1px solid rgba(52,211,153,0.3);
             color: var(--success);
         }
         .group-ctrl {
@@ -513,8 +562,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Brain -->
             <div class="exp-card p-6 flex items-center gap-6">
-                <div class="character-container flex-shrink-0">
-                    <svg width="90" height="110" viewBox="0 0 100 120">
+                <div class="character-container jaula flex-shrink-0" id="cage-brain">
+                    <svg class="mouse-svg" width="90" height="110" viewBox="0 0 100 120">
                         <ellipse cx="50" cy="82" rx="18" ry="22" fill="#d0d0d0"/>
                         <ellipse cx="50" cy="40" rx="30" ry="34" fill="#d8d8d8"/>
                         <circle cx="22" cy="18" r="13" fill="#ffaaaa"/>
@@ -535,6 +584,7 @@
                     </svg>
                     <span class="character-name text-[var(--pre-color)]">BRAIN</span>
                     <span class="group-tag group-exp">Sujeto A</span>
+                    <span class="cage-status" id="status-brain"></span>
                 </div>
                 <div class="text-sm">
                     <p class="text-[var(--fg)] mb-2"><strong>Especie:</strong> Mus musculus (raton de laboratorio geneticamente modificado)</p>
@@ -544,8 +594,8 @@
             </div>
             <!-- Pinky -->
             <div class="exp-card p-6 flex items-center gap-6">
-                <div class="character-container flex-shrink-0">
-                    <svg width="90" height="110" viewBox="0 0 100 120">
+                <div class="character-container jaula flex-shrink-0" id="cage-pinky">
+                    <svg class="mouse-svg" width="90" height="110" viewBox="0 0 100 120">
                         <ellipse cx="50" cy="85" rx="20" ry="20" fill="#e8d8d8"/>
                         <ellipse cx="50" cy="46" rx="24" ry="26" fill="#f0e0e0"/>
                         <circle cx="28" cy="28" r="15" fill="#ffaacc"/>
@@ -565,6 +615,7 @@
                     </svg>
                     <span class="character-name text-[#88aaff]">PINKY</span>
                     <span class="group-tag group-ctrl">Sujeto B</span>
+                    <span class="cage-status" id="status-pinky"></span>
                 </div>
                 <div class="text-sm">
                     <p class="text-[var(--fg)] mb-2"><strong>Especie:</strong> Mus musculus (raton de laboratorio, sin modificacion)</p>
@@ -986,7 +1037,7 @@ class Particle {
         if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
     }
     draw() {
-        ctx.fillStyle = `rgba(0, 255, 65, ${this.opacity})`;
+        ctx.fillStyle = `rgba(52, 211, 153, ${this.opacity})`;
         ctx.beginPath();
         ctx.arc(this.x, this.y, Math.max(0.5, this.size), 0, Math.PI * 2);
         ctx.fill();
@@ -1095,11 +1146,11 @@ function obtenerNombreUsuario(callback) {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:99999;';
     overlay.innerHTML = `
-        <div style="background:var(--bg-card,#0c1a0c);color:var(--fg,#b8e8b8);padding:32px;border-radius:8px;max-width:380px;width:90%;text-align:center;border:1px solid var(--fg-bright,#00ff41);font-family:inherit;box-shadow:0 0 30px rgba(0,255,65,.2)">
-            <h3 style="margin:0 0 12px;color:var(--fg-bright,#00ff41);font-family:'Orbitron',sans-serif;font-size:1rem;letter-spacing:1px;">IDENTIFIQUESE, SUJETO</h3>
+        <div style="background:var(--bg-card,#0c1a0c);color:var(--fg,#b8e8b8);padding:32px;border-radius:8px;max-width:380px;width:90%;text-align:center;border:1px solid var(--fg-bright,#34D399);font-family:inherit;box-shadow:0 0 30px rgba(52,211,153,.2)">
+            <h3 style="margin:0 0 12px;color:var(--fg-bright,#34D399);font-family:'Orbitron',sans-serif;font-size:1rem;letter-spacing:1px;">IDENTIFIQUESE, SUJETO</h3>
             <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesion del navegador y no se guarda ni se envia a ningun servidor.</p>
             <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:4px;border:1px solid var(--border-bright,#2a5a2a);background:var(--bg,#060d06);color:var(--fg,#b8e8b8);margin-bottom:16px;box-sizing:border-box;font-size:1rem">
-            <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:4px;background:var(--fg-bright,#00ff41);color:#000;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+            <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:4px;background:var(--fg-bright,#34D399);color:#000;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
         </div>`;
     document.body.appendChild(overlay);
     const input = overlay.querySelector('#inputNombreUsuario');
@@ -1119,9 +1170,54 @@ function obtenerNombreUsuario(callback) {
 // =============================================
 const experimentState = { pre: false, quasi: false, pure: false };
 
+// Reacciona visualmente a BRAIN y PINKY en sus jaulas según el diseño ejecutado
+function animarSujetos(type) {
+    const cageBrain = document.getElementById('cage-brain');
+    const cagePinky = document.getElementById('cage-pinky');
+    const statusBrain = document.getElementById('status-brain');
+    const statusPinky = document.getElementById('status-pinky');
+
+    cageBrain.classList.remove('reaccion-activa', 'sorteo', 'sin-actividad');
+    cagePinky.classList.remove('reaccion-activa', 'sorteo', 'sin-actividad');
+    statusBrain.className = 'cage-status';
+    statusPinky.className = 'cage-status';
+
+    if (type === 'pre') {
+        // Sin grupo control: solo Brain recibe el tratamiento, Pinky queda inactiva
+        cageBrain.classList.add('reaccion-activa');
+        cagePinky.classList.add('sin-actividad');
+        statusBrain.textContent = '⚡ RAYO ACTIVADO';
+        statusPinky.textContent = '⚠ SIN GRUPO CONTROL';
+        statusPinky.classList.add('status-warning');
+    } else if (type === 'quasi') {
+        // Grupos preexistentes/intactos: cada quien reacciona a su propio tratamiento, sin sorteo
+        cageBrain.classList.add('reaccion-activa');
+        setTimeout(() => cagePinky.classList.add('reaccion-activa'), 300);
+        statusBrain.textContent = '🍔 SUPERALIMENTO';
+        statusPinky.textContent = '🥣 DIETA NORMAL';
+    } else if (type === 'pure') {
+        // Asignación aleatoria real: ambos sujetos "sorteados" antes de recibir tratamiento
+        cageBrain.classList.add('sorteo');
+        cagePinky.classList.add('sorteo');
+        statusBrain.textContent = '🎲 ALEATORIZANDO...';
+        statusPinky.textContent = '🎲 ALEATORIZANDO...';
+        setTimeout(() => {
+            cageBrain.classList.remove('sorteo');
+            cagePinky.classList.remove('sorteo');
+            cageBrain.classList.add('reaccion-activa');
+            cagePinky.classList.add('reaccion-activa');
+            statusBrain.textContent = '✓ ALEATORIZADO';
+            statusPinky.textContent = '✓ ALEATORIZADO';
+            statusBrain.classList.add('status-success');
+            statusPinky.classList.add('status-success');
+        }, 1300);
+    }
+}
+
 async function runExperiment(type) {
     if (experimentState[type]) return;
     experimentState[type] = true;
+    animarSujetos(type);
 
     const btn = document.getElementById(`btn-${type}`);
     const panel = document.getElementById(`results-${type}`);
@@ -1289,7 +1385,7 @@ async function runPureExperiment(panel) {
 
     await delay(500);
     createBarChart(panel, [
-        { label: 'Exp', value: 52.3, maxValue: 65, color: '#00ff41', sublabel: 'Pre: 52.3s' },
+        { label: 'Exp', value: 52.3, maxValue: 65, color: '#34D399', sublabel: 'Pre: 52.3s' },
         { label: 'Exp', value: 34.1, maxValue: 65, color: '#00cc33', sublabel: 'Post: 34.1s' },
         { label: 'Ctrl', value: 51.8, maxValue: 65, color: '#88aaff', sublabel: 'Pre: 51.8s' },
         { label: 'Ctrl', value: 49.7, maxValue: 65, color: '#6688dd', sublabel: 'Post: 49.7s' },

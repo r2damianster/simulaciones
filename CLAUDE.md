@@ -50,14 +50,16 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 | Simulación | Fondo | Acento | Estilo |
 |---|---|---|---|
 | `observación.html` | `#1C1917` (dark warm) | `#D97706` (amber) | Premium editorial dark |
-| `financiamiento_etica.html` | `#f4f6f8` (light) | azul ONU / verde / naranja | Institucional |
-| `disenos.html` | `#060d06` (dark green) | `#00ff41` (matrix green) | Terminal / cyberpunk |
+| `financiamiento_etica.html` | `#14110d` (dark warm) | `#D4A24E` (gold) + `#7ba7c9` (steel blue) | Despacho del investigador — cartas con membrete, sello de goma, mapa enmarcado como monitor |
+| `disenos.html` | `#060d06` (dark green) | `#34D399` (emerald, ex-matrix `#00ff41`) | Terminal/lab elegante — BRAIN y PINKY en jaulas animadas que reaccionan al diseño ejecutado |
 | `apa7.html` | `#141210` (dark warm) | `#D4A853` (gold) | Editorial académico / Tailwind |
 | `apa7_2.html` | `#1E1E1E` (VS Code dark) | `#D4A853` (gold) | Editor de código / Word-like ribbon |
 | `evaluaciones_lectura.html` | `#0d0f12` (dark slate) | `#D4A24E` (gold) | Editorial caligráfico / papel manuscrito, Tailwind |
 | `muestreo.html` | `#0A1410` (dark green) | `#34D399` (emerald) | Paisaje ecológico / naturaleza orgánica |
-| `peel.html` | `#1a1a2e` (dark blue) | `#3498db` (blue) | Construcción modular / arquitectura |
-| `conectores.html` | `#1a1a1d` (dark industrial) | `#d4af37` (gold) + `#39ff14` (neon green) | Mecánica industrial / engranajes |
+| `peel.html` | `#14110d` (dark warm) | `#D4A24E` (gold) | Cuaderno del escritor — párrafo se escribe a mano con pluma animada sobre papel de renglones |
+| `conectores.html` | `#171310` (dark warm industrial) | `#d4af37` (gold) + `#34D399` (emerald, ex-neon) | Operario de la máquina — tira de palanca, estampa conectores en cinta de producción |
+
+**Nota de rediseño (2026-07):** `peel.html`, `conectores.html`, `disenos.html` y `financiamiento_etica.html` fueron re-diseñadas para alinear su identidad visual con las simulaciones favoritas del usuario (observación, evaluaciones_lectura, muestreo, apa7/apa7_2): fondo oscuro cálido, acento dorado/esmeralda, tipografía serif en títulos. Más importante: cada una ganó un **elemento concreto/humano** que hace tangible la mecánica pedagógica (no solo estética) — ver detalle en cada fila de la tabla.
 
 ### Patrones de código JS
 
