@@ -187,6 +187,125 @@ function obtenerNombreUsuario(callback) {
 
 ---
 
+## Incorporación de Nueva Simulación — Workflow Automatizado
+
+Cuando el usuario pega un HTML de simulación y pide que se incorpore, seguir este workflow:
+
+### Paso 1: Escribir el archivo HTML (Automático)
+
+El usuario proporciona un HTML (SPA completo: HTML5 + CSS3 + Vanilla JS). Claude escribe el archivo en `c:\Users\User\Documents\Desarrollo Web\Simulaciones\NOMBRE.html`.
+
+**Hook automático dispara:** `normalize-new-sim.js` lee el archivo recién escrito y ejecuta:
+- ✓ Inyecta `<meta name="description">` (si falta)
+- ✓ Inyecta favicon SVG data-URI
+- ✓ Inyecta variables CSS `--sim-home-*` (paleta parametrizada)
+- ✓ Inyecta back-link canónico (esquina fijo top:14px left:14px)
+- ✓ Inyecta `localStorage.setItem('simlab_done_<clave>', Date.now())` en función pantalla final
+- ✓ Inyecta `obtenerNombreUsuario()` si falta
+- ✓ Genera archivo .md documentación en `.claude/Simulaciones/`
+
+### Paso 2: Ediciones manuales por Claude (críticas)
+
+Después de que el hook normaliza, Claude DEBE ejecutar MANUALMENTE:
+
+1. **Generar tarjeta para index.html**
+   - Copiar patrón de tarjeta existente (ej. observación.html)
+   - Llenar: `data-cat`, `data-key`, `data-file`, título, descripción, duración, dificultad, icono emoji
+   - Insertar en `.sim-grid` (respetando orden alfabético o de temas)
+   
+   Patrón mínimo:
+   ```html
+   <!-- NUEVO NOMBRE -->
+   <div class="sim-out CLAVE reveal dX" data-cat="CATEGORIA" data-key="simlab_CLAVE" data-file="ARCHIVO.html">
+     <input type="hidden" data-done>
+     <div class="sim-badge-done">✓ Completada</div>
+     <a href="ARCHIVO.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
+       <div class="sim-in">
+         <div class="sim-thumb">
+           <span class="sim-thumb-icon" aria-hidden="true">EMOJI</span>
+         </div>
+         <div class="sim-body">
+           <span class="sim-tag">CATEGORÍA</span>
+           <div class="sim-title">TÍTULO</div>
+           <p class="sim-desc">Descripción breve, 1 frase.</p>
+           <div class="sim-meta">
+             <span class="sim-meta-chip">⏱ ~X min</span>
+             <span class="sim-meta-chip">Nivel</span>
+           </div>
+           <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
+             Iniciar Simulación
+             <span class="btn-sim-ico">→</span>
+           </button>
+         </div>
+       </div>
+     </a>
+   </div>
+   ```
+
+2. **Completar .md de documentación**
+   - El hook genera un .md esqueleto en `.claude/Simulaciones/CLAVE.md`
+   - Claude completa: marco metodológico, tipologías, sesgos comunes, referencias
+   - Formato: títulos H2-H3, tablas Markdown, listas con viñetas
+
+3. **Agregar entrada en CLAUDE.md tabla "Simulaciones activas"**
+   ```
+   | `ARCHIVO.html` | TÍTULO | CATEGORÍA — descripción breve |
+   ```
+
+4. **Verificar en navegador** (una sola vez)
+   - Abrir index.html en navegador
+   - Clicar en nueva tarjeta → debe abrir la sim
+   - Verificar back-link fijo (esquina sup-izq)
+   - Completar sim → debe escribir `localStorage.simlab_done_*`
+   - Volver a index → debe mostrar badge ✓ Completada
+
+### Referencia rápida: Claves y Categorías
+
+**Categorías válidas:** `redaccion`, `metodologia`, `estadistica`, `etica`, `lectura`
+
+**Claves de localStorage:** Derivadas del nombre archivo:
+- `mi-nueva-sim.html` → `simlab_mi_nueva_sim`
+- `algo.html` → `simlab_algo`
+- (underscore reemplaza guiones, lowercase)
+
+**Paletas predefinidas:**
+```javascript
+// En normalize-new-sim.js, agregar nueva entrada si es necesario
+PALETAS.mi_nuevo_nombre = {
+  fg: '#XXXXXX',       // color texto normal
+  bg: 'rgba(...)',     // fondo
+  bd: 'rgba(...)',     // borde
+  hi: '#XXXXXX',       // color hover
+};
+```
+
+### Checklist post-incorporación
+
+- [ ] Hook `normalize-new-sim.js` ejecutó sin errores (revisar statusMessage)
+- [ ] Archivo HTML tiene back-link en esquina
+- [ ] Archivo HTML tiene meta description en `<head>`
+- [ ] Archivo HTML tiene favicon
+- [ ] Archivo HTML tiene variables `--sim-home-*` en `:root`
+- [ ] Archivo HTML tiene `localStorage.setItem('simlab_done_...')` en función pantalla final
+- [ ] Tarjeta insertada en index.html (con `data-cat`, `data-key`, `data-file`)
+- [ ] .md documentación existe en `.claude/Simulaciones/`
+- [ ] Entrada agregada en CLAUDE.md tabla "Simulaciones activas"
+- [ ] Navegador: tarjeta cliqueable, sim abre, back-link funcional
+- [ ] Navegador: completar sim → badge ✓ Completada aparece en index
+
+### Mensajes de salida comunes del hook
+
+**✓ HTML normalizado**
+→ El script inyectó todos los snippets
+
+**✓ Documentación creada: .claude/Simulaciones/CLAVE.md**
+→ Se generó el .md esqueleto
+
+**Próximos pasos manuales:**
+→ Claude debe hacer tarjeta + actualizar CLAUDE.md
+
+---
+
 ## Instrucción de flujo narrativo
 
 Al analizar o modificar simulaciones, enfocarse en la lógica de transiciones entre `addDialog` y `addButton`, ya que estas controlan el flujo narrativo y la experiencia del usuario.
