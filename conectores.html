@@ -34,48 +34,81 @@
             overflow-x: hidden;
         }
 
+        /* ── LAYOUT: sidebar + escenario central ── */
+        .app-layout {
+            display: flex;
+            gap: 28px;
+            max-width: 1500px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+        .sidebar {
+            width: 270px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            position: sticky;
+            top: 20px;
+        }
+        .main-stage {
+            flex: 1;
+            min-width: 0;
+        }
+
         h1 {
-            text-align: center;
+            text-align: left;
             color: var(--accent-gold);
             font-family: 'DM Serif Display', serif;
             font-weight: 400;
             text-transform: none;
             letter-spacing: 0.5px;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            margin-bottom: 6px;
             text-shadow: 0 0 16px rgba(212, 175, 55, 0.35);
         }
 
         .subtitle {
-            text-align: center;
+            text-align: left;
             color: #888;
-            margin-bottom: 20px;
+            margin-bottom: 0;
             font-style: italic;
+            font-size: 0.82rem;
+            line-height: 1.5;
         }
+
+        .sidebar-manual-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--metal-dark); border: 1px solid var(--metal-light);
+            color: var(--accent-gold); padding: 10px 14px; border-radius: 8px;
+            cursor: pointer; font-size: 0.85rem; font-weight: 600;
+            transition: all 0.2s; width: 100%; text-align: left;
+        }
+        .sidebar-manual-btn:hover { background: var(--accent-gold); color: #000; }
 
         /* MARCADOR DE PUNTUACIÓN */
         #scoreboard {
             background: #100d0a;
             border: 2px solid var(--metal-light);
             border-radius: 10px;
-            padding: 15px 30px;
-            margin: 0 auto 40px auto;
-            width: fit-content;
+            padding: 15px 20px;
             text-align: center;
             box-shadow: 0 0 15px rgba(0,0,0,0.8);
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 15px;
         }
 
         #scoreboard span.label {
             color: #888;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         #scoreValue {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: bold;
             color: var(--accent-green);
             font-family: 'Courier New', Courier, monospace;
@@ -87,6 +120,40 @@
             color: var(--accent-red);
             text-shadow: 0 0 10px var(--accent-red);
         }
+
+        /* ── INDICADOR DE TEMAS ── */
+        .tema-indicator {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .tema-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--metal-light);
+            background: var(--metal-dark);
+            font-size: 0.78rem;
+            color: #8a7d5f;
+            transition: all 0.3s;
+        }
+        .tema-num {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: #100d0a; color: #8a7d5f;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+        }
+        .tema-titulo { flex: 1; line-height: 1.3; }
+        .tema-dif { font-size: 0.65rem; opacity: 0.75; }
+        .tema-chip.tema-active {
+            border-color: var(--accent-gold); background: #241f18; color: var(--accent-gold);
+            box-shadow: 0 0 12px rgba(212,175,55,0.15);
+        }
+        .tema-chip.tema-active .tema-num { background: var(--accent-gold); color: #1a1610; }
+        .tema-chip.tema-done { border-color: var(--accent-green); color: var(--accent-green); }
+        .tema-chip.tema-done .tema-num { background: var(--accent-green); color: #0d1a12; }
 
         /* Contenedor de la máquina */
         .machine-container {
@@ -518,6 +585,8 @@
         .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
 
         @media (max-width: 900px) {
+            .app-layout { flex-direction: column; }
+            .sidebar { width: 100%; position: static; }
             .manual-grid { grid-template-columns: 1fr; }
             .manual-panel { max-width: 92%; }
             .gear { width: 70px; height: 70px; }
@@ -534,48 +603,58 @@
       <i class="fa-solid fa-house" aria-hidden="true"></i>
     </a>
 
-    <h1>Máquina de Engranajes Argumentativos</h1>
-    <p class="subtitle">Nivel Avanzado: Puntuación sobre 100. Cada error resta 5 puntos.</p>
-    <p class="subtitle" style="font-size:0.8rem;">Pulsa <strong style="color:var(--accent-gold)">📖</strong> en cualquier momento para consultar el manual de conectores.</p>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div>
+                <h1>Máquina de Engranajes Argumentativos</h1>
+                <p class="subtitle">3 temas de dificultad creciente. Puntuación acumulada sobre 100. Cada error resta 5 puntos.</p>
+            </div>
 
-    <!-- MARCADOR -->
-    <div id="scoreboard">
-        <span class="label">Puntuación:</span>
-        <div id="scoreValue">100</div>
-    </div>
+            <button class="sidebar-manual-btn" id="manualSidebarBtn">📖 Consultar manual de conectores</button>
 
-    <div class="machine-container">
-        <div class="operario-station">
-            <svg viewBox="0 0 140 160" width="110" height="126" aria-hidden="true">
-                <rect x="95" y="130" width="14" height="26" rx="3" fill="#5a4a2a"/>
-                <ellipse cx="102" cy="156" rx="22" ry="6" fill="#000" opacity="0.35"/>
-                <g class="palanca-grupo" id="palancaGrupo">
-                    <rect x="99" y="70" width="6" height="60" rx="3" fill="#d4af37"/>
-                    <circle cx="102" cy="66" r="10" fill="#e8c558" stroke="#8a6a1a" stroke-width="2"/>
-                </g>
-                <g class="operario-cuerpo">
-                    <rect x="30" y="118" width="10" height="30" rx="4" fill="#3a3428"/>
-                    <rect x="48" y="118" width="10" height="30" rx="4" fill="#3a3428"/>
-                    <rect x="22" y="80" width="44" height="42" rx="10" fill="#5a4e3a"/>
-                    <rect x="22" y="80" width="44" height="14" rx="6" fill="#d4af37" opacity="0.85"/>
-                    <circle cx="44" cy="66" r="16" fill="#e0b088"/>
-                    <path d="M28 62 a16 16 0 0 1 32 0 z" fill="#d4af37"/>
-                    <rect x="26" y="60" width="36" height="6" rx="3" fill="#b8941f"/>
-                    <g class="brazo-operario" id="brazoOperario">
-                        <rect x="62" y="88" width="38" height="9" rx="4" fill="#e0b088"/>
-                    </g>
-                </g>
-            </svg>
-            <div class="operario-vapor" id="operarioVapor">💨</div>
-        </div>
-        <div id="machine"></div>
-    </div>
+            <div id="scoreboard">
+                <span class="label">Puntuación:</span>
+                <div id="scoreValue">100</div>
+            </div>
 
-    <div class="cinta-wrap">
-        <div class="cinta-label">🧾 Cinta de producción — conectores estampados</div>
-        <div class="cinta-produccion" id="cintaProduccion">
-            <div class="cinta-vacia" id="cintaVacia">Aún no se ha estampado ningún conector...</div>
-        </div>
+            <div class="tema-indicator" id="temaIndicator"></div>
+        </aside>
+
+        <main class="main-stage">
+            <div class="machine-container">
+                <div class="operario-station">
+                    <svg viewBox="0 0 140 160" width="110" height="126" aria-hidden="true">
+                        <rect x="95" y="130" width="14" height="26" rx="3" fill="#5a4a2a"/>
+                        <ellipse cx="102" cy="156" rx="22" ry="6" fill="#000" opacity="0.35"/>
+                        <g class="palanca-grupo" id="palancaGrupo">
+                            <rect x="99" y="70" width="6" height="60" rx="3" fill="#d4af37"/>
+                            <circle cx="102" cy="66" r="10" fill="#e8c558" stroke="#8a6a1a" stroke-width="2"/>
+                        </g>
+                        <g class="operario-cuerpo">
+                            <rect x="30" y="118" width="10" height="30" rx="4" fill="#3a3428"/>
+                            <rect x="48" y="118" width="10" height="30" rx="4" fill="#3a3428"/>
+                            <rect x="22" y="80" width="44" height="42" rx="10" fill="#5a4e3a"/>
+                            <rect x="22" y="80" width="44" height="14" rx="6" fill="#d4af37" opacity="0.85"/>
+                            <circle cx="44" cy="66" r="16" fill="#e0b088"/>
+                            <path d="M28 62 a16 16 0 0 1 32 0 z" fill="#d4af37"/>
+                            <rect x="26" y="60" width="36" height="6" rx="3" fill="#b8941f"/>
+                            <g class="brazo-operario" id="brazoOperario">
+                                <rect x="62" y="88" width="38" height="9" rx="4" fill="#e0b088"/>
+                            </g>
+                        </g>
+                    </svg>
+                    <div class="operario-vapor" id="operarioVapor">💨</div>
+                </div>
+                <div id="machine"></div>
+            </div>
+
+            <div class="cinta-wrap">
+                <div class="cinta-label">🧾 Cinta de producción — conectores estampados</div>
+                <div class="cinta-produccion" id="cintaProduccion">
+                    <div class="cinta-vacia" id="cintaVacia">Aún no se ha estampado ningún conector...</div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <div class="overlay" id="overlay"></div>
@@ -591,13 +670,23 @@
         <div class="options-grid" id="optionsGrid"></div>
     </div>
 
+    <!-- TRANSICIÓN ENTRE TEMAS -->
+    <div class="modal-base" id="temaPanel">
+        <h3>✅ Tema completado</h3>
+        <p id="temaMsg" style="color:#ccc; font-size:1rem; line-height:1.5; margin:14px 0 20px;"></p>
+        <button id="btnSiguienteTema" style="background:var(--accent-gold);color:#000;border:none;padding:12px 30px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1rem;">Siguiente tema →</button>
+    </div>
+
     <!-- PANTALLA FINAL -->
     <div class="modal-base" id="finalPanel">
         <h3>¡Máquina Completa!</h3>
-        <p style="color:#aaa; margin-top: 10px;">Tu rendimiento analítico:</p>
+        <p style="color:#aaa; margin-top: 10px;">Tu rendimiento analítico tras los 3 temas:</p>
         <div id="finalScore">100</div>
         <p id="finalMessage" style="font-size: 1.1rem; color: #ccc;"></p>
-        <button id="restartBtn">Reiniciar Máquina</button>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
+            <button id="restartBtn">↺ Reiniciar Máquina</button>
+            <a href="index.html" style="background:var(--metal-dark); color:var(--text-color); border:1px solid var(--metal-light); border-radius:8px; padding:12px 30px; text-decoration:none; font-weight:bold; display:inline-flex; align-items:center;">← Volver al inicio</a>
+        </div>
     </div>
 
     <div class="feedback-toast" id="toast"></div>
@@ -614,15 +703,52 @@
     <button class="manual-fab" id="manualFab" title="Manual de Conectores">📖</button>
 
     <script>
-        const machineData = [
-            { sentence: "La educación en línea ha experimentado un crecimiento exponencial en la última década.", type: "Inicio" },
-            { connectorType: "Adición", correctConnector: "Además", categoryOptions: ["Contraste", "Causalidad", "Adición", "Conclusión"], wordOptions: ["Sin embargo", "Por lo tanto", "Además", "En conclusión"], sentence: "las plataformas digitales ofrecen una flexibilidad horaria inigualable para los estudiantes." },
-            { connectorType: "Causalidad", correctConnector: "Como consecuencia", categoryOptions: ["Orden Temporal", "Ejemplificación", "Causalidad", "Adición"], wordOptions: ["A continuación", "Por el contrario", "En síntesis", "Como consecuencia"], sentence: "esta accesibilidad ha permitido que personas en zonas rurales accedan a educación de calidad." },
-            { connectorType: "Ejemplificación", correctConnector: "Tal es el caso de", categoryOptions: ["Conclusión", "Causalidad", "Contraste", "Ejemplificación"], wordOptions: ["Por lo tanto", "Tal es el caso de", "No obstante", "En primer lugar"], sentence: "la Universidad de Harvard, que ofrece programas completos de manera gratuita a través de edX." },
-            { connectorType: "Contraste (Adversativo)", correctConnector: "No obstante", categoryOptions: ["Ejemplificación", "Adición", "Contraste (Adversativo)", "Orden Temporal"], wordOptions: ["Además", "No obstante", "Por ejemplo", "Posteriormente"], sentence: "la interacción directa y el debate espontáneo con el profesor se ven limitados en estos entornos." },
-            { connectorType: "Orden Temporal", correctConnector: "Posteriormente", categoryOptions: ["Contraste", "Orden Temporal", "Conclusión", "Causalidad"], wordOptions: ["Por consiguiente", "Posteriormente", "En resumen", "Sin embargo"], sentence: "se implementaron foros asíncronos para compensar la falta de diálogo en tiempo real." },
-            { connectorType: "Conclusión", correctConnector: "En definitiva", categoryOptions: ["Adición", "Ejemplificación", "Causalidad", "Conclusión"], wordOptions: ["En definitiva", "A modo de ejemplo", "Por el contrario", "Luego"], sentence: "el modelo virtual no reemplaza al presencial, sino que actúa como una herramienta complementaria indispensable." }
+        // ── TEMAS: 3 párrafos independientes, dificultad y variedad de conectores creciente ──
+        const temasDB = [
+            {
+                titulo: "Tema 1 · Vida cotidiana y tecnología",
+                dificultad: "Básico",
+                machineData: [
+                    { sentence: "La educación en línea ha experimentado un crecimiento exponencial en la última década.", type: "Inicio" },
+                    { connectorType: "Adición", correctConnector: "Además", categoryOptions: ["Contraste", "Causalidad", "Adición", "Conclusión"], wordOptions: ["Sin embargo", "Por lo tanto", "Además", "En conclusión"], sentence: "las plataformas digitales ofrecen una flexibilidad horaria inigualable para los estudiantes." },
+                    { connectorType: "Causalidad", correctConnector: "Como consecuencia", categoryOptions: ["Orden Temporal", "Ejemplificación", "Causalidad", "Adición"], wordOptions: ["A continuación", "Por el contrario", "En síntesis", "Como consecuencia"], sentence: "esta accesibilidad ha permitido que personas en zonas rurales accedan a educación de calidad." },
+                    { connectorType: "Ejemplificación", correctConnector: "Tal es el caso de", categoryOptions: ["Conclusión", "Causalidad", "Contraste", "Ejemplificación"], wordOptions: ["Por lo tanto", "Tal es el caso de", "No obstante", "En primer lugar"], sentence: "la Universidad de Harvard, que ofrece programas completos de manera gratuita a través de edX." },
+                    { connectorType: "Contraste (Adversativo)", correctConnector: "No obstante", categoryOptions: ["Ejemplificación", "Adición", "Contraste (Adversativo)", "Orden Temporal"], wordOptions: ["Además", "No obstante", "Por ejemplo", "Posteriormente"], sentence: "la interacción directa y el debate espontáneo con el profesor se ven limitados en estos entornos." },
+                    { connectorType: "Orden Temporal", correctConnector: "Posteriormente", categoryOptions: ["Contraste", "Orden Temporal", "Conclusión", "Causalidad"], wordOptions: ["Por consiguiente", "Posteriormente", "En resumen", "Sin embargo"], sentence: "se implementaron foros asíncronos para compensar la falta de diálogo en tiempo real." },
+                    { connectorType: "Conclusión", correctConnector: "En definitiva", categoryOptions: ["Adición", "Ejemplificación", "Causalidad", "Conclusión"], wordOptions: ["En definitiva", "A modo de ejemplo", "Por el contrario", "Luego"], sentence: "el modelo virtual no reemplaza al presencial, sino que actúa como una herramienta complementaria indispensable." }
+                ]
+            },
+            {
+                titulo: "Tema 2 · Ciencia y medioambiente",
+                dificultad: "Intermedio",
+                machineData: [
+                    { sentence: "El calentamiento global ha intensificado la frecuencia de fenómenos climáticos extremos en la última década.", type: "Inicio" },
+                    { connectorType: "Adición", correctConnector: "Asimismo", categoryOptions: ["Causalidad", "Contraste", "Adición", "Ejemplificación"], wordOptions: ["Sin embargo", "Por consiguiente", "Asimismo", "Por ejemplo"], sentence: "los patrones de precipitación se han vuelto significativamente más impredecibles en regiones agrícolas clave." },
+                    { connectorType: "Causalidad", correctConnector: "Como resultado", categoryOptions: ["Orden Temporal", "Ejemplificación", "Causalidad", "Conclusión"], wordOptions: ["Posteriormente", "Tal es el caso de", "Como resultado", "En síntesis"], sentence: "numerosas comunidades costeras enfrentan desplazamientos forzados debido al aumento del nivel del mar." },
+                    { connectorType: "Ejemplificación", correctConnector: "Un caso paradigmático es", categoryOptions: ["Conclusión", "Contraste", "Causalidad", "Ejemplificación"], wordOptions: ["En definitiva", "Un caso paradigmático es", "Por lo tanto", "No obstante"], sentence: "el archipiélago de Tuvalu, que podría quedar sumergido en las próximas décadas." },
+                    { connectorType: "Contraste (Adversativo)", correctConnector: "Pese a ello", categoryOptions: ["Ejemplificación", "Adición", "Contraste (Adversativo)", "Orden Temporal"], wordOptions: ["Por ejemplo", "Además", "Pese a ello", "A continuación"], sentence: "los acuerdos internacionales de reducción de emisiones continúan sin cumplirse cabalmente." },
+                    { connectorType: "Orden Temporal", correctConnector: "A partir de entonces", categoryOptions: ["Contraste", "Causalidad", "Orden Temporal", "Adición"], wordOptions: ["Sin embargo", "Debido a esto", "A partir de entonces", "También"], sentence: "varios países han comenzado a invertir masivamente en infraestructura de energías renovables." },
+                    { connectorType: "Conclusión", correctConnector: "En última instancia", categoryOptions: ["Causalidad", "Ejemplificación", "Adición", "Conclusión"], wordOptions: ["Por consiguiente", "Tal es el caso de", "Igualmente", "En última instancia"], sentence: "la crisis climática exige una respuesta coordinada que trascienda los intereses económicos de corto plazo." }
+                ]
+            },
+            {
+                titulo: "Tema 3 · Ética de la IA en la academia",
+                dificultad: "Avanzado",
+                machineData: [
+                    { sentence: "La proliferación de herramientas de inteligencia artificial generativa ha transformado radicalmente las prácticas de escritura académica universitaria.", type: "Inicio" },
+                    { connectorType: "Causalidad", correctConnector: "Por consiguiente", categoryOptions: ["Adición", "Reformulación", "Causalidad", "Contraste (Adversativo)"], wordOptions: ["Es decir", "Además", "Por consiguiente", "No obstante"], sentence: "las instituciones educativas enfrentan el desafío urgente de redefinir sus políticas de integridad académica." },
+                    { connectorType: "Reformulación", correctConnector: "Dicho de otro modo", categoryOptions: ["Ejemplificación", "Reformulación", "Conclusión", "Orden Temporal"], wordOptions: ["Por ejemplo", "Dicho de otro modo", "En síntesis", "Luego"], sentence: "ya no basta con detectar el uso de IA; es necesario enseñar su uso ético y metodológicamente riguroso." },
+                    { connectorType: "Ejemplificación", correctConnector: "Tal como lo demuestra", categoryOptions: ["Contraste (Adversativo)", "Causalidad", "Ejemplificación", "Adición"], wordOptions: ["Sin embargo", "Debido a ello", "Tal como lo demuestra", "Asimismo"], sentence: "el caso de universidades que han incorporado la IA como asistente declarado dentro del proceso de escritura." },
+                    { connectorType: "Contraste (Adversativo)", correctConnector: "No obstante", categoryOptions: ["Reformulación", "Ejemplificación", "Contraste (Adversativo)", "Conclusión"], wordOptions: ["Es decir", "Por ejemplo", "No obstante", "En definitiva"], sentence: "persisten voces académicas que consideran cualquier asistencia algorítmica una forma de deshonestidad intelectual." },
+                    { connectorType: "Adición", correctConnector: "Asimismo", categoryOptions: ["Causalidad", "Adición", "Orden Temporal", "Reformulación"], wordOptions: ["Por lo tanto", "Asimismo", "Posteriormente", "Dicho de otro modo"], sentence: "la falta de consenso internacional dificulta la creación de estándares unificados de citación de IA." },
+                    { connectorType: "Orden Temporal", correctConnector: "Con el tiempo", categoryOptions: ["Contraste (Adversativo)", "Conclusión", "Orden Temporal", "Causalidad"], wordOptions: ["Sin embargo", "En síntesis", "Con el tiempo", "Como consecuencia"], sentence: "es previsible que surjan marcos regulatorios más maduros y consensuados entre instituciones." },
+                    { connectorType: "Conclusión", correctConnector: "En síntesis", categoryOptions: ["Reformulación", "Adición", "Ejemplificación", "Conclusión"], wordOptions: ["Es decir", "También", "Por ejemplo", "En síntesis"], sentence: "el reto no es prohibir la inteligencia artificial, sino construir una cultura académica capaz de integrarla con rigor y transparencia." }
+                ]
+            }
         ];
+
+        let currentTemaIndex = 0;
+        let machineData = temasDB[currentTemaIndex].machineData;
 
         // ── MANUAL TÉCNICO: TIPOS DE CONECTORES ──
         const connectorTypesInfo = {
@@ -649,8 +775,25 @@
             "Conclusión": {
                 definicion: "Cierra el razonamiento sintetizando o resumiendo lo expuesto.",
                 ejemplos: ["En definitiva", "En síntesis", "En conclusión", "En resumen"]
+            },
+            "Reformulación": {
+                definicion: "Expresa la misma idea de otra manera, aclarando o precisando su sentido.",
+                ejemplos: ["Es decir", "Dicho de otro modo", "En otras palabras"]
             }
         };
+
+        // ── INDICADOR DE TEMAS (sidebar) ──
+        function renderTemaIndicator() {
+            const el = document.getElementById('temaIndicator');
+            el.innerHTML = temasDB.map((t, i) => {
+                const cls = i < currentTemaIndex ? 'tema-done' : i === currentTemaIndex ? 'tema-active' : '';
+                const icono = i < currentTemaIndex ? '<i class="fa-solid fa-check"></i>' : (i + 1);
+                return `<div class="tema-chip ${cls}">
+                    <span class="tema-num">${icono}</span>
+                    <span class="tema-titulo">${t.titulo}<br><span class="tema-dif">${t.dificultad}</span></span>
+                </div>`;
+            }).join('');
+        }
 
         function renderManualGrid() {
             const grid = document.getElementById('manualGrid');
@@ -686,6 +829,7 @@
 
         function startMachine() {
             closeManual();
+            renderTemaIndicator();
             buildMachine();
         }
 
@@ -918,8 +1062,29 @@
             const solvedCount = document.querySelectorAll('.axle-container.solved').length;
             if (solvedCount === axles.length) {
                 document.getElementById('overlay').classList.remove('show'); // Limpiar overlay de opciones
-                setTimeout(showFinalScreen, 1000);
+                if (currentTemaIndex < temasDB.length - 1) {
+                    setTimeout(showTemaTransition, 1000);
+                } else {
+                    setTimeout(showFinalScreen, 1000);
+                }
             }
+        }
+
+        // Muestra el panel de transición al completar un tema (antes de pasar al siguiente)
+        function showTemaTransition() {
+            document.getElementById('temaMsg').textContent = `Completaste "${temasDB[currentTemaIndex].titulo}". La dificultad y la variedad de conectores aumentan a partir de aquí.`;
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('temaPanel').classList.add('show');
+        }
+
+        // Avanza al siguiente tema: reconstruye la máquina con su propio conjunto de datos
+        function avanzarTema() {
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('temaPanel').classList.remove('show');
+            currentTemaIndex++;
+            machineData = temasDB[currentTemaIndex].machineData;
+            renderTemaIndicator();
+            buildMachine();
         }
 
         // PANTALLA FINAL
@@ -958,10 +1123,14 @@
 
         function restartGame() {
             score = 100;
+            currentTemaIndex = 0;
+            machineData = temasDB[currentTemaIndex].machineData;
             updateScoreDisplay(false);
             document.getElementById('finalPanel').classList.remove('show');
             document.getElementById('overlay').classList.remove('show');
+            renderTemaIndicator();
             buildMachine();
+            document.getElementById('cintaProduccion').innerHTML = '<div class="cinta-vacia" id="cintaVacia">Aún no se ha estampado ningún conector...</div>';
         }
 
         function showToast(message, type) {
@@ -981,15 +1150,19 @@
         // Event Listeners
         document.getElementById('closePanel').addEventListener('click', closeOptions);
         document.getElementById('overlay').addEventListener('click', (e) => {
-            // Evitar cerrar si la pantalla final está abierta
-            if(!document.getElementById('finalPanel').classList.contains('show')) {
+            // Evitar cerrar si la pantalla final o la transición de tema están abiertas
+            const finalAbierto = document.getElementById('finalPanel').classList.contains('show');
+            const temaAbierto = document.getElementById('temaPanel').classList.contains('show');
+            if (!finalAbierto && !temaAbierto) {
                 closeOptions();
             }
         });
         document.getElementById('restartBtn').addEventListener('click', restartGame);
         document.getElementById('manualFab').addEventListener('click', () => openManual('consult'));
+        document.getElementById('manualSidebarBtn').addEventListener('click', () => openManual('consult'));
         document.getElementById('closeManualPanel').addEventListener('click', closeManual);
         document.getElementById('manualOverlay').addEventListener('click', closeManual);
+        document.getElementById('btnSiguienteTema').addEventListener('click', avanzarTema);
 
         // Iniciar: Manual Técnico obligatorio antes de la máquina
         openManual('intro');

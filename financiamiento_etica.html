@@ -43,7 +43,74 @@
         .monitor-corner.tr { top: 6px; right: 6px; }
         .monitor-corner.bl { bottom: 6px; left: 6px; }
         .monitor-corner.br { bottom: 6px; right: 6px; }
-        #canvas { width: 100%; height: 100%; display: block; background: #010409; }
+        #canvas { width: 100%; height: 100%; display: block; background: transparent; position: relative; z-index: 2; }
+
+        /* ── HABITACIONES ILUSTRADAS (overlay DOM detrás del canvas) ── */
+        #roomOverlay { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+        .room-card {
+            position: absolute; border-radius: 10px; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
+        .room-card.activa { box-shadow: inset 0 0 30px rgba(0,0,0,0.25), 0 0 22px currentColor; }
+        .room-badge {
+            position: absolute; top: 10px; left: 10px; width: 34px; height: 34px; border-radius: 50%;
+            background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; border: 1px solid rgba(255,255,255,0.15);
+        }
+        .room-label {
+            width: 100%; text-align: center; padding: 8px 6px; font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem; letter-spacing: 0.5px; text-transform: uppercase;
+            background: rgba(0,0,0,0.5);
+        }
+        .room-scene { flex: 1; width: 100%; position: relative; display: flex; align-items: center; justify-content: center; }
+        .room-prop { font-size: 2.2rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
+
+        .room-onu { background: linear-gradient(180deg, #141d24 0%, #0d151a 100%); border: 2px solid #7ba7c9; color: #7ba7c9; }
+        .room-onu .room-label { color: #7ba7c9; }
+
+        .room-lab { background: linear-gradient(180deg, #1a1610 0%, #120f0a 100%); border: 2px solid #6b5f47; color: #6b5f47; }
+        .room-lab .room-label { color: #a89878; }
+        .room-bench {
+            position: absolute; bottom: 36px; left: 12%; right: 12%; height: 10px;
+            background: #3a3226; border-radius: 3px; box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+        }
+        .room-beaker { position: absolute; bottom: 44px; font-size: 1.8rem; }
+        .room-beaker.b1 { left: 38%; }
+        .room-beaker.b2 { left: 56%; font-size: 1.5rem; }
+
+        .room-revA { background: linear-gradient(180deg, #141d16 0%, #0d150f 100%); border: 2px solid #4a8f5f; color: #4a8f5f; }
+        .room-revA .room-label { color: #4a8f5f; }
+        .room-shelf { display: flex; gap: 4px; align-items: flex-end; }
+        .room-shelf span { display: block; width: 14px; border-radius: 2px 2px 0 0; }
+        .room-shelf span:nth-child(1) { height: 46px; background: #4a8f5f; }
+        .room-shelf span:nth-child(2) { height: 60px; background: #6bb682; }
+        .room-shelf span:nth-child(3) { height: 38px; background: #3a7a4a; }
+        .room-shelf span:nth-child(4) { height: 52px; background: #5a9e6f; }
+
+        .room-revB {
+            background: linear-gradient(180deg, #241d10 0%, #18140a 100%); border: 2px solid #d9a441; color: #d9a441;
+            animation: neonPulse 1.6s ease-in-out infinite;
+        }
+        @keyframes neonPulse {
+            0%, 100% { box-shadow: inset 0 0 30px rgba(0,0,0,0.4), 0 0 12px rgba(217,164,65,0.25); }
+            50%      { box-shadow: inset 0 0 30px rgba(0,0,0,0.4), 0 0 28px rgba(217,164,65,0.55); }
+        }
+        .room-neon {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            font-size: 0.82rem; font-weight: 700; color: #d9a441; text-shadow: 0 0 8px rgba(217,164,65,0.7);
+            white-space: nowrap;
+        }
+        .room-revB .room-label { color: #d9a441; }
+        .cash { position: absolute; font-size: 1.5rem; animation: cashFloat 2.2s ease-in-out infinite; }
+        .cash.c1 { left: 30%; top: 40%; animation-delay: 0s; }
+        .cash.c2 { left: 50%; top: 55%; animation-delay: 0.5s; }
+        .cash.c3 { left: 68%; top: 38%; animation-delay: 1s; }
+        @keyframes cashFloat {
+            0%, 100% { transform: translateY(0) rotate(-6deg); opacity: 0.85; }
+            50%      { transform: translateY(-8px) rotate(6deg); opacity: 1; }
+        }
 
         #terminal-container { flex: 1; display: flex; flex-direction: column; background: var(--panel-bg); }
 
@@ -165,6 +232,40 @@
 
     <div id="map-container">
         <div id="map-monitor">
+            <div id="roomOverlay">
+                <div class="room-card room-onu" id="room-onu">
+                    <div class="room-badge">🇺🇳</div>
+                    <div class="room-scene">
+                        <div class="room-prop">📬</div>
+                    </div>
+                    <div class="room-label">Convocatoria ONU</div>
+                </div>
+                <div class="room-card room-lab" id="room-lab">
+                    <div class="room-badge">🧪</div>
+                    <div class="room-scene">
+                        <div class="room-bench"></div>
+                        <div class="room-prop room-beaker b1">🧫</div>
+                        <div class="room-prop room-beaker b2">🧪</div>
+                    </div>
+                    <div class="room-label">Laboratorio</div>
+                </div>
+                <div class="room-card room-revA" id="room-revA">
+                    <div class="room-badge">📗</div>
+                    <div class="room-scene">
+                        <div class="room-shelf"><span></span><span></span><span></span><span></span></div>
+                    </div>
+                    <div class="room-label">Revista Q1 (Peer Review)</div>
+                </div>
+                <div class="room-card room-revB" id="room-revB">
+                    <div class="room-neon">⚡ FAST PUBLISH ⚡</div>
+                    <div class="room-scene">
+                        <div class="room-prop cash c1">💸</div>
+                        <div class="room-prop cash c2">💸</div>
+                        <div class="room-prop cash c3">💸</div>
+                    </div>
+                    <div class="room-label">Fast Publish</div>
+                </div>
+            </div>
             <canvas id="canvas"></canvas>
             <span class="monitor-corner tl"></span>
             <span class="monitor-corner tr"></span>
@@ -271,9 +372,11 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     
+    let zonesListas = false; // evita referenciar `zones` antes de su declaración (TDZ)
     function resize() {
         canvas.width = canvas.parentElement.clientWidth;
         canvas.height = canvas.parentElement.clientHeight;
+        if (zonesListas) positionRoomOverlays();
     }
     window.addEventListener('resize', resize);
     resize();
@@ -315,6 +418,24 @@
     function getZoneRect(z) {
         return { x: z.x * canvas.width, y: z.y * canvas.height, w: z.w * canvas.width, h: z.h * canvas.height };
     }
+
+    // Mapea el id de zona al id del elemento de habitación ilustrada correspondiente
+    const roomElementId = { onu: 'room-onu', lab: 'room-lab', revistaA: 'room-revA', revistaB: 'room-revB' };
+
+    // Posiciona las habitaciones ilustradas (DOM) exactamente sobre el rect de cada zona del canvas
+    function positionRoomOverlays() {
+        zones.forEach(z => {
+            const el = document.getElementById(roomElementId[z.id]);
+            if (!el) return;
+            const r = getZoneRect(z);
+            el.style.left = r.x + 'px';
+            el.style.top = r.y + 'px';
+            el.style.width = r.w + 'px';
+            el.style.height = r.h + 'px';
+        });
+    }
+    zonesListas = true;
+    positionRoomOverlays();
 
     // --- ENTIDADES (PLAYER Y NPCS) ---
     class Entity {
@@ -373,9 +494,9 @@
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             
             if (this.isPlayer) {
-                ctx.fillStyle = '#00f3ff';
+                ctx.fillStyle = '#D4A24E';
                 ctx.shadowBlur = 15;
-                ctx.shadowColor = '#00f3ff';
+                ctx.shadowColor = '#D4A24E';
             } else if (this.state === 'trapped') {
                 ctx.fillStyle = '#ffeb3b';
                 ctx.shadowBlur = 10;
@@ -531,6 +652,13 @@
     let onuTimerInterval;
     
     function onPlayerEnterZone(zoneId) {
+        // Resalta la habitación ilustrada en la que está parado el jugador
+        document.querySelectorAll('.room-card').forEach(c => c.classList.remove('activa'));
+        if (zoneId && roomElementId[zoneId]) {
+            const el = document.getElementById(roomElementId[zoneId]);
+            if (el) el.classList.add('activa');
+        }
+
         if (zoneId === null) {
             if(state.phase === 1 && state.timerActive) setInstructions('<span style="color:#ff3d5a">⚠️ ADVERTENCIA: FUERA DE LA ZONA DE CONVOCATORIA. EL TIEMPO SIGUE CORRIENDO.</span>');
             return;
@@ -815,33 +943,8 @@
         for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
         for(let i=0; i<canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
 
-        // Dibujar Zonas
-        for (let z of zones) {
-            let r = getZoneRect(z);
-            ctx.fillStyle = z.color;
-            ctx.fillRect(r.x, r.y, r.w, r.h);
-            ctx.strokeStyle = z.borderColor;
-            ctx.lineWidth = 2;
-            ctx.strokeRect(r.x, r.y, r.w, r.h);
-
-            // Efecto Neón especial para Revista B (La trampa)
-            if (z.id === 'revistaB') {
-                ctx.shadowBlur = 20 + Math.sin(frameCount * 0.1) * 10;
-                ctx.shadowColor = '#ffeb3b';
-                ctx.strokeRect(r.x, r.y, r.w, r.h);
-                ctx.shadowBlur = 0;
-            }
-
-            // Texto de zona
-            ctx.fillStyle = z.borderColor;
-            ctx.font = '14px "Share Tech Mono"';
-            ctx.textAlign = 'center';
-            ctx.fillText(z.name, r.x + r.w/2, r.y + 20);
-
-            // Icono de zona
-            ctx.font = '46px sans-serif';
-            ctx.fillText(z.icon, r.x + r.w/2, r.y + r.h/2 + 16);
-        }
+        // Las zonas ya no se dibujan en canvas: las habitaciones ilustradas (DOM, #roomOverlay)
+        // se posicionan sobre los mismos rects vía positionRoomOverlays().
 
         // Tentador (NPC especial, fase 3, zona FAST PUBLISH)
         if (tempter && tempter.active) {
