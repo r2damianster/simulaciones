@@ -110,18 +110,20 @@ En la **función de pantalla final** de cada simulación (inmediatamente antes d
 localStorage.setItem('simlab_done_CLAVE', Date.now());
 ```
 
-Donde `CLAVE` es:
-- observación.html: `simlab_obs`
-- financiamiento_etica.html: `simlab_fin`
-- disenos.html: `simlab_des`
-- apa7.html: `simlab_apa`
-- apa7_2.html: `simlab_apa2`
-- peel.html: `simlab_peel`
-- evaluaciones_lectura.html: `simlab_eval`
-- muestreo.html: `simlab_mue`
-- conectores.html: `simlab_con`
+Donde `CLAVE` es el `data-key` de la tarjeta en index.html (la clave completa queda `simlab_done_simlab_*`):
+- observación.html: `simlab_obs` → `simlab_done_simlab_obs`
+- financiamiento_etica.html: `simlab_fin` → `simlab_done_simlab_fin`
+- disenos.html: `simlab_des` → `simlab_done_simlab_des`
+- apa7.html: `simlab_apa` → `simlab_done_simlab_apa`
+- apa7_2.html: `simlab_apa2` → `simlab_done_simlab_apa2`
+- peel.html: `simlab_peel` → `simlab_done_simlab_peel`
+- evaluaciones_lectura.html: `simlab_eval` → `simlab_done_simlab_eval`
+- muestreo.html: `simlab_mue` → `simlab_done_simlab_mue`
+- conectores.html: `simlab_con` → `simlab_done_simlab_con`
 
-En `index.html`, el JavaScript lee estas claves y muestra badge «✓ Completada» en las tarjetas correspondientes.
+En `index.html`, `isSimDone(key)` lee `simlab_done_${key}` (donde `key` = `data-key`) y muestra badge «✓ Completada».
+
+**⚠ Bug histórico (en corrección progresiva, 2026-07):** las sims escribían la clave corta (`simlab_obs`) en vez de `simlab_done_simlab_obs`. Eso impedía el badge Y corrompía el contador de lanzamientos (el `Date.now()` pisaba el conteo de `incCount`, que usa la clave corta). Al tocar cada sim en el trabajo i18n, corregir su `setItem` al formato largo.
 
 ### Obtenernobraestudiantr (sessionStorage)
 
@@ -141,21 +143,20 @@ function obtenerNombreUsuario(callback) {
   modal.style.cssText = `background:var(--card, #222);border:1px solid var(--border, rgba(255,255,255,0.1));
     border-radius:12px;padding:32px;max-width:400px;text-align:center;`;
   modal.innerHTML = `
-    <p style="font-size:16px;color:var(--txt, #fff);margin-bottom:24px;font-weight:600">¿Cómo te llamas?</p>
+    <p style="font-size:16px;color:var(--txt, #fff);margin-bottom:24px;font-weight:600">${t('name_q')}</p>
     <input type="text" id="input-nombre" style="width:100%;padding:10px 14px;border:1px solid var(--border, rgba(255,255,255,0.2));
       border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg, #111);color:var(--txt, #fff);margin-bottom:16px"
-      placeholder="Ingresa tu nombre" autocomplete="off">
-    <p style="font-size:12px;color:var(--txt-3, #999);margin-bottom:20px">No te preguntaremos otra vez en esta sesión.</p>
+      placeholder="${t('name_ph')}" autocomplete="off">
+    <p style="font-size:12px;color:var(--txt-3, #999);margin-bottom:20px">${t('name_note')}</p>
     <button id="btn-continuar" style="background:var(--accent, #818cf8);color:var(--bg, #000);border:none;
-      padding:10px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">Continuar</button>
+      padding:10px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">${t('name_btn')}</button>
   `;
-  modal.appendChild(modal);
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
   const inputNombre = modal.querySelector('#input-nombre');
   const btnContinuar = modal.querySelector('#btn-continuar');
   const submit = () => {
-    const nombre = inputNombre.value.trim() || 'Estudiante';
+    const nombre = inputNombre.value.trim() || t('name_default');
     sessionStorage.setItem('nombreEstudianteSim', nombre);
     overlay.remove();
     callback(nombre);
@@ -168,6 +169,91 @@ function obtenerNombreUsuario(callback) {
 
 **Uso en pantalla final:** `obtenerNombreUsuario(nombre => { /* usa 'nombre' aquí */ })`
 
+Requiere el bloque i18n (las claves `name_q`, `name_ph`, `name_note`, `name_btn`, `name_default` van en `I18N`).
+
+### i18n ES/EN (diccionario embebido + toggle)
+
+Todo archivo (index + sims) es bilingüe ES/EN. Idioma persistido en `localStorage['simlab_lang']` (default `'es'`), compartido entre index y sims. Patrón **híbrido**: `t(clave)` para UI corta; **ramas de datos completas por idioma** para contenido pedagógico. La rama se elige una vez al cargar — el cambio de idioma siempre recarga la página, así `LANG` es constante.
+
+Bloque canónico (compartido-por-copia, al inicio del `<script>` de cada archivo):
+
+```javascript
+/* === i18n === */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+
+const I18N = {
+  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+        name_q:'¿Cómo te llamas?', name_ph:'Ingresa tu nombre',
+        name_note:'No te preguntaremos otra vez en esta sesión.', name_btn:'Continuar',
+        name_default:'Estudiante' /* + claves de UI usadas desde JS */ },
+  en: { confirm_switch:'Switching language will restart the simulation. Continue?',
+        name_q:'What is your name?', name_ph:'Enter your name',
+        name_note:'We will not ask again during this session.', name_btn:'Continue',
+        name_default:'Student',
+        page_title:'…', meta_desc:'…' /* + TODAS las claves data-i18n del HTML */ }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
+/* Datos pedagógicos: rama por idioma, MISMO shape en ambas (misma cardinalidad y campos) */
+const ROUNDS_ALL = { es: [/* ES */], en: [/* EN */] };
+const ROUNDS = ROUNDS_ALL[LANG];   // el resto del código no cambia
+
+/* Sweep de texto estático (solo actúa en EN; el markup se autoría en ES) */
+function applyStaticI18n(){
+  if (LANG === 'es') return;
+  document.title = t('page_title');
+  const md = document.querySelector('meta[name="description"]');
+  if (md) md.content = t('meta_desc');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+}
+applyStaticI18n();
+```
+
+Marcado del HTML estático (autoría siempre en ES; los valores del diccionario pueden llevar `<strong>`/`<em>` — el sweep usa `innerHTML`, nunca meter input del usuario en el diccionario):
+
+```html
+<h1 data-i18n="hero_title">Título en español…</h1>
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab"
+   data-i18n-title="back_title" data-i18n-aria="back_title">…</a>
+<input placeholder="Ingresa tu nombre" data-i18n-ph="name_ph">
+```
+
+Toggle canónico `.sim-lang` — espejo del `.sim-home`, fijo **top:14px right:14px**, reutiliza las variables `--sim-home-*` de la paleta. Muestra el idioma **destino**:
+
+```html
+<button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
+```
+```css
+.sim-lang{position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;
+  color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
+  border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
+  transition:transform .2s,color .2s}
+.sim-lang:hover,.sim-lang:focus-visible{color:var(--sim-home-hi,#fff);transform:scale(1.06)}
+```
+```javascript
+const langBtn = document.getElementById('simLangBtn');
+langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+langBtn.addEventListener('click', () => {
+  if (!confirm(t('confirm_switch'))) return;   // en index.html: sin confirm (no hay estado que perder)
+  setLang(LANG === 'es' ? 'en' : 'es');
+  location.reload();
+});
+```
+
+Reglas del patrón:
+- **Sims:** confirm + reload (reinicia la sim; el estado ya se pierde al refrescar). **index.html:** sin confirm, solo `setLang` + reload.
+- Ambas ramas de `*_ALL` deben tener **shape idéntico** (mismos campos, misma cardinalidad de rondas/slots/opciones) — el código lo asume.
+- La rama EN es **adaptación pedagógica**, no traducción literal (ej.: conectores usa conectores ingleses; peel usa frases en inglés).
+- `I18N.es` solo necesita claves usadas desde JS; `I18N.en` necesita todas (incl. `page_title`, `meta_desc` y las `data-i18n`).
+
 ---
 
 ## Reglas para Claude
@@ -177,6 +263,7 @@ function obtenerNombreUsuario(callback) {
 - Al añadir fases, seguir el patrón `startPhaseX()` y actualizar `endGame()`.
 - Los textos pedagógicos deben mantener rigor científico (nivel universitario/posgrado).
 - Codificación: **UTF-8** siempre. Verificar que las tildes y ñ queden correctas.
+- **Bilingüe ES/EN obligatorio:** toda simulación (nueva o editada) debe funcionar 100% en ambos idiomas con el patrón i18n canónico (diccionario embebido, nunca `translations.js` compartido; idioma en `localStorage['simlab_lang']`; toggle `.sim-lang` top-right; `<html lang>` dinámico; contenido pedagógico como adaptación, no traducción literal). *(Adopción progresiva 2026-07: ver plan i18n; las sims aún no migradas quedan solo ES hasta su fase.)*
 - No commitear sin instrucción explícita.
 - **Toda nueva simulación** debe: (1) enlazarse en `index.html` (tarjeta en `#simulaciones`, sim-grid con clase CSS propia), (2) listarse en la tabla "Simulaciones activas" de este archivo, (3) incluir botón/enlace `href="index.html"` para volver al inicio, (4) implementar captura de nombre del estudiante. Un hook (`PostToolUse:Write` → `.claude/hooks/check-sim-link.js`) recuerda esto automáticamente al crear el archivo.
 - **Captura de nombre obligatoria en pantalla final:** toda simulación debe incluir la función `obtenerNombreUsuario(callback)` que: usa `sessionStorage.getItem/setItem('nombreEstudianteSim')` para no preguntar dos veces en la misma sesión; si no hay nombre guardado, muestra un overlay modal con input + botón "Continuar"; llama `callback(nombre)` al confirmar. La pantalla final (`endGame()`, `showFinalScreen()` o equivalente) debe llamar `obtenerNombreUsuario(nombre => { ... })` y personalizar el mensaje con el nombre. Colores del overlay deben respetar la paleta de la simulación (usar variables CSS de la simulación para borde y acento).

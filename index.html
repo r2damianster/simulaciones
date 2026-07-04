@@ -112,6 +112,14 @@
             transition: all 0.3s var(--ease);
         }
         .nav-link:hover { color: var(--txt); background: rgba(255,255,255,0.07); }
+        .sim-lang {
+            background: none; border: 1px solid var(--border); color: var(--txt-2);
+            font-family: inherit; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+            min-width: 44px; padding: 8px 12px; border-radius: 100px; cursor: pointer;
+            flex-shrink: 0; transition: all 0.3s var(--ease);
+        }
+        .sim-lang:hover { color: var(--txt); border-color: var(--border-h); background: rgba(255,255,255,0.07); }
+        .sim-lang:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
         .nav-link:focus-visible, .nav-cta:focus-visible, .btn-hero:focus-visible {
             outline: 2px solid var(--indigo); outline-offset: 2px;
         }
@@ -553,19 +561,20 @@
                 SimLab ULEAM
             </div>
             <div class="nav-links">
-                <a class="nav-link" href="#metricas">Métricas</a>
-                <a class="nav-link" href="#simulaciones">Simulaciones</a>
-                <a class="nav-link" href="#autor">Autor</a>
+                <a class="nav-link" href="#metricas" data-i18n="nav_metrics">Métricas</a>
+                <a class="nav-link" href="#simulaciones" data-i18n="nav_sims">Simulaciones</a>
+                <a class="nav-link" href="#autor" data-i18n="nav_author">Autor</a>
             </div>
+            <button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
             <button class="nav-toggle" aria-expanded="false" aria-controls="nav-mobile">☰</button>
             <a class="nav-cta" href="#simulaciones">
-                Explorar
+                <span data-i18n="nav_explore">Explorar</span>
                 <span class="nav-cta-icon">↗</span>
             </a>
             <div class="nav-mobile-panel" id="nav-mobile">
-                <a class="nav-link" href="#metricas">Métricas</a>
-                <a class="nav-link" href="#simulaciones">Simulaciones</a>
-                <a class="nav-link" href="#autor">Autor</a>
+                <a class="nav-link" href="#metricas" data-i18n="nav_metrics">Métricas</a>
+                <a class="nav-link" href="#simulaciones" data-i18n="nav_sims">Simulaciones</a>
+                <a class="nav-link" href="#autor" data-i18n="nav_author">Autor</a>
             </div>
         </nav>
     </div>
@@ -585,7 +594,7 @@
                         </div>
                         <div class="avatar-badge">
                             <span class="badge-dot"></span>
-                            <span class="badge-txt">Docente universitario &nbsp;·&nbsp; Doctorando UPV/EHU</span>
+                            <span class="badge-txt" data-i18n="badge_txt">Docente universitario &nbsp;·&nbsp; Doctorando UPV/EHU</span>
                         </div>
                     </div>
                 </div>
@@ -594,16 +603,16 @@
                 <div class="hero-content">
                     <div class="eyebrow reveal d1">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="6" r="2.5" fill="currentColor"/></svg>
-                        Laboratorio de Simulaciones Pedagógicas
+                        <span data-i18n="eyebrow_hero">Laboratorio de Simulaciones Pedagógicas</span>
                     </div>
 
-                    <h1 class="hero-title reveal d2">
+                    <h1 class="hero-title reveal d2" data-i18n="hero_title">
                         Bienvenido al<br>
                         espacio donde la<br>
                         <em>investigación cobra vida</em>
                     </h1>
 
-                    <p class="hero-welcome reveal d3">
+                    <p class="hero-welcome reveal d3" data-i18n="hero_welcome">
                         Hola, soy el <strong>Dr. Arturo Rodríguez Zambrano</strong>, docente ULEAM y
                         doctorando en Psicodidáctica (UPV/EHU, España). Aquí encontrarás
                         <strong>serious games</strong> diseñados con inteligencia artificial para transformar
@@ -611,7 +620,7 @@
                     </p>
 
                     <div class="ai-strip reveal d3">
-                        <span class="ai-label">Co-creado con</span>
+                        <span class="ai-label" data-i18n="ai_label">Co-creado con</span>
                         <span class="ai-sep"></span>
                         <div class="ai-pill ai-claude">
                             <span class="ai-ico">C</span>Claude
@@ -625,7 +634,7 @@
                     </div>
 
                     <a class="btn-hero reveal d4" href="#simulaciones">
-                        Ir a las Simulaciones
+                        <span data-i18n="btn_hero">Ir a las Simulaciones</span>
                         <span class="btn-hero-ico">↓</span>
                     </a>
                 </div>
@@ -637,7 +646,7 @@
     <!-- ── MÉTRICAS ── -->
     <section class="section" id="metricas">
         <div class="container">
-            <div class="section-eyebrow reveal">Datos de uso &amp; proyecto</div>
+            <div class="section-eyebrow reveal" data-i18n="metrics_eyebrow">Datos de uso &amp; proyecto</div>
 
             <div class="bento">
 
@@ -645,7 +654,7 @@
                 <div class="card-out b-stat reveal d1">
                     <div class="card-in">
                         <div class="shimmer"></div>
-                        <div class="stat-lbl">Visitas</div>
+                        <div class="stat-lbl" data-i18n="stat_visits">Visitas</div>
                         <div class="stat-val" id="cnt-visits" style="color:var(--indigo)">0</div>
                     </div>
                 </div>
@@ -654,7 +663,7 @@
                 <div class="card-out b-stat reveal d2">
                     <div class="card-in">
                         <div class="shimmer"></div>
-                        <div class="stat-lbl">Lanzamientos</div>
+                        <div class="stat-lbl" data-i18n="stat_launches">Lanzamientos</div>
                         <div class="stat-val" id="cnt-launch" style="color:var(--amber)">0</div>
                     </div>
                 </div>
@@ -663,7 +672,7 @@
                 <div class="card-out b-stat reveal d3">
                     <div class="card-in">
                         <div class="shimmer"></div>
-                        <div class="stat-lbl">Simulaciones</div>
+                        <div class="stat-lbl" data-i18n="stat_sims">Simulaciones</div>
                         <div class="stat-val" id="cnt-sims" style="color:var(--emerald)">9</div>
                     </div>
                 </div>
@@ -672,7 +681,7 @@
                 <div class="card-out b-stat reveal d4">
                     <div class="card-in">
                         <div class="shimmer"></div>
-                        <div class="stat-lbl">Modelos IA</div>
+                        <div class="stat-lbl" data-i18n="stat_models">Modelos IA</div>
                         <div class="stat-val" style="color:var(--violet)">3</div>
                     </div>
                 </div>
@@ -682,8 +691,8 @@
                     <div class="card-in" style="background:linear-gradient(135deg,rgba(129,140,248,0.07),rgba(167,139,250,0.04));padding:36px;">
                         <div class="shimmer"></div>
                         <div>
-                            <div class="eyebrow" style="margin-bottom:18px;font-size:0.63rem;">Filosofía del proyecto</div>
-                            <p style="font-family:var(--serif);font-size:1.3rem;line-height:1.55;color:var(--txt);font-weight:400;">
+                            <div class="eyebrow" style="margin-bottom:18px;font-size:0.63rem;" data-i18n="feat_eyebrow">Filosofía del proyecto</div>
+                            <p style="font-family:var(--serif);font-size:1.3rem;line-height:1.55;color:var(--txt);font-weight:400;" data-i18n="feat_quote">
                                 "Los mejores aprendizajes ocurren cuando el estudiante no nota que está estudiando — sino que está jugando, eligiendo, equivocándose y descubriendo."
                             </p>
                         </div>
@@ -691,7 +700,7 @@
                             <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🎓</div>
                             <div>
                                 <div style="font-size:0.83rem;font-weight:700;color:var(--txt);">Dr. Arturo Rodríguez Zambrano</div>
-                                <div style="font-size:0.72rem;color:var(--txt-3);">ULEAM · Doctorando en Psicodidáctica, UPV/EHU</div>
+                                <div style="font-size:0.72rem;color:var(--txt-3);" data-i18n="feat_role">ULEAM · Doctorando en Psicodidáctica, UPV/EHU</div>
                             </div>
                         </div>
                     </div>
@@ -703,8 +712,8 @@
                         <div class="shimmer"></div>
                         <div style="font-size:2.6rem;opacity:0.85;flex-shrink:0;">🧪</div>
                         <div>
-                            <div style="font-size:0.86rem;font-weight:700;color:var(--txt);margin-bottom:5px;">Aprendizaje Basado en Juego</div>
-                            <div style="font-size:0.78rem;color:var(--txt-2);line-height:1.55;">Retroalimentación inmediata, decisiones con consecuencias, narrativa pedagógica inmersiva.</div>
+                            <div style="font-size:0.86rem;font-weight:700;color:var(--txt);margin-bottom:5px;" data-i18n="gbl_title">Aprendizaje Basado en Juego</div>
+                            <div style="font-size:0.78rem;color:var(--txt-2);line-height:1.55;" data-i18n="gbl_desc">Retroalimentación inmediata, decisiones con consecuencias, narrativa pedagógica inmersiva.</div>
                         </div>
                     </div>
                 </div>
@@ -714,8 +723,8 @@
                     <div class="card-in" style="flex-direction:row;align-items:center;justify-content:space-between;gap:16px;">
                         <div class="shimmer"></div>
                         <div>
-                            <div style="font-size:0.86rem;font-weight:700;color:var(--txt);margin-bottom:5px;">Stack Tecnológico</div>
-                            <div style="font-size:0.78rem;color:var(--txt-2);">Sin frameworks — HTML puro, portátil, sin dependencias.</div>
+                            <div style="font-size:0.86rem;font-weight:700;color:var(--txt);margin-bottom:5px;" data-i18n="stack_title">Stack Tecnológico</div>
+                            <div style="font-size:0.78rem;color:var(--txt-2);" data-i18n="stack_desc">Sin frameworks — HTML puro, portátil, sin dependencias.</div>
                         </div>
                         <div style="display:flex;gap:7px;flex-shrink:0;">
                             <div style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:0.68rem;color:var(--txt-2);font-weight:600;">HTML5</div>
@@ -732,30 +741,30 @@
     <!-- ── SIMULACIONES ── -->
     <section class="section" id="simulaciones">
         <div class="container">
-            <div class="section-eyebrow reveal">Simulaciones disponibles</div>
+            <div class="section-eyebrow reveal" data-i18n="sims_eyebrow">Simulaciones disponibles</div>
 
             <div class="sim-controls">
-                <div class="sim-chips" role="group" aria-label="Filtrar por categoría">
+                <div class="sim-chips" role="group" aria-label="Filtrar por categoría" data-i18n-aria="filter_aria">
                     <button class="chip is-active" data-filter="*">
-                        Todas <span class="chip-count">9</span>
+                        <span data-i18n="chip_all">Todas</span> <span class="chip-count">9</span>
                     </button>
                     <button class="chip" data-filter="redaccion">
-                        Redacción <span class="chip-count">4</span>
+                        <span data-i18n="chip_writing">Redacción</span> <span class="chip-count">4</span>
                     </button>
                     <button class="chip" data-filter="metodologia">
-                        Metodología <span class="chip-count">2</span>
+                        <span data-i18n="chip_method">Metodología</span> <span class="chip-count">2</span>
                     </button>
                     <button class="chip" data-filter="estadistica">
-                        Estadística <span class="chip-count">1</span>
+                        <span data-i18n="chip_stats">Estadística</span> <span class="chip-count">1</span>
                     </button>
                     <button class="chip" data-filter="etica">
-                        Ética <span class="chip-count">1</span>
+                        <span data-i18n="chip_ethics">Ética</span> <span class="chip-count">1</span>
                     </button>
                     <button class="chip" data-filter="lectura">
-                        Lectura <span class="chip-count">1</span>
+                        <span data-i18n="chip_reading">Lectura</span> <span class="chip-count">1</span>
                     </button>
                 </div>
-                <input type="search" class="sim-search" placeholder="Buscar simulación..." aria-label="Buscar simulación">
+                <input type="search" class="sim-search" placeholder="Buscar simulación..." aria-label="Buscar simulación" data-i18n-ph="search_ph" data-i18n-aria="search_ph">
             </div>
             <div class="sim-status"></div>
 
@@ -764,22 +773,22 @@
                 <!-- Observación -->
                 <div class="sim-out obs reveal d1" data-cat="metodologia" data-key="simlab_obs" data-file="observación.html">
                     <input type="hidden" data-done>
-                    <div class="sim-badge-done">✓ Completada</div>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="observación.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
                         <div class="sim-in">
                             <div class="sim-thumb">
                                 <span class="sim-thumb-icon" aria-hidden="true">👁️</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag">Metodología Cualitativa</span>
-                                <div class="sim-title">Observación en Investigación Social</div>
-                                <p class="sim-desc">Domina los tipos de observación, la construcción de notas de campo y la gestión de sesgos en un entorno 3D interactivo.</p>
+                                <span class="sim-tag" data-i18n="card_obs_tag">Metodología Cualitativa</span>
+                                <div class="sim-title" data-i18n="card_obs_title">Observación en Investigación Social</div>
+                                <p class="sim-desc" data-i18n="card_obs_desc">Domina los tipos de observación, la construcción de notas de campo y la gestión de sesgos en un entorno 3D interactivo.</p>
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~25 min</span>
-                                    <span class="sim-meta-chip">Intermedio</span>
+                                    <span class="sim-meta-chip" data-i18n="level_mid">Intermedio</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
-                                    Iniciar Simulación
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
                                     <span class="btn-sim-ico">→</span>
                                 </button>
                             </div>
@@ -790,22 +799,22 @@
                 <!-- Financiamiento / Ética -->
                 <div class="sim-out fin reveal d2" data-cat="etica" data-key="simlab_fin" data-file="financiamiento_etica.html">
                     <input type="hidden" data-done>
-                    <div class="sim-badge-done">✓ Completada</div>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="financiamiento_etica.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
                         <div class="sim-in">
                             <div class="sim-thumb">
                                 <span class="sim-thumb-icon" aria-hidden="true">⚖️</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag">Ética Académica</span>
-                                <div class="sim-title">El Dilema del Investigador 2.0</div>
-                                <p class="sim-desc">Navega entre revistas depredadoras, gestiona fondos ONU/CEDIA y toma decisiones éticas bajo presión en tiempo real.</p>
+                                <span class="sim-tag" data-i18n="card_fin_tag">Ética Académica</span>
+                                <div class="sim-title" data-i18n="card_fin_title">El Dilema del Investigador 2.0</div>
+                                <p class="sim-desc" data-i18n="card_fin_desc">Navega entre revistas depredadoras, gestiona fondos ONU/CEDIA y toma decisiones éticas bajo presión en tiempo real.</p>
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~20 min</span>
-                                    <span class="sim-meta-chip">Intermedio</span>
+                                    <span class="sim-meta-chip" data-i18n="level_mid">Intermedio</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
-                                    Iniciar Simulación
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
                                     <span class="btn-sim-ico">→</span>
                                 </button>
                             </div>
@@ -816,22 +825,22 @@
                 <!-- Diseños -->
                 <div class="sim-out des reveal d3" data-cat="metodologia" data-key="simlab_des" data-file="disenos.html">
                     <input type="hidden" data-done>
-                    <div class="sim-badge-done">✓ Completada</div>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="disenos.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
                         <div class="sim-in">
                             <div class="sim-thumb">
                                 <span class="sim-thumb-icon" aria-hidden="true">⚗️</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag">Diseños Experimentales</span>
-                                <div class="sim-title">Laboratorio ACME</div>
-                                <p class="sim-desc">Diseña y ejecuta experimentos conductuales en un laboratorio virtual de estética terminal-cyberpunk.</p>
+                                <span class="sim-tag" data-i18n="card_des_tag">Diseños Experimentales</span>
+                                <div class="sim-title" data-i18n="card_des_title">Laboratorio ACME</div>
+                                <p class="sim-desc" data-i18n="card_des_desc">Diseña y ejecuta experimentos conductuales en un laboratorio virtual de estética terminal-cyberpunk.</p>
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~25 min</span>
-                                    <span class="sim-meta-chip">Avanzado</span>
+                                    <span class="sim-meta-chip" data-i18n="level_adv">Avanzado</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
-                                    Iniciar Simulación
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
                                     <span class="btn-sim-ico">→</span>
                                 </button>
                             </div>
@@ -842,22 +851,22 @@
                 <!-- APA 7 -->
                 <div class="sim-out apa reveal d4" data-cat="redaccion" data-key="simlab_apa" data-file="apa7.html">
                     <input type="hidden" data-done>
-                    <div class="sim-badge-done">✓ Completada</div>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="apa7.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
                         <div class="sim-in">
                             <div class="sim-thumb">
                                 <span class="sim-thumb-icon" aria-hidden="true">📝</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag">Redacción Académica</span>
-                                <div class="sim-title">Simulación Formato APA 7</div>
-                                <p class="sim-desc">Corrige un manuscrito con errores de formato APA 7.ª edición: portada, encabezados, citas y referencias, bajo la mirada de la profesora revisora.</p>
+                                <span class="sim-tag" data-i18n="card_apa_tag">Redacción Académica</span>
+                                <div class="sim-title" data-i18n="card_apa_title">Simulación Formato APA 7</div>
+                                <p class="sim-desc" data-i18n="card_apa_desc">Corrige un manuscrito con errores de formato APA 7.ª edición: portada, encabezados, citas y referencias, bajo la mirada de la profesora revisora.</p>
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~15 min</span>
-                                    <span class="sim-meta-chip">Intermedio</span>
+                                    <span class="sim-meta-chip" data-i18n="level_mid">Intermedio</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
-                                    Iniciar Simulación
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
                                     <span class="btn-sim-ico">→</span>
                                 </button>
                             </div>
@@ -868,22 +877,22 @@
                 <!-- APA 7 Editor -->
                 <div class="sim-out apa2 reveal d5" data-cat="redaccion" data-key="simlab_apa2" data-file="apa7_2.html">
                     <input type="hidden" data-done>
-                    <div class="sim-badge-done">✓ Completada</div>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="apa7_2.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
                         <div class="sim-in">
                             <div class="sim-thumb">
                                 <span class="sim-thumb-icon" aria-hidden="true">🖊️</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag">Redacción Académica</span>
-                                <div class="sim-title">Editor APA 7 — Cinta de herramientas</div>
-                                <p class="sim-desc">Formatea un manuscrito usando una cinta estilo Word: tipografía, alineación, márgenes, sangría y herramientas APA. Se desbloquea sección a sección.</p>
+                                <span class="sim-tag" data-i18n="card_apa2_tag">Redacción Académica</span>
+                                <div class="sim-title" data-i18n="card_apa2_title">Editor APA 7 — Cinta de herramientas</div>
+                                <p class="sim-desc" data-i18n="card_apa2_desc">Formatea un manuscrito usando una cinta estilo Word: tipografía, alineación, márgenes, sangría y herramientas APA. Se desbloquea sección a sección.</p>
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~20 min</span>
-                                    <span class="sim-meta-chip">Avanzado</span>
+                                    <span class="sim-meta-chip" data-i18n="level_adv">Avanzado</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
-                                    Iniciar Simulación
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
                                     <span class="btn-sim-ico">→</span>
                                 </button>
                             </div>
@@ -894,22 +903,22 @@
                 <!-- PEEL -->
                 <div class="sim-out peel reveal d6" data-cat="redaccion" data-key="simlab_peel" data-file="peel.html">
                     <input type="hidden" data-done>
-                    <div class="sim-badge-done">✓ Completada</div>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="peel.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
                         <div class="sim-in">
                             <div class="sim-thumb">
                                 <span class="sim-thumb-icon" aria-hidden="true">🧩</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag">Redacción Argumentativa</span>
-                                <div class="sim-title">Constructor PEEL</div>
-                                <p class="sim-desc">Arrastra y suelta frases para construir párrafos argumentativos siguiendo la estructura PEEL: Punto, Evidencia, Explicación y Link.</p>
+                                <span class="sim-tag" data-i18n="card_peel_tag">Redacción Argumentativa</span>
+                                <div class="sim-title" data-i18n="card_peel_title">Constructor PEEL</div>
+                                <p class="sim-desc" data-i18n="card_peel_desc">Arrastra y suelta frases para construir párrafos argumentativos siguiendo la estructura PEEL: Punto, Evidencia, Explicación y Link.</p>
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~15 min</span>
-                                    <span class="sim-meta-chip">Básico</span>
+                                    <span class="sim-meta-chip" data-i18n="level_basic">Básico</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
-                                    Iniciar Simulación
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
                                     <span class="btn-sim-ico">→</span>
                                 </button>
                             </div>
@@ -920,22 +929,22 @@
                 <!-- Evaluación Lectora -->
                 <div class="sim-out eval reveal d6" data-cat="lectura" data-key="simlab_eval" data-file="evaluaciones_lectura.html">
                     <input type="hidden" data-done>
-                    <div class="sim-badge-done">✓ Completada</div>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="evaluaciones_lectura.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
                         <div class="sim-in">
                             <div class="sim-thumb">
                                 <span class="sim-thumb-icon" aria-hidden="true">📖</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag">Comprensión Lectora</span>
-                                <div class="sim-title">Evaluación Lectora — Ciencias Naturales</div>
-                                <p class="sim-desc">Evalúa escritos de estudiantes de 3° a 8° básico aplicando una rúbrica progresiva de comprensión literal, inferencial y crítica.</p>
+                                <span class="sim-tag" data-i18n="card_eval_tag">Comprensión Lectora</span>
+                                <div class="sim-title" data-i18n="card_eval_title">Evaluación Lectora — Ciencias Naturales</div>
+                                <p class="sim-desc" data-i18n="card_eval_desc">Evalúa escritos de estudiantes de 3° a 8° básico aplicando una rúbrica progresiva de comprensión literal, inferencial y crítica.</p>
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~20 min</span>
-                                    <span class="sim-meta-chip">Intermedio</span>
+                                    <span class="sim-meta-chip" data-i18n="level_mid">Intermedio</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
-                                    Iniciar Simulación
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
                                     <span class="btn-sim-ico">→</span>
                                 </button>
                             </div>
@@ -946,22 +955,22 @@
                 <!-- Muestreo -->
                 <div class="sim-out mue reveal d2" data-cat="estadistica" data-key="simlab_mue" data-file="muestreo.html">
                     <input type="hidden" data-done>
-                    <div class="sim-badge-done">✓ Completada</div>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="muestreo.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
                         <div class="sim-in">
                             <div class="sim-thumb">
                                 <span class="sim-thumb-icon" aria-hidden="true">📊</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag">Estadística / Muestreo</span>
-                                <div class="sim-title">Simulador de Muestreos</div>
-                                <p class="sim-desc">Distingue entre técnicas probabilísticas y no probabilísticas mediante simulaciones visuales con poblaciones reales de plantas, personas y fábricas.</p>
+                                <span class="sim-tag" data-i18n="card_mue_tag">Estadística / Muestreo</span>
+                                <div class="sim-title" data-i18n="card_mue_title">Simulador de Muestreos</div>
+                                <p class="sim-desc" data-i18n="card_mue_desc">Distingue entre técnicas probabilísticas y no probabilísticas mediante simulaciones visuales con poblaciones reales de plantas, personas y fábricas.</p>
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~25 min</span>
-                                    <span class="sim-meta-chip">Intermedio</span>
+                                    <span class="sim-meta-chip" data-i18n="level_mid">Intermedio</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
-                                    Iniciar Simulación
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
                                     <span class="btn-sim-ico">→</span>
                                 </button>
                             </div>
@@ -973,22 +982,22 @@
                 <!-- Conectores Argumentativos -->
                 <div class="sim-out con reveal d3" data-cat="redaccion" data-key="simlab_con" data-file="conectores.html">
                     <input type="hidden" data-done>
-                    <div class="sim-badge-done">✓ Completada</div>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="conectores.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
                         <div class="sim-in">
                             <div class="sim-thumb">
                                 <span class="sim-thumb-icon" aria-hidden="true">⚙️</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag">Redacción Académica</span>
-                                <div class="sim-title">Máquina de Engranajes Argumentativos</div>
-                                <p class="sim-desc">Conecta enunciados académicos eligiendo el tipo de relación lógica y el conector exacto. Cada error resta puntos en este desafío de nivel avanzado.</p>
+                                <span class="sim-tag" data-i18n="card_con_tag">Redacción Académica</span>
+                                <div class="sim-title" data-i18n="card_con_title">Máquina de Engranajes Argumentativos</div>
+                                <p class="sim-desc" data-i18n="card_con_desc">Conecta enunciados académicos eligiendo el tipo de relación lógica y el conector exacto. Cada error resta puntos en este desafío de nivel avanzado.</p>
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~15 min</span>
-                                    <span class="sim-meta-chip">Básico</span>
+                                    <span class="sim-meta-chip" data-i18n="level_basic">Básico</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
-                                    Iniciar Simulación
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
                                     <span class="btn-sim-ico">→</span>
                                 </button>
                             </div>
@@ -1006,7 +1015,7 @@
             <div class="footer-inner">
                 <div class="footer-info">
                     <div class="footer-name">Dr. Arturo Damián Rodríguez Zambrano</div>
-                    <div class="footer-role">Docente universitario &nbsp;·&nbsp; Doctorando en Psicodidáctica, UPV/EHU (España)</div>
+                    <div class="footer-role" data-i18n="footer_role">Docente universitario &nbsp;·&nbsp; Doctorando en Psicodidáctica, UPV/EHU (España)</div>
                     <div class="footer-email">arturo.rodriguez@uleam.edu.ec &nbsp;·&nbsp; arturo.rodriguez30@gmail.com</div>
                 </div>
                 <div class="footer-right">
@@ -1021,6 +1030,107 @@
     </footer>
 
     <script>
+        /* === i18n === */
+        function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+        function setLang(l){ localStorage.setItem('simlab_lang', l); }
+        const LANG = getLang();
+        document.documentElement.lang = LANG;
+
+        const I18N = {
+            es: {
+                sims_sg:'simulación', sims_pl:'simulaciones',
+                found_sg:'encontrada', found_pl:'encontradas',
+                done_sg:'completada', done_pl:'completadas',
+                no_results:'Sin resultados.', clear_filters:'Limpiar filtros'
+            },
+            en: {
+                page_title:'SimLab ULEAM — Dr. Arturo Rodríguez',
+                meta_desc:'SimLab ULEAM — interactive educational simulations (serious games) on research methodology, statistics and academic writing, by Dr. Arturo Rodríguez Zambrano.',
+                /* nav */
+                nav_metrics:'Metrics', nav_sims:'Simulations', nav_author:'About', nav_explore:'Explore',
+                /* hero */
+                badge_txt:'University Lecturer &nbsp;·&nbsp; PhD Candidate UPV/EHU',
+                eyebrow_hero:'Pedagogical Simulation Laboratory',
+                hero_title:'Welcome to<br>the space where<br><em>research comes alive</em>',
+                hero_welcome:'Hi, I’m <strong>Dr. Arturo Rodríguez Zambrano</strong>, a lecturer at ULEAM and PhD candidate in Psychodidactics (UPV/EHU, Spain). Here you’ll find <strong>serious games</strong> designed with artificial intelligence to transform how research methodology and statistics are learned at university.',
+                ai_label:'Co-created with',
+                btn_hero:'Go to the Simulations',
+                /* metrics */
+                metrics_eyebrow:'Usage &amp; project data',
+                stat_visits:'Visits', stat_launches:'Launches', stat_sims:'Simulations', stat_models:'AI Models',
+                feat_eyebrow:'Project philosophy',
+                feat_quote:'"The best learning happens when students don’t notice they are studying — they are playing, choosing, making mistakes and discovering."',
+                feat_role:'ULEAM · PhD Candidate in Psychodidactics, UPV/EHU',
+                gbl_title:'Game-Based Learning',
+                gbl_desc:'Immediate feedback, decisions with consequences, immersive pedagogical storytelling.',
+                stack_title:'Tech Stack',
+                stack_desc:'No frameworks — pure HTML, portable, zero dependencies.',
+                /* simulations section */
+                sims_eyebrow:'Available simulations',
+                filter_aria:'Filter by category',
+                chip_all:'All', chip_writing:'Writing', chip_method:'Methodology',
+                chip_stats:'Statistics', chip_ethics:'Ethics', chip_reading:'Reading',
+                search_ph:'Search simulations...',
+                badge_done:'✓ Completed', btn_start:'Start Simulation',
+                level_basic:'Beginner', level_mid:'Intermediate', level_adv:'Advanced',
+                /* cards */
+                card_obs_tag:'Qualitative Methods',
+                card_obs_title:'Observation in Social Research',
+                card_obs_desc:'Master observation types, field-note writing and bias management in an interactive 3D environment.',
+                card_fin_tag:'Academic Ethics',
+                card_fin_title:'The Researcher’s Dilemma 2.0',
+                card_fin_desc:'Navigate predatory journals, manage UN/CEDIA funds and make ethical decisions under real-time pressure.',
+                card_des_tag:'Experimental Designs',
+                card_des_title:'ACME Laboratory',
+                card_des_desc:'Design and run behavioral experiments in a virtual lab with a terminal-cyberpunk aesthetic.',
+                card_apa_tag:'Academic Writing',
+                card_apa_title:'APA 7 Format Simulation',
+                card_apa_desc:'Fix a manuscript full of APA 7th-edition formatting errors: title page, headings, citations and references, under the eye of the reviewing professor.',
+                card_apa2_tag:'Academic Writing',
+                card_apa2_title:'APA 7 Editor — Ribbon Toolbar',
+                card_apa2_desc:'Format a manuscript using a Word-style ribbon: typography, alignment, margins, indentation and APA tools. Unlocks section by section.',
+                card_peel_tag:'Argumentative Writing',
+                card_peel_title:'PEEL Builder',
+                card_peel_desc:'Drag and drop sentences to build argumentative paragraphs following the PEEL structure: Point, Evidence, Explanation and Link.',
+                card_eval_tag:'Reading Comprehension',
+                card_eval_title:'Reading Assessment — Natural Sciences',
+                card_eval_desc:'Assess writings by 3rd-to-8th-grade students using a progressive rubric of literal, inferential and critical comprehension.',
+                card_mue_tag:'Statistics / Sampling',
+                card_mue_title:'Sampling Simulator',
+                card_mue_desc:'Tell probability and non-probability sampling techniques apart through visual simulations with real populations of plants, people and factories.',
+                card_con_tag:'Academic Writing',
+                card_con_title:'Argumentative Gears Machine',
+                card_con_desc:'Connect academic statements by choosing the logical relation type and the exact connector. Every mistake costs points in this advanced challenge.',
+                /* footer */
+                footer_role:'University Lecturer &nbsp;·&nbsp; PhD Candidate in Psychodidactics, UPV/EHU (Spain)',
+                /* JS strings */
+                sims_sg:'simulation', sims_pl:'simulations',
+                found_sg:'found', found_pl:'found',
+                done_sg:'completed', done_pl:'completed',
+                no_results:'No results.', clear_filters:'Clear filters'
+            }
+        };
+        function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
+        function applyStaticI18n(){
+            if (LANG === 'es') return;
+            document.title = t('page_title');
+            const md = document.querySelector('meta[name="description"]');
+            if (md) md.content = t('meta_desc');
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+            document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+        }
+        applyStaticI18n();
+
+        const langBtn = document.getElementById('simLangBtn');
+        langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+        langBtn.addEventListener('click', () => {
+            setLang(LANG === 'es' ? 'en' : 'es');
+            location.reload();
+        });
+
         /* ── COUNTERS (localStorage) ── */
         function getCount(key) { return parseInt(localStorage.getItem(key) || '0'); }
         function incCount(key) { const n = getCount(key) + 1; localStorage.setItem(key, n); return n; }
@@ -1051,7 +1161,7 @@
             const tick = now => {
                 const p = Math.min((now - t0) / duration, 1);
                 const eased = 1 - Math.pow(1 - p, 3);
-                el.textContent = Math.round(target * eased).toLocaleString('es');
+                el.textContent = Math.round(target * eased).toLocaleString(LANG);
                 if (p < 1) requestAnimationFrame(tick);
             };
             requestAnimationFrame(tick);
@@ -1110,7 +1220,7 @@
 
             if (visibleCount === 0) {
                 simGrid.innerHTML += `<div class="sim-empty" id="sim-empty-state">
-                    Sin resultados. <button class="sim-clear-btn" onclick="document.querySelector('.chip.is-active').click(); document.querySelector('.sim-search').value=''; document.querySelector('.sim-search').dispatchEvent(new Event('input'));">Limpiar filtros</button>
+                    ${t('no_results')} <button class="sim-clear-btn" onclick="document.querySelector('.chip.is-active').click(); document.querySelector('.sim-search').value=''; document.querySelector('.sim-search').dispatchEvent(new Event('input'));">${t('clear_filters')}</button>
                 </div>`;
             } else {
                 document.getElementById('sim-empty-state')?.remove();
@@ -1118,7 +1228,7 @@
 
             const totalSims = document.querySelectorAll('.sim-out:not(.sim-hidden)').length;
             const completedSims = [...document.querySelectorAll('.sim-out:not(.sim-hidden)')].filter(sim => isSimDone(sim.dataset.key)).length;
-            simStatus.innerHTML = `<span style="font-size:0.78rem;color:var(--txt-2);">${totalSims} simulación${totalSims !== 1 ? 'es' : ''} ${visibleCount !== simOuts.length ? 'encontrada' + (totalSims !== 1 ? 's' : '') : ''} ${completedSims > 0 ? `· ${completedSims} completada${completedSims !== 1 ? 's' : ''}` : ''}</span>`;
+            simStatus.innerHTML = `<span style="font-size:0.78rem;color:var(--txt-2);">${totalSims} ${totalSims !== 1 ? t('sims_pl') : t('sims_sg')} ${visibleCount !== simOuts.length ? (totalSims !== 1 ? t('found_pl') : t('found_sg')) : ''} ${completedSims > 0 ? `· ${completedSims} ${completedSims !== 1 ? t('done_pl') : t('done_sg')}` : ''}</span>`;
         }
 
         chips.forEach(chip => {
