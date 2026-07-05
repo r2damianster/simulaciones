@@ -21,6 +21,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `evaluaciones_lectura.html` | Evaluación Lectora — Ciencias Naturales | Comprensión lectora — rúbrica progresiva (literal, inferencial, crítico) sobre escritos de estudiantes de 3° a 8° básico |
 | `muestreo.html` | Simulador de Muestreos | Estadística — técnicas probabilísticas y no probabilísticas, simulaciones visuales con poblaciones de plantas, personas y fábricas |
 | `conectores.html` | Máquina de Engranajes Argumentativos | Redacción académica — conectores discursivos (adición, causalidad, contraste, ejemplificación, orden temporal, conclusión); mecánica 2-paso: tipo de relación → conector exacto; puntuación sobre 100, -5 por error |
+| `constructos.html` | Constructor de Constructos Teóricos | Epistemología — operacionalización de conceptos, validez de constructos, identificar alucinaciones de IA |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 
@@ -120,6 +121,10 @@ Donde `CLAVE` es el `data-key` de la tarjeta en index.html (la clave completa qu
 - evaluaciones_lectura.html: `simlab_eval` → `simlab_done_simlab_eval`
 - muestreo.html: `simlab_mue` → `simlab_done_simlab_mue`
 - conectores.html: `simlab_con` → `simlab_done_simlab_con`
+- financiamiento_etica.html: `simlab_fin` → `simlab_done_simlab_fin`
+- disenos.html: `simlab_des` → `simlab_done_simlab_des`
+- observación.html: `simlab_obs` → `simlab_done_simlab_obs`
+- constructos.html: `simlab_constructos` → `simlab_done_simlab_constructos`
 
 En `index.html`, `isSimDone(key)` lee `simlab_done_${key}` (donde `key` = `data-key`) y muestra badge «✓ Completada».
 
@@ -263,7 +268,7 @@ Reglas del patrón:
 - Al añadir fases, seguir el patrón `startPhaseX()` y actualizar `endGame()`.
 - Los textos pedagógicos deben mantener rigor científico (nivel universitario/posgrado).
 - Codificación: **UTF-8** siempre. Verificar que las tildes y ñ queden correctas.
-- **Bilingüe ES/EN obligatorio:** toda simulación (nueva o editada) debe funcionar 100% en ambos idiomas con el patrón i18n canónico (diccionario embebido, nunca `translations.js` compartido; idioma en `localStorage['simlab_lang']`; toggle `.sim-lang` top-right; `<html lang>` dinámico; contenido pedagógico como adaptación, no traducción literal). *(Adopción progresiva 2026-07: ver plan i18n; las sims aún no migradas quedan solo ES hasta su fase.)*
+- **Bilingüe ES/EN obligatorio:** toda simulación (nueva o editada) debe funcionar 100% en ambos idiomas con el patrón i18n canónico (diccionario embebido, nunca `translations.js` compartido; idioma en `localStorage['simlab_lang']`; toggle `.sim-lang` top-right; `<html lang>` dinámico; contenido pedagógico como adaptación, no traducción literal). *(Adopción progresiva 2026-07: fases 0-2 completas (index, apa7, apa7_2, peel); fase 3-8 en curso (muestreo, conectores, financiamiento, disenos, evaluaciones, observación, constructos).)*
 - No commitear sin instrucción explícita.
 - **Toda nueva simulación** debe: (1) enlazarse en `index.html` (tarjeta en `#simulaciones`, sim-grid con clase CSS propia), (2) listarse en la tabla "Simulaciones activas" de este archivo, (3) incluir botón/enlace `href="index.html"` para volver al inicio, (4) implementar captura de nombre del estudiante. Un hook (`PostToolUse:Write` → `.claude/hooks/check-sim-link.js`) recuerda esto automáticamente al crear el archivo.
 - **Captura de nombre obligatoria en pantalla final:** toda simulación debe incluir la función `obtenerNombreUsuario(callback)` que: usa `sessionStorage.getItem/setItem('nombreEstudianteSim')` para no preguntar dos veces en la misma sesión; si no hay nombre guardado, muestra un overlay modal con input + botón "Continuar"; llama `callback(nombre)` al confirmar. La pantalla final (`endGame()`, `showFinalScreen()` o equivalente) debe llamar `obtenerNombreUsuario(nombre => { ... })` y personalizar el mensaje con el nombre. Colores del overlay deben respetar la paleta de la simulación (usar variables CSS de la simulación para borde y acento).

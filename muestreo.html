@@ -304,29 +304,78 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 </div>
 
 <script>
-/* ========== DATOS ========== */
-const GLOSARIO = [
-  { termino:"Población", icono:"fa-users", definicion:"Conjunto completo de elementos (personas, animales, plantas, objetos) sobre los que se desea obtener información." },
-  { termino:"Muestra", icono:"fa-vial", definicion:"Subconjunto de la población que se selecciona para estudiarlo directamente. Debe ser representativa." },
-  { termino:"Muestreo", icono:"fa-filter", definicion:"Procedimiento o técnica utilizado para seleccionar los elementos que conformarán la muestra." },
-  { termino:"Muestreo Probabilístico", icono:"fa-dice", definicion:"Cada elemento de la población tiene una probabilidad conocida y mayor a cero de ser seleccionado. Permite generalizar resultados.",
-    subtipos:[
-      {nombre:"Aleatorio Simple",desc:"Sorteo puro: todos los elementos tienen la misma probabilidad."},
-      {nombre:"Sistemático",desc:"Se elige cada k-ésimo elemento a partir de un inicio aleatorio."},
-      {nombre:"Estratificado",desc:"Se divide en grupos homogéneos (estratos) y se muestrea dentro de cada uno."},
-      {nombre:"Por Conglomerados",desc:"Se agrupa en conglomerados naturales, se sortean algunos y se estudian todos sus elementos."}
-    ]},
-  { termino:"Muestreo No Probabilístico", icono:"fa-hand-pointer", definicion:"La selección depende del criterio del investigador. No todos tienen oportunidad de ser elegidos. No permite generalizar estadísticamente.",
-    subtipos:[
-      {nombre:"Por Conveniencia",desc:"Se eligen los elementos más accesibles o fáciles de alcanzar."},
-      {nombre:"Por Juicio",desc:"El investigador selecciona los que considera representativos según su experiencia."},
-      {nombre:"Bola de Nieve",desc:"Un sujeto inicial refiere a otros, y esos a más, en cadena."},
-      {nombre:"Por Cuotas",desc:"Se establece una cuota por categoría y se selecciona hasta completarla."}
-    ]}
-];
+/* === i18n === */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
 
-const SUBTIPOS_PROB = ["Aleatorio Simple","Sistemático","Estratificado","Por Conglomerados"];
-const SUBTIPOS_NO_PROB = ["Por Conveniencia","Por Juicio","Bola de Nieve","Por Cuotas"];
+const I18N = {
+  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+        name_q:'¿Cómo te llamas?', name_ph:'Ingresa tu nombre',
+        name_note:'No te preguntaremos otra vez en esta sesión.', name_btn:'Continuar',
+        name_default:'Estudiante' },
+  en: { confirm_switch:'Switching language will restart the simulation. Continue?',
+        name_q:'What is your name?', name_ph:'Enter your name',
+        name_note:'We will not ask again during this session.', name_btn:'Continue',
+        name_default:'Student' }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
+function applyStaticI18n(){
+  if (LANG === 'es') return;
+  document.title = t('page_title');
+  const md = document.querySelector('meta[name="description"]');
+  if (md) md.content = t('meta_desc');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+}
+applyStaticI18n();
+
+/* ========== DATOS ========== */
+const GLOSARIO_ALL = {
+  es: [
+    { termino:"Población", icono:"fa-users", definicion:"Conjunto completo de elementos (personas, animales, plantas, objetos) sobre los que se desea obtener información." },
+    { termino:"Muestra", icono:"fa-vial", definicion:"Subconjunto de la población que se selecciona para estudiarlo directamente. Debe ser representativa." },
+    { termino:"Muestreo", icono:"fa-filter", definicion:"Procedimiento o técnica utilizado para seleccionar los elementos que conformarán la muestra." },
+    { termino:"Muestreo Probabilístico", icono:"fa-dice", definicion:"Cada elemento de la población tiene una probabilidad conocida y mayor a cero de ser seleccionado. Permite generalizar resultados.",
+      subtipos:[
+        {nombre:"Aleatorio Simple",desc:"Sorteo puro: todos los elementos tienen la misma probabilidad."},
+        {nombre:"Sistemático",desc:"Se elige cada k-ésimo elemento a partir de un inicio aleatorio."},
+        {nombre:"Estratificado",desc:"Se divide en grupos homogéneos (estratos) y se muestrea dentro de cada uno."},
+        {nombre:"Por Conglomerados",desc:"Se agrupa en conglomerados naturales, se sortean algunos y se estudian todos sus elementos."}
+      ]},
+    { termino:"Muestreo No Probabilístico", icono:"fa-hand-pointer", definicion:"La selección depende del criterio del investigador. No todos tienen oportunidad de ser elegidos. No permite generalizar estadísticamente.",
+      subtipos:[
+        {nombre:"Por Conveniencia",desc:"Se eligen los elementos más accesibles o fáciles de alcanzar."},
+        {nombre:"Por Juicio",desc:"El investigador selecciona los que considera representativos según su experiencia."},
+        {nombre:"Bola de Nieve",desc:"Un sujeto inicial refiere a otros, y esos a más, en cadena."},
+        {nombre:"Por Cuotas",desc:"Se establece una cuota por categoría y se selecciona hasta completarla."}
+      ]}
+  ],
+  en: [
+    { termino:"Population", icono:"fa-users", definicion:"Complete set of elements (people, animals, plants, objects) about which information is desired." },
+    { termino:"Sample", icono:"fa-vial", definicion:"Subset of the population selected for direct study. Must be representative." },
+    { termino:"Sampling", icono:"fa-filter", definicion:"Procedure or technique used to select the elements that will form the sample." },
+    { termino:"Probability Sampling", icono:"fa-dice", definicion:"Each element of the population has a known probability greater than zero of being selected. Allows generalizing results.",
+      subtipos:[
+        {nombre:"Simple Random",desc:"Pure random draw: all elements have equal probability."},
+        {nombre:"Systematic",desc:"Every k-th element is chosen from a random starting point."},
+        {nombre:"Stratified",desc:"Population is divided into homogeneous groups (strata) and sampled within each."},
+        {nombre:"Cluster",desc:"Grouped into natural clusters, some are drawn randomly, and all their elements are studied."}
+      ]},
+    { termino:"Non-Probability Sampling", icono:"fa-hand-pointer", definicion:"Selection depends on researcher's criteria. Not everyone has opportunity to be chosen. Does not allow statistical generalization.",
+      subtipos:[
+        {nombre:"Convenience",desc:"Elements most accessible or easiest to reach are selected."},
+        {nombre:"Judgment",desc:"Researcher selects those considered representative by experience."},
+        {nombre:"Snowball",desc:"Initial subject refers others, and those refer more, in chain."},
+        {nombre:"Quota",desc:"Quota is set per category and selection continues until quota is filled."}
+      ]}
+  ]
+};
+const GLOSARIO = GLOSARIO_ALL[LANG];
+
+const SUBTIPOS_PROB = LANG === 'es' ? ["Aleatorio Simple","Sistemático","Estratificado","Por Conglomerados"] : ["Simple Random","Systematic","Stratified","Cluster"];
+const SUBTIPOS_NO_PROB = LANG === 'es' ? ["Por Conveniencia","Por Juicio","Bola de Nieve","Por Cuotas"] : ["Convenience","Judgment","Snowball","Quota"];
 
 const EJERCICIOS = [
   // ===== FASE 1: Clasificación binaria =====
