@@ -198,6 +198,8 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
 <body>
 
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
+<button type="button" id="simLangBtn" style="position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;transition:transform .2s,color .2s" aria-label="Cambiar idioma / Switch language"></button>
+<a href="index.html" style="position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;transition:transform .2s,color .2s" title="Volver al inicio" aria-label="Volver al inicio del SimLab"><i class="fas fa-house"></i></a>
 <div id="toast-container" role="alert" aria-live="polite"></div>
 
 <!-- ===== INTRO ===== -->
@@ -380,6 +382,17 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
 </div>
 
 <script>
+/* === i18n === */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+const I18N = {
+  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?', name_q:'¿Cómo te llamas?', name_ph:'Tu nombre', name_note:'No te preguntaremos otra vez en esta sesión.', name_btn:'Continuar', name_default:'Estudiante' },
+  en: { confirm_switch:'Switching language will restart the simulation. Continue?', name_q:'What is your name?', name_ph:'Your name', name_note:'We will not ask again during this session.', name_btn:'Continue', name_default:'Student', page_title:'Construct Builder', meta_desc:'Detect AI hallucinations in theoretical constructs' }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
 /* ===== DATOS ===== */
 const ROUNDS=[
 {area:"Educacion y Aprendizaje",userQuery:"Necesito un tema de investigacion sobre factores que influyen en el rendimiento estudiantil universitario. Algo novedoso pero con base teorica solida.",aiMsg:"Basandome en analisis de tendencias recientes en literatura educativa, te propongo estos temas. Cada uno incluye un constructo central:",options:[
@@ -607,6 +620,7 @@ function nextRound(){if(S.round<2){S.round++;startChatRound()}else{showFinal()}}
 
 /* ===== FINAL ===== */
 function showFinal(){
+    localStorage.setItem('simlab_done_simlab_constructos', Date.now());
     $('view-scopus').classList.remove('active');$('view-chat').style.display='none';$('cg-sidebar').style.display='none';
     $('tab-chat').classList.remove('active');$('tab-scopus').classList.remove('active');$('url-text').textContent='simulai.app/resultados';
     const fv=$('view-final');fv.classList.add('active');
@@ -628,6 +642,17 @@ function resetSim(){
     $('inp-nombre').value='';$('inp-apellido').value='';
     document.querySelectorAll('.gender-opt').forEach(o=>{o.classList.remove('selected');o.setAttribute('aria-checked','false')});
     document.querySelectorAll('.onboard-field').forEach(f=>f.classList.remove('has-error'));
+}
+
+/* === Toggle idioma === */
+const langBtn = document.getElementById('simLangBtn');
+if(langBtn){
+  langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+  langBtn.addEventListener('click', () => {
+    if (!confirm(t('confirm_switch'))) return;
+    setLang(LANG === 'es' ? 'en' : 'es');
+    location.reload();
+  });
 }
 
 /* ===== CANVAS ===== */

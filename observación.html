@@ -295,6 +295,9 @@
 </head>
 <body>
 
+<!-- Toggle idioma -->
+<button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language" style="position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;transition:transform .2s,color .2s"></button>
+
 <!-- Back-link -->
 <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
   <i class="fa-solid fa-house" aria-hidden="true"></i>
@@ -391,6 +394,19 @@
 }
 </script>
 <script type="module">
+/* === i18n === */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+const I18N = {
+  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?', name_q:'¿Cómo te llamas?', name_ph:'Tu nombre', name_note:'No te preguntaremos otra vez en esta sesión.', name_btn:'Continuar', name_default:'Estudiante' },
+  en: { confirm_switch:'Switching language will restart the simulation. Continue?', name_q:'What is your name?', name_ph:'Your name', name_note:'We will not ask again during this session.', name_btn:'Continue', name_default:'Student', page_title:'Observation Simulation', meta_desc:'Interactive social research observation' }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+function applyStaticI18n(){ if(LANG === 'es') return; document.title = t('page_title'); const md = document.querySelector('meta[name="description"]'); if(md) md.content = t('meta_desc'); }
+applyStaticI18n();
+
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
@@ -1208,7 +1224,7 @@ function obtenerNombreUsuario(callback) {
 }
 
 function mostrarPantallaFinal() {
-    localStorage.setItem('simlab_obs', Date.now());
+    localStorage.setItem('simlab_done_simlab_obs', Date.now());
     obtenerNombreUsuario(nombre => {
         const desc = state.notes.filter(n => n.type === 'descriptiva').length;
         const refl = state.notes.filter(n => n.type === 'reflexiva').length;
@@ -1494,6 +1510,17 @@ window.addEventListener('touchend', (e) => {
 }, { passive: true });
 
 animate();
+
+// === Toggle idioma ===
+const langBtn = document.getElementById('simLangBtn');
+if(langBtn){
+  langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+  langBtn.addEventListener('click', () => {
+    if (!confirm(t('confirm_switch'))) return;
+    setLang(LANG === 'es' ? 'en' : 'es');
+    location.reload();
+  });
+}
 </script>
 </body>
 </html>
