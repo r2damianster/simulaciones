@@ -1269,7 +1269,7 @@ async function runExperiment(type) {
     document.getElementById(`tab-btn-${type}`)?.classList.add('completado');
 
     if (experimentState.pre && experimentState.quasi && experimentState.pure) {
-        localStorage.setItem('simlab_des', Date.now());
+        localStorage.setItem('simlab_done_simlab_des', Date.now());
         await delay(600);
         obtenerNombreUsuario(nombre => {
             const finalSection = document.getElementById('sec-final');

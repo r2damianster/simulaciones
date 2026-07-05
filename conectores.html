@@ -7,6 +7,7 @@
     <meta name="description" content="Simulación pedagógica interactiva de conectores argumentativos: conecta enunciados académicos eligiendo tipo de relación lógica y conector exacto. SimLab ULEAM.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
             --bg-color: #171310;
@@ -605,6 +606,14 @@
           transition:transform .2s, color .2s}
         .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
 
+        .sim-lang{position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;
+          display:flex;align-items:center;justify-content:center;cursor:pointer;
+          font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;
+          color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
+          border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
+          transition:transform .2s,color .2s}
+        .sim-lang:hover,.sim-lang:focus-visible{color:var(--sim-home-hi,#fff);transform:scale(1.06)}
+
         @media (max-width: 900px) {
             .app-layout { flex-direction: column; }
             .sidebar { width: 100%; position: static; }
@@ -623,6 +632,8 @@
     <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
       <span aria-hidden="true">🏠</span>
     </a>
+
+    <button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
 
     <div class="app-layout">
         <aside class="sidebar">
@@ -724,8 +735,31 @@
     <button class="manual-fab" id="manualFab" title="Manual de Conectores">📖</button>
 
     <script>
+        /* === i18n === */
+        function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+        function setLang(l){ localStorage.setItem('simlab_lang', l); }
+        const LANG = getLang();
+        document.documentElement.lang = LANG;
+
+        const I18N = {
+          es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+                name_q:'¿Cómo te llamas?', name_ph:'Ingresa tu nombre',
+                name_note:'No te preguntaremos otra vez en esta sesión.', name_btn:'Continuar',
+                name_default:'Estudiante' },
+          en: { confirm_switch:'Switching language will restart the simulation. Continue?',
+                name_q:'What is your name?', name_ph:'Enter your name',
+                name_note:'We will not ask again during this session.', name_btn:'Continue',
+                name_default:'Student' }
+        };
+        function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
+        function applyStaticI18n(){
+          if (LANG === 'es') return;
+        }
+        applyStaticI18n();
+
         // ── TEMAS: 3 párrafos independientes, dificultad y variedad de conectores creciente ──
-        const temasDB = [
+        const temasDB_ALL = { es: [
             {
                 titulo: "Tema 1 · Vida cotidiana y tecnología",
                 dificultad: "Básico",
@@ -766,7 +800,49 @@
                     { connectorType: "Conclusión", correctConnector: "En síntesis", categoryOptions: ["Reformulación", "Adición", "Ejemplificación", "Conclusión"], wordOptions: ["Es decir", "También", "Por ejemplo", "En síntesis"], sentence: "el reto no es prohibir la inteligencia artificial, sino construir una cultura académica capaz de integrarla con rigor y transparencia." }
                 ]
             }
-        ];
+        ], en: [
+            {
+                titulo: "Topic 1 · Daily life and technology",
+                dificultad: "Basic",
+                machineData: [
+                    { sentence: "Online education has experienced exponential growth in the last decade.", type: "Start" },
+                    { connectorType: "Addition", correctConnector: "Additionally", categoryOptions: ["Contrast", "Causality", "Addition", "Conclusion"], wordOptions: ["However", "Therefore", "Additionally", "In conclusion"], sentence: "digital platforms offer unparalleled scheduling flexibility for students." },
+                    { connectorType: "Causality", correctConnector: "As a result", categoryOptions: ["Temporal Order", "Exemplification", "Causality", "Addition"], wordOptions: ["Next", "On the other hand", "In summary", "As a result"], sentence: "this accessibility has allowed people in rural areas to access quality education." },
+                    { connectorType: "Exemplification", correctConnector: "For example", categoryOptions: ["Conclusion", "Causality", "Contrast", "Exemplification"], wordOptions: ["Therefore", "For example", "However", "First"], sentence: "Harvard University offers complete programs for free through edX." },
+                    { connectorType: "Contrast", correctConnector: "However", categoryOptions: ["Exemplification", "Addition", "Contrast", "Temporal Order"], wordOptions: ["Additionally", "However", "For instance", "Later"], sentence: "direct interaction and spontaneous debate with the professor are limited in these environments." },
+                    { connectorType: "Temporal Order", correctConnector: "Later", categoryOptions: ["Contrast", "Temporal Order", "Conclusion", "Causality"], wordOptions: ["Therefore", "Later", "In summary", "Nevertheless"], sentence: "asynchronous forums were implemented to compensate for the lack of real-time dialogue." },
+                    { connectorType: "Conclusion", correctConnector: "Ultimately", categoryOptions: ["Addition", "Exemplification", "Causality", "Conclusion"], wordOptions: ["Ultimately", "As an example", "On the contrary", "Thus"], sentence: "the virtual model does not replace in-person education but acts as an indispensable complementary tool." }
+                ]
+            },
+            {
+                titulo: "Topic 2 · Science and environment",
+                dificultad: "Intermediate",
+                machineData: [
+                    { sentence: "Global warming has intensified the frequency of extreme weather phenomena in the last decade.", type: "Start" },
+                    { connectorType: "Addition", correctConnector: "Likewise", categoryOptions: ["Causality", "Contrast", "Addition", "Exemplification"], wordOptions: ["However", "Consequently", "Likewise", "For instance"], sentence: "precipitation patterns have become significantly more unpredictable in key agricultural regions." },
+                    { connectorType: "Causality", correctConnector: "As a result", categoryOptions: ["Temporal Order", "Exemplification", "Causality", "Conclusion"], wordOptions: ["Subsequently", "For example", "As a result", "In summary"], sentence: "many coastal communities face forced displacement due to rising sea levels." },
+                    { connectorType: "Exemplification", correctConnector: "A prime case is", categoryOptions: ["Conclusion", "Contrast", "Causality", "Exemplification"], wordOptions: ["Ultimately", "A prime case is", "Therefore", "Nevertheless"], sentence: "the archipelago of Tuvalu, which could be submerged in the coming decades." },
+                    { connectorType: "Contrast", correctConnector: "Despite this", categoryOptions: ["Exemplification", "Addition", "Contrast", "Temporal Order"], wordOptions: ["For example", "Additionally", "Despite this", "Next"], sentence: "international emission reduction agreements continue to fall short of implementation." },
+                    { connectorType: "Temporal Order", correctConnector: "Since then", categoryOptions: ["Contrast", "Causality", "Temporal Order", "Addition"], wordOptions: ["However", "Because of this", "Since then", "Also"], sentence: "several countries have begun investing heavily in renewable energy infrastructure." },
+                    { connectorType: "Conclusion", correctConnector: "Ultimately", categoryOptions: ["Causality", "Exemplification", "Addition", "Conclusion"], wordOptions: ["Therefore", "For example", "Equally", "Ultimately"], sentence: "the climate crisis demands a coordinated response that transcends short-term economic interests." }
+                ]
+            },
+            {
+                titulo: "Topic 3 · Ethics of AI in academia",
+                dificultad: "Advanced",
+                machineData: [
+                    { sentence: "The proliferation of generative artificial intelligence tools has radically transformed university academic writing practices.", type: "Start" },
+                    { connectorType: "Causality", correctConnector: "Consequently", categoryOptions: ["Addition", "Restatement", "Causality", "Contrast"], wordOptions: ["That is", "Moreover", "Consequently", "Nevertheless"], sentence: "educational institutions face the urgent challenge of redefining their academic integrity policies." },
+                    { connectorType: "Restatement", correctConnector: "In other words", categoryOptions: ["Exemplification", "Restatement", "Conclusion", "Temporal Order"], wordOptions: ["For instance", "In other words", "In summary", "Then"], sentence: "it is no longer enough to detect AI use; we must teach its ethical and methodologically rigorous application." },
+                    { connectorType: "Exemplification", correctConnector: "As demonstrated by", categoryOptions: ["Contrast", "Causality", "Exemplification", "Addition"], wordOptions: ["However", "Because of this", "As demonstrated by", "Similarly"], sentence: "the case of universities that have incorporated AI as a declared assistant in the writing process." },
+                    { connectorType: "Contrast", correctConnector: "Nevertheless", categoryOptions: ["Restatement", "Exemplification", "Contrast", "Conclusion"], wordOptions: ["That is", "For example", "Nevertheless", "Ultimately"], sentence: "academic voices persist in considering any algorithmic assistance a form of intellectual dishonesty." },
+                    { connectorType: "Addition", correctConnector: "Likewise", categoryOptions: ["Causality", "Addition", "Temporal Order", "Restatement"], wordOptions: ["Therefore", "Likewise", "Subsequently", "In other words"], sentence: "the lack of international consensus hinders the creation of unified AI citation standards." },
+                    { connectorType: "Temporal Order", correctConnector: "Over time", categoryOptions: ["Contrast", "Conclusion", "Temporal Order", "Causality"], wordOptions: ["However", "In summary", "Over time", "As a consequence"], sentence: "it is foreseeable that more mature and consensual regulatory frameworks will emerge among institutions." },
+                    { connectorType: "Conclusion", correctConnector: "In summary", categoryOptions: ["Restatement", "Addition", "Exemplification", "Conclusion"], wordOptions: ["That is", "Also", "For example", "In summary"], sentence: "the challenge is not to ban artificial intelligence but to build an academic culture capable of integrating it with rigor and transparency." }
+                ]
+            }
+        ] };
+        const temasDB = temasDB_ALL[LANG];
 
         let currentTemaIndex = 0;
         let machineData = temasDB[currentTemaIndex].machineData;
@@ -1146,7 +1222,7 @@
 
         // PANTALLA FINAL
         function showFinalScreen() {
-            localStorage.setItem('simlab_con', Date.now());
+            localStorage.setItem('simlab_done_simlab_con', Date.now());
             obtenerNombreUsuario(nombre => {
                 const finalScoreEl = document.getElementById('finalScore');
                 const finalMsgEl = document.getElementById('finalMessage');
@@ -1223,6 +1299,15 @@
 
         // Iniciar: Manual Técnico obligatorio antes de la máquina
         openManual('intro');
+
+        // Toggle de idioma
+        const langBtn = document.getElementById('simLangBtn');
+        langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+        langBtn.addEventListener('click', () => {
+          if (!confirm(t('confirm_switch'))) return;
+          setLang(LANG === 'es' ? 'en' : 'es');
+          location.reload();
+        });
     </script>
 </body>
 </html>

@@ -392,7 +392,7 @@
     <div class="bg-orb bg-orb-2"></div>
     <div class="bg-orb bg-orb-3"></div>
 
-    <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+    <button type="button" class="sim-lang" id="simLangBtn" style="position:fixed;top:14px;right:14px;z-index:200;width:40px;height:40px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;transition:transform .2s,color .2s"></button><a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
       <i class="fa-solid fa-house" aria-hidden="true"></i>
     </a>
 
@@ -1041,7 +1041,7 @@
             const nextEval = state.currentEval + 1;
             if (nextEval >= 6) {
                 // Ir a resumen
-                localStorage.setItem('simlab_eval', Date.now());
+                localStorage.setItem('simlab_done_simlab_eval', Date.now());
                 obtenerNombreUsuario(nombre => {
                     state.nombreUsuario = nombre;
                     state.screen = 'summary';
