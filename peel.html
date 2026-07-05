@@ -309,16 +309,25 @@
           border:1px solid var(--sim-home-bd);border-radius:10px;
           transition:transform .2s, color .2s}
         .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+        .sim-lang{position:fixed;top:14px;right:14px;z-index:100;min-width:40px;height:40px;padding:0 10px;
+          display:flex;align-items:center;justify-content:center;cursor:pointer;
+          font-weight:600;font-size:13px;letter-spacing:.06em;font-family:'DM Sans',sans-serif;margin:0;
+          color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
+          border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
+          transition:transform .2s,color .2s}
+        .sim-lang:hover,.sim-lang:focus-visible{color:var(--sim-home-hi,#fff);transform:scale(1.06);background:var(--sim-home-bg)}
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+    <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab" data-i18n-title="back_title" data-i18n-aria="back_title">
       <i class="fa-solid fa-house" aria-hidden="true"></i>
     </a>
 
-    <h1>✒️ El Cuaderno del Escritor</h1>
-    <p class="subtitulo">Arrastra las frases del banco y suéltalas sobre el cuaderno para escribir tu párrafo. ¡Cuidado con las trampas! Completa los 4 ejercicios para dominar la estructura PEEL.</p>
+    <button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
+
+    <h1 data-i18n="h1">✒️ El Cuaderno del Escritor</h1>
+    <p class="subtitulo" data-i18n="subtitle">Arrastra las frases del banco y suéltalas sobre el cuaderno para escribir tu párrafo. ¡Cuidado con las trampas! Completa los 4 ejercicios para dominar la estructura PEEL.</p>
 
     <div class="progreso-ejercicios" id="progreso-ejercicios"></div>
 
@@ -328,14 +337,89 @@
         <div class="resumen-icono">🖋️</div>
         <div class="resumen-paper">
             <h2 id="resumen-final-titulo">¡Felicidades! Has dominado la estructura PEEL</h2>
-            <p>Construiste argumentos sólidos en cuatro contextos distintos: una carta vecinal, una columna de opinión, una propuesta institucional y un ensayo académico.</p>
-            <p>Recuerda siempre: <b>P</b>unto (idea), <b>E</b>videncia (dato), <b>Exp</b>licación (porqué) y <b>L</b>ink (cierre que conecta con tu tesis). Y desconfía de las frases que "suenan bien" pero contradicen tu propio argumento.</p>
+            <p data-i18n="sum_p1">Construiste argumentos sólidos en cuatro contextos distintos: una carta vecinal, una columna de opinión, una propuesta institucional y un ensayo académico.</p>
+            <p data-i18n="sum_p2">Recuerda siempre: <b>P</b>unto (idea), <b>E</b>videncia (dato), <b>Exp</b>licación (porqué) y <b>L</b>ink (cierre que conecta con tu tesis). Y desconfía de las frases que "suenan bien" pero contradicen tu propio argumento.</p>
             <div class="resumen-firma" id="resumen-firma">Firmado, ______________</div>
         </div>
-        <a class="btn-volver" href="index.html"><i class="fa-solid fa-house"></i> Volver al inicio</a>
+        <a class="btn-volver" href="index.html"><i class="fa-solid fa-house"></i> <span data-i18n="btn_home">Volver al inicio</span></a>
     </div>
 
     <script>
+        // ============================================================
+        // i18n (compartido-por-copia)
+        // ============================================================
+        function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+        function setLang(l){ localStorage.setItem('simlab_lang', l); }
+        const LANG = getLang();
+        document.documentElement.lang = LANG;
+
+        const I18N = {
+            es: {
+                confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+                name_q:'¿Cómo te llamas?',
+                name_note:'Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.',
+                name_ph:'Tu nombre', name_btn:'Continuar', name_default:'Estudiante',
+                thesis_label:'Tesis a defender:',
+                bank_title:'📦 Banco de Frases (Arrastra de aquí)',
+                btn_shuffle:'🔄 Mezclar de nuevo',
+                btn_check:'✅ Comprobar Estructura PEEL',
+                fb_perfect:'🎉 ¡PERFECTO! Has construido un texto académico impecable.',
+                btn_next:'Siguiente ejercicio →',
+                btn_summary:'Ver resumen final →',
+                fb_errors:'❌ Tienes errores.',
+                fb_check_red:'Revisa los recuadros rojos.',
+                sum_title_name:'¡Felicidades, {n}! Has dominado la estructura PEEL',
+                signed:'Firmado,'
+            },
+            en: {
+                confirm_switch:'Switching language will restart the simulation. Continue?',
+                name_q:'What is your name?',
+                name_note:'Used to personalize your result. Your name is only kept for this browser session and is never stored or sent to any server.',
+                name_ph:'Your name', name_btn:'Continue', name_default:'Student',
+                thesis_label:'Thesis to defend:',
+                bank_title:'📦 Sentence Bank (Drag from here)',
+                btn_shuffle:'🔄 Shuffle again',
+                btn_check:'✅ Check PEEL Structure',
+                fb_perfect:'🎉 PERFECT! You have built a flawless academic text.',
+                btn_next:'Next exercise →',
+                btn_summary:'View final summary →',
+                fb_errors:'❌ There are mistakes.',
+                fb_check_red:'Check the red boxes.',
+                sum_title_name:'Congratulations, {n}! You have mastered the PEEL structure',
+                signed:'Signed,',
+                /* data-i18n (solo EN) */
+                page_title:'PEEL Builder - Drag & Drop',
+                meta_desc:'Interactive educational simulation of argumentative writing: build PEEL paragraphs (Point, Evidence, Explanation, Link) by dragging sentences. SimLab ULEAM.',
+                back_title:'Back to SimLab home',
+                h1:'✒️ The Writer’s Notebook',
+                subtitle:'Drag sentences from the bank and drop them onto the notebook to write your paragraph. Watch out for the traps! Complete all 4 exercises to master the PEEL structure.',
+                sum_p1:'You built solid arguments in four different contexts: a neighborhood letter, an opinion column, an institutional proposal and an academic essay.',
+                sum_p2:'Always remember: <b>P</b>oint (idea), <b>E</b>vidence (data), <b>Ex</b>planation (why) and <b>L</b>ink (a closing that connects back to your thesis). And beware of sentences that "sound good" but contradict your own argument.',
+                btn_home:'Back to home'
+            }
+        };
+        function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
+        function applyStaticI18n(){
+            if (LANG === 'es') return;
+            document.title = t('page_title');
+            const md = document.querySelector('meta[name="description"]');
+            if (md) md.content = t('meta_desc');
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+            document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+        }
+        applyStaticI18n();
+
+        const langBtn = document.getElementById('simLangBtn');
+        langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+        langBtn.addEventListener('click', () => {
+            if (!confirm(t('confirm_switch'))) return;
+            setLang(LANG === 'es' ? 'en' : 'es');
+            location.reload();
+        });
+
         // ============================================================
         // PERSONALIZACIÓN: NOMBRE DEL USUARIO
         // (solo en esta sesión del navegador, no se guarda permanentemente)
@@ -347,16 +431,16 @@
             overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
             overlay.innerHTML = `
                 <div style="background:var(--panel,#1d1812);color:var(--primary,#ece2d0);padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--accent,#D4A24E);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.5)">
-                    <h3 style="margin:0 0 12px;color:var(--accent,#D4A24E);font-family:'DM Serif Display',serif;font-weight:400">¿Cómo te llamas?</h3>
-                    <p style="font-size:.85rem;opacity:.75;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.</p>
-                    <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border,#332c22);background:var(--bg,#14110d);color:var(--primary,#ece2d0);margin-bottom:16px;box-sizing:border-box;font-size:1rem">
-                    <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:100px;background:var(--accent,#D4A24E);color:#1a1610;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+                    <h3 style="margin:0 0 12px;color:var(--accent,#D4A24E);font-family:'DM Serif Display',serif;font-weight:400">${t('name_q')}</h3>
+                    <p style="font-size:.85rem;opacity:.75;margin:0 0 16px;line-height:1.5">${t('name_note')}</p>
+                    <input id="inputNombreUsuario" type="text" placeholder="${t('name_ph')}" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border,#332c22);background:var(--bg,#14110d);color:var(--primary,#ece2d0);margin-bottom:16px;box-sizing:border-box;font-size:1rem">
+                    <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:100px;background:var(--accent,#D4A24E);color:#1a1610;font-weight:700;cursor:pointer;font-size:1rem">${t('name_btn')}</button>
                 </div>`;
             document.body.appendChild(overlay);
             const input = overlay.querySelector('#inputNombreUsuario');
             input.focus();
             const confirmar = () => {
-                const nombre = input.value.trim() || 'Estudiante';
+                const nombre = input.value.trim() || t('name_default');
                 sessionStorage.setItem('nombreEstudianteSim', nombre);
                 overlay.remove();
                 callback(nombre);
@@ -372,7 +456,7 @@
         // (slots PEEL) y el banco de frases (correctas + trampas).
         // El id de cada slot sigue el patrón: e{ejercicio}-p{parrafo}-{clave}
         // y "correcta" en frasesDB debe coincidir exactamente con ese id.
-        const ejerciciosDB = [
+        const ejerciciosDB_ALL = { es: [
             // ================= EJERCICIO 1 =================
             {
                 id: 1,
@@ -524,7 +608,161 @@
                     { id: "f_t4", texto: "Esto demuestra que los estudiantes de generaciones anteriores tenían mejores habilidades de redacción que los actuales.", correcta: null }
                 ]
             }
-        ];
+        ],
+        en: [
+            // ================= EXERCISE 1 =================
+            {
+                id: 1,
+                contextoTitulo: "📝 Scenario 1: Letter to the City Council",
+                contextoTexto: "The city council wants to cut down a 50-year-old historic park downtown to build an underground parking lot. You are the residents' spokesperson.",
+                tesis: "Cutting down Central Park is an urban-planning and environmental mistake that will harm public health and the local economy.",
+                ayuda: "Remember: <b>P</b> is the idea, <b>E</b> is the DATA, <b>Ex</b> is the WHY, and <b>L</b> is the closing.",
+                parrafos: [
+                    {
+                        titulo: "Paragraph 1: Health Focus",
+                        slots: [
+                            { key: "p", label: "[P] Point", clase: "label-p" },
+                            { key: "e", label: "[E] Evidence", clase: "label-e" },
+                            { key: "exp", label: "[Ex] Explanation", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    },
+                    {
+                        titulo: "Paragraph 2: Economic Focus",
+                        slots: [
+                            { key: "p", label: "[P] Point", clase: "label-p" },
+                            { key: "e", label: "[E] Evidence", clase: "label-e" },
+                            { key: "exp", label: "[Ex] Explanation", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    }
+                ],
+                frases: [
+                    { id: "f_p1p", texto: "Destroying Central Park will drastically increase respiratory problems in the downtown area.", correcta: "e1-p1-p" },
+                    { id: "f_p1e", texto: "A study by the Complutense University shows that this urban forest filters up to 15 tons of carbon dioxide per year.", correcta: "e1-p1-e" },
+                    { id: "f_p1exp", texto: "By removing this natural barrier, the toxic particles from the cars using the new parking lot will go unfiltered, causing a rise in asthma cases among residents.", correcta: "e1-p1-exp" },
+                    { id: "f_p1l", texto: "Therefore, replacing vegetation with asphalt directly contradicts the council's stated goal of keeping the city healthy.", correcta: "e1-p1-l" },
+
+                    { id: "f_p2p", texto: "Moreover, the underground parking project is economically unviable in the long run.", correcta: "e1-p2-p" },
+                    { id: "f_p2e", texto: "Data from the Ministry of Transport reveal that underground parking garages in historic pedestrian areas operate, on average, at 40% of their capacity.", correcta: "e1-p2-e" },
+                    { id: "f_p2exp", texto: "This low occupancy means that parking-fee revenue will never cover the millions it costs to excavate and build the infrastructure, creating unnecessary public debt.", correcta: "e1-p2-exp" },
+                    { id: "f_p2l", texto: "In conclusion, the plan will not only harm public health but will also become a financial sinkhole that every citizen will end up paying for.", correcta: "e1-p2-l" },
+
+                    { id: "f_t1", texto: "Personally, I find the park very pretty because there are lots of birds.", correcta: null },
+                    { id: "f_t2", texto: "Asphalt is gray and makes the city look very ugly and sad.", correcta: null },
+                    { id: "f_t3", texto: "Everybody knows that cars produce a lot of smoke and that is bad.", correcta: null },
+                    { id: "f_t4", texto: "Therefore, trees have green leaves that fall in autumn.", correcta: null }
+                ]
+            },
+
+            // ================= EXERCISE 2 (intermediate: everyday topic with academic backing, 2 pieces of evidence) =================
+            {
+                id: 2,
+                contextoTitulo: "📱 Scenario 2: Opinion Column on Digital Wellbeing",
+                contextoTexto: "You have been invited to write an opinion column for the university newspaper about the impact of social media on young people's mental health. Note: this time the structure changes — the paragraph needs TWO pieces of evidence before moving on to the explanation.",
+                tesis: "Prolonged social media use during adolescence is associated with increased anxiety levels and lower self-esteem, so its regulation should be part of digital education.",
+                ayuda: "This structure uses two pieces of evidence (E1 and E2) supporting the same Point before the Explanation and the Link.",
+                parrafos: [
+                    {
+                        titulo: "Single paragraph: Social media and adolescent mental health",
+                        slots: [
+                            { key: "p", label: "[P] Point", clase: "label-p" },
+                            { key: "e1", label: "[E1] Evidence 1", clase: "label-e" },
+                            { key: "e2", label: "[E2] Evidence 2", clase: "label-e2" },
+                            { key: "exp", label: "[Ex] Explanation", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    }
+                ],
+                frases: [
+                    { id: "f_p", texto: "Excessive time spent on social media during adolescence is linked to a notable decline in young people's emotional wellbeing.", correcta: "e2-p1-p" },
+                    { id: "f_e1", texto: "A longitudinal study published in JAMA Psychiatry (2021) found that adolescents who spent more than three hours a day on social media were twice as likely to show symptoms of anxiety and depression as those who used them less than one hour.", correcta: "e2-p1-e1" },
+                    { id: "f_e2", texto: "A survey by the National Institute of Statistics and Census (2022) revealed that 58% of high-school students who use social media more than four hours a day reported feeling 'frequently' dissatisfied with their own body image.", correcta: "e2-p1-e2" },
+                    { id: "f_exp", texto: "This happens because social media platforms are designed to maximize usage time through constant social comparison, exposing adolescents to idealized versions of other people's lives that create a gap between their reality and their expectations.", correcta: "e2-p1-exp" },
+                    { id: "f_l", texto: "Therefore, incorporating digital education and media literacy content into the school curriculum is a necessary measure to mitigate these effects on young people's mental health.", correcta: "e2-p1-l" },
+
+                    { id: "f_t1", texto: "The most popular social networks among teenagers are Instagram, TikTok and YouTube.", correcta: null },
+                    { id: "f_t2", texto: "In my opinion, young people should go outside more and use their phones less.", correcta: null },
+                    { id: "f_t3", texto: "Therefore, the best solution would be to completely ban internet access for minors.", correcta: null }
+                ]
+            },
+
+            // ================= EXERCISE 3 (contradictory link/explanation) =================
+            {
+                id: 3,
+                contextoTitulo: "♻️ Scenario 3: Proposal to the University Council",
+                contextoTexto: "As a student representative, you must argue in favor of a mandatory recycling system on campus. Careful: the bank contains sentences that SOUND like a good explanation or a good closing, but actually contradict your own thesis. Don't fall for the trap.",
+                tesis: "Implementing a mandatory waste-separation system at the university is a necessary measure to reduce the institution's environmental impact.",
+                ayuda: "Some sentences look like a valid Link or Explanation, but they actually contradict the thesis. Read them carefully before dropping them.",
+                parrafos: [
+                    {
+                        titulo: "Single paragraph: University waste management",
+                        slots: [
+                            { key: "p", label: "[P] Point", clase: "label-p" },
+                            { key: "e", label: "[E] Evidence", clase: "label-e" },
+                            { key: "exp", label: "[Ex] Explanation", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    }
+                ],
+                frases: [
+                    { id: "f_p", texto: "The university produces large amounts of waste every day that currently receive no separation or differentiated treatment of any kind.", correcta: "e3-p1-p" },
+                    { id: "f_e", texto: "An internal audit conducted in 2023 determined that 68% of the waste produced on campus consists of recyclable materials (paper, plastic and glass) that end up mixed with regular garbage.", correcta: "e3-p1-e" },
+                    { id: "f_exp", texto: "This means that most of that waste, which could re-enter recycling chains, ends up in landfills, generating methane emissions and squandering resources that could be reused.", correcta: "e3-p1-exp" },
+                    { id: "f_l", texto: "Therefore, setting up mandatory separation stations would allow the university to reduce its environmental footprint and become a sustainability model for other institutions.", correcta: "e3-p1-l" },
+
+                    { id: "f_trampa_exp", texto: "This proves that separating garbage has no real environmental impact, since collection companies mix the waste together at the end anyway.", correcta: null },
+                    { id: "f_trampa_l", texto: "However, since each person produces waste differently, trying to standardize waste separation at the university would be an ineffective measure not worth implementing.", correcta: null },
+                    { id: "f_trampa3", texto: "The word 'recycle' comes from Latin and literally means 'to return to the cycle'.", correcta: null }
+                ]
+            },
+
+            // ================= EXERCISE 4 (highly academic: scientific-article-style essay) =================
+            {
+                id: 4,
+                contextoTitulo: "🎓 Scenario 4: Academic Essay — Generative Artificial Intelligence at University",
+                contextoTexto: "As part of an academic essay for a student science-outreach journal, you must argue about the role of generative artificial intelligence in university academic writing. A formal register is expected, with bibliographic support and rigorous reasoning in every paragraph.",
+                tesis: "Integrating generative artificial intelligence into university academic writing requires the development of academic-integrity frameworks that regulate its use, rather than blanket bans that prove unworkable.",
+                ayuda: "Remember: <b>P</b> is the idea, <b>E</b> is the DATA, <b>Ex</b> is the WHY, and <b>L</b> is the closing. Check that each sentence belongs to the right paragraph (epistemological or institutional policy) and beware of closings that sound formal but contradict the thesis.",
+                parrafos: [
+                    {
+                        titulo: "Paragraph 1: Epistemological Dimension",
+                        slots: [
+                            { key: "p", label: "[P] Point", clase: "label-p" },
+                            { key: "e", label: "[E] Evidence", clase: "label-e" },
+                            { key: "exp", label: "[Ex] Explanation", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    },
+                    {
+                        titulo: "Paragraph 2: Institutional Policy Dimension",
+                        slots: [
+                            { key: "p", label: "[P] Point", clase: "label-p" },
+                            { key: "e", label: "[E] Evidence", clase: "label-e" },
+                            { key: "exp", label: "[Ex] Explanation", clase: "label-exp" },
+                            { key: "l", label: "[L] Link", clase: "label-l" }
+                        ]
+                    }
+                ],
+                frases: [
+                    { id: "f_p1p", texto: "The indiscriminate use of generative artificial intelligence tools in academic assignments poses a significant risk to the development of critical thinking in university students.", correcta: "e4-p1-p" },
+                    { id: "f_p1e", texto: "A systematic review published in Higher Education Research & Development (2023) found that 61% of students who systematically delegated argumentative writing tasks to generative AI systems showed a measurable decline in their ability to produce original counterarguments.", correcta: "e4-p1-e" },
+                    { id: "f_p1exp", texto: "This is because critical thinking develops through the deliberate practice of formulating, defending and revising one's own arguments; when this practice is replaced by accepting an externally generated text, the student loses the opportunity to exercise the cognitive processes that academic writing is designed to strengthen.", correcta: "e4-p1-exp" },
+                    { id: "f_p1l", texto: "Therefore, any institutional policy on generative AI must distinguish between its use as a tool that supports thinking and its use as a substitute for it, since the pedagogical consequences of the two scenarios are radically different.", correcta: "e4-p1-l" },
+
+                    { id: "f_p2p", texto: "Likewise, an absolute ban on generative AI in universities is an unworkable and ineffective measure given today's technological reality.", correcta: "e4-p2-p" },
+                    { id: "f_p2e", texto: "A UNESCO report (2023) on generative AI in higher education notes that, despite the formal bans adopted by 67% of the universities surveyed, more than 80% of students reported having used these tools during the last academic semester.", correcta: "e4-p2-e" },
+                    { id: "f_p2exp", texto: "This gap between regulation and actual practice shows that blanket bans do not change students' behavior; they merely push usage underground, preventing institutions from providing guidance on the ethical and methodologically sound use of these tools.", correcta: "e4-p2-exp" },
+                    { id: "f_p2l", texto: "Consequently, universities should opt for regulatory frameworks that clearly define acceptable uses of generative AI, encouraging transparent disclosure by students and the assessment of competencies that such tools cannot replace.", correcta: "e4-p2-l" },
+
+                    { id: "f_t1", texto: "It is well known that generative artificial intelligence, such as ChatGPT, was developed by the company OpenAI in 2022.", correcta: null },
+                    { id: "f_t2", texto: "Many students find it more convenient to use artificial intelligence because it saves time on their assignments.", correcta: null },
+                    { id: "f_t3", texto: "Therefore, since technology advances faster than regulation, any attempt at regulation will always arrive too late and be pointless.", correcta: null },
+                    { id: "f_t4", texto: "This proves that students from earlier generations had better writing skills than today's students.", correcta: null }
+                ]
+            }
+        ] };
+        const ejerciciosDB = ejerciciosDB_ALL[LANG];
 
         let dragData = null; // id completo del elemento .frase que se está arrastrando
         const estado = { actual: 1, completados: [false, false, false, false] };
@@ -557,11 +795,11 @@
                     <div class="contexto-caja">
                         <h2>${ej.contextoTitulo}</h2>
                         <p>${ej.contextoTexto}</p>
-                        <p class="tesis">Tesis a defender: "${ej.tesis}"</p>
+                        <p class="tesis">${t('thesis_label')} "${ej.tesis}"</p>
                     </div>
                     <div class="grid-principal">
                         <div class="banco-frases">
-                            <h3>📦 Banco de Frases (Arrastra de aquí)</h3>
+                            <h3>${t('bank_title')}</h3>
                             <div id="banco-${ej.id}" ondragover="allowDrop(event)" ondrop="dropBanco(event)"></div>
                         </div>
                         <div class="zona-construccion">
@@ -569,8 +807,8 @@
                         </div>
                     </div>
                     <div class="botones-accion">
-                        <button class="btn-reset" onclick="resetearEjercicio(${ej.id})">🔄 Mezclar de nuevo</button>
-                        <button onclick="comprobarEstructura(${ej.id})">✅ Comprobar Estructura PEEL</button>
+                        <button class="btn-reset" onclick="resetearEjercicio(${ej.id})">${t('btn_shuffle')}</button>
+                        <button onclick="comprobarEstructura(${ej.id})">${t('btn_check')}</button>
                     </div>
                     <div id="feedback-final-${ej.id}" class="feedback-final"></div>
                 `;
@@ -738,14 +976,14 @@
                 feedbackDiv.style.color = '#27ae60';
 
                 if (ejId < ejerciciosDB.length) {
-                    feedbackDiv.innerHTML = `🎉 ¡PERFECTO! Has construido un texto académico impecable. (${aciertos}/${totalSlots})
+                    feedbackDiv.innerHTML = `${t('fb_perfect')} (${aciertos}/${totalSlots})
                         <div style="margin-top:15px;">
-                            <button class="btn-siguiente" onclick="avanzarEjercicio(${ejId})">Siguiente ejercicio →</button>
+                            <button class="btn-siguiente" onclick="avanzarEjercicio(${ejId})">${t('btn_next')}</button>
                         </div>`;
                 } else {
-                    feedbackDiv.innerHTML = `🎉 ¡PERFECTO! Has construido un texto académico impecable. (${aciertos}/${totalSlots})
+                    feedbackDiv.innerHTML = `${t('fb_perfect')} (${aciertos}/${totalSlots})
                         <div style="margin-top:15px;">
-                            <button class="btn-siguiente" onclick="finalizarSimulacion()">Ver resumen final →</button>
+                            <button class="btn-siguiente" onclick="finalizarSimulacion()">${t('btn_summary')}</button>
                         </div>`;
                 }
 
@@ -754,7 +992,7 @@
             } else {
                 feedbackDiv.style.backgroundColor = '#fdedec';
                 feedbackDiv.style.color = '#c0392b';
-                feedbackDiv.innerHTML = `❌ Tienes errores. ${ej.ayuda} Revisa los recuadros rojos. (${aciertos}/${totalSlots})`;
+                feedbackDiv.innerHTML = `${t('fb_errors')} ${ej.ayuda} ${t('fb_check_red')} (${aciertos}/${totalSlots})`;
             }
 
             feedbackDiv.scrollIntoView({ behavior: 'smooth' });
@@ -785,11 +1023,11 @@
         }
 
         function finalizarSimulacion() {
-            localStorage.setItem('simlab_peel', Date.now());
+            localStorage.setItem('simlab_done_simlab_peel', Date.now());
             document.getElementById(`ejercicio-${ejerciciosDB.length}`).classList.add('oculto');
             obtenerNombreUsuario(nombre => {
-                document.getElementById('resumen-final-titulo').textContent = `¡Felicidades, ${nombre}! Has dominado la estructura PEEL`;
-                document.getElementById('resumen-firma').textContent = `Firmado, ${nombre}`;
+                document.getElementById('resumen-final-titulo').textContent = t('sum_title_name').replace('{n}', nombre);
+                document.getElementById('resumen-firma').textContent = `${t('signed')} ${nombre}`;
                 document.getElementById('resumen-final').classList.add('visible');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });

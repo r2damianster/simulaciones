@@ -122,6 +122,13 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
   border:1px solid var(--sim-home-bd);border-radius:10px;
   transition:transform .2s, color .2s}
 .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+.sim-lang{position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-weight:600;font-size:13px;letter-spacing:.06em;font-family:'Source Sans 3',sans-serif;
+  color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
+  border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
+  transition:transform .2s,color .2s}
+.sim-lang:hover,.sim-lang:focus-visible{color:var(--sim-home-hi,#fff);transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @media(max-width:700px){
   .editor-area{padding:8px}
@@ -140,16 +147,19 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
 <body>
 
 <!-- Back-link -->
-<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab" data-i18n-title="back_title" data-i18n-aria="back_title">
   <i class="fa-solid fa-house" aria-hidden="true"></i>
 </a>
 
+<!-- Toggle idioma -->
+<button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
+
 <!-- Pestañas -->
 <div class="tab-bar">
-  <div class="tab active">Inicio</div>
-  <div class="tab off">Insertar</div>
-  <div class="tab off">Diseno</div>
-  <div class="tab off">Referencias</div>
+  <div class="tab active" data-i18n="tab_home">Inicio</div>
+  <div class="tab off" data-i18n="tab_insert">Insertar</div>
+  <div class="tab off" data-i18n="tab_design">Diseño</div>
+  <div class="tab off" data-i18n="tab_refs">Referencias</div>
 </div>
 
 <!-- Cinta de herramientas -->
@@ -159,7 +169,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
   <!-- Tipografía -->
   <div class="rib-group">
     <div class="rib-gc">
-      <select class="rib-sel" id="selFont" title="Tipo de letra" style="width:110px">
+      <select class="rib-sel" id="selFont" title="Tipo de letra" data-i18n-title="tt_font" style="width:110px">
         <option value="arial" selected>Arial</option>
         <option value="calibri">Calibri</option>
         <option value="comic">Comic Sans MS</option>
@@ -167,7 +177,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
         <option value="times">Times New Roman</option>
         <option value="verdana">Verdana</option>
       </select>
-      <select class="rib-sel" id="selSize" title="Tamano de letra" style="width:56px">
+      <select class="rib-sel" id="selSize" title="Tamaño de letra" data-i18n-title="tt_size" style="width:56px">
         <option value="10pt">10pt</option>
         <option value="11pt">11pt</option>
         <option value="12pt">12pt</option>
@@ -175,106 +185,106 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
         <option value="16pt">16pt</option>
       </select>
     </div>
-    <div class="rib-gl">Tipografia</div>
+    <div class="rib-gl" data-i18n="gl_font">Tipografía</div>
   </div>
   <div class="rib-sep"></div>
 
   <!-- Estilo -->
   <div class="rib-group">
     <div class="rib-gc" id="styleGroup">
-      <button class="rib-btn" id="btnB" title="Negrita (B)" disabled><i class="fa-solid fa-bold"></i></button>
-      <button class="rib-btn" id="btnI" title="Cursiva (I)" disabled><i class="fa-solid fa-italic"></i></button>
-      <button class="rib-btn" id="btnU" title="Subrayado (U)" disabled><i class="fa-solid fa-underline"></i></button>
+      <button class="rib-btn" id="btnB" title="Negrita (B)" data-i18n-title="tt_bold" disabled><i class="fa-solid fa-bold"></i></button>
+      <button class="rib-btn" id="btnI" title="Cursiva (I)" data-i18n-title="tt_italic" disabled><i class="fa-solid fa-italic"></i></button>
+      <button class="rib-btn" id="btnU" title="Subrayado (U)" data-i18n-title="tt_under" disabled><i class="fa-solid fa-underline"></i></button>
     </div>
-    <div class="rib-gl">Estilo</div>
+    <div class="rib-gl" data-i18n="gl_style">Estilo</div>
   </div>
   <div class="rib-sep"></div>
 
   <!-- Alineación -->
   <div class="rib-group">
     <div class="rib-gc" id="alignGroup">
-      <button class="rib-btn align-b" data-a="left" title="Alinear a la izquierda" disabled><i class="fa-solid fa-align-left"></i></button>
-      <button class="rib-btn align-b" data-a="center" title="Centrar" disabled><i class="fa-solid fa-align-center"></i></button>
-      <button class="rib-btn align-b" data-a="right" title="Alinear a la derecha" disabled><i class="fa-solid fa-align-right"></i></button>
+      <button class="rib-btn align-b" data-a="left" title="Alinear a la izquierda" data-i18n-title="tt_left" disabled><i class="fa-solid fa-align-left"></i></button>
+      <button class="rib-btn align-b" data-a="center" title="Centrar" data-i18n-title="tt_center" disabled><i class="fa-solid fa-align-center"></i></button>
+      <button class="rib-btn align-b" data-a="right" title="Alinear a la derecha" data-i18n-title="tt_right" disabled><i class="fa-solid fa-align-right"></i></button>
     </div>
-    <div class="rib-gl">Alineacion</div>
+    <div class="rib-gl" data-i18n="gl_align">Alineación</div>
   </div>
   <div class="rib-sep"></div>
 
   <!-- Espaciado -->
   <div class="rib-group">
     <div class="rib-gc">
-      <select class="rib-sel" id="selSpacing" title="Interlineado" style="width:72px">
+      <select class="rib-sel" id="selSpacing" title="Interlineado" data-i18n-title="tt_spacing" style="width:72px">
         <option value="1" selected>1.0</option>
         <option value="1.15">1.15</option>
         <option value="1.5">1.5</option>
         <option value="2">2.0</option>
       </select>
-      <button class="rib-btn" id="btnParaSpace" title="Espacio entre parrafos" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-arrows-up-down" style="margin-right:3px"></i>Espacio</button>
+      <button class="rib-btn" id="btnParaSpace" title="Espacio entre párrafos" data-i18n-title="tt_paraspace" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-arrows-up-down" style="margin-right:3px"></i><span data-i18n="btn_space">Espacio</span></button>
     </div>
-    <div class="rib-gl">Espaciado</div>
+    <div class="rib-gl" data-i18n="gl_spacing">Espaciado</div>
   </div>
   <div class="rib-sep"></div>
 
   <!-- Lista -->
   <div class="rib-group">
     <div class="rib-gc">
-      <button class="rib-btn" id="btnBullets" title="Viñetas" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-list-ul"></i></button>
+      <button class="rib-btn" id="btnBullets" title="Viñetas" data-i18n-title="tt_bullets" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-list-ul"></i></button>
     </div>
-    <div class="rib-gl">Lista</div>
+    <div class="rib-gl" data-i18n="gl_list">Lista</div>
   </div>
   <div class="rib-sep"></div>
 
   <!-- Sangría -->
   <div class="rib-group">
     <div class="rib-gc">
-      <button class="rib-btn" id="btnFirstIndent" title="Sangria primera linea (parrafos del cuerpo)" style="width:auto;padding:0 6px;font-size:10px">1.ª linea</button>
-      <button class="rib-btn" id="btnHangIndent" title="Sangria francesa (entradas de referencia)" style="width:auto;padding:0 6px;font-size:10px">Francesa</button>
+      <button class="rib-btn" id="btnFirstIndent" title="Sangría primera línea (párrafos del cuerpo)" data-i18n-title="tt_firstind" style="width:auto;padding:0 6px;font-size:10px" data-i18n="btn_firstind">1.ª línea</button>
+      <button class="rib-btn" id="btnHangIndent" title="Sangría francesa (entradas de referencia)" data-i18n-title="tt_hangind" style="width:auto;padding:0 6px;font-size:10px" data-i18n="btn_hangind">Francesa</button>
     </div>
-    <div class="rib-gl">Sangria</div>
+    <div class="rib-gl" data-i18n="gl_indent">Sangría</div>
   </div>
   <div class="rib-sep"></div>
 
   <!-- Página -->
   <div class="rib-group">
     <div class="rib-gc">
-      <select class="rib-sel" id="selMargins" title="Margenes" style="width:100px">
-        <option value="narrow" selected>Estrechos</option>
-        <option value="normal">Normal (2.54cm)</option>
-        <option value="wide">Anchos</option>
+      <select class="rib-sel" id="selMargins" title="Márgenes" data-i18n-title="tt_margins" style="width:100px">
+        <option value="narrow" selected data-i18n="opt_narrow">Estrechos</option>
+        <option value="normal" data-i18n="opt_normal">Normal (2.54cm)</option>
+        <option value="wide" data-i18n="opt_wide">Anchos</option>
       </select>
-      <button class="rib-btn" id="btnBreak" title="Salto de pagina" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-arrow-turn-down"></i></button>
-      <button class="rib-btn" id="btnPageNum" title="Numero de pagina" style="width:auto;padding:0 6px;font-size:10px">#</button>
-      <button class="rib-btn" id="btnHeader" title="Encabezado" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-heading"></i></button>
+      <button class="rib-btn" id="btnBreak" title="Salto de página" data-i18n-title="tt_break" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-arrow-turn-down"></i></button>
+      <button class="rib-btn" id="btnPageNum" title="Número de página" data-i18n-title="tt_pagenum" style="width:auto;padding:0 6px;font-size:10px">#</button>
+      <button class="rib-btn" id="btnHeader" title="Encabezado" data-i18n-title="tt_header" style="width:auto;padding:0 6px;font-size:10px"><i class="fa-solid fa-heading"></i></button>
     </div>
-    <div class="rib-gl">Pagina</div>
+    <div class="rib-gl" data-i18n="gl_page">Página</div>
   </div>
   <div class="rib-sep"></div>
 
   <!-- Texto -->
   <div class="rib-group">
     <div class="rib-gc" id="caseGroup">
-      <select class="rib-sel" id="selCase" title="Cambiar mayusculas/minusculas" style="width:105px" disabled>
-        <option value="none" selected>Ninguno</option>
-        <option value="upper">MAYUSCULAS</option>
-        <option value="lower">minusculas</option>
-        <option value="sentence">Tipo oracion</option>
-        <option value="title">Tipo Titulo</option>
+      <select class="rib-sel" id="selCase" title="Cambiar mayúsculas/minúsculas" data-i18n-title="tt_case" style="width:105px" disabled>
+        <option value="none" selected data-i18n="opt_none">Ninguno</option>
+        <option value="upper" data-i18n="opt_upper">MAYÚSCULAS</option>
+        <option value="lower" data-i18n="opt_lower">minúsculas</option>
+        <option value="sentence" data-i18n="opt_sentence">Tipo oración</option>
+        <option value="title" data-i18n="opt_title">Tipo Título</option>
       </select>
     </div>
-    <div class="rib-gl">Texto</div>
+    <div class="rib-gl" data-i18n="gl_text">Texto</div>
   </div>
   <div class="rib-sep"></div>
 
   <!-- Herramientas APA -->
   <div class="rib-group">
     <div class="rib-gc">
-      <button class="rib-tool" id="btnCite" title="Corregir formato de citas al estilo (Autor, Ano)"><i class="fa-solid fa-quote-left" style="margin-right:3px"></i>Citas</button>
-      <button class="rib-tool" id="btnEtal" title='Reemplazar "y otros" por "et al."'>et al.</button>
-      <button class="rib-tool" id="btnDoi" title="Agregar enlaces DOI a las referencias">DOI</button>
-      <button class="rib-tool" id="btnAlpha" title="Ordenar referencias alfabeticamente"><i class="fa-solid fa-arrow-down-a-z" style="margin-right:3px"></i>A-Z</button>
+      <button class="rib-tool" id="btnCite" title="Corregir formato de citas al estilo (Autor, Año)" data-i18n-title="tt_cite"><i class="fa-solid fa-quote-left" style="margin-right:3px"></i><span data-i18n="btn_cite">Citas</span></button>
+      <button class="rib-tool" id="btnEtal" title='Reemplazar "y otros" por "et al."' data-i18n-title="tt_etal">et al.</button>
+      <button class="rib-tool" id="btnDoi" title="Agregar enlaces DOI a las referencias" data-i18n-title="tt_doi">DOI</button>
+      <button class="rib-tool" id="btnAlpha" title="Ordenar referencias alfabéticamente" data-i18n-title="tt_alpha"><i class="fa-solid fa-arrow-down-a-z" style="margin-right:3px"></i>A-Z</button>
     </div>
-    <div class="rib-gl">Herramientas APA</div>
+    <div class="rib-gl" data-i18n="gl_apatools">Herramientas APA</div>
   </div>
 
 </div>
@@ -290,63 +300,63 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
 <section class="editor-area">
 <div class="paper" id="paper">
 
-  <div class="rhead">IMPACTO TECNOLOGIA ADOLESCENTES</div>
+  <div class="rhead" data-i18n="paper_rhead">IMPACTO TECNOLOGÍA ADOLESCENTES</div>
   <div class="pnum">1</div>
 
   <!-- FASE 0: PORTADA -->
   <div class="doc-sec" data-phase="0">
-    <h1 class="tit" data-sel="title">El impacto de la tecnologia en el desarrollo cognitivo de los adolescentes: una revision sistematica</h1>
-    <p class="autor-t" data-sel="author" style="margin-top:14px">Maria Carmen Rodriguez Perez</p>
-    <p class="afil-t" data-sel="affiliation" style="margin-top:4px">Universidad Nacional de Educacion a Distancia</p>
+    <h1 class="tit" data-sel="title" data-i18n="paper_title">El impacto de la tecnología en el desarrollo cognitivo de los adolescentes: una revisión sistemática</h1>
+    <p class="autor-t" data-sel="author" style="margin-top:14px">María Carmen Rodríguez Pérez</p>
+    <p class="afil-t" data-sel="affiliation" style="margin-top:4px" data-i18n="paper_afil">Universidad Nacional de Educación a Distancia</p>
   </div>
 
   <!-- FASE 1: INTRODUCCIÓN -->
   <div class="doc-sec locked" data-phase="1">
-    <div class="lock-ico"><i class="fa-solid fa-lock"></i><span>Completa la portada primero</span></div>
-    <div class="break-mark">— salto de pagina —</div>
-    <h2 class="h1" data-sel="h1">Introduccion</h2>
-    <p class="parr" data-sel="paragraph">En la ultima decada, el uso de dispositivos tecnologicos por parte de los adolescentes ha aumentado de manera <span class="ubold">significativa</span>. Segun estudios recientes <span class="wcita">(segun Garcia y Lopez, 2019)</span><span class="rcita">(Garcia y Lopez, 2019)</span>, el tiempo promedio de pantalla diario en adolescentes de 12 a 18 anos se ha triplicado, lo que ha generado un intenso debate en la comunidad cientifica sobre sus implicaciones en el desarrollo cognitivo.</p>
-    <p class="parr" data-sel="paragraph">Diversos investigadores <span class="wcita">(como senalan Martinez y otros, 2020)</span><span class="rcita">(Martinez <span class="yot">y otros</span><span class="etal">et al.</span>, 2020)</span> han identificado correlaciones entre el uso excesivo de redes sociales y una disminucion en las capacidades de atencion sostenida. Sin embargo, otros autores <span class="wcita">(ver Fernandez, 2021)</span><span class="rcita">(Fernandez, 2021)</span> sostienen que la tecnologia puede facilitar el desarrollo de habilidades digitales fundamentales para el siglo XXI.</p>
-    <h3 class="h2" data-sel="h2">Planteamiento del problema</h3>
-    <p class="parr" data-sel="paragraph">El presente estudio tiene como objetivo analizar de manera <span class="ubold">sistematica</span> la evidencia empirica disponible sobre la relacion entre el uso de tecnologia y el desarrollo cognitivo en poblacion adolescente. Se busca responder a la siguiente pregunta de investigacion: cual es el impacto real de la exposicion tecnologica en las funciones ejecutivas, la memoria y la atencion de los adolescentes?</p>
+    <div class="lock-ico"><i class="fa-solid fa-lock"></i><span data-i18n="lock_0">Completa la portada primero</span></div>
+    <div class="break-mark" data-i18n="break_mark">— salto de página —</div>
+    <h2 class="h1" data-sel="h1" data-i18n="h_intro">Introducción</h2>
+    <p class="parr" data-sel="paragraph" data-i18n="p_intro1">En la última década, el uso de dispositivos tecnológicos por parte de los adolescentes ha aumentado de manera <span class="ubold">significativa</span>. Según estudios recientes <span class="wcita">(según García y López, 2019)</span><span class="rcita">(García y López, 2019)</span>, el tiempo promedio de pantalla diario en adolescentes de 12 a 18 años se ha triplicado, lo que ha generado un intenso debate en la comunidad científica sobre sus implicaciones en el desarrollo cognitivo.</p>
+    <p class="parr" data-sel="paragraph" data-i18n="p_intro2">Diversos investigadores <span class="wcita">(como señalan Martínez y otros, 2020)</span><span class="rcita">(Martínez <span class="yot">y otros</span><span class="etal">et al.</span>, 2020)</span> han identificado correlaciones entre el uso excesivo de redes sociales y una disminución en las capacidades de atención sostenida. Sin embargo, otros autores <span class="wcita">(ver Fernández, 2021)</span><span class="rcita">(Fernández, 2021)</span> sostienen que la tecnología puede facilitar el desarrollo de habilidades digitales fundamentales para el siglo XXI.</p>
+    <h3 class="h2" data-sel="h2" data-i18n="h_problem">Planteamiento del problema</h3>
+    <p class="parr" data-sel="paragraph" data-i18n="p_problem">El presente estudio tiene como objetivo analizar de manera <span class="ubold">sistemática</span> la evidencia empírica disponible sobre la relación entre el uso de tecnología y el desarrollo cognitivo en población adolescente. Se busca responder a la siguiente pregunta de investigación: ¿cuál es el impacto real de la exposición tecnológica en las funciones ejecutivas, la memoria y la atención de los adolescentes?</p>
     <ul class="blist">
-      <li class="parr">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas.</li>
-      <li class="parr">Se ha observado una disminucion en los puntajes de atencion sostenida.</li>
-      <li class="parr">Las habilidades de multitarea digital han mejorado significativamente.</li>
+      <li class="parr" data-i18n="bullet_1">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas.</li>
+      <li class="parr" data-i18n="bullet_2">Se ha observado una disminución en los puntajes de atención sostenida.</li>
+      <li class="parr" data-i18n="bullet_3">Las habilidades de multitarea digital han mejorado significativamente.</li>
     </ul>
     <div class="bparas">
-      <p class="parr" data-sel="paragraph">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas, segun datos recientes de organismos internacionales de salud.</p>
-      <p class="parr" data-sel="paragraph">Se ha observado una disminucion en los puntajes de atencion sostenida en evaluaciones estandarizadas aplicadas a poblacion estudiantil.</p>
-      <p class="parr" data-sel="paragraph">Las habilidades de multitarea digital han mejorado significativamente en comparacion con generaciones anteriores.</p>
+      <p class="parr" data-sel="paragraph" data-i18n="bp_1">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas, según datos recientes de organismos internacionales de salud.</p>
+      <p class="parr" data-sel="paragraph" data-i18n="bp_2">Se ha observado una disminución en los puntajes de atención sostenida en evaluaciones estandarizadas aplicadas a población estudiantil.</p>
+      <p class="parr" data-sel="paragraph" data-i18n="bp_3">Las habilidades de multitarea digital han mejorado significativamente en comparación con generaciones anteriores.</p>
     </div>
   </div>
 
   <!-- FASE 2: CUERPO -->
   <div class="doc-sec locked" data-phase="2">
-    <div class="lock-ico"><i class="fa-solid fa-lock"></i><span>Completa la introduccion primero</span></div>
-    <h2 class="h1" data-sel="h1">Metodo</h2>
-    <h3 class="h2" data-sel="h2">Participantes</h3>
-    <p class="parr" data-sel="paragraph">Se revisaron 45 estudios publicados entre 2015 y 2023, que incluian un total de 12.340 participantes con edades comprendidas entre los 12 y 18 anos. Los criterios de inclusion requirieron que los estudios emplearan disenos longitudinales o transversales con <span class="ubold">controles metodologicos</span> adecuados.</p>
-    <h3 class="h2" data-sel="h2">Procedimiento</h3>
-    <p class="parr" data-sel="paragraph">La busqueda se realizo en las bases de datos PubMed, PsycINFO y Web of Science. Los investigadores <span class="wcita">(segun Chen y colaboradores, 2022)</span><span class="rcita">(Chen <span class="yot">y colaboradores</span><span class="etal">et al.</span>, 2022)</span> aplicaron un protocolo de revision sistematica siguiendo las directrices PRISMA, evaluando la calidad metodologica mediante la escala de Newcastle-Ottawa.</p>
-    <h2 class="h1" data-sel="h1">Resultados</h2>
-    <p class="parr" data-sel="paragraph">Los resultados revelan un panorama <span class="ubold">complejo</span> y matizado. Por un lado, se identifico una correlacion negativa moderada (r = -0.34) entre el tiempo de uso de redes sociales y el rendimiento en tareas de atencion sostenida. Por otro lado, el uso de herramientas digitales educativas mostro una correlacion positiva (r = 0.28) con la memoria de trabajo visual.</p>
-    <p class="parr" data-sel="paragraph">Los analisis de subgrupos realizados por <span class="wcita">(Torres y otros, 2023)</span><span class="rcita">(Torres <span class="yot">y otros</span><span class="etal">et al.</span>, 2023)</span> indicaron que el tipo de actividad tecnologica es un factor moderador crucial: las actividades pasivas se asociaron con peores resultados cognitivos, mientras que las actividades interactivas mostraron efectos neutros o positivos.</p>
-    <h2 class="h1" data-sel="h1">Discusion</h2>
-    <p class="parr" data-sel="paragraph">Los hallazgos de esta revision sistematica sugieren que el impacto de la tecnologia en el desarrollo cognitivo adolescente no es uniforme, sino que depende de multiples variables. Estos resultados son consistentes con los planteamientos de <span class="wcita">(vease Garcia y Lopez, 2019)</span><span class="rcita">(Garcia y Lopez, 2019)</span> sobre la necesidad de adoptar una perspectiva diferenciada.</p>
-    <p class="parr" data-sel="paragraph">Se recomienda que futuras investigaciones adopten disenos longitudinales de mayor duracion y utilicen medidas neurocognitivas objetivas. Asimismo, los resultados subrayan la importancia de desarrollar programas de alfabetizacion digital que promuevan un uso <span class="ubold">responsable</span> y activo de la tecnologia.</p>
+    <div class="lock-ico"><i class="fa-solid fa-lock"></i><span data-i18n="lock_1">Completa la introducción primero</span></div>
+    <h2 class="h1" data-sel="h1" data-i18n="h_method">Método</h2>
+    <h3 class="h2" data-sel="h2" data-i18n="h_partic">Participantes</h3>
+    <p class="parr" data-sel="paragraph" data-i18n="p_partic">Se revisaron 45 estudios publicados entre 2015 y 2023, que incluían un total de 12.340 participantes con edades comprendidas entre los 12 y 18 años. Los criterios de inclusión requirieron que los estudios emplearan diseños longitudinales o transversales con <span class="ubold">controles metodológicos</span> adecuados.</p>
+    <h3 class="h2" data-sel="h2" data-i18n="h_proc">Procedimiento</h3>
+    <p class="parr" data-sel="paragraph" data-i18n="p_proc">La búsqueda se realizó en las bases de datos PubMed, PsycINFO y Web of Science. Los investigadores <span class="wcita">(según Chen y colaboradores, 2022)</span><span class="rcita">(Chen <span class="yot">y colaboradores</span><span class="etal">et al.</span>, 2022)</span> aplicaron un protocolo de revisión sistemática siguiendo las directrices PRISMA, evaluando la calidad metodológica mediante la escala de Newcastle-Ottawa.</p>
+    <h2 class="h1" data-sel="h1" data-i18n="h_results">Resultados</h2>
+    <p class="parr" data-sel="paragraph" data-i18n="p_res1">Los resultados revelan un panorama <span class="ubold">complejo</span> y matizado. Por un lado, se identificó una correlación negativa moderada (r = -0.34) entre el tiempo de uso de redes sociales y el rendimiento en tareas de atención sostenida. Por otro lado, el uso de herramientas digitales educativas mostró una correlación positiva (r = 0.28) con la memoria de trabajo visual.</p>
+    <p class="parr" data-sel="paragraph" data-i18n="p_res2">Los análisis de subgrupos realizados por <span class="wcita">(Torres y otros, 2023)</span><span class="rcita">(Torres <span class="yot">y otros</span><span class="etal">et al.</span>, 2023)</span> indicaron que el tipo de actividad tecnológica es un factor moderador crucial: las actividades pasivas se asociaron con peores resultados cognitivos, mientras que las actividades interactivas mostraron efectos neutros o positivos.</p>
+    <h2 class="h1" data-sel="h1" data-i18n="h_disc">Discusión</h2>
+    <p class="parr" data-sel="paragraph" data-i18n="p_disc1">Los hallazgos de esta revisión sistemática sugieren que el impacto de la tecnología en el desarrollo cognitivo adolescente no es uniforme, sino que depende de múltiples variables. Estos resultados son consistentes con los planteamientos de <span class="wcita">(véase García y López, 2019)</span><span class="rcita">(García y López, 2019)</span> sobre la necesidad de adoptar una perspectiva diferenciada.</p>
+    <p class="parr" data-sel="paragraph" data-i18n="p_disc2">Se recomienda que futuras investigaciones adopten diseños longitudinales de mayor duración y utilicen medidas neurocognitivas objetivas. Asimismo, los resultados subrayan la importancia de desarrollar programas de alfabetización digital que promuevan un uso <span class="ubold">responsable</span> y activo de la tecnología.</p>
   </div>
 
   <!-- FASE 3: REFERENCIAS -->
   <div class="doc-sec locked" data-phase="3">
-    <div class="lock-ico"><i class="fa-solid fa-lock"></i><span>Completa el cuerpo primero</span></div>
-    <h2 class="refs-h">Referencias</h2>
+    <div class="lock-ico"><i class="fa-solid fa-lock"></i><span data-i18n="lock_2">Completa el cuerpo primero</span></div>
+    <h2 class="refs-h" data-i18n="h_refs">Referencias</h2>
     <div id="refsList">
-      <p class="ref-e" data-key="torres">Torres, R., Navarro, M., y Delgado, P. (2023). <span class="atitle" data-sel="atitle">Efectos diferenciales de la tecnologia en cognicion adolescente</span>. <span class="jname" data-sel="jname">Revista de Psicologia Educativa</span>, <span class="vnum" data-sel="vnum">29</span>(3), 145-162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span></p>
-      <p class="ref-e" data-key="garcia">Garcia, M., y Lopez, C. (2019). <span class="atitle" data-sel="atitle">Pantallas y desarrollo cognitivo: una perspectiva diferenciada</span>. <span class="jname" data-sel="jname">Infancia y Aprendizaje</span>, <span class="vnum" data-sel="vnum">42</span>(4), 890-912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span></p>
-      <p class="ref-e" data-key="chen">Chen, W., Park, S., y Muller, H. (2022). <span class="atitle" data-sel="atitle">Metodologias de revision sistematica en investigacion cognitiva</span>. <span class="jname" data-sel="jname">Psychological Methods</span>, <span class="vnum" data-sel="vnum">27</span>(1), 34-52. <span class="doi-l">https://doi.org/10.1037/met0000412</span></p>
-      <p class="ref-e" data-key="martinez">Martinez, A., Ruiz, B., y Santos, L. (2020). <span class="atitle" data-sel="atitle">Redes sociales y atencion sostenida en adolescentes</span>. <span class="jname" data-sel="jname">Journal of Adolescent Psychology</span>, <span class="vnum" data-sel="vnum">45</span>(2), 78-95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span></p>
-      <p class="ref-e" data-key="fernandez">Fernandez, J. (2021). <span class="atitle" data-sel="atitle">Habilidades digitales y competencias del siglo XXI en jovenes</span>. <span class="jname" data-sel="jname">Comunicar</span>, <span class="vnum" data-sel="vnum">69</span>, 23-38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span></p>
+      <p class="ref-e" data-key="torres" data-i18n="ref_torres">Torres, R., Navarro, M., y Delgado, P. (2023). <span class="atitle" data-sel="atitle">Efectos diferenciales de la tecnología en cognición adolescente</span>. <span class="jname" data-sel="jname">Revista de Psicología Educativa</span>, <span class="vnum" data-sel="vnum">29</span>(3), 145-162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span></p>
+      <p class="ref-e" data-key="garcia" data-i18n="ref_garcia">García, M., y López, C. (2019). <span class="atitle" data-sel="atitle">Pantallas y desarrollo cognitivo: una perspectiva diferenciada</span>. <span class="jname" data-sel="jname">Infancia y Aprendizaje</span>, <span class="vnum" data-sel="vnum">42</span>(4), 890-912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span></p>
+      <p class="ref-e" data-key="chen" data-i18n="ref_chen">Chen, W., Park, S., y Müller, H. (2022). <span class="atitle" data-sel="atitle">Metodologías de revisión sistemática en investigación cognitiva</span>. <span class="jname" data-sel="jname">Psychological Methods</span>, <span class="vnum" data-sel="vnum">27</span>(1), 34-52. <span class="doi-l">https://doi.org/10.1037/met0000412</span></p>
+      <p class="ref-e" data-key="martinez" data-i18n="ref_martinez">Martínez, A., Ruiz, B., y Santos, L. (2020). <span class="atitle" data-sel="atitle">Redes sociales y atención sostenida en adolescentes</span>. <span class="jname" data-sel="jname">Journal of Adolescent Psychology</span>, <span class="vnum" data-sel="vnum">45</span>(2), 78-95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span></p>
+      <p class="ref-e" data-key="fernandez" data-i18n="ref_fernandez">Fernández, J. (2021). <span class="atitle" data-sel="atitle">Habilidades digitales y competencias del siglo XXI en jóvenes</span>. <span class="jname" data-sel="jname">Comunicar</span>, <span class="vnum" data-sel="vnum">69</span>, 23-38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span></p>
     </div>
   </div>
 
@@ -356,8 +366,8 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
 <!-- Barra de estado -->
 <footer class="status-bar">
   <div class="st-l"><i class="fa-solid fa-file-lines" style="margin-right:4px"></i><span id="stSection">Portada</span><span id="stSel" style="color:var(--accent);display:none"></span></div>
-  <div class="st-c"><span id="stTime">00:00</span> &nbsp;|&nbsp; <span id="stWords">487 palabras</span></div>
-  <div class="st-r"><span style="color:#666;margin-right:8px;font-size:10.5px">Envios: <span id="stEnvios">0</span></span><button class="send-sb" id="sendBtn"><i class="fa-solid fa-paper-plane" style="margin-right:4px"></i>Enviar Tarea</button></div>
+  <div class="st-c"><span id="stTime">00:00</span> &nbsp;|&nbsp; <span id="stWords" data-i18n="words_count">487 palabras</span></div>
+  <div class="st-r"><span style="color:#666;margin-right:8px;font-size:10.5px"><span data-i18n="lbl_sends">Envíos:</span> <span id="stEnvios">0</span></span><button class="send-sb" id="sendBtn"><i class="fa-solid fa-paper-plane" style="margin-right:4px"></i><span data-i18n="send_btn">Enviar Tarea</span></button></div>
 </footer>
 
 <!-- Notificación de fase -->
@@ -367,6 +377,195 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--bt)
 <div class="modal-bg" id="modal" role="dialog" aria-modal="true"><div class="modal-box" id="modalBox"></div></div>
 
 <script>
+/* =============================================
+   i18n (compartido-por-copia)
+   ============================================= */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+
+const I18N = {
+  es: {
+    confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+    name_q:'¿Cómo te llamas?',
+    name_note:'Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.',
+    name_ph:'Tu nombre', name_btn:'Continuar', name_default:'Estudiante',
+    prof_name:'Prof. Dra. Ana Belén Montoya',
+    lbl_from:'De:', lbl_subject:'Asunto:', lbl_date:'Fecha:',
+    acc_title:'Trabajo Aprobado', rej_title:'Trabajo Devuelto',
+    word_attempt:'Intento',
+    acc_subject:'Aprobado — Formato APA 7',
+    acc_greet:'Estimado/a',
+    acc_body:'Tu trabajo cumple con todas las especificaciones de formato APA 7.ª edición. Aceptado para evaluación de contenido.',
+    acc_first:'Excelente trabajo desde el primer intento. Es raro ver un formato tan impecable sin lista de verificación.',
+    acc_retry:'Revisa el manual con más atención la próxima vez para evitar múltiples revisiones.',
+    regards:'Saludos cordiales,', btn_close:'Cerrar', btn_understood:'Entendido',
+    rej_subject:'Devolución — Formato APA 7 incompleto',
+    rej_body:'Estimada María Carmen, el formato no cumple con APA 7. Corrige lo siguiente:',
+    frase_1:'Revisa cada sección con cuidado antes de reenviar.',
+    frase_2:'Sigue sin estar listo. Explora los botones de la cinta de herramientas.',
+    frase_3:'Te sugiero seleccionar cada elemento del documento y probar las opciones disponibles.',
+    frase_4:'Cada sección se desbloquea al completar la anterior. Concéntrate en una a la vez.',
+    frase_5:'Los errores están detallados arriba. Corrígelos uno por uno.',
+    sel_suffix:'seleccionado',
+    unlock_msg:'Sección desbloqueada:',
+    /* checklist por fase */
+    pr0_0:'Times New Roman 12pt', pr0_1:'Título en negrita', pr0_2:'Título centrado',
+    pr0_3:'Título sin subrayado', pr0_4:'Título sin MAYÚSCULAS', pr0_5:'Autor centrado', pr0_6:'Afiliación centrada',
+    pr1_0:'Interlineado doble (2.0)', pr1_1:'Sin espacio extra entre párrafos', pr1_2:'Márgenes de 2.54cm',
+    pr1_3:'Encabezado N1 centrado y negrita, sin subrayado/cursiva/MAYÚSCULAS',
+    pr1_4:'Encabezado N2 izquierda y negrita, sin MAYÚSCULAS',
+    pr2_0:'Sangría en primera línea', pr2_1:'Sin viñetas (párrafos continuos)', pr2_2:'Sin negritas en el cuerpo',
+    pr2_3:'Citas en formato (Autor, Año)', pr2_4:'"et al." en lugar de "y otros"',
+    pr3_0:'Sangría francesa en referencias',
+    pr3_1:'Nombre de revista en cursiva (selecciona el nombre de la revista en una referencia y aplica Cursiva)',
+    pr3_2:'Número de volumen en cursiva (selecciona el número de volumen — aparte de la revista — y aplica Cursiva)',
+    pr3_3:'Enlaces DOI agregados', pr3_4:'Referencias en orden alfabético',
+    /* errores por fase */
+    err0_0:'La tipografía no es Times New Roman 12pt.', err0_1:'El tamaño no es 12pt.',
+    err0_2:'El título no está en negrita.', err0_3:'El título no está centrado.',
+    err0_4:'El título está subrayado — debe quitarse.', err0_5:'El título está en MAYÚSCULAS — usar tipo oración.',
+    err0_6:'El nombre del autor no está centrado.', err0_7:'La afiliación no está centrada.',
+    err1_0:'El interlineado no es doble (2.0).', err1_1:'Hay espacio adicional entre párrafos.',
+    err1_2:'Los márgenes no son de 2.54 cm.', err1_3:'Los encabezados Nivel 1 deben estar centrados y en negrita.',
+    err1_4:'Los encabezados Nivel 1 no deben estar subrayados.', err1_5:'Los encabezados Nivel 1 no deben estar en cursiva.',
+    err1_6:'Los encabezados Nivel 1 no deben estar en MAYÚSCULAS.', err1_7:'Los encabezados Nivel 2 deben estar a la izquierda y en negrita.',
+    err1_8:'Los encabezados Nivel 2 no deben estar en MAYÚSCULAS.',
+    err2_0:'Los párrafos no tienen sangría en la primera línea.', err2_1:'Hay viñetas en el texto — APA 7 exige párrafos continuos.',
+    err2_2:'Hay negritas innecesarias en el cuerpo del texto.', err2_3:'Las citas no siguen el formato (Autor, Año).',
+    err2_4:'Se usa "y otros" en lugar de "et al." en citas con 3+ autores.',
+    err3_0:'Las referencias no tienen sangría francesa.',
+    err3_1:'El nombre de la revista no está en cursiva (selecciona solo el nombre de la revista y aplica Cursiva).',
+    err3_2:'El número de volumen no está en cursiva (selecciona solo el número de volumen, aparte de la revista, y aplica Cursiva).',
+    err3_3:'Faltan los enlaces DOI en las referencias.', err3_4:'Las referencias no están ordenadas alfabéticamente.'
+  },
+  en: {
+    confirm_switch:'Switching language will restart the simulation. Continue?',
+    name_q:'What is your name?',
+    name_note:'Used to personalize your result. Your name is only kept for this browser session and is never stored or sent to any server.',
+    name_ph:'Your name', name_btn:'Continue', name_default:'Student',
+    prof_name:'Prof. Dr. Ana Belén Montoya',
+    lbl_from:'From:', lbl_subject:'Subject:', lbl_date:'Date:',
+    acc_title:'Work Approved', rej_title:'Work Returned',
+    word_attempt:'Attempt',
+    acc_subject:'Approved — APA 7 Format',
+    acc_greet:'Dear',
+    acc_body:'Your paper meets every APA 7th-edition formatting requirement. Accepted for content review.',
+    acc_first:'Excellent work on your very first attempt. Flawless formatting without a checklist is rare.',
+    acc_retry:'Review the manual more carefully next time to avoid multiple revisions.',
+    regards:'Kind regards,', btn_close:'Close', btn_understood:'Understood',
+    rej_subject:'Returned — Incomplete APA 7 format',
+    rej_body:'Dear María Carmen, the formatting does not meet APA 7. Please fix the following:',
+    frase_1:'Review each section carefully before resubmitting.',
+    frase_2:'Still not ready. Explore the buttons on the ribbon.',
+    frase_3:'Try selecting each element of the document and testing the available options.',
+    frase_4:'Each section unlocks when the previous one is completed. Focus on one at a time.',
+    frase_5:'The errors are detailed above. Fix them one by one.',
+    sel_suffix:'selected',
+    unlock_msg:'Section unlocked:',
+    pr0_0:'Times New Roman 12pt', pr0_1:'Title in bold', pr0_2:'Title centered',
+    pr0_3:'Title not underlined', pr0_4:'Title not in ALL CAPS', pr0_5:'Author centered', pr0_6:'Affiliation centered',
+    pr1_0:'Double line spacing (2.0)', pr1_1:'No extra space between paragraphs', pr1_2:'Margins 2.54cm',
+    pr1_3:'Level 1 headings centered and bold, no underline/italics/ALL CAPS',
+    pr1_4:'Level 2 headings left-aligned and bold, no ALL CAPS',
+    pr2_0:'First-line indent', pr2_1:'No bullets (continuous paragraphs)', pr2_2:'No bold in the body',
+    pr2_3:'Citations in (Author, Year) format', pr2_4:'"et al." instead of "and others"',
+    pr3_0:'Hanging indent in references',
+    pr3_1:'Journal name in italics (select the journal name in a reference and apply Italics)',
+    pr3_2:'Volume number in italics (select the volume number — separately from the journal — and apply Italics)',
+    pr3_3:'DOI links added', pr3_4:'References in alphabetical order',
+    err0_0:'The typeface is not Times New Roman 12pt.', err0_1:'The size is not 12pt.',
+    err0_2:'The title is not bold.', err0_3:'The title is not centered.',
+    err0_4:'The title is underlined — remove it.', err0_5:'The title is in ALL CAPS — use sentence case.',
+    err0_6:'The author name is not centered.', err0_7:'The affiliation is not centered.',
+    err1_0:'Line spacing is not double (2.0).', err1_1:'There is extra space between paragraphs.',
+    err1_2:'Margins are not 2.54 cm.', err1_3:'Level 1 headings must be centered and bold.',
+    err1_4:'Level 1 headings must not be underlined.', err1_5:'Level 1 headings must not be italicized.',
+    err1_6:'Level 1 headings must not be in ALL CAPS.', err1_7:'Level 2 headings must be left-aligned and bold.',
+    err1_8:'Level 2 headings must not be in ALL CAPS.',
+    err2_0:'Paragraphs lack a first-line indent.', err2_1:'The text contains bullets — APA 7 requires continuous paragraphs.',
+    err2_2:'There is unnecessary bold in the body text.', err2_3:'Citations do not follow the (Author, Year) format.',
+    err2_4:'"And others" is used instead of "et al." in 3+ author citations.',
+    err3_0:'The references lack a hanging indent.',
+    err3_1:'The journal name is not in italics (select only the journal name and apply Italics).',
+    err3_2:'The volume number is not in italics (select only the volume number, separately from the journal, and apply Italics).',
+    err3_3:'DOI links are missing from the references.', err3_4:'The references are not in alphabetical order.',
+    /* data-i18n (solo EN) */
+    page_title:'APA 7 Editor — Simulation',
+    meta_desc:'Interactive educational simulation of an APA 7 editor: format a manuscript using a Word-style ribbon with typography, margins, indentation and APA tools. SimLab ULEAM.',
+    back_title:'Back to SimLab home',
+    tab_home:'Home', tab_insert:'Insert', tab_design:'Design', tab_refs:'References',
+    gl_font:'Typography', gl_style:'Style', gl_align:'Alignment', gl_spacing:'Spacing', gl_list:'List',
+    gl_indent:'Indentation', gl_page:'Page', gl_text:'Text', gl_apatools:'APA Tools',
+    tt_font:'Font', tt_size:'Font size', tt_bold:'Bold (B)', tt_italic:'Italic (I)', tt_under:'Underline (U)',
+    tt_left:'Align left', tt_center:'Center', tt_right:'Align right', tt_spacing:'Line spacing',
+    tt_paraspace:'Space between paragraphs', tt_bullets:'Bullets',
+    tt_firstind:'First-line indent (body paragraphs)', tt_hangind:'Hanging indent (reference entries)',
+    tt_margins:'Margins', tt_break:'Page break', tt_pagenum:'Page number', tt_header:'Running head',
+    tt_case:'Change case', tt_cite:'Fix citation format to (Author, Year) style',
+    tt_etal:'Replace "and others" with "et al."', tt_doi:'Add DOI links to the references',
+    tt_alpha:'Sort references alphabetically',
+    btn_space:'Spacing', btn_firstind:'1st line', btn_hangind:'Hanging', btn_cite:'Citations',
+    opt_narrow:'Narrow', opt_normal:'Normal (2.54cm)', opt_wide:'Wide',
+    opt_none:'None', opt_upper:'UPPERCASE', opt_lower:'lowercase', opt_sentence:'Sentence case', opt_title:'Title Case',
+    words_count:'487 words', lbl_sends:'Submissions:', send_btn:'Submit Work',
+    lock_0:'Complete the title page first', lock_1:'Complete the introduction first', lock_2:'Complete the body first',
+    paper_rhead:'TECHNOLOGY IMPACT ADOLESCENTS',
+    paper_title:'The impact of technology on adolescent cognitive development: a systematic review',
+    paper_afil:'National Distance Education University',
+    break_mark:'— page break —',
+    h_intro:'Introduction',
+    p_intro1:'Over the last decade, adolescents’ use of technological devices has increased <span class="ubold">significantly</span>. According to recent studies <span class="wcita">(according to García and López, 2019)</span><span class="rcita">(García &amp; López, 2019)</span>, average daily screen time among adolescents aged 12 to 18 has tripled, sparking an intense debate in the scientific community about its implications for cognitive development.',
+    p_intro2:'Several researchers <span class="wcita">(as noted by Martínez and others, 2020)</span><span class="rcita">(Martínez <span class="yot">and others</span><span class="etal">et al.</span>, 2020)</span> have identified correlations between excessive social media use and a decline in sustained attention. However, other authors <span class="wcita">(see Fernández, 2021)</span><span class="rcita">(Fernández, 2021)</span> argue that technology can foster the digital skills essential for the 21st century.',
+    h_problem:'Problem statement',
+    p_problem:'The present study aims to <span class="ubold">systematically</span> analyze the available empirical evidence on the relationship between technology use and cognitive development in adolescents. It seeks to answer the following research question: what is the real impact of technological exposure on adolescents’ executive functions, memory and attention?',
+    bullet_1:'Adolescents spend an average of 7 hours a day in front of screens.',
+    bullet_2:'A decline in sustained-attention scores has been observed.',
+    bullet_3:'Digital multitasking skills have improved significantly.',
+    bp_1:'Adolescents spend an average of 7 hours a day in front of screens, according to recent data from international health organizations.',
+    bp_2:'A decline in sustained-attention scores has been observed in standardized assessments administered to student populations.',
+    bp_3:'Digital multitasking skills have improved significantly compared with previous generations.',
+    h_method:'Method', h_partic:'Participants',
+    p_partic:'A total of 45 studies published between 2015 and 2023 were reviewed, comprising 12,340 participants aged 12 to 18. Inclusion criteria required longitudinal or cross-sectional designs with adequate <span class="ubold">methodological controls</span>.',
+    h_proc:'Procedure',
+    p_proc:'The search was conducted in the PubMed, PsycINFO and Web of Science databases. The researchers <span class="wcita">(according to Chen and colleagues, 2022)</span><span class="rcita">(Chen <span class="yot">and colleagues</span><span class="etal">et al.</span>, 2022)</span> applied a systematic review protocol following the PRISMA guidelines, assessing methodological quality with the Newcastle-Ottawa scale.',
+    h_results:'Results',
+    p_res1:'The results reveal a <span class="ubold">complex</span> and nuanced picture. On the one hand, a moderate negative correlation (r = -0.34) was identified between social media use time and performance on sustained-attention tasks. On the other hand, the use of educational digital tools showed a positive correlation (r = 0.28) with visual working memory.',
+    p_res2:'Subgroup analyses conducted by <span class="wcita">(Torres and others, 2023)</span><span class="rcita">(Torres <span class="yot">and others</span><span class="etal">et al.</span>, 2023)</span> indicated that the type of technological activity is a crucial moderating factor: passive activities were associated with poorer cognitive outcomes, while interactive activities showed neutral or positive effects.',
+    h_disc:'Discussion',
+    p_disc1:'The findings of this systematic review suggest that the impact of technology on adolescent cognitive development is not uniform; it depends on multiple variables. These results are consistent with the arguments of <span class="wcita">(refer to García and López, 2019)</span><span class="rcita">(García &amp; López, 2019)</span> on the need for a differentiated perspective.',
+    p_disc2:'Future research should adopt longer longitudinal designs and use objective neurocognitive measures. The results also underscore the importance of developing digital literacy programs that promote <span class="ubold">responsible</span>, active technology use.',
+    h_refs:'References',
+    ref_torres:'Torres, R., Navarro, M., &amp; Delgado, P. (2023). <span class="atitle" data-sel="atitle">Differential effects of technology on adolescent cognition</span>. <span class="jname" data-sel="jname">Revista de Psicología Educativa</span>, <span class="vnum" data-sel="vnum">29</span>(3), 145-162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span>',
+    ref_garcia:'García, M., &amp; López, C. (2019). <span class="atitle" data-sel="atitle">Screens and cognitive development: a differentiated perspective</span>. <span class="jname" data-sel="jname">Infancia y Aprendizaje</span>, <span class="vnum" data-sel="vnum">42</span>(4), 890-912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span>',
+    ref_chen:'Chen, W., Park, S., &amp; Müller, H. (2022). <span class="atitle" data-sel="atitle">Systematic review methodologies in cognitive research</span>. <span class="jname" data-sel="jname">Psychological Methods</span>, <span class="vnum" data-sel="vnum">27</span>(1), 34-52. <span class="doi-l">https://doi.org/10.1037/met0000412</span>',
+    ref_martinez:'Martínez, A., Ruiz, B., &amp; Santos, L. (2020). <span class="atitle" data-sel="atitle">Social media and sustained attention in adolescents</span>. <span class="jname" data-sel="jname">Journal of Adolescent Psychology</span>, <span class="vnum" data-sel="vnum">45</span>(2), 78-95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span>',
+    ref_fernandez:'Fernández, J. (2021). <span class="atitle" data-sel="atitle">Digital skills and 21st-century competences in youth</span>. <span class="jname" data-sel="jname">Comunicar</span>, <span class="vnum" data-sel="vnum">69</span>, 23-38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span>'
+  }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
+function applyStaticI18n(){
+  if (LANG === 'es') return;
+  document.title = t('page_title');
+  const md = document.querySelector('meta[name="description"]');
+  if (md) md.content = t('meta_desc');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+}
+applyStaticI18n();
+
+const langBtn = document.getElementById('simLangBtn');
+langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+langBtn.addEventListener('click', () => {
+  if (!confirm(t('confirm_switch'))) return;
+  setLang(LANG === 'es' ? 'en' : 'es');
+  location.reload();
+});
+
 /* =============================================
    PERSONALIZACIÓN: NOMBRE DEL USUARIO
    (solo en esta sesión del navegador, no se guarda permanentemente)
@@ -378,16 +577,16 @@ function obtenerNombreUsuario(callback) {
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
   overlay.innerHTML = `
     <div style="background:var(--card,#1e1e1e);color:var(--fg,#f1f1f1);padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--accent,#D4A853);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.5)">
-      <h3 style="margin:0 0 12px;color:var(--accent,#D4A853)">¿Cómo te llamas?</h3>
-      <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.</p>
-      <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid #777;background:rgba(255,255,255,.05);color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
-      <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:var(--accent,#D4A853);color:#000;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+      <h3 style="margin:0 0 12px;color:var(--accent,#D4A853)">${t('name_q')}</h3>
+      <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">${t('name_note')}</p>
+      <input id="inputNombreUsuario" type="text" placeholder="${t('name_ph')}" style="width:100%;padding:10px;border-radius:6px;border:1px solid #777;background:rgba(255,255,255,.05);color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
+      <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:var(--accent,#D4A853);color:#000;font-weight:700;cursor:pointer;font-size:1rem">${t('name_btn')}</button>
     </div>`;
   document.body.appendChild(overlay);
   const input = overlay.querySelector('#inputNombreUsuario');
   input.focus();
   const confirmar = () => {
-    const nombre = input.value.trim() || 'Estudiante';
+    const nombre = input.value.trim() || t('name_default');
     sessionStorage.setItem('nombreEstudianteSim', nombre);
     overlay.remove();
     callback(nombre);
@@ -432,12 +631,21 @@ const SEL_MAP = {
 };
 
 /* Etiquetas legibles */
-const TYPE_LABEL = {
-  title:'Titulo', author:'Autor', affiliation:'Afiliacion',
-  h1:'Encabezado Nivel 1', h2:'Encabezado Nivel 2',
-  paragraph:'Parrafo',
-  atitle:'Titulo de articulo', jname:'Nombre de revista', vnum:'Numero de volumen'
+const TYPE_LABEL_ALL = {
+  es: {
+    title:'Título', author:'Autor', affiliation:'Afiliación',
+    h1:'Encabezado Nivel 1', h2:'Encabezado Nivel 2',
+    paragraph:'Párrafo',
+    atitle:'Título de artículo', jname:'Nombre de revista', vnum:'Número de volumen'
+  },
+  en: {
+    title:'Title', author:'Author', affiliation:'Affiliation',
+    h1:'Level 1 heading', h2:'Level 2 heading',
+    paragraph:'Paragraph',
+    atitle:'Article title', jname:'Journal name', vnum:'Volume number'
+  }
 };
+const TYPE_LABEL = TYPE_LABEL_ALL[LANG];
 
 let selType = null;       // Tipo de elemento seleccionado
 let maxPhase = 0;         // Fase máxima desbloqueada (0=portada visible)
@@ -570,7 +778,7 @@ function updateRibbon() {
   /* Estado de selección en barra */
   const stSel = $('stSel');
   if (selType) {
-    stSel.textContent = ' | ' + TYPE_LABEL[selType] + ' seleccionado';
+    stSel.textContent = ' | ' + TYPE_LABEL[selType] + ' ' + t('sel_suffix');
     stSel.style.display = 'inline';
   } else {
     stSel.style.display = 'none';
@@ -713,38 +921,36 @@ function checkAllPhases() {
 /* Requisitos por fase, para el checklist en vivo */
 const PHASE_REQS = {
   0: [
-    { label:'Times New Roman 12pt',          ok:() => G.font==='times' && G.size==='12pt' },
-    { label:'Titulo en negrita',             ok:() => TF.title.bold },
-    { label:'Titulo centrado',               ok:() => TF.title.align==='center' },
-    { label:'Titulo sin subrayado',          ok:() => !TF.title.underline },
-    { label:'Titulo sin MAYUSCULAS',         ok:() => TF.title.case!=='upper' },
-    { label:'Autor centrado',                ok:() => TF.author.align==='center' },
-    { label:'Afiliacion centrada',           ok:() => TF.affiliation.align==='center' },
+    { label:t('pr0_0'), ok:() => G.font==='times' && G.size==='12pt' },
+    { label:t('pr0_1'), ok:() => TF.title.bold },
+    { label:t('pr0_2'), ok:() => TF.title.align==='center' },
+    { label:t('pr0_3'), ok:() => !TF.title.underline },
+    { label:t('pr0_4'), ok:() => TF.title.case!=='upper' },
+    { label:t('pr0_5'), ok:() => TF.author.align==='center' },
+    { label:t('pr0_6'), ok:() => TF.affiliation.align==='center' },
   ],
   1: [
-    { label:'Interlineado doble (2.0)',                ok:() => G.lineSpacing===2 },
-    { label:'Sin espacio extra entre parrafos',         ok:() => !G.paraSpacing },
-    { label:'Margenes de 2.54cm',                       ok:() => G.margins==='normal' },
-    { label:'Encabezado N1 centrado y negrita, sin subrayado/cursiva/MAYUSCULAS',
+    { label:t('pr1_0'), ok:() => G.lineSpacing===2 },
+    { label:t('pr1_1'), ok:() => !G.paraSpacing },
+    { label:t('pr1_2'), ok:() => G.margins==='normal' },
+    { label:t('pr1_3'),
       ok:() => TF.h1.align==='center' && TF.h1.bold && !TF.h1.underline && !TF.h1.italic && TF.h1.case!=='upper' },
-    { label:'Encabezado N2 izquierda y negrita, sin MAYUSCULAS',
+    { label:t('pr1_4'),
       ok:() => TF.h2.align==='left' && TF.h2.bold && TF.h2.case!=='upper' },
   ],
   2: [
-    { label:'Sangria en primera linea',                 ok:() => G.firstIndent },
-    { label:'Sin viñetas (parrafos continuos)',         ok:() => !G.bullets },
-    { label:'Sin negritas en el cuerpo',                ok:() => !G.bodyBold },
-    { label:'Citas en formato (Autor, Año)',            ok:() => G.citations },
-    { label:'"et al." en lugar de "y otros"',           ok:() => G.etAl },
+    { label:t('pr2_0'), ok:() => G.firstIndent },
+    { label:t('pr2_1'), ok:() => !G.bullets },
+    { label:t('pr2_2'), ok:() => !G.bodyBold },
+    { label:t('pr2_3'), ok:() => G.citations },
+    { label:t('pr2_4'), ok:() => G.etAl },
   ],
   3: [
-    { label:'Sangria francesa en referencias',          ok:() => G.hangIndent },
-    { label:'Nombre de revista en cursiva (selecciona el nombre de la revista en una referencia y aplica Cursiva)',
-      ok:() => TF.jname.italic },
-    { label:'Numero de volumen en cursiva (selecciona el numero de volumen — aparte de la revista — y aplica Cursiva)',
-      ok:() => TF.vnum.italic },
-    { label:'Enlaces DOI agregados',                    ok:() => G.doi },
-    { label:'Referencias en orden alfabetico',          ok:() => G.alphaOrder },
+    { label:t('pr3_0'), ok:() => G.hangIndent },
+    { label:t('pr3_1'), ok:() => TF.jname.italic },
+    { label:t('pr3_2'), ok:() => TF.vnum.italic },
+    { label:t('pr3_3'), ok:() => G.doi },
+    { label:t('pr3_4'), ok:() => G.alphaOrder },
   ],
 };
 
@@ -770,8 +976,10 @@ function tryUnlock() {
           sec.style.display = 'none';
           void sec.offsetHeight;
           sec.style.display = '';
-          const names = ['','Introduccion','Cuerpo del texto','Referencias'];
-          showPhaseNot('Seccion desbloqueada: ' + names[maxPhase]);
+          const names = LANG === 'es'
+            ? ['','Introducción','Cuerpo del texto','Referencias']
+            : ['','Introduction','Body text','References'];
+          showPhaseNot(t('unlock_msg') + ' ' + names[maxPhase]);
           updateStatusSection();
         }
       }
@@ -792,37 +1000,71 @@ render = function() {
 /* =============================================
    PISTAS (HINTS)
    ============================================= */
-const HINTS = {
+const HINTS_ALL = {
+es: {
   0: [
-    'APA 7 exige Times New Roman 12pt como tipografia obligatoria.',
-    'Selecciona el titulo y aplicale negrita y centrado.',
-    'El titulo no debe estar subrayado ni en MAYUSCULAS.',
-    'Centra el nombre del autor y la afiliacion institucional.',
+    'APA 7 exige Times New Roman 12pt como tipografía obligatoria.',
+    'Selecciona el título y aplícale negrita y centrado.',
+    'El título no debe estar subrayado ni en MAYÚSCULAS.',
+    'Centra el nombre del autor y la afiliación institucional.',
     'Haz clic en un elemento del documento para seleccionarlo, luego usa los botones de la cinta.'
   ],
   1: [
     'El interlineado debe ser doble (2.0) en todo el documento.',
-    'Desactiva el espacio adicional entre parrafos.',
-    'Los margenes deben ser de 2.54 cm — selecciona "Normal".',
+    'Desactiva el espacio adicional entre párrafos.',
+    'Los márgenes deben ser de 2.54 cm — selecciona "Normal".',
     'Los encabezados de Nivel 1 van centrados y en negrita, sin subrayado ni cursiva.',
     'Los encabezados de Nivel 2 van alineados a la izquierda y en negrita.',
-    'Cambia las mayusculas de los encabezados a "Tipo oracion".'
+    'Cambia las mayúsculas de los encabezados a "Tipo oración".'
   ],
   2: [
-    'Los parrafos necesitan sangria de 1.27 cm en la primera linea.',
-    'Desactiva las viñetas — APA 7 usa parrafos continuos.',
+    'Los párrafos necesitan sangría de 1.27 cm en la primera línea.',
+    'Desactiva las viñetas — APA 7 usa párrafos continuos.',
     'Quita las negritas innecesarias del cuerpo del texto.',
-    'Corrige el formato de las citas al estandar (Autor, Ano).',
-    'Reemplaza "y otros" por "et al." en citas con tres o mas autores.'
+    'Corrige el formato de las citas al estándar (Autor, Año).',
+    'Reemplaza "y otros" por "et al." en citas con tres o más autores.'
   ],
   3: [
-    'El encabezado "Referencias" ya hereda el formato de los encabezados Nivel 1 — si esos quedaron bien, este tambien.',
-    'Aplica sangria francesa a las entradas de referencia.',
-    'Selecciona el nombre de la revista y aplica Cursiva (boton I). Luego selecciona el numero de volumen, aparte, y aplicalo tambien — son dos clics distintos.',
+    'El encabezado "Referencias" ya hereda el formato de los encabezados Nivel 1 — si esos quedaron bien, este también.',
+    'Aplica sangría francesa a las entradas de referencia.',
+    'Selecciona el nombre de la revista y aplica Cursiva (botón I). Luego selecciona el número de volumen, aparte, y aplícalo también — son dos clics distintos.',
     'Agrega los enlaces DOI a cada referencia.',
-    'Ordena las referencias alfabeticamente por apellido del primer autor.'
+    'Ordena las referencias alfabéticamente por apellido del primer autor.'
   ]
+},
+en: {
+  0: [
+    'APA 7 requires Times New Roman 12pt as the mandatory typeface.',
+    'Select the title and apply bold and centered alignment.',
+    'The title must not be underlined or in ALL CAPS.',
+    'Center the author name and the institutional affiliation.',
+    'Click an element in the document to select it, then use the ribbon buttons.'
+  ],
+  1: [
+    'Line spacing must be double (2.0) throughout the document.',
+    'Turn off the extra space between paragraphs.',
+    'Margins must be 2.54 cm — select "Normal".',
+    'Level 1 headings go centered and bold, with no underline or italics.',
+    'Level 2 headings go left-aligned and bold.',
+    'Change the heading case to "Sentence case".'
+  ],
+  2: [
+    'Paragraphs need a 1.27 cm first-line indent.',
+    'Turn off bullets — APA 7 uses continuous paragraphs.',
+    'Remove the unnecessary bold from the body text.',
+    'Fix the citation format to the (Author, Year) standard.',
+    'Replace "and others" with "et al." in citations with three or more authors.'
+  ],
+  3: [
+    'The "References" heading already inherits the Level 1 heading format — if those are right, so is this one.',
+    'Apply a hanging indent to the reference entries.',
+    'Select the journal name and apply Italics (I button). Then select the volume number, separately, and apply it too — two different clicks.',
+    'Add the DOI links to every reference.',
+    'Sort the references alphabetically by the first author’s surname.'
+  ]
+}
 };
+const HINTS = HINTS_ALL[LANG];
 
 function resetHintTimer() {
   clearTimeout(hintTimer);
@@ -856,7 +1098,9 @@ function showPhaseNot(text) {
 /* =============================================
    BARRA DE ESTADO
    ============================================= */
-const SECTION_NAMES = ['Portada','Introduccion','Cuerpo','Referencias'];
+const SECTION_NAMES = LANG === 'es'
+  ? ['Portada','Introducción','Cuerpo','Referencias']
+  : ['Title page','Introduction','Body','References'];
 function updateStatusSection() {
   $('stSection').textContent = SECTION_NAMES[Math.min(maxPhase, 3)];
 }
@@ -880,7 +1124,7 @@ setInterval(() => {
 
   if (checkAllPhases()) {
     /* APROBADO */
-    localStorage.setItem('simlab_apa2', Date.now());
+    localStorage.setItem('simlab_done_simlab_apa2', Date.now());
     $('modalBox').className = 'modal-box acc';
     const m = String(Math.floor(secs/60)).padStart(2,'0');
     const s = String(secs%60).padStart(2,'0');
@@ -888,19 +1132,19 @@ setInterval(() => {
       $('modalBox').innerHTML = `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
           <div style="width:38px;height:38px;border-radius:50%;background:var(--ok);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-check" style="color:#fff;font-size:16px"></i></div>
-          <div><div style="font-weight:700;font-size:15px;color:var(--ok)">Trabajo Aprobado</div>
-          <div style="font-size:11px;color:#888">Intento ${envios} — ${m}:${s}</div></div>
+          <div><div style="font-weight:700;font-size:15px;color:var(--ok)">${t('acc_title')}</div>
+          <div style="font-size:11px;color:#888">${t('word_attempt')} ${envios} — ${m}:${s}</div></div>
         </div>
         <div style="background:rgba(80,160,96,.08);border:1px solid rgba(80,160,96,.2);border-radius:8px;padding:14px;font-size:13px;line-height:1.7">
-          <p style="margin-bottom:6px"><strong>De:</strong> Prof. Dra. Ana Belen Montoya</p>
-          <p style="margin-bottom:6px"><strong>Asunto:</strong> Aprobado — Formato APA 7</p>
-          <p style="margin-bottom:10px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
-          <p style="margin-bottom:6px">Estimado/a ${nombre},</p>
-          <p style="margin-bottom:6px">Tu trabajo cumple con todas las especificaciones de formato APA 7.ª edicion. Aceptado para evaluacion de contenido.</p>
-          <p style="margin-bottom:6px">${envios===1?'Excelente trabajo desde el primer intento. Es raro ver un formato tan impecable sin lista de verificacion.':'Revisa el manual con mas atencion la proxima vez para evitar multiples revisiones.'}</p>
-          <p>Saludos cordiales,<br><strong>Prof. Dra. Ana Belen Montoya</strong></p>
+          <p style="margin-bottom:6px"><strong>${t('lbl_from')}</strong> ${t('prof_name')}</p>
+          <p style="margin-bottom:6px"><strong>${t('lbl_subject')}</strong> ${t('acc_subject')}</p>
+          <p style="margin-bottom:10px"><strong>${t('lbl_date')}</strong> ${new Date().toLocaleDateString(LANG==='es'?'es-ES':'en-US',{day:'numeric',month:'long',year:'numeric'})}</p>
+          <p style="margin-bottom:6px">${t('acc_greet')} ${nombre},</p>
+          <p style="margin-bottom:6px">${t('acc_body')}</p>
+          <p style="margin-bottom:6px">${envios===1?t('acc_first'):t('acc_retry')}</p>
+          <p>${t('regards')}<br><strong>${t('prof_name')}</strong></p>
         </div>
-        <div style="text-align:center;margin-top:18px"><button onclick="document.getElementById('modal').classList.remove('on')" style="background:var(--ok);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">Cerrar</button></div>`;
+        <div style="text-align:center;margin-top:18px"><button onclick="document.getElementById('modal').classList.remove('on')" style="background:var(--ok);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">${t('btn_close')}</button></div>`;
       $('modal').classList.add('on');
       launchConfetti();
     });
@@ -913,7 +1157,9 @@ setInterval(() => {
 
     /* Recopilar errores por fase */
     let fbHtml = '';
-    const phaseNames = ['Portada','Introduccion','Parrafos y cuerpo','Referencias'];
+    const phaseNames = LANG === 'es'
+      ? ['Portada','Introducción','Párrafos y cuerpo','Referencias']
+      : ['Title page','Introduction','Paragraphs and body','References'];
     const phaseColors = ['#D4A853','#7EB8DA','#E0915A','#5A9E6F'];
 
     for (let p = 0; p <= 3; p++) {
@@ -929,11 +1175,11 @@ setInterval(() => {
     }
 
     let frase;
-    if(envios===1) frase='Revisa cada seccion con cuidado antes de reenviar.';
-    else if(envios===2) frase='Sigue sin estar listo. Explora los botones de la cinta de herramientas.';
-    else if(envios<=4) frase='Te sugiero seleccionar cada elemento del documento y probar las opciones disponibles.';
-    else if(envios<=7) frase='Cada seccion se desbloquea al completar la anterior. Concéntrate en una a la vez.';
-    else frase='Los errores estan detallados arriba. Corrigelos uno por uno.';
+    if(envios===1) frase=t('frase_1');
+    else if(envios===2) frase=t('frase_2');
+    else if(envios<=4) frase=t('frase_3');
+    else if(envios<=7) frase=t('frase_4');
+    else frase=t('frase_5');
 
     const m = String(Math.floor(secs/60)).padStart(2,'0');
     const s = String(secs%60).padStart(2,'0');
@@ -941,21 +1187,21 @@ setInterval(() => {
     $('modalBox').innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
         <div style="width:38px;height:38px;border-radius:50%;background:var(--err);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-xmark" style="color:#fff;font-size:16px"></i></div>
-        <div><div style="font-weight:700;font-size:15px;color:var(--err)">Trabajo Devuelto</div>
-        <div style="font-size:11px;color:#888">Intento ${envios} — ${m}:${s}</div></div>
+        <div><div style="font-weight:700;font-size:15px;color:var(--err)">${t('rej_title')}</div>
+        <div style="font-size:11px;color:#888">${t('word_attempt')} ${envios} — ${m}:${s}</div></div>
       </div>
       <div style="background:rgba(224,80,80,.06);border:1px solid rgba(224,80,80,.15);border-radius:8px;padding:14px;font-size:13px;line-height:1.7">
-        <p style="margin-bottom:6px"><strong>De:</strong> Prof. Dra. Ana Belen Montoya</p>
-        <p style="margin-bottom:6px"><strong>Asunto:</strong> Devolucion — Formato APA 7 incompleto</p>
-        <p style="margin-bottom:10px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
-        <p style="margin-bottom:10px">Estimada Maria Carmen, el formato no cumple con APA 7. Corrige lo siguiente:</p>
+        <p style="margin-bottom:6px"><strong>${t('lbl_from')}</strong> ${t('prof_name')}</p>
+        <p style="margin-bottom:6px"><strong>${t('lbl_subject')}</strong> ${t('rej_subject')}</p>
+        <p style="margin-bottom:10px"><strong>${t('lbl_date')}</strong> ${new Date().toLocaleDateString(LANG==='es'?'es-ES':'en-US',{day:'numeric',month:'long',year:'numeric'})}</p>
+        <p style="margin-bottom:10px">${t('rej_body')}</p>
         ${fbHtml}
         <div style="border-top:1px solid rgba(224,80,80,.15);margin-top:12px;padding-top:10px;font-style:italic;color:#888;font-size:12px">
           <i class="fa-solid fa-circle-info" style="margin-right:4px"></i>${frase}
         </div>
-        <p style="margin-top:10px">Saludos cordiales,<br><strong>Prof. Dra. Ana Belen Montoya</strong></p>
+        <p style="margin-top:10px">${t('regards')}<br><strong>${t('prof_name')}</strong></p>
       </div>
-      <div style="text-align:center;margin-top:18px"><button onclick="document.getElementById('modal').classList.remove('on')" style="background:var(--err);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">Entendido</button></div>`;
+      <div style="text-align:center;margin-top:18px"><button onclick="document.getElementById('modal').classList.remove('on')" style="background:var(--err);color:#fff;border:none;padding:9px 32px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px">${t('btn_understood')}</button></div>`;
     $('modal').classList.add('on');
   }
 });
@@ -964,39 +1210,39 @@ setInterval(() => {
 function getPhaseErrors(p) {
   const e = [];
   if (p===0) {
-    if(G.font!=='times') e.push('La tipografia no es Times New Roman 12pt.');
-    if(G.size!=='12pt') e.push('El tamano no es 12pt.');
-    if(!TF.title.bold) e.push('El titulo no esta en negrita.');
-    if(TF.title.align!=='center') e.push('El titulo no esta centrado.');
-    if(TF.title.underline) e.push('El titulo esta subrayado — debe quitarse.');
-    if(TF.title.case==='upper') e.push('El titulo esta en MAYUSCULAS — usar tipo oracion.');
-    if(TF.author.align!=='center') e.push('El nombre del autor no esta centrado.');
-    if(TF.affiliation.align!=='center') e.push('La afiliacion no esta centrada.');
+    if(G.font!=='times') e.push(t('err0_0'));
+    if(G.size!=='12pt') e.push(t('err0_1'));
+    if(!TF.title.bold) e.push(t('err0_2'));
+    if(TF.title.align!=='center') e.push(t('err0_3'));
+    if(TF.title.underline) e.push(t('err0_4'));
+    if(TF.title.case==='upper') e.push(t('err0_5'));
+    if(TF.author.align!=='center') e.push(t('err0_6'));
+    if(TF.affiliation.align!=='center') e.push(t('err0_7'));
   }
   if (p===1) {
-    if(G.lineSpacing!==2) e.push('El interlineado no es doble (2.0).');
-    if(G.paraSpacing) e.push('Hay espacio adicional entre parrafos.');
-    if(G.margins!=='normal') e.push('Los margenes no son de 2.54 cm.');
-    if(TF.h1.align!=='center'||!TF.h1.bold) e.push('Los encabezados Nivel 1 deben estar centrados y en negrita.');
-    if(TF.h1.underline) e.push('Los encabezados Nivel 1 no deben estar subrayados.');
-    if(TF.h1.italic) e.push('Los encabezados Nivel 1 no deben estar en cursiva.');
-    if(TF.h1.case==='upper') e.push('Los encabezados Nivel 1 no deben estar en MAYUSCULAS.');
-    if(TF.h2.align!=='left'||!TF.h2.bold) e.push('Los encabezados Nivel 2 deben estar a la izquierda y en negrita.');
-    if(TF.h2.case==='upper') e.push('Los encabezados Nivel 2 no deben estar en MAYUSCULAS.');
+    if(G.lineSpacing!==2) e.push(t('err1_0'));
+    if(G.paraSpacing) e.push(t('err1_1'));
+    if(G.margins!=='normal') e.push(t('err1_2'));
+    if(TF.h1.align!=='center'||!TF.h1.bold) e.push(t('err1_3'));
+    if(TF.h1.underline) e.push(t('err1_4'));
+    if(TF.h1.italic) e.push(t('err1_5'));
+    if(TF.h1.case==='upper') e.push(t('err1_6'));
+    if(TF.h2.align!=='left'||!TF.h2.bold) e.push(t('err1_7'));
+    if(TF.h2.case==='upper') e.push(t('err1_8'));
   }
   if (p===2) {
-    if(!G.firstIndent) e.push('Los parrafos no tienen sangria en la primera linea.');
-    if(G.bullets) e.push('Hay viñetas en el texto — APA 7 exige parrafos continuos.');
-    if(G.bodyBold) e.push('Hay negritas innecesarias en el cuerpo del texto.');
-    if(!G.citations) e.push('Las citas no siguen el formato (Autor, Ano).');
-    if(!G.etAl) e.push('Se usa "y otros" en lugar de "et al." en citas con 3+ autores.');
+    if(!G.firstIndent) e.push(t('err2_0'));
+    if(G.bullets) e.push(t('err2_1'));
+    if(G.bodyBold) e.push(t('err2_2'));
+    if(!G.citations) e.push(t('err2_3'));
+    if(!G.etAl) e.push(t('err2_4'));
   }
   if (p===3) {
-    if(!G.hangIndent) e.push('Las referencias no tienen sangria francesa.');
-    if(!TF.jname.italic) e.push('El nombre de la revista no esta en cursiva (selecciona solo el nombre de la revista y aplica Cursiva).');
-    if(!TF.vnum.italic) e.push('El numero de volumen no esta en cursiva (selecciona solo el numero de volumen, aparte de la revista, y aplica Cursiva).');
-    if(!G.doi) e.push('Faltan los enlaces DOI en las referencias.');
-    if(!G.alphaOrder) e.push('Las referencias no estan ordenadas alfabeticamente.');
+    if(!G.hangIndent) e.push(t('err3_0'));
+    if(!TF.jname.italic) e.push(t('err3_1'));
+    if(!TF.vnum.italic) e.push(t('err3_2'));
+    if(!G.doi) e.push(t('err3_3'));
+    if(!G.alphaOrder) e.push(t('err3_4'));
   }
   return e;
 }
