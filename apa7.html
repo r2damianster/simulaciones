@@ -135,15 +135,25 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
   border:1px solid var(--sim-home-bd);border-radius:10px;
   transition:transform .2s, color .2s}
 .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+.sim-lang{position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;
+  color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
+  border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
+  transition:transform .2s,color .2s}
+.sim-lang:hover,.sim-lang:focus-visible{color:var(--sim-home-hi,#fff);transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 
 <!-- Back-link -->
-<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab" data-i18n-title="back_title" data-i18n-aria="back_title">
   <i class="fa-solid fa-house" aria-hidden="true"></i>
 </a>
+
+<!-- Toggle idioma -->
+<button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
 
 <!-- Fondo decorativo -->
 <div class="bg-glow bg-glow-1"></div>
@@ -155,18 +165,18 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
   <div style="display:flex;align-items:center;gap:12px">
     <i class="fa-solid fa-graduation-cap" style="color:var(--accent);font-size:20px"></i>
     <div>
-      <div style="font-family:'Crimson Pro',serif;font-weight:700;font-size:18px;line-height:1.1">Simulación APA 7</div>
-      <div style="font-size:11px;color:var(--muted)">Formateación de manuscrito académico</div>
+      <div style="font-family:'Crimson Pro',serif;font-weight:700;font-size:18px;line-height:1.1" data-i18n="hdr_title">Simulación APA 7</div>
+      <div style="font-size:11px;color:var(--muted)" data-i18n="hdr_sub">Formateación de manuscrito académico</div>
     </div>
-    <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.05);border-radius:8px;padding:3px;margin-left:8px" title="Vista comparativa: formato APA real vs. ejemplo ilustrativo de plantilla de revista">
-      <button id="btnModoReal" class="mode-btn on" onclick="setRevistaMode(false)">APA real</button>
-      <button id="btnModoRevista" class="mode-btn" onclick="setRevistaMode(true)">Plantilla de revista (ejemplo)</button>
+    <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.05);border-radius:8px;padding:3px;margin-left:8px" title="Vista comparativa: formato APA real vs. ejemplo ilustrativo de plantilla de revista" data-i18n-title="mode_title">
+      <button id="btnModoReal" class="mode-btn on" onclick="setRevistaMode(false)" data-i18n="mode_real">APA real</button>
+      <button id="btnModoRevista" class="mode-btn" onclick="setRevistaMode(true)" data-i18n="mode_journal">Plantilla de revista (ejemplo)</button>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-    <div style="text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Tiempo</div><div id="timer" style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">00:00</div></div>
-    <div style="text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Envios</div><div id="envios" style="font-size:16px;font-weight:700;color:var(--error)">0</div></div>
-    <div style="text-align:center;min-width:120px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Progreso</div><div style="background:var(--border);border-radius:99px;height:8px;overflow:hidden"><div class="prog-fill" id="progBar" style="width:0%;background:var(--accent)"></div></div><div id="progText" style="font-size:11px;color:var(--muted);margin-top:2px">0 / 24</div></div>
+    <div style="text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px" data-i18n="lbl_time">Tiempo</div><div id="timer" style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">00:00</div></div>
+    <div style="text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px" data-i18n="lbl_sends">Envios</div><div id="envios" style="font-size:16px;font-weight:700;color:var(--error)">0</div></div>
+    <div style="text-align:center;min-width:120px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px" data-i18n="lbl_prog">Progreso</div><div style="background:var(--border);border-radius:99px;height:8px;overflow:hidden"><div class="prog-fill" id="progBar" style="width:0%;background:var(--accent)"></div></div><div id="progText" style="font-size:11px;color:var(--muted);margin-top:2px">0 / 24</div></div>
   </div>
 </header>
 
@@ -175,7 +185,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
 
   <!-- Panel de tareas -->
   <aside class="task-col" style="width:360px;flex-shrink:0;overflow-y:auto;border-right:1px solid var(--border);padding:16px 18px;background:rgba(30,27,24,.6)">
-    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:600">Lista de correcciones</div>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:600" data-i18n="aside_title">Lista de correcciones</div>
     <div id="taskList"></div>
   </aside>
 
@@ -183,81 +193,81 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
   <section class="doc-col" style="flex:1;overflow-y:auto;padding:24px;display:flex;justify-content:center;background:rgba(20,18,16,.4)">
     <div class="paper" id="paper">
 
-      <div class="revista-banner"><i class="fa-solid fa-circle-info" style="margin-right:6px"></i>Vista ilustrativa: formato de plantilla de revista (doble columna, títulos Nivel 2). Cada revista define su propio estilo — esto <strong>no</strong> es parte de la norma APA 7 evaluada en este ejercicio.</div>
+      <div class="revista-banner"><i class="fa-solid fa-circle-info" style="margin-right:6px"></i><span data-i18n="paper_banner">Vista ilustrativa: formato de plantilla de revista (doble columna, títulos Nivel 2). Cada revista define su propio estilo — esto <strong>no</strong> es parte de la norma APA 7 evaluada en este ejercicio.</span></div>
 
       <!-- Encabezado y número de página -->
-      <div class="rhead">IMPACTO TECNOLOGÍA ADOLESCENTES</div>
+      <div class="rhead" data-i18n="paper_rhead">IMPACTO TECNOLOGÍA ADOLESCENTES</div>
       <div class="pnum">1</div>
 
       <!-- PORTADA -->
       <div class="portada">
-        <h1 class="tit">EL IMPACTO DE LA TECNOLOGÍA EN EL DESARROLLO COGNITIVO DE LOS ADOLESCENTES: UNA REVISIÓN SISTEMÁTICA</h1>
+        <h1 class="tit" data-i18n="paper_title">El impacto de la tecnología en el desarrollo cognitivo de los adolescentes: una revisión sistemática</h1>
         <p class="autor" style="margin-top:16px">María Carmen Rodríguez Pérez</p>
-        <p class="afil" style="margin-top:4px">Universidad Nacional de Educación a Distancia</p>
+        <p class="afil" style="margin-top:4px" data-i18n="paper_afil">Universidad Nacional de Educación a Distancia</p>
       </div>
 
       <!-- Marca de salto de página -->
-      <div class="break-mark">— salto de página —</div>
+      <div class="break-mark" data-i18n="break_mark">— salto de página —</div>
 
       <!-- INTRODUCCIÓN -->
-      <h2 class="h1">INTRODUCCIÓN</h2>
-      <p class="parr">En la última década, el uso de dispositivos tecnológicos por parte de los adolescentes ha aumentado de manera <span class="ubold">significativa</span>. Según estudios recientes <span class="wcita">(según García y López, 2019)</span><span class="rcita">(García y López, 2019)</span>, el tiempo promedio de pantalla diario en adolescentes de 12 a 18 años se ha triplicado, lo que ha generado un intenso debate en la comunidad científica sobre sus implicaciones en el desarrollo cognitivo.</p>
-      <p class="parr">Diversos investigadores <span class="wcita">(como señalan Martínez y otros, 2020)</span><span class="rcita">(Martínez <span class="yot">y otros</span><span class="etal">et al.</span>, 2020)</span> han identificado correlaciones entre el uso excesivo de redes sociales y una disminución en las capacidades de atención sostenida. Sin embargo, otros autores <span class="wcita">(ver Fernández, 2021)</span><span class="rcita">(Fernández, 2021)</span> sostienen que la tecnología puede facilitar el desarrollo de habilidades digitales fundamentales para el siglo XXI.</p>
+      <h2 class="h1" data-i18n="h_intro">Introducción</h2>
+      <p class="parr" data-i18n="p_intro1">En la última década, el uso de dispositivos tecnológicos por parte de los adolescentes ha aumentado de manera <span class="ubold">significativa</span>. Según estudios recientes <span class="wcita">(según García y López, 2019)</span><span class="rcita">(García y López, 2019)</span>, el tiempo promedio de pantalla diario en adolescentes de 12 a 18 años se ha triplicado, lo que ha generado un intenso debate en la comunidad científica sobre sus implicaciones en el desarrollo cognitivo.</p>
+      <p class="parr" data-i18n="p_intro2">Diversos investigadores <span class="wcita">(como señalan Martínez y otros, 2020)</span><span class="rcita">(Martínez <span class="yot">y otros</span><span class="etal">et al.</span>, 2020)</span> han identificado correlaciones entre el uso excesivo de redes sociales y una disminución en las capacidades de atención sostenida. Sin embargo, otros autores <span class="wcita">(ver Fernández, 2021)</span><span class="rcita">(Fernández, 2021)</span> sostienen que la tecnología puede facilitar el desarrollo de habilidades digitales fundamentales para el siglo XXI.</p>
 
-      <h3 class="h2">PLANTEAMIENTO DEL PROBLEMA</h3>
-      <p class="parr">El presente estudio tiene como objetivo analizar de manera <span class="ubold">sistemática</span> la evidencia empírica disponible sobre la relación entre el uso de tecnología y el desarrollo cognitivo en población adolescente. Se busca responder a la siguiente pregunta de investigación: ¿cuál es el impacto real de la exposición tecnológica en las funciones ejecutivas, la memoria y la atención de los adolescentes?</p>
+      <h3 class="h2" data-i18n="h_problem">Planteamiento del problema</h3>
+      <p class="parr" data-i18n="p_problem">El presente estudio tiene como objetivo analizar de manera <span class="ubold">sistemática</span> la evidencia empírica disponible sobre la relación entre el uso de tecnología y el desarrollo cognitivo en población adolescente. Se busca responder a la siguiente pregunta de investigación: ¿cuál es el impacto real de la exposición tecnológica en las funciones ejecutivas, la memoria y la atención de los adolescentes?</p>
 
       <!-- Viñetas (mal) -->
       <ul class="blist" style="margin:8px 0 8px 28px;list-style:disc">
-        <li class="parr" style="margin-bottom:6px">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas.</li>
-        <li class="parr" style="margin-bottom:6px">Se ha observado una disminución en los puntajes de atención sostenida.</li>
-        <li class="parr" style="margin-bottom:6px">Las habilidades de multitarea digital han mejorado significativamente.</li>
+        <li class="parr" style="margin-bottom:6px" data-i18n="bullet_1">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas.</li>
+        <li class="parr" style="margin-bottom:6px" data-i18n="bullet_2">Se ha observado una disminución en los puntajes de atención sostenida.</li>
+        <li class="parr" style="margin-bottom:6px" data-i18n="bullet_3">Las habilidades de multitarea digital han mejorado significativamente.</li>
       </ul>
       <!-- Párrafos (bien, ocultos) -->
       <div class="bparas">
-        <p class="parr">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas, según datos recientes de organismos internacionales de salud.</p>
-        <p class="parr">Se ha observado una disminución en los puntajes de atención sostenida en evaluaciones estandarizadas aplicadas a población estudiantil.</p>
-        <p class="parr">Las habilidades de multitarea digital han mejorado significativamente en comparación con generaciones anteriores.</p>
+        <p class="parr" data-i18n="bp_1">Los adolescentes pasan un promedio de 7 horas diarias frente a pantallas, según datos recientes de organismos internacionales de salud.</p>
+        <p class="parr" data-i18n="bp_2">Se ha observado una disminución en los puntajes de atención sostenida en evaluaciones estandarizadas aplicadas a población estudiantil.</p>
+        <p class="parr" data-i18n="bp_3">Las habilidades de multitarea digital han mejorado significativamente en comparación con generaciones anteriores.</p>
       </div>
 
       <!-- Marca de salto de página -->
-      <div class="break-mark">— salto de página —</div>
+      <div class="break-mark" data-i18n="break_mark">— salto de página —</div>
 
       <!-- MÉTODO -->
-      <h2 class="h1">MÉTODO</h2>
-      <h3 class="h2">PARTICIPANTES</h3>
-      <p class="parr">Se revisaron 45 estudios publicados entre 2015 y 2023, que incluían un total de 12.340 participantes con edades comprendidas entre los 12 y 18 años. Los criterios de inclusión requirieron que los estudios emplearan diseños longitudinales o transversales con <span class="ubold">controles metodológicos</span> adecuados.</p>
+      <h2 class="h1" data-i18n="h_method">Método</h2>
+      <h3 class="h2" data-i18n="h_partic">Participantes</h3>
+      <p class="parr" data-i18n="p_partic">Se revisaron 45 estudios publicados entre 2015 y 2023, que incluían un total de 12.340 participantes con edades comprendidas entre los 12 y 18 años. Los criterios de inclusión requirieron que los estudios emplearan diseños longitudinales o transversales con <span class="ubold">controles metodológicos</span> adecuados.</p>
 
-      <h3 class="h2">PROCEDIMIENTO</h3>
-      <p class="parr">La búsqueda se realizó en las bases de datos PubMed, PsycINFO y Web of Science. Los investigadores <span class="wcita">(según Chen y colaboradores, 2022)</span><span class="rcita">(Chen <span class="yot">y colaboradores</span><span class="etal">et al.</span>, 2022)</span> aplicaron un protocolo de revisión sistemática siguiendo las directrices PRISMA, evaluando la calidad metodológica mediante la escala de Newcastle-Ottawa.</p>
+      <h3 class="h2" data-i18n="h_proc">Procedimiento</h3>
+      <p class="parr" data-i18n="p_proc">La búsqueda se realizó en las bases de datos PubMed, PsycINFO y Web of Science. Los investigadores <span class="wcita">(según Chen y colaboradores, 2022)</span><span class="rcita">(Chen <span class="yot">y colaboradores</span><span class="etal">et al.</span>, 2022)</span> aplicaron un protocolo de revisión sistemática siguiendo las directrices PRISMA, evaluando la calidad metodológica mediante la escala de Newcastle-Ottawa.</p>
 
       <!-- Marca de salto de página -->
-      <div class="break-mark">— salto de página —</div>
+      <div class="break-mark" data-i18n="break_mark">— salto de página —</div>
 
       <!-- RESULTADOS -->
-      <h2 class="h1">RESULTADOS</h2>
-      <p class="parr">Los resultados revelan un panorama <span class="ubold">complejo</span> y matizado. Por un lado, se identificó una correlación negativa moderada (r = -0.34) entre el tiempo de uso de redes sociales y el rendimiento en tareas de atención sostenida. Por otro lado, el uso de herramientas digitales educativas mostró una correlación positiva (r = 0.28) con la memoria de trabajo visual.</p>
-      <p class="parr">Los análisis de subgrupos realizados por <span class="wcita">(Torres y otros, 2023)</span><span class="rcita">(Torres <span class="yot">y otros</span><span class="etal">et al.</span>, 2023)</span> indicaron que el tipo de actividad tecnológica es un factor moderador crucial: las actividades pasivas (como ver videos) se asociaron con peores resultados cognitivos, mientras que las actividades interactivas (como programación o creación de contenido) mostraron efectos neutros o positivos.</p>
+      <h2 class="h1" data-i18n="h_results">Resultados</h2>
+      <p class="parr" data-i18n="p_res1">Los resultados revelan un panorama <span class="ubold">complejo</span> y matizado. Por un lado, se identificó una correlación negativa moderada (r = -0.34) entre el tiempo de uso de redes sociales y el rendimiento en tareas de atención sostenida. Por otro lado, el uso de herramientas digitales educativas mostró una correlación positiva (r = 0.28) con la memoria de trabajo visual.</p>
+      <p class="parr" data-i18n="p_res2">Los análisis de subgrupos realizados por <span class="wcita">(Torres y otros, 2023)</span><span class="rcita">(Torres <span class="yot">y otros</span><span class="etal">et al.</span>, 2023)</span> indicaron que el tipo de actividad tecnológica es un factor moderador crucial: las actividades pasivas (como ver videos) se asociaron con peores resultados cognitivos, mientras que las actividades interactivas (como programación o creación de contenido) mostraron efectos neutros o positivos.</p>
 
       <!-- Marca de salto de página -->
-      <div class="break-mark">— salto de página —</div>
+      <div class="break-mark" data-i18n="break_mark">— salto de página —</div>
 
       <!-- DISCUSIÓN -->
-      <h2 class="h1">DISCUSIÓN</h2>
-      <p class="parr">Los hallazgos de esta revisión sistemática sugieren que el impacto de la tecnología en el desarrollo cognitivo adolescente no es uniforme, sino que depende de múltiples variables como el tipo de uso, la duración de la exposición y el contexto en el que se utiliza la tecnología. Estos resultados son consistentes con los planteamientos de <span class="wcita">(véase García y López, 2019)</span><span class="rcita">(García y López, 2019)</span> sobre la necesidad de adoptar una perspectiva diferenciada.</p>
-      <p class="parr">Se recomienda que futuras investigaciones adopten diseños longitudinales de mayor duración y utilicen medidas neurocognitivas objetivas. Asimismo, los resultados subrayan la importancia de desarrollar programas de alfabetización digital que promuevan un uso <span class="ubold">responsable</span> y activo de la tecnología por parte de los adolescentes.</p>
+      <h2 class="h1" data-i18n="h_disc">Discusión</h2>
+      <p class="parr" data-i18n="p_disc1">Los hallazgos de esta revisión sistemática sugieren que el impacto de la tecnología en el desarrollo cognitivo adolescente no es uniforme, sino que depende de múltiples variables como el tipo de uso, la duración de la exposición y el contexto en el que se utiliza la tecnología. Estos resultados son consistentes con los planteamientos de <span class="wcita">(véase García y López, 2019)</span><span class="rcita">(García y López, 2019)</span> sobre la necesidad de adoptar una perspectiva diferenciada.</p>
+      <p class="parr" data-i18n="p_disc2">Se recomienda que futuras investigaciones adopten diseños longitudinales de mayor duración y utilicen medidas neurocognitivas objetivas. Asimismo, los resultados subrayan la importancia de desarrollar programas de alfabetización digital que promuevan un uso <span class="ubold">responsable</span> y activo de la tecnología por parte de los adolescentes.</p>
 
       <!-- Marca de salto de página -->
-      <div class="break-mark">— salto de página —</div>
+      <div class="break-mark" data-i18n="break_mark">— salto de página —</div>
 
       <!-- REFERENCIAS -->
-      <h2 class="refs-h">REFERENCIAS</h2>
+      <h2 class="refs-h" data-i18n="h_refs">Referencias</h2>
       <div class="refs-list" id="refsList">
-        <p class="ref-e" data-key="torres">Torres, R., Navarro, M., y Delgado, P. (2023). <span class="atitle">EFECTOS DIFERENCIALES DE LA TECNOLOGÍA EN COGNICIÓN ADOLESCENTE</span>. <span class="jname">Revista de Psicología Educativa</span>, <span class="vnum">29</span>(3), 145–162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span></p>
-        <p class="ref-e" data-key="garcia">García, M., y López, C. (2019). <span class="atitle">PANTALLAS Y DESARROLLO COGNITIVO: UNA PERSPECTIVA DIFERENCIADA</span>. <span class="jname">Infancia y Aprendizaje</span>, <span class="vnum">42</span>(4), 890–912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span></p>
-        <p class="ref-e" data-key="chen">Chen, W., Park, S., y Müller, H. (2022). <span class="atitle">METODOLOGÍAS DE REVISIÓN SISTEMÁTICA EN INVESTIGACIÓN COGNITIVA</span>. <span class="jname">Psychological Methods</span>, <span class="vnum">27</span>(1), 34–52. <span class="doi-l">https://doi.org/10.1037/met0000412</span></p>
-        <p class="ref-e" data-key="martinez">Martínez, A., Ruiz, B., y Santos, L. (2020). <span class="atitle">REDES SOCIALES Y ATENCIÓN SOSTENIDA EN ADOLESCENTES</span>. <span class="jname">Journal of Adolescent Psychology</span>, <span class="vnum">45</span>(2), 78–95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span></p>
-        <p class="ref-e" data-key="fernandez">Fernández, J. (2021). <span class="atitle">HABILIDADES DIGITALES Y COMPETENCIAS DEL SIGLO XXI EN JÓVENES</span>. <span class="jname">Comunicar</span>, <span class="vnum">69</span>, 23–38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span></p>
+        <p class="ref-e" data-key="torres" data-i18n="ref_torres">Torres, R., Navarro, M., y Delgado, P. (2023). <span class="atitle">Efectos diferenciales de la tecnología en cognición adolescente</span>. <span class="jname">Revista de Psicología Educativa</span>, <span class="vnum">29</span>(3), 145–162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span></p>
+        <p class="ref-e" data-key="garcia" data-i18n="ref_garcia">García, M., y López, C. (2019). <span class="atitle">Pantallas y desarrollo cognitivo: una perspectiva diferenciada</span>. <span class="jname">Infancia y Aprendizaje</span>, <span class="vnum">42</span>(4), 890–912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span></p>
+        <p class="ref-e" data-key="chen" data-i18n="ref_chen">Chen, W., Park, S., y Müller, H. (2022). <span class="atitle">Metodologías de revisión sistemática en investigación cognitiva</span>. <span class="jname">Psychological Methods</span>, <span class="vnum">27</span>(1), 34–52. <span class="doi-l">https://doi.org/10.1037/met0000412</span></p>
+        <p class="ref-e" data-key="martinez" data-i18n="ref_martinez">Martínez, A., Ruiz, B., y Santos, L. (2020). <span class="atitle">Redes sociales y atención sostenida en adolescentes</span>. <span class="jname">Journal of Adolescent Psychology</span>, <span class="vnum">45</span>(2), 78–95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span></p>
+        <p class="ref-e" data-key="fernandez" data-i18n="ref_fernandez">Fernández, J. (2021). <span class="atitle">Habilidades digitales y competencias del siglo XXI en jóvenes</span>. <span class="jname">Comunicar</span>, <span class="vnum">69</span>, 23–38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span></p>
       </div>
 
     </div>
@@ -266,7 +276,7 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
 
 <!-- Barra inferior de envío -->
 <footer style="height:64px;background:var(--card);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:16px;position:sticky;bottom:0;z-index:100">
-  <button class="send-btn" id="sendBtn" aria-label="Enviar tarea"><i class="fa-solid fa-paper-plane" style="margin-right:8px"></i>Enviar Tarea</button>
+  <button class="send-btn" id="sendBtn" aria-label="Enviar tarea" data-i18n-aria="send_aria"><i class="fa-solid fa-paper-plane" style="margin-right:8px"></i><span data-i18n="send_btn">Enviar Tarea</span></button>
 </footer>
 
 <!-- Modal -->
@@ -279,6 +289,141 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--fg)
 
 <script>
 /* ============================================
+   i18n (compartido-por-copia)
+   ============================================ */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+
+const I18N = {
+  es: {
+    confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+    name_q:'¿Cómo te llamas?',
+    name_note:'Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.',
+    name_ph:'Tu nombre', name_btn:'Continuar', name_default:'Estudiante',
+    prof_name:'Prof. Dra. Ana Belén Montoya',
+    lbl_from:'De:', lbl_subject:'Asunto:', lbl_date:'Fecha:',
+    acc_title:'Trabajo Aprobado',
+    acc_meta_1:'Después de', acc_meta_2:'de trabajo',
+    attempt_sg:'intento', attempt_pl:'intentos',
+    acc_subject:'Aprobado — Formato APA 7',
+    acc_greet:'Estimado/a',
+    acc_body:'Tu trabajo cumple correctamente con todas las especificaciones de formato APA 7.ª edición. El manuscrito ha sido aceptado para evaluación de contenido.',
+    acc_first:'Excelente trabajo desde el primer intento. Es raro ver un formato tan impecable.',
+    acc_retry:'Veamos si la próxima vez puedes lograrlo desde el primer envío. Revisa el manual con más atención antes de entregar.',
+    regards:'Saludos cordiales,', btn_close:'Cerrar',
+    rej_title:'Trabajo Devuelto',
+    word_attempt:'Intento', err_sg:'error encontrado', err_pl:'errores encontrados', elapsed:'transcurridos',
+    rej_subject:'Devolución — Formato APA 7 incompleto',
+    rej_greet:'Estimada María Carmen,',
+    rej_body:'He revisado tu trabajo y lo devuelvo con observaciones. El contenido es adecuado, pero el formato <strong>no cumple</strong> con las normas APA 7.ª edición. Corrige los siguientes',
+    point_sg:'punto', point_pl:'puntos',
+    frase_1:'Revisa cuidadosamente cada punto antes de volver a enviar.',
+    frase_2:'Te falta la mitad del trabajo. Revisa el Manual de Publicaciones APA.',
+    frase_3:'Sigue sin estar listo. Te sugiero comparar tu documento con una plantilla APA 7 oficial.',
+    frase_4:'Esto está tomando demasiado tiempo. Revisa cada elemento uno por uno con la lista.',
+    frase_5:'¿Has consultado el manual? Los puntos marcados son específicos y claros.',
+    frase_6:'La paciencia tiene un límite. Cada punto está detallado. Corrígelo ya.',
+    btn_understood:'Entendido, vuelvo a revisar'
+  },
+  en: {
+    confirm_switch:'Switching language will restart the simulation. Continue?',
+    name_q:'What is your name?',
+    name_note:'Used to personalize your result. Your name is only kept for this browser session and is never stored or sent to any server.',
+    name_ph:'Your name', name_btn:'Continue', name_default:'Student',
+    prof_name:'Prof. Dr. Ana Belén Montoya',
+    lbl_from:'From:', lbl_subject:'Subject:', lbl_date:'Date:',
+    acc_title:'Work Approved',
+    acc_meta_1:'After', acc_meta_2:'of work',
+    attempt_sg:'attempt', attempt_pl:'attempts',
+    acc_subject:'Approved — APA 7 Format',
+    acc_greet:'Dear',
+    acc_body:'Your paper correctly meets every APA 7th-edition formatting requirement. The manuscript has been accepted for content review.',
+    acc_first:'Excellent work on your very first attempt. Such flawless formatting is rare.',
+    acc_retry:'Let’s see if next time you can get it right on the first submission. Review the manual more carefully before handing in.',
+    regards:'Kind regards,', btn_close:'Close',
+    rej_title:'Work Returned',
+    word_attempt:'Attempt', err_sg:'error found', err_pl:'errors found', elapsed:'elapsed',
+    rej_subject:'Returned — Incomplete APA 7 format',
+    rej_greet:'Dear María Carmen,',
+    rej_body:'I have reviewed your paper and I am returning it with comments. The content is adequate, but the formatting <strong>does not meet</strong> APA 7th-edition standards. Please fix the following',
+    point_sg:'point', point_pl:'points',
+    frase_1:'Review each point carefully before submitting again.',
+    frase_2:'Half the work is still missing. Check the APA Publication Manual.',
+    frase_3:'Still not ready. I suggest comparing your document against an official APA 7 template.',
+    frase_4:'This is taking too long. Go through each item on the list one by one.',
+    frase_5:'Have you consulted the manual? The items flagged are specific and clear.',
+    frase_6:'Patience has a limit. Every point is spelled out. Fix it now.',
+    btn_understood:'Understood, I’ll review it again',
+    /* data-i18n (solo EN) */
+    page_title:'APA 7 Format Simulation',
+    meta_desc:'Interactive educational simulation of APA 7 format: fix a manuscript with title page, heading, citation and reference errors. SimLab ULEAM.',
+    back_title:'Back to SimLab home',
+    hdr_title:'APA 7 Simulation', hdr_sub:'Academic manuscript formatting',
+    mode_title:'Comparison view: real APA format vs. an illustrative journal-template example',
+    mode_real:'Real APA', mode_journal:'Journal template (example)',
+    lbl_time:'Time', lbl_sends:'Submissions', lbl_prog:'Progress',
+    aside_title:'Correction checklist',
+    send_btn:'Submit Work', send_aria:'Submit work',
+    paper_banner:'Illustrative view: journal-template layout (two columns, Level 2 headings). Each journal defines its own style — this is <strong>not</strong> part of the APA 7 rules assessed in this exercise.',
+    paper_rhead:'TECHNOLOGY IMPACT ADOLESCENTS',
+    paper_title:'The impact of technology on adolescent cognitive development: a systematic review',
+    paper_afil:'National Distance Education University',
+    break_mark:'— page break —',
+    h_intro:'Introduction',
+    p_intro1:'Over the last decade, adolescents’ use of technological devices has increased <span class="ubold">significantly</span>. According to recent studies <span class="wcita">(according to García and López, 2019)</span><span class="rcita">(García &amp; López, 2019)</span>, average daily screen time among adolescents aged 12 to 18 has tripled, sparking an intense debate in the scientific community about its implications for cognitive development.',
+    p_intro2:'Several researchers <span class="wcita">(as noted by Martínez and others, 2020)</span><span class="rcita">(Martínez <span class="yot">and others</span><span class="etal">et al.</span>, 2020)</span> have identified correlations between excessive social media use and a decline in sustained attention. However, other authors <span class="wcita">(see Fernández, 2021)</span><span class="rcita">(Fernández, 2021)</span> argue that technology can foster the digital skills essential for the 21st century.',
+    h_problem:'Problem statement',
+    p_problem:'The present study aims to <span class="ubold">systematically</span> analyze the available empirical evidence on the relationship between technology use and cognitive development in adolescents. It seeks to answer the following research question: what is the real impact of technological exposure on adolescents’ executive functions, memory and attention?',
+    bullet_1:'Adolescents spend an average of 7 hours a day in front of screens.',
+    bullet_2:'A decline in sustained-attention scores has been observed.',
+    bullet_3:'Digital multitasking skills have improved significantly.',
+    bp_1:'Adolescents spend an average of 7 hours a day in front of screens, according to recent data from international health organizations.',
+    bp_2:'A decline in sustained-attention scores has been observed in standardized assessments administered to student populations.',
+    bp_3:'Digital multitasking skills have improved significantly compared with previous generations.',
+    h_method:'Method',
+    h_partic:'Participants',
+    p_partic:'A total of 45 studies published between 2015 and 2023 were reviewed, comprising 12,340 participants aged 12 to 18. Inclusion criteria required longitudinal or cross-sectional designs with adequate <span class="ubold">methodological controls</span>.',
+    h_proc:'Procedure',
+    p_proc:'The search was conducted in the PubMed, PsycINFO and Web of Science databases. The researchers <span class="wcita">(according to Chen and colleagues, 2022)</span><span class="rcita">(Chen <span class="yot">and colleagues</span><span class="etal">et al.</span>, 2022)</span> applied a systematic review protocol following the PRISMA guidelines, assessing methodological quality with the Newcastle-Ottawa scale.',
+    h_results:'Results',
+    p_res1:'The results reveal a <span class="ubold">complex</span> and nuanced picture. On the one hand, a moderate negative correlation (r = -0.34) was identified between social media use time and performance on sustained-attention tasks. On the other hand, the use of educational digital tools showed a positive correlation (r = 0.28) with visual working memory.',
+    p_res2:'Subgroup analyses conducted by <span class="wcita">(Torres and others, 2023)</span><span class="rcita">(Torres <span class="yot">and others</span><span class="etal">et al.</span>, 2023)</span> indicated that the type of technological activity is a crucial moderating factor: passive activities (such as watching videos) were associated with poorer cognitive outcomes, while interactive activities (such as programming or content creation) showed neutral or positive effects.',
+    h_disc:'Discussion',
+    p_disc1:'The findings of this systematic review suggest that the impact of technology on adolescent cognitive development is not uniform; it depends on multiple variables such as the type of use, the duration of exposure and the context in which technology is used. These results are consistent with the arguments of <span class="wcita">(refer to García and López, 2019)</span><span class="rcita">(García &amp; López, 2019)</span> on the need for a differentiated perspective.',
+    p_disc2:'Future research should adopt longer longitudinal designs and use objective neurocognitive measures. The results also underscore the importance of developing digital literacy programs that promote <span class="ubold">responsible</span>, active technology use among adolescents.',
+    h_refs:'References',
+    ref_torres:'Torres, R., Navarro, M., &amp; Delgado, P. (2023). <span class="atitle">Differential effects of technology on adolescent cognition</span>. <span class="jname">Revista de Psicología Educativa</span>, <span class="vnum">29</span>(3), 145–162. <span class="doi-l">https://doi.org/10.5093/psed2023a15</span>',
+    ref_garcia:'García, M., &amp; López, C. (2019). <span class="atitle">Screens and cognitive development: a differentiated perspective</span>. <span class="jname">Infancia y Aprendizaje</span>, <span class="vnum">42</span>(4), 890–912. <span class="doi-l">https://doi.org/10.1080/02103702.2019.1654501</span>',
+    ref_chen:'Chen, W., Park, S., &amp; Müller, H. (2022). <span class="atitle">Systematic review methodologies in cognitive research</span>. <span class="jname">Psychological Methods</span>, <span class="vnum">27</span>(1), 34–52. <span class="doi-l">https://doi.org/10.1037/met0000412</span>',
+    ref_martinez:'Martínez, A., Ruiz, B., &amp; Santos, L. (2020). <span class="atitle">Social media and sustained attention in adolescents</span>. <span class="jname">Journal of Adolescent Psychology</span>, <span class="vnum">45</span>(2), 78–95. <span class="doi-l">https://doi.org/10.1037/ado0000487</span>',
+    ref_fernandez:'Fernández, J. (2021). <span class="atitle">Digital skills and 21st-century competences in youth</span>. <span class="jname">Comunicar</span>, <span class="vnum">69</span>, 23–38. <span class="doi-l">https://doi.org/10.3916/C69-2021-02</span>'
+  }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
+function applyStaticI18n(){
+  if (LANG === 'es') return;
+  document.title = t('page_title');
+  const md = document.querySelector('meta[name="description"]');
+  if (md) md.content = t('meta_desc');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+}
+applyStaticI18n();
+
+const langBtn = document.getElementById('simLangBtn');
+langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+langBtn.addEventListener('click', () => {
+  if (!confirm(t('confirm_switch'))) return;
+  setLang(LANG === 'es' ? 'en' : 'es');
+  location.reload();
+});
+
+/* ============================================
    PERSONALIZACIÓN: NOMBRE DEL USUARIO
    (solo en esta sesión del navegador, no se guarda permanentemente)
    ============================================ */
@@ -289,16 +434,16 @@ function obtenerNombreUsuario(callback) {
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
   overlay.innerHTML = `
     <div style="background:var(--card,#1e1e1e);color:var(--fg,#f1f1f1);padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--accent,#D4A853);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.5)">
-      <h3 style="margin:0 0 12px;color:var(--accent,#D4A853)">¿Cómo te llamas?</h3>
-      <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.</p>
-      <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid #777;background:rgba(255,255,255,.05);color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
-      <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:var(--accent,#D4A853);color:#000;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
+      <h3 style="margin:0 0 12px;color:var(--accent,#D4A853)">${t('name_q')}</h3>
+      <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">${t('name_note')}</p>
+      <input id="inputNombreUsuario" type="text" placeholder="${t('name_ph')}" style="width:100%;padding:10px;border-radius:6px;border:1px solid #777;background:rgba(255,255,255,.05);color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
+      <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:6px;background:var(--accent,#D4A853);color:#000;font-weight:700;cursor:pointer;font-size:1rem">${t('name_btn')}</button>
     </div>`;
   document.body.appendChild(overlay);
   const input = overlay.querySelector('#inputNombreUsuario');
   input.focus();
   const confirmar = () => {
-    const nombre = input.value.trim() || 'Estudiante';
+    const nombre = input.value.trim() || t('name_default');
     sessionStorage.setItem('nombreEstudianteSim', nombre);
     overlay.remove();
     callback(nombre);
@@ -310,7 +455,7 @@ function obtenerNombreUsuario(callback) {
 /* ============================================
    DATOS DE TAREAS
    ============================================ */
-const TASKS = [
+const TASKS_ALL = { es: [
   { id:'fuente',    cat:'portada', label:'Cambiar tipo de letra a Times New Roman 12pt',           css:'t-fuente',   fb:'El documento no está en Times New Roman 12pt. APA 7 exige esta tipografía.' },
   { id:'portada',   cat:'portada', label:'Centrar verticalmente el contenido de la portada',        css:'t-portada',  fb:'El contenido de la portada no está centrado en la mitad superior de la página.' },
   { id:'titulo',    cat:'portada', label:'Título: centrado, negrita, sin subrayar ni mayúsculas',   css:'t-titulo',   fb:'El título debe estar centrado, en negrita, sin subrayado ni mayúsculas sostenidas.' },
@@ -335,15 +480,50 @@ const TASKS = [
   { id:'mayus',     cat:'refs',    label:'Corregir mayúsculas en títulos de artículos (tipo oración)',css:'t-mayus',   fb:'Los títulos de artículos deben estar en mayúscula de tipo oración (solo primera palabra y nombres propios en mayúscula).' },
   { id:'doi',       cat:'refs',    label:'Agregar enlaces DOI a cada referencia',                   css:'t-doi',      fb:'Faltan los enlaces DOI en las referencias. Cuando esté disponible, el DOI debe incluirse con formato https://doi.org/...' },
   { id:'alpha',     cat:'refs',    label:'Ordenar referencias alfabéticamente por apellido',        css:null,         fb:'Las referencias no están ordenadas alfabéticamente por el apellido del primer autor.' },
-];
+],
+en: [
+  { id:'fuente',    cat:'portada', label:'Change the font to Times New Roman 12pt',                 css:'t-fuente',   fb:'The document is not set in Times New Roman 12pt. APA 7 requires this typeface.' },
+  { id:'portada',   cat:'portada', label:'Vertically center the title-page content',                css:'t-portada',  fb:'The title-page content is not centered in the upper half of the page.' },
+  { id:'titulo',    cat:'portada', label:'Title: centered, bold, no underline or all caps',         css:'t-titulo',   fb:'The title must be centered, in bold, with no underline and no sustained capitals.' },
+  { id:'autor',     cat:'portada', label:'Center the author’s name',                                css:'t-autor',    fb:'The author’s name must be centered below the title.' },
+  { id:'afil',      cat:'portada', label:'Center the institutional affiliation',                    css:'t-afil',     fb:'The institutional affiliation must be centered below the author’s name.' },
+  { id:'espaciado', cat:'formato', label:'Apply double line spacing (2.0)',                         css:'t-espaciado',fb:'Line spacing is not double. APA 7 requires 2.0 spacing throughout the document.' },
+  { id:'sin-esp',   cat:'formato', label:'Remove extra space between paragraphs',                   css:'t-sin-espacio',fb:'There is extra space between paragraphs. It must be removed; double spacing is sufficient.' },
+  { id:'margenes',  cat:'formato', label:'Set margins to 2.54 cm (1 inch)',                         css:'t-margenes', fb:'Margins are not 2.54 cm on all sides. Check the page setup.' },
+  { id:'pnum',      cat:'formato', label:'Add a page number in the top-right corner',               css:'t-pnum',     fb:'There is no page number in the top-right corner. All pages must be numbered.' },
+  { id:'salto',     cat:'formato', label:'Insert a page break between each section',                css:'t-salto',    fb:'Page breaks between sections are missing. Each Level 1 heading (Introduction, Method, Results, Discussion, References) must start on a new page.' },
+  { id:'rhead',     cat:'encab',   label:'Add a running head with the abbreviated title in caps',   css:'t-rhead',    fb:'The running head with the abbreviated title in capitals is missing from the top margin.' },
+  { id:'sangria',   cat:'cuerpo',  label:'Apply a 1.27 cm first-line indent',                       css:'t-sangria',  fb:'Paragraphs lack the 1.27 cm first-line indent. It is mandatory in APA 7.' },
+  { id:'h1',        cat:'cuerpo',  label:'Level 1 headings: centered, bold',                        css:'t-h1',       fb:'Level 1 headings must be centered and bold, with no underline or all caps.' },
+  { id:'h2',        cat:'cuerpo',  label:'Level 2 headings: left-aligned, bold',                    css:'t-h2',       fb:'Level 2 headings must be left-aligned and bold.' },
+  { id:'cita',      cat:'cuerpo',  label:'Fix in-text citation format (Author, Year)',              css:'t-cita',     fb:'In-text citations do not follow the (Author, Year) format. Check every parenthetical citation.' },
+  { id:'nobold',    cat:'cuerpo',  label:'Remove unnecessary bold in the body text',                css:'t-nobold',   fb:'There is unnecessary bold in the body text. APA 7 does not allow bold for emphasizing words.' },
+  { id:'etal',      cat:'cuerpo',  label:'Change "and others" to "et al." in 3+ author citations',  css:'t-etal',     fb:'"And others" is used instead of "et al." for citations with three or more authors. A frequent error.' },
+  { id:'bullets',   cat:'cuerpo',  label:'Convert bullet points into continuous paragraphs',        css:'t-bullets',  fb:'The body text contains bullet points. APA 7 requires continuous paragraph format; bullets are not used in the body.' },
+  { id:'refs-head', cat:'refs',    label:'"References" as a Level 1 heading (centered, bold)',      css:'t-refs-head',fb:'The "References" title is not formatted as a Level 1 heading.' },
+  { id:'hang',      cat:'refs',    label:'Apply a hanging indent to the references',                css:'t-hang',     fb:'The references lack a hanging indent. The first line sits at the margin and subsequent lines are indented 1.27 cm.' },
+  { id:'cursiva',   cat:'refs',    label:'Italicize journal names and volume numbers',              css:'t-cursiva',  fb:'Journal names and volume numbers must be in italics.' },
+  { id:'mayus',     cat:'refs',    label:'Fix capitalization in article titles (sentence case)',    css:'t-mayus',    fb:'Article titles must be in sentence case (only the first word and proper nouns capitalized).' },
+  { id:'doi',       cat:'refs',    label:'Add DOI links to every reference',                        css:'t-doi',      fb:'DOI links are missing from the references. When available, the DOI must be included as https://doi.org/...' },
+  { id:'alpha',     cat:'refs',    label:'Sort references alphabetically by surname',               css:null,         fb:'The references are not sorted alphabetically by the first author’s surname.' },
+] };
+const TASKS = TASKS_ALL[LANG];
 
-const CATS = [
+const CATS_ALL = { es: [
   { id:'portada', label:'Portada',       icon:'fa-file-lines',     color:'#D4A853' },
   { id:'formato', label:'Formato general',icon:'fa-sliders',       color:'#7EB8DA' },
   { id:'encab',   label:'Encabezado',     icon:'fa-heading',        color:'#C78DD2' },
   { id:'cuerpo',  label:'Cuerpo del texto',icon:'fa-align-left',    color:'#E0915A' },
   { id:'refs',    label:'Referencias',    icon:'fa-book-open',      color:'#5A9E6F' },
-];
+],
+en: [
+  { id:'portada', label:'Title page',    icon:'fa-file-lines',     color:'#D4A853' },
+  { id:'formato', label:'General format',icon:'fa-sliders',        color:'#7EB8DA' },
+  { id:'encab',   label:'Running head',  icon:'fa-heading',        color:'#C78DD2' },
+  { id:'cuerpo',  label:'Body text',     icon:'fa-align-left',     color:'#E0915A' },
+  { id:'refs',    label:'References',    icon:'fa-book-open',      color:'#5A9E6F' },
+] };
+const CATS = CATS_ALL[LANG];
 
 /* ============================================
    ESTADO
@@ -509,7 +689,7 @@ sendBtn.addEventListener('click', () => {
 
   if (pendientes.length === 0) {
     /* APROBADO */
-    localStorage.setItem('simlab_apa', Date.now());
+    localStorage.setItem('simlab_done_simlab_apa', Date.now());
     modalBox.className = 'modal-box acc';
     const m = String(Math.floor(seconds / 60)).padStart(2, '0');
     const s = String(seconds % 60).padStart(2, '0');
@@ -518,21 +698,21 @@ sendBtn.addEventListener('click', () => {
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
           <div style="width:40px;height:40px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-check" style="color:#fff;font-size:18px"></i></div>
           <div>
-            <div style="font-weight:700;font-size:16px;color:var(--success)">Trabajo Aprobado</div>
-            <div style="font-size:11px;color:var(--muted)">Después de ${envioCount} intento${envioCount>1?'s':''} y ${m}:${s} de trabajo</div>
+            <div style="font-weight:700;font-size:16px;color:var(--success)">${t('acc_title')}</div>
+            <div style="font-size:11px;color:var(--muted)">${t('acc_meta_1')} ${envioCount} ${envioCount>1?t('attempt_pl'):t('attempt_sg')} ${LANG==='es'?'y':'and'} ${m}:${s} ${t('acc_meta_2')}</div>
           </div>
         </div>
         <div style="background:rgba(90,158,111,.08);border:1px solid rgba(90,158,111,.2);border-radius:8px;padding:16px;font-size:13.5px;line-height:1.7;color:var(--fg)">
-          <p style="margin-bottom:8px"><strong>De:</strong> Prof. Dra. Ana Belén Montoya</p>
-          <p style="margin-bottom:8px"><strong>Asunto:</strong> Aprobado — Formato APA 7</p>
-          <p style="margin-bottom:12px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
-          <p style="margin-bottom:8px">Estimado/a ${nombre},</p>
-          <p style="margin-bottom:8px">Tu trabajo cumple correctamente con todas las especificaciones de formato APA 7.ª edición. El manuscrito ha sido aceptado para evaluación de contenido.</p>
-          <p style="margin-bottom:8px">${envioCount === 1 ? 'Excelente trabajo desde el primer intento. Es raro ver un formato tan impecable.' : 'Veamos si la próxima vez puedes lograrlo desde el primer envío. Revisa el manual con más atención antes de entregar.'}</p>
-          <p>Saludos cordiales,<br><strong>Prof. Dra. Ana Belén Montoya</strong></p>
+          <p style="margin-bottom:8px"><strong>${t('lbl_from')}</strong> ${t('prof_name')}</p>
+          <p style="margin-bottom:8px"><strong>${t('lbl_subject')}</strong> ${t('acc_subject')}</p>
+          <p style="margin-bottom:12px"><strong>${t('lbl_date')}</strong> ${new Date().toLocaleDateString(LANG==='es'?'es-ES':'en-US',{day:'numeric',month:'long',year:'numeric'})}</p>
+          <p style="margin-bottom:8px">${t('acc_greet')} ${nombre},</p>
+          <p style="margin-bottom:8px">${t('acc_body')}</p>
+          <p style="margin-bottom:8px">${envioCount === 1 ? t('acc_first') : t('acc_retry')}</p>
+          <p>${t('regards')}<br><strong>${t('prof_name')}</strong></p>
         </div>
         <div style="text-align:center;margin-top:20px">
-          <button onclick="closeModal()" style="background:var(--success);color:#fff;border:none;padding:10px 36px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:14px;transition:opacity .2s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">Cerrar</button>
+          <button onclick="closeModal()" style="background:var(--success);color:#fff;border:none;padding:10px 36px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:14px;transition:opacity .2s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">${t('btn_close')}</button>
         </div>`;
       modal.classList.add('on');
       launchConfetti();
@@ -562,12 +742,12 @@ sendBtn.addEventListener('click', () => {
 
     /* Frases motivacionales/desmotivadoras según cuántos envíos lleve */
     let frase = '';
-    if (envioCount === 1) frase = 'Revisa cuidadosamente cada punto antes de volver a enviar.';
-    else if (envioCount === 2) frase = 'Te falta la mitad del trabajo. Revisa el Manual de Publicaciones APA.';
-    else if (envioCount === 3) frase = 'Sigue sin estar listo. Te sugiero comparar tu documento con una plantilla APA 7 oficial.';
-    else if (envioCount <= 5) frase = 'Esto está tomando demasiado tiempo. Revisa cada elemento uno por uno con la lista.';
-    else if (envioCount <= 8) frase = '¿Has consultado el manual? Los puntos marcados son específicos y claros.';
-    else frase = 'La paciencia tiene un límite. Cada punto está detallado. Corrígelo ya.';
+    if (envioCount === 1) frase = t('frase_1');
+    else if (envioCount === 2) frase = t('frase_2');
+    else if (envioCount === 3) frase = t('frase_3');
+    else if (envioCount <= 5) frase = t('frase_4');
+    else if (envioCount <= 8) frase = t('frase_5');
+    else frase = t('frase_6');
 
     const m = String(Math.floor(seconds / 60)).padStart(2, '0');
     const s = String(seconds % 60).padStart(2, '0');
@@ -576,24 +756,24 @@ sendBtn.addEventListener('click', () => {
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
         <div style="width:40px;height:40px;border-radius:50%;background:var(--error);display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-xmark" style="color:#fff;font-size:18px"></i></div>
         <div>
-          <div style="font-weight:700;font-size:16px;color:var(--error)">Trabajo Devuelto</div>
-          <div style="font-size:11px;color:var(--muted)">Intento ${envioCount} — ${pendientes.length} error${pendientes.length>1?'es':''} encontrado${pendientes.length>1?'s':''} — ${m}:${s} transcurridos</div>
+          <div style="font-weight:700;font-size:16px;color:var(--error)">${t('rej_title')}</div>
+          <div style="font-size:11px;color:var(--muted)">${t('word_attempt')} ${envioCount} — ${pendientes.length} ${pendientes.length>1?t('err_pl'):t('err_sg')} — ${m}:${s} ${t('elapsed')}</div>
         </div>
       </div>
       <div style="background:rgba(199,80,80,.06);border:1px solid rgba(199,80,80,.15);border-radius:8px;padding:16px;font-size:13.5px;line-height:1.7;color:var(--fg)">
-        <p style="margin-bottom:8px"><strong>De:</strong> Prof. Dra. Ana Belén Montoya</p>
-        <p style="margin-bottom:8px"><strong>Asunto:</strong> Devolución — Formato APA 7 incompleto</p>
-        <p style="margin-bottom:12px"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
-        <p style="margin-bottom:8px">Estimada María Carmen,</p>
-        <p style="margin-bottom:12px">He revisado tu trabajo y lo devuelvo con observaciones. El contenido es adecuado, pero el formato <strong>no cumple</strong> con las normas APA 7.ª edición. Corrige los siguientes <strong>${pendientes.length} punto${pendientes.length>1?'s':''}</strong>:</p>
+        <p style="margin-bottom:8px"><strong>${t('lbl_from')}</strong> ${t('prof_name')}</p>
+        <p style="margin-bottom:8px"><strong>${t('lbl_subject')}</strong> ${t('rej_subject')}</p>
+        <p style="margin-bottom:12px"><strong>${t('lbl_date')}</strong> ${new Date().toLocaleDateString(LANG==='es'?'es-ES':'en-US',{day:'numeric',month:'long',year:'numeric'})}</p>
+        <p style="margin-bottom:8px">${t('rej_greet')}</p>
+        <p style="margin-bottom:12px">${t('rej_body')} <strong>${pendientes.length} ${pendientes.length>1?t('point_pl'):t('point_sg')}</strong>:</p>
         ${fbHtml}
         <div style="border-top:1px solid rgba(199,80,80,.15);margin-top:14px;padding-top:12px;font-style:italic;color:var(--muted);font-size:12.5px">
           <i class="fa-solid fa-circle-info" style="margin-right:4px"></i>${frase}
         </div>
-        <p style="margin-top:12px">Saludos cordiales,<br><strong>Prof. Dra. Ana Belén Montoya</strong></p>
+        <p style="margin-top:12px">${t('regards')}<br><strong>${t('prof_name')}</strong></p>
       </div>
       <div style="text-align:center;margin-top:20px">
-        <button onclick="closeModal()" style="background:var(--error);color:#fff;border:none;padding:10px 36px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:14px;transition:opacity .2s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">Entendido, vuelvo a revisar</button>
+        <button onclick="closeModal()" style="background:var(--error);color:#fff;border:none;padding:10px 36px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:14px;transition:opacity .2s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">${t('btn_understood')}</button>
       </div>`;
     modal.classList.add('on');
   }
