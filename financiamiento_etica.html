@@ -353,6 +353,26 @@
     </div>
 
 <script>
+/* === i18n === */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+const I18N = {
+  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?', name_q:'¿Cómo te llamas?', name_ph:'Tu nombre', name_note:'No te preguntaremos otra vez en esta sesión.', name_btn:'Continuar', name_default:'Estudiante' },
+  en: { confirm_switch:'Switching language will restart the simulation. Continue?', name_q:'What is your name?', name_ph:'Your name', name_note:'We will not ask again during this session.', name_btn:'Continue', name_default:'Student' }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+const langBtn = document.getElementById('simLangBtn');
+if(langBtn){
+  langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+  langBtn.addEventListener('click', () => {
+    if (!confirm(t('confirm_switch'))) return;
+    setLang(LANG === 'es' ? 'en' : 'es');
+    location.reload();
+  });
+}
+
     // --- PERSONALIZACIÓN: NOMBRE DEL USUARIO ---
     // (solo en esta sesión del navegador, no se guarda permanentemente)
     function obtenerNombreUsuario(callback) {

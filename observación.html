@@ -393,7 +393,8 @@
     }
 }
 </script>
-<script type="module">
+
+<script>
 /* === i18n === */
 function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
 function setLang(l){ localStorage.setItem('simlab_lang', l); }
@@ -406,7 +407,18 @@ const I18N = {
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
 function applyStaticI18n(){ if(LANG === 'es') return; document.title = t('page_title'); const md = document.querySelector('meta[name="description"]'); if(md) md.content = t('meta_desc'); }
 applyStaticI18n();
+const langBtn = document.getElementById('simLangBtn');
+if(langBtn){
+  langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+  langBtn.addEventListener('click', () => {
+    if (!confirm(t('confirm_switch'))) return;
+    setLang(LANG === 'es' ? 'en' : 'es');
+    location.reload();
+  });
+}
+</script>
 
+<script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
@@ -1510,17 +1522,6 @@ window.addEventListener('touchend', (e) => {
 }, { passive: true });
 
 animate();
-
-// === Toggle idioma ===
-const langBtn = document.getElementById('simLangBtn');
-if(langBtn){
-  langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
-  langBtn.addEventListener('click', () => {
-    if (!confirm(t('confirm_switch'))) return;
-    setLang(LANG === 'es' ? 'en' : 'es');
-    location.reload();
-  });
-}
 </script>
 </body>
 </html>

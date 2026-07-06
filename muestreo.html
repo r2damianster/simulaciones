@@ -285,6 +285,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
   <i class="fa-solid fa-house" aria-hidden="true"></i>
 </a>
+<button type="button" id="simLangBtn" style="position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;transition:transform .2s" aria-label="Cambiar idioma / Switch language"></button>
 <button id="glosario-toggle" aria-label="Abrir glosario"><i class="fas fa-book"></i></button>
 <div id="app">
   <aside id="glosario-panel"></aside>
@@ -377,174 +378,345 @@ const GLOSARIO = GLOSARIO_ALL[LANG];
 const SUBTIPOS_PROB = LANG === 'es' ? ["Aleatorio Simple","Sistemático","Estratificado","Por Conglomerados"] : ["Simple Random","Systematic","Stratified","Cluster"];
 const SUBTIPOS_NO_PROB = LANG === 'es' ? ["Por Conveniencia","Por Juicio","Bola de Nieve","Por Cuotas"] : ["Convenience","Judgment","Snowball","Quota"];
 
-const EJERCICIOS = [
-  // ===== FASE 1: Clasificación binaria =====
-  { id:1, fase:1, titulo:"Jardín Botánico", icono:"🌿",
-    poblacion:{ total:40, columns:8, grupos:[
-      {nombre:"Rosas",emoji:"🌹",color:"#E63946",cantidad:15},
-      {nombre:"Lirios",emoji:"🌸",color:"#D4A0E0",cantidad:12},
-      {nombre:"Tulipanes",emoji:"🌷",color:"#F4A261",cantidad:13}
-    ]},
-    muestraCantidad:8, seleccionados:[3,11,17,22,28,33,36,39],
-    tipo:"probabilistico", subtipo:"Aleatorio Simple", distribucion:"mezclado",
-    narrativa:"Se numeran todas las plantas del 1 al 40 y se usa un generador de números aleatorios para seleccionar 8 de ellas.",
-    explicacionP1:"Cada planta tuvo la misma probabilidad conocida de ser elegida (8/40 = 20%) mediante un mecanismo aleatorio. Por eso es <strong>probabilístico</strong>.",
-    explicacionP2:"Al numerar todos los elementos y usar azar puro para elegir, se trata de un <strong>Muestreo Aleatorio Simple</strong>.",
-    animacion:"aleatorio_simple"
-  },
-  { id:2, fase:1, titulo:"Biblioteca Municipal", icono:"📚",
-    poblacion:{ total:36, columns:9, grupos:[
-      {nombre:"Novelas",emoji:"📕",color:"#E63946",cantidad:12},
-      {nombre:"Ciencia",emoji:"📗",color:"#2A9D8F",cantidad:12},
-      {nombre:"Historia",emoji:"📘",color:"#457B9D",cantidad:12}
-    ]},
-    muestraCantidad:9, seleccionados:[0,1,2,9,10,11,18,19,20],
-    tipo:"noProbabilistico", subtipo:"Por Conveniencia", distribucion:"mezclado",
-    narrativa:"El investigador toma los 9 libros que están en la mesa más cercana a la entrada de la biblioteca.",
-    explicacionP1:"No todos los libros tuvieron oportunidad de ser elegidos. Solo se tomaron los más accesibles. Es <strong>no probabilístico</strong>.",
-    explicacionP2:"Se eligieron los elementos más fáciles de acceder. Esto es <strong>Muestreo por Conveniencia</strong>.",
-    animacion:"conveniencia"
-  },
-  { id:3, fase:1, titulo:"Escuela Secundaria", icono:"🏫",
-    poblacion:{ total:50, columns:10, grupos:[
-      {nombre:"1ro año",emoji:"👦",color:"#F59E0B",cantidad:17},
-      {nombre:"2do año",emoji:"👧",color:"#22C55E",cantidad:16},
-      {nombre:"3ro año",emoji:"🧑",color:"#8B5CF6",cantidad:17}
-    ]},
-    muestraCantidad:10, seleccionados:[2,7,12,17,22,27,32,37,42,47],
-    tipo:"probabilistico", subtipo:"Sistemático", distribucion:"mezclado",
-    narrativa:"Se ordena a los 50 alumnos en una lista y se selecciona cada 5to alumno comenzando desde el número 3.",
-    explicacionP1:"El intervalo fijo garantiza que cada alumno tenía una probabilidad conocida de ser seleccionado (1/5). Es <strong>probabilístico</strong>.",
-    explicacionP2:"Se usa un intervalo constante (k=5) a partir de un punto de inicio. Esto es <strong>Muestreo Sistemático</strong>.",
-    animacion:"sistematico", sistematicoInicio:2, sistematicoIntervalo:5
-  },
-  { id:4, fase:1, titulo:"Hospital Regional", icono:"🏥",
-    poblacion:{ total:30, columns:6, grupos:[
-      {nombre:"Piso 1",emoji:"🛏️",color:"#457B9D",cantidad:10},
-      {nombre:"Piso 2",emoji:"🛏️",color:"#E63946",cantidad:10},
-      {nombre:"Piso 3",emoji:"🛏️",color:"#F4A261",cantidad:10}
-    ]},
-    muestraCantidad:6, seleccionados:[4,11,15,20,25,28],
-    tipo:"noProbabilistico", subtipo:"Por Juicio", distribucion:"mezclado",
-    narrativa:"El médico selecciona manualmente a 6 pacientes que considera 'casos típicos y representativos' de la enfermedad que estudia.",
-    explicacionP1:"La selección depende del criterio subjetivo del médico. No hay probabilidad conocida para cada paciente. Es <strong>no probabilístico</strong>.",
-    explicacionP2:"El investigador usa su criterio para elegir 'casos representativos'. Esto es <strong>Muestreo por Juicio</strong>.",
-    animacion:"juicio"
-  },
-  { id:5, fase:1, titulo:"Fábrica de Alimentos", icono:"🏭",
-    poblacion:{ total:48, columns:8, grupos:[
-      {nombre:"Línea A",emoji:"📦",color:"#E63946",cantidad:16},
-      {nombre:"Línea B",emoji:"📦",color:"#2A9D8F",cantidad:16},
-      {nombre:"Línea C",emoji:"📦",color:"#F59E0B",cantidad:16}
-    ]},
-    muestraCantidad:8, seleccionados:[3,8,12,20,25,30,36,44],
-    tipo:"probabilistico", subtipo:"Estratificado", distribucion:"contiguo",
-    narrativa:"Se clasifican las cajas por línea de producción (A, B, C) y se toma una muestra proporcional de cada línea usando sorteo.",
-    explicacionP1:"La población se dividió en estratos, pero dentro de cada uno se usó azar. Cada caja tuvo probabilidad conocida. Es <strong>probabilístico</strong>.",
-    explicacionP2:"Se divide la población en grupos homogéneos (estratos) y se muestrea aleatoriamente dentro de cada uno. Es <strong>Muestreo Estratificado</strong>.",
-    animacion:"estratificado"
-  },
-  { id:6, fase:1, titulo:"Pesca Artesanal del Lago", icono:"🐟",
-    poblacion:{ total:28, columns:7, grupos:[
-      {nombre:"Truchas",emoji:"🐟",color:"#457B9D",cantidad:10},
-      {nombre:"Carpas",emoji:"🐠",color:"#F4A261",cantidad:10},
-      {nombre:"Bagres",emoji:"🐡",color:"#8B5CF6",cantidad:8}
-    ]},
-    muestraCantidad:7, seleccionados:[5,12,13,19,20,24,25],
-    tipo:"noProbabilistico", subtipo:"Bola de Nieve", distribucion:"mezclado",
-    narrativa:"Un pescador nombra a 2 conocidos que también pescan, esos nombran a 2 más cada uno, hasta reunir 7 pescadores para encuestar.",
-    explicacionP1:"Los participantes se van sumando por referencia de otros. No todos tienen la misma oportunidad. Es <strong>no probabilístico</strong>.",
-    explicacionP2:"Un sujeto inicial refiere a otros, y esos a más, como una bola de nieve que crece. Es <strong>Muestreo por Bola de Nieve</strong>.",
-    animacion:"bola_nieve", bolaNieveOlas:[[5],[12,13],[19,20],[24,25]]
-  },
+const EJERCICIOS_ALL = {
+  es: [
+    // ===== FASE 1: Clasificación binaria =====
+    { id:1, fase:1, titulo:"Jardín Botánico", icono:"🌿",
+      poblacion:{ total:40, columns:8, grupos:[
+        {nombre:"Rosas",emoji:"🌹",color:"#E63946",cantidad:15},
+        {nombre:"Lirios",emoji:"🌸",color:"#D4A0E0",cantidad:12},
+        {nombre:"Tulipanes",emoji:"🌷",color:"#F4A261",cantidad:13}
+      ]},
+      muestraCantidad:8, seleccionados:[3,11,17,22,28,33,36,39],
+      tipo:"probabilistico", subtipo:"Aleatorio Simple", distribucion:"mezclado",
+      narrativa:"Se numeran todas las plantas del 1 al 40 y se usa un generador de números aleatorios para seleccionar 8 de ellas.",
+      explicacionP1:"Cada planta tuvo la misma probabilidad conocida de ser elegida (8/40 = 20%) mediante un mecanismo aleatorio. Por eso es <strong>probabilístico</strong>.",
+      explicacionP2:"Al numerar todos los elementos y usar azar puro para elegir, se trata de un <strong>Muestreo Aleatorio Simple</strong>.",
+      animacion:"aleatorio_simple"
+    },
+    { id:2, fase:1, titulo:"Biblioteca Municipal", icono:"📚",
+      poblacion:{ total:36, columns:9, grupos:[
+        {nombre:"Novelas",emoji:"📕",color:"#E63946",cantidad:12},
+        {nombre:"Ciencia",emoji:"📗",color:"#2A9D8F",cantidad:12},
+        {nombre:"Historia",emoji:"📘",color:"#457B9D",cantidad:12}
+      ]},
+      muestraCantidad:9, seleccionados:[0,1,2,9,10,11,18,19,20],
+      tipo:"noProbabilistico", subtipo:"Por Conveniencia", distribucion:"mezclado",
+      narrativa:"El investigador toma los 9 libros que están en la mesa más cercana a la entrada de la biblioteca.",
+      explicacionP1:"No todos los libros tuvieron oportunidad de ser elegidos. Solo se tomaron los más accesibles. Es <strong>no probabilístico</strong>.",
+      explicacionP2:"Se eligieron los elementos más fáciles de acceder. Esto es <strong>Muestreo por Conveniencia</strong>.",
+      animacion:"conveniencia"
+    },
+    { id:3, fase:1, titulo:"Escuela Secundaria", icono:"🏫",
+      poblacion:{ total:50, columns:10, grupos:[
+        {nombre:"1ro año",emoji:"👦",color:"#F59E0B",cantidad:17},
+        {nombre:"2do año",emoji:"👧",color:"#22C55E",cantidad:16},
+        {nombre:"3ro año",emoji:"🧑",color:"#8B5CF6",cantidad:17}
+      ]},
+      muestraCantidad:10, seleccionados:[2,7,12,17,22,27,32,37,42,47],
+      tipo:"probabilistico", subtipo:"Sistemático", distribucion:"mezclado",
+      narrativa:"Se ordena a los 50 alumnos en una lista y se selecciona cada 5to alumno comenzando desde el número 3.",
+      explicacionP1:"El intervalo fijo garantiza que cada alumno tenía una probabilidad conocida de ser seleccionado (1/5). Es <strong>probabilístico</strong>.",
+      explicacionP2:"Se usa un intervalo constante (k=5) a partir de un punto de inicio. Esto es <strong>Muestreo Sistemático</strong>.",
+      animacion:"sistematico", sistematicoInicio:2, sistematicoIntervalo:5
+    },
+    { id:4, fase:1, titulo:"Hospital Regional", icono:"🏥",
+      poblacion:{ total:30, columns:6, grupos:[
+        {nombre:"Piso 1",emoji:"🛏️",color:"#457B9D",cantidad:10},
+        {nombre:"Piso 2",emoji:"🛏️",color:"#E63946",cantidad:10},
+        {nombre:"Piso 3",emoji:"🛏️",color:"#F4A261",cantidad:10}
+      ]},
+      muestraCantidad:6, seleccionados:[4,11,15,20,25,28],
+      tipo:"noProbabilistico", subtipo:"Por Juicio", distribucion:"mezclado",
+      narrativa:"El médico selecciona manualmente a 6 pacientes que considera 'casos típicos y representativos' de la enfermedad que estudia.",
+      explicacionP1:"La selección depende del criterio subjetivo del médico. No hay probabilidad conocida para cada paciente. Es <strong>no probabilístico</strong>.",
+      explicacionP2:"El investigador usa su criterio para elegir 'casos representativos'. Esto es <strong>Muestreo por Juicio</strong>.",
+      animacion:"juicio"
+    },
+    { id:5, fase:1, titulo:"Fábrica de Alimentos", icono:"🏭",
+      poblacion:{ total:48, columns:8, grupos:[
+        {nombre:"Línea A",emoji:"📦",color:"#E63946",cantidad:16},
+        {nombre:"Línea B",emoji:"📦",color:"#2A9D8F",cantidad:16},
+        {nombre:"Línea C",emoji:"📦",color:"#F59E0B",cantidad:16}
+      ]},
+      muestraCantidad:8, seleccionados:[3,8,12,20,25,30,36,44],
+      tipo:"probabilistico", subtipo:"Estratificado", distribucion:"contiguo",
+      narrativa:"Se clasifican las cajas por línea de producción (A, B, C) y se toma una muestra proporcional de cada línea usando sorteo.",
+      explicacionP1:"La población se dividió en estratos, pero dentro de cada uno se usó azar. Cada caja tuvo probabilidad conocida. Es <strong>probabilístico</strong>.",
+      explicacionP2:"Se divide la población en grupos homogéneos (estratos) y se muestrea aleatoriamente dentro de cada uno. Es <strong>Muestreo Estratificado</strong>.",
+      animacion:"estratificado"
+    },
+    { id:6, fase:1, titulo:"Pesca Artesanal del Lago", icono:"🐟",
+      poblacion:{ total:28, columns:7, grupos:[
+        {nombre:"Truchas",emoji:"🐟",color:"#457B9D",cantidad:10},
+        {nombre:"Carpas",emoji:"🐠",color:"#F4A261",cantidad:10},
+        {nombre:"Bagres",emoji:"🐡",color:"#8B5CF6",cantidad:8}
+      ]},
+      muestraCantidad:7, seleccionados:[5,12,13,19,20,24,25],
+      tipo:"noProbabilistico", subtipo:"Bola de Nieve", distribucion:"mezclado",
+      narrativa:"Un pescador nombra a 2 conocidos que también pescan, esos nombran a 2 más cada uno, hasta reunir 7 pescadores para encuestar.",
+      explicacionP1:"Los participantes se van sumando por referencia de otros. No todos tienen la misma oportunidad. Es <strong>no probabilístico</strong>.",
+      explicacionP2:"Un sujeto inicial refiere a otros, y esos a más, como una bola de nieve que crece. Es <strong>Muestreo por Bola de Nieve</strong>.",
+      animacion:"bola_nieve", bolaNieveOlas:[[5],[12,13],[19,20],[24,25]]
+    },
 
-  // ===== FASE 2: Clasificación específica =====
-  { id:7, fase:2, titulo:"Granja Los Pinos", icono:"🐄",
-    poblacion:{ total:36, columns:6, grupos:[
-      {nombre:"Corral 1",emoji:"🐄",color:"#E63946",cantidad:6},
-      {nombre:"Corral 2",emoji:"🐑",color:"#F4A261",cantidad:6},
-      {nombre:"Corral 3",emoji:"🐎",color:"#457B9D",cantidad:6},
-      {nombre:"Corral 4",emoji:"🐔",color:"#22C55E",cantidad:6},
-      {nombre:"Corral 5",emoji:"🐄",color:"#8B5CF6",cantidad:6},
-      {nombre:"Corral 6",emoji:"🐑",color:"#F59E0B",cantidad:6}
-    ]},
-    muestraCantidad:12, seleccionados:[0,1,2,3,4,5,24,25,26,27,28,29],
-    tipo:"probabilistico", subtipo:"Por Conglomerados", distribucion:"filas",
-    narrativa:"Se dividen los animales en 6 corrales, se sortean 2 corrales al azar, y se estudian TODOS los animales de esos corrales elegidos.",
-    explicacionP1:"Los corrales se eligieron al azar, dando a cada uno probabilidad conocida de ser seleccionado. Es <strong>probabilístico</strong>.",
-    explicacionP2:"La población se agrupa en conglomerados naturales (corrales), se sortean algunos, y se estudian todos sus elementos. Es <strong>Muestreo por Conglomerados</strong>.",
-    animacion:"conglomerados", conglomeradosFilas:[0,4]
-  },
-  { id:8, fase:2, titulo:"Lago Esmeralda", icono:"🐠",
-    poblacion:{ total:35, columns:7, grupos:[
-      {nombre:"Grandes",emoji:"🐋",color:"#E63946",cantidad:12},
-      {nombre:"Medianos",emoji:"🐟",color:"#F4A261",cantidad:13},
-      {nombre:"Pequeños",emoji:"🐠",color:"#22C55E",cantidad:10}
-    ]},
-    muestraCantidad:7, seleccionados:[0,2,4,14,16,28,30],
-    tipo:"noProbabilistico", subtipo:"Por Cuotas", distribucion:"contiguo",
-    narrativa:"Se establece una cuota: 3 peces grandes, 2 medianos y 2 pequeños. Se capturan peces hasta completar cada categoría.",
-    explicacionP1:"No hay probabilidad conocida. Se impone una cuota y se captura hasta llenarla. Es <strong>no probabilístico</strong>.",
-    explicacionP2:"Se define una cuota por categoría y se selecciona hasta completarla. Es <strong>Muestreo por Cuotas</strong>.",
-    animacion:"cuotas", cuotas:[
-      {nombre:"Grandes",cantidad:3,indices:[0,2,4]},
-      {nombre:"Medianos",cantidad:2,indices:[14,16]},
-      {nombre:"Pequeños",cantidad:2,indices:[28,30]}
-    ]
-  },
-  { id:9, fase:2, titulo:"Invernadero Municipal", icono:"🌱",
-    poblacion:{ total:40, columns:8, grupos:[
-      {nombre:"Tomates",emoji:"🍅",color:"#E63946",cantidad:14},
-      {nombre:"Lechugas",emoji:"🥬",color:"#22C55E",cantidad:13},
-      {nombre:"Pimientos",emoji:"🫑",color:"#F59E0B",cantidad:13}
-    ]},
-    muestraCantidad:8, seleccionados:[1,8,15,21,27,30,35,38],
-    tipo:"probabilistico", subtipo:"Aleatorio Simple", distribucion:"mezclado",
-    narrativa:"Cada planta recibe un número del 1 al 40. Una tabla de números aleatorios determina cuáles se estudian.",
-    explicacionP1:"Todas las plantas tienen la misma probabilidad (8/40) de ser elegidas por azar. Es <strong>probabilístico</strong>.",
-    explicacionP2:"Numeración total de la población + selección por azar puro = <strong>Muestreo Aleatorio Simple</strong>.",
-    animacion:"aleatorio_simple"
-  },
-  { id:10, fase:2, titulo:"Reserva La Sierra", icono:"🦎",
-    poblacion:{ total:36, columns:9, grupos:[
-      {nombre:"Mamíferos",emoji:"🦊",color:"#E63946",cantidad:12},
-      {nombre:"Aves",emoji:"🦅",color:"#457B9D",cantidad:12},
-      {nombre:"Reptiles",emoji:"🦎",color:"#22C55E",cantidad:12}
-    ]},
-    muestraCantidad:8, seleccionados:[0,1,9,10,18,19,27,28],
-    tipo:"noProbabilistico", subtipo:"Por Conveniencia", distribucion:"mezclado",
-    narrativa:"Se muestrean solo los animales que se encuentran en el sendero principal cerca del campamento base.",
-    explicacionP1:"Solo los animales de una zona accesible fueron considerados. Los demás no tuvieron oportunidad. Es <strong>no probabilístico</strong>.",
-    explicacionP2:"Se selecciona lo más fácil de acceder. Es <strong>Muestreo por Conveniencia</strong>.",
-    animacion:"conveniencia"
-  },
-  { id:11, fase:2, titulo:"Ciudad Nuevo Amanecer", icono:"🏘️",
-    poblacion:{ total:42, columns:7, grupos:[
-      {nombre:"Manzana Norte",emoji:"🏠",color:"#E63946",cantidad:14},
-      {nombre:"Manzana Centro",emoji:"🏘️",color:"#457B9D",cantidad:14},
-      {nombre:"Manzana Sur",emoji:"🏗️",color:"#F4A261",cantidad:14}
-    ]},
-    muestraCantidad:8, seleccionados:[1,6,11,16,21,26,31,36],
-    tipo:"probabilistico", subtipo:"Sistemático", distribucion:"mezclado",
-    narrativa:"Se numeran las 42 casas y se seleccionan con un intervalo fijo de 5, comenzando desde la casa número 2.",
-    explicacionP1:"El intervalo fijo garantiza que cada casa tenía probabilidad conocida (1/5). Es <strong>probabilístico</strong>.",
-    explicacionP2:"Intervalo constante (k=5) desde un inicio. Es <strong>Muestreo Sistemático</strong>.",
-    animacion:"sistematico", sistematicoInicio:1, sistematicoIntervalo:5
-  },
-  { id:12, fase:2, titulo:"Almacén Distribuidora Sur", icono:"🏗️",
-    poblacion:{ total:45, columns:9, grupos:[
-      {nombre:"Electrónica",emoji:"📺",color:"#457B9D",cantidad:15},
-      {nombre:"Ropa",emoji:"👕",color:"#E63946",cantidad:15},
-      {nombre:"Alimentos",emoji:"🥫",color:"#22C55E",cantidad:15}
-    ]},
-    muestraCantidad:8, seleccionados:[3,9,18,24,31,35,40,43],
-    tipo:"noProbabilistico", subtipo:"Por Juicio", distribucion:"mezclado",
-    narrativa:"El supervisor elige a mano los productos que, por su experiencia, considera más propensos a tener defectos de fábrica.",
-    explicacionP1:"La selección depende del criterio personal del supervisor. No hay probabilidad para cada producto. Es <strong>no probabilístico</strong>.",
-    explicacionP2:"El investigador usa su experiencia y juicio para elegir. Es <strong>Muestreo por Juicio</strong>.",
-    animacion:"juicio"
-  }
-];
+    // ===== FASE 2: Clasificación específica =====
+    { id:7, fase:2, titulo:"Granja Los Pinos", icono:"🐄",
+      poblacion:{ total:36, columns:6, grupos:[
+        {nombre:"Corral 1",emoji:"🐄",color:"#E63946",cantidad:6},
+        {nombre:"Corral 2",emoji:"🐑",color:"#F4A261",cantidad:6},
+        {nombre:"Corral 3",emoji:"🐎",color:"#457B9D",cantidad:6},
+        {nombre:"Corral 4",emoji:"🐔",color:"#22C55E",cantidad:6},
+        {nombre:"Corral 5",emoji:"🐄",color:"#8B5CF6",cantidad:6},
+        {nombre:"Corral 6",emoji:"🐑",color:"#F59E0B",cantidad:6}
+      ]},
+      muestraCantidad:12, seleccionados:[0,1,2,3,4,5,24,25,26,27,28,29],
+      tipo:"probabilistico", subtipo:"Por Conglomerados", distribucion:"filas",
+      narrativa:"Se dividen los animales en 6 corrales, se sortean 2 corrales al azar, y se estudian TODOS los animales de esos corrales elegidos.",
+      explicacionP1:"Los corrales se eligieron al azar, dando a cada uno probabilidad conocida de ser seleccionado. Es <strong>probabilístico</strong>.",
+      explicacionP2:"La población se agrupa en conglomerados naturales (corrales), se sortean algunos, y se estudian todos sus elementos. Es <strong>Muestreo por Conglomerados</strong>.",
+      animacion:"conglomerados", conglomeradosFilas:[0,4]
+    },
+    { id:8, fase:2, titulo:"Lago Esmeralda", icono:"🐠",
+      poblacion:{ total:35, columns:7, grupos:[
+        {nombre:"Grandes",emoji:"🐋",color:"#E63946",cantidad:12},
+        {nombre:"Medianos",emoji:"🐟",color:"#F4A261",cantidad:13},
+        {nombre:"Pequeños",emoji:"🐠",color:"#22C55E",cantidad:10}
+      ]},
+      muestraCantidad:7, seleccionados:[0,2,4,14,16,28,30],
+      tipo:"noProbabilistico", subtipo:"Por Cuotas", distribucion:"contiguo",
+      narrativa:"Se establece una cuota: 3 peces grandes, 2 medianos y 2 pequeños. Se capturan peces hasta completar cada categoría.",
+      explicacionP1:"No hay probabilidad conocida. Se impone una cuota y se captura hasta llenarla. Es <strong>no probabilístico</strong>.",
+      explicacionP2:"Se define una cuota por categoría y se selecciona hasta completarla. Es <strong>Muestreo por Cuotas</strong>.",
+      animacion:"cuotas", cuotas:[
+        {nombre:"Grandes",cantidad:3,indices:[0,2,4]},
+        {nombre:"Medianos",cantidad:2,indices:[14,16]},
+        {nombre:"Pequeños",cantidad:2,indices:[28,30]}
+      ]
+    },
+    { id:9, fase:2, titulo:"Invernadero Municipal", icono:"🌱",
+      poblacion:{ total:40, columns:8, grupos:[
+        {nombre:"Tomates",emoji:"🍅",color:"#E63946",cantidad:14},
+        {nombre:"Lechugas",emoji:"🥬",color:"#22C55E",cantidad:13},
+        {nombre:"Pimientos",emoji:"🫑",color:"#F59E0B",cantidad:13}
+      ]},
+      muestraCantidad:8, seleccionados:[1,8,15,21,27,30,35,38],
+      tipo:"probabilistico", subtipo:"Aleatorio Simple", distribucion:"mezclado",
+      narrativa:"Cada planta recibe un número del 1 al 40. Una tabla de números aleatorios determina cuáles se estudian.",
+      explicacionP1:"Todas las plantas tienen la misma probabilidad (8/40) de ser elegidas por azar. Es <strong>probabilístico</strong>.",
+      explicacionP2:"Numeración total de la población + selección por azar puro = <strong>Muestreo Aleatorio Simple</strong>.",
+      animacion:"aleatorio_simple"
+    },
+    { id:10, fase:2, titulo:"Reserva La Sierra", icono:"🦎",
+      poblacion:{ total:36, columns:9, grupos:[
+        {nombre:"Mamíferos",emoji:"🦊",color:"#E63946",cantidad:12},
+        {nombre:"Aves",emoji:"🦅",color:"#457B9D",cantidad:12},
+        {nombre:"Reptiles",emoji:"🦎",color:"#22C55E",cantidad:12}
+      ]},
+      muestraCantidad:8, seleccionados:[0,1,9,10,18,19,27,28],
+      tipo:"noProbabilistico", subtipo:"Por Conveniencia", distribucion:"mezclado",
+      narrativa:"Se muestrean solo los animales que se encuentran en el sendero principal cerca del campamento base.",
+      explicacionP1:"Solo los animales de una zona accesible fueron considerados. Los demás no tuvieron oportunidad. Es <strong>no probabilístico</strong>.",
+      explicacionP2:"Se selecciona lo más fácil de acceder. Es <strong>Muestreo por Conveniencia</strong>.",
+      animacion:"conveniencia"
+    },
+    { id:11, fase:2, titulo:"Ciudad Nuevo Amanecer", icono:"🏘️",
+      poblacion:{ total:42, columns:7, grupos:[
+        {nombre:"Manzana Norte",emoji:"🏠",color:"#E63946",cantidad:14},
+        {nombre:"Manzana Centro",emoji:"🏘️",color:"#457B9D",cantidad:14},
+        {nombre:"Manzana Sur",emoji:"🏗️",color:"#F4A261",cantidad:14}
+      ]},
+      muestraCantidad:8, seleccionados:[1,6,11,16,21,26,31,36],
+      tipo:"probabilistico", subtipo:"Sistemático", distribucion:"mezclado",
+      narrativa:"Se numeran las 42 casas y se seleccionan con un intervalo fijo de 5, comenzando desde la casa número 2.",
+      explicacionP1:"El intervalo fijo garantiza que cada casa tenía probabilidad conocida (1/5). Es <strong>probabilístico</strong>.",
+      explicacionP2:"Intervalo constante (k=5) desde un inicio. Es <strong>Muestreo Sistemático</strong>.",
+      animacion:"sistematico", sistematicoInicio:1, sistematicoIntervalo:5
+    },
+    { id:12, fase:2, titulo:"Almacén Distribuidora Sur", icono:"🏗️",
+      poblacion:{ total:45, columns:9, grupos:[
+        {nombre:"Electrónica",emoji:"📺",color:"#457B9D",cantidad:15},
+        {nombre:"Ropa",emoji:"👕",color:"#E63946",cantidad:15},
+        {nombre:"Alimentos",emoji:"🥫",color:"#22C55E",cantidad:15}
+      ]},
+      muestraCantidad:8, seleccionados:[3,9,18,24,31,35,40,43],
+      tipo:"noProbabilistico", subtipo:"Por Juicio", distribucion:"mezclado",
+      narrativa:"El supervisor elige a mano los productos que, por su experiencia, considera más propensos a tener defectos de fábrica.",
+      explicacionP1:"La selección depende del criterio personal del supervisor. No hay probabilidad para cada producto. Es <strong>no probabilístico</strong>.",
+      explicacionP2:"El investigador usa su experiencia y juicio para elegir. Es <strong>Muestreo por Juicio</strong>.",
+      animacion:"juicio"
+    }
+  ],
+  en: [
+    // ===== PHASE 1: Binary classification =====
+    { id:1, fase:1, titulo:"Botanical Garden", icono:"🌿",
+      poblacion:{ total:40, columns:8, grupos:[
+        {nombre:"Roses",emoji:"🌹",color:"#E63946",cantidad:15},
+        {nombre:"Lilies",emoji:"🌸",color:"#D4A0E0",cantidad:12},
+        {nombre:"Tulips",emoji:"🌷",color:"#F4A261",cantidad:13}
+      ]},
+      muestraCantidad:8, seleccionados:[3,11,17,22,28,33,36,39],
+      tipo:"probabilistico", subtipo:"Simple Random", distribucion:"mezclado",
+      narrativa:"All 40 plants are numbered from 1 to 40, and a random number generator is used to select 8 of them.",
+      explicacionP1:"Each plant had an equal known probability of being selected (8/40 = 20%) through a random mechanism. That is why it is <strong>probabilistic</strong>.",
+      explicacionP2:"By numbering all elements and using pure chance to select, this is <strong>Simple Random Sampling</strong>.",
+      animacion:"aleatorio_simple"
+    },
+    { id:2, fase:1, titulo:"Municipal Library", icono:"📚",
+      poblacion:{ total:36, columns:9, grupos:[
+        {nombre:"Novels",emoji:"📕",color:"#E63946",cantidad:12},
+        {nombre:"Science",emoji:"📗",color:"#2A9D8F",cantidad:12},
+        {nombre:"History",emoji:"📘",color:"#457B9D",cantidad:12}
+      ]},
+      muestraCantidad:9, seleccionados:[0,1,2,9,10,11,18,19,20],
+      tipo:"noProbabilistico", subtipo:"Convenience", distribucion:"mezclado",
+      narrativa:"The researcher takes the 9 books that are on the table closest to the library entrance.",
+      explicacionP1:"Not all books had an opportunity to be chosen. Only the most accessible ones were taken. It is <strong>non-probabilistic</strong>.",
+      explicacionP2:"The easiest elements to reach were selected. This is <strong>Convenience Sampling</strong>.",
+      animacion:"conveniencia"
+    },
+    { id:3, fase:1, titulo:"Secondary School", icono:"🏫",
+      poblacion:{ total:50, columns:10, grupos:[
+        {nombre:"1st year",emoji:"👦",color:"#F59E0B",cantidad:17},
+        {nombre:"2nd year",emoji:"👧",color:"#22C55E",cantidad:16},
+        {nombre:"3rd year",emoji:"🧑",color:"#8B5CF6",cantidad:17}
+      ]},
+      muestraCantidad:10, seleccionados:[2,7,12,17,22,27,32,37,42,47],
+      tipo:"probabilistico", subtipo:"Systematic", distribucion:"mezclado",
+      narrativa:"The 50 students are ordered in a list and every 5th student is selected starting from student number 3.",
+      explicacionP1:"The fixed interval ensures that each student had a known probability of being selected (1/5). It is <strong>probabilistic</strong>.",
+      explicacionP2:"A constant interval (k=5) is used from a starting point. This is <strong>Systematic Sampling</strong>.",
+      animacion:"sistematico", sistematicoInicio:2, sistematicoIntervalo:5
+    },
+    { id:4, fase:1, titulo:"Regional Hospital", icono:"🏥",
+      poblacion:{ total:30, columns:6, grupos:[
+        {nombre:"Floor 1",emoji:"🛏️",color:"#457B9D",cantidad:10},
+        {nombre:"Floor 2",emoji:"🛏️",color:"#E63946",cantidad:10},
+        {nombre:"Floor 3",emoji:"🛏️",color:"#F4A261",cantidad:10}
+      ]},
+      muestraCantidad:6, seleccionados:[4,11,15,20,25,28],
+      tipo:"noProbabilistico", subtipo:"Judgment", distribucion:"mezclado",
+      narrativa:"The doctor manually selects 6 patients that he considers 'typical and representative cases' of the disease he is studying.",
+      explicacionP1:"The selection depends on the doctor's subjective criteria. There is no known probability for each patient. It is <strong>non-probabilistic</strong>.",
+      explicacionP2:"The researcher uses his criteria to select 'representative cases'. This is <strong>Judgment Sampling</strong>.",
+      animacion:"juicio"
+    },
+    { id:5, fase:1, titulo:"Food Factory", icono:"🏭",
+      poblacion:{ total:48, columns:8, grupos:[
+        {nombre:"Line A",emoji:"📦",color:"#E63946",cantidad:16},
+        {nombre:"Line B",emoji:"📦",color:"#2A9D8F",cantidad:16},
+        {nombre:"Line C",emoji:"📦",color:"#F59E0B",cantidad:16}
+      ]},
+      muestraCantidad:8, seleccionados:[3,8,12,20,25,30,36,44],
+      tipo:"probabilistico", subtipo:"Stratified", distribucion:"contiguo",
+      narrativa:"Boxes are classified by production line (A, B, C) and a proportional sample of each line is taken using random draw.",
+      explicacionP1:"The population was divided into strata, but within each one random chance was used. Each box had known probability. It is <strong>probabilistic</strong>.",
+      explicacionP2:"The population is divided into homogeneous groups (strata) and sampled randomly within each one. This is <strong>Stratified Sampling</strong>.",
+      animacion:"estratificado"
+    },
+    { id:6, fase:1, titulo:"Artisanal Lake Fishing", icono:"🐟",
+      poblacion:{ total:28, columns:7, grupos:[
+        {nombre:"Trout",emoji:"🐟",color:"#457B9D",cantidad:10},
+        {nombre:"Carp",emoji:"🐠",color:"#F4A261",cantidad:10},
+        {nombre:"Catfish",emoji:"🐡",color:"#8B5CF6",cantidad:8}
+      ]},
+      muestraCantidad:7, seleccionados:[5,12,13,19,20,24,25],
+      tipo:"noProbabilistico", subtipo:"Snowball", distribucion:"mezclado",
+      narrativa:"One fisherman names 2 known fishermen, those name 2 more each, until 7 fishermen gather to survey.",
+      explicacionP1:"Participants keep joining by referral from others. Not everyone has the same opportunity. It is <strong>non-probabilistic</strong>.",
+      explicacionP2:"One initial subject refers to others, and those refer to more, like a snowball that grows. This is <strong>Snowball Sampling</strong>.",
+      animacion:"bola_nieve", bolaNieveOlas:[[5],[12,13],[19,20],[24,25]]
+    },
+
+    // ===== PHASE 2: Specific classification =====
+    { id:7, fase:2, titulo:"Los Pinos Farm", icono:"🐄",
+      poblacion:{ total:36, columns:6, grupos:[
+        {nombre:"Corral 1",emoji:"🐄",color:"#E63946",cantidad:6},
+        {nombre:"Corral 2",emoji:"🐑",color:"#F4A261",cantidad:6},
+        {nombre:"Corral 3",emoji:"🐎",color:"#457B9D",cantidad:6},
+        {nombre:"Corral 4",emoji:"🐔",color:"#22C55E",cantidad:6},
+        {nombre:"Corral 5",emoji:"🐄",color:"#8B5CF6",cantidad:6},
+        {nombre:"Corral 6",emoji:"🐑",color:"#F59E0B",cantidad:6}
+      ]},
+      muestraCantidad:12, seleccionados:[0,1,2,3,4,5,24,25,26,27,28,29],
+      tipo:"probabilistico", subtipo:"Cluster", distribucion:"filas",
+      narrativa:"The animals are divided into 6 corrals, 2 corrals are randomly drawn, and ALL animals in those chosen corrals are studied.",
+      explicacionP1:"The corrals were chosen randomly, giving each one known probability of being selected. It is <strong>probabilistic</strong>.",
+      explicacionP2:"The population is grouped into natural clusters (corrals), some are drawn, and all their elements are studied. This is <strong>Cluster Sampling</strong>.",
+      animacion:"conglomerados", conglomeradosFilas:[0,4]
+    },
+    { id:8, fase:2, titulo:"Emerald Lake", icono:"🐠",
+      poblacion:{ total:35, columns:7, grupos:[
+        {nombre:"Large",emoji:"🐋",color:"#E63946",cantidad:12},
+        {nombre:"Medium",emoji:"🐟",color:"#F4A261",cantidad:13},
+        {nombre:"Small",emoji:"🐠",color:"#22C55E",cantidad:10}
+      ]},
+      muestraCantidad:7, seleccionados:[0,2,4,14,16,28,30],
+      tipo:"noProbabilistico", subtipo:"Quota", distribucion:"contiguo",
+      narrativa:"A quota is set: 3 large fish, 2 medium, and 2 small. Fish are caught until each category is filled.",
+      explicacionP1:"There is no known probability. A quota is imposed and capturing continues until it is filled. It is <strong>non-probabilistic</strong>.",
+      explicacionP2:"A quota is defined per category and selection continues until filled. This is <strong>Quota Sampling</strong>.",
+      animacion:"cuotas", cuotas:[
+        {nombre:"Large",cantidad:3,indices:[0,2,4]},
+        {nombre:"Medium",cantidad:2,indices:[14,16]},
+        {nombre:"Small",cantidad:2,indices:[28,30]}
+      ]
+    },
+    { id:9, fase:2, titulo:"Municipal Greenhouse", icono:"🌱",
+      poblacion:{ total:40, columns:8, grupos:[
+        {nombre:"Tomatoes",emoji:"🍅",color:"#E63946",cantidad:14},
+        {nombre:"Lettuce",emoji:"🥬",color:"#22C55E",cantidad:13},
+        {nombre:"Peppers",emoji:"🫑",color:"#F59E0B",cantidad:13}
+      ]},
+      muestraCantidad:8, seleccionados:[1,8,15,21,27,30,35,38],
+      tipo:"probabilistico", subtipo:"Simple Random", distribucion:"mezclado",
+      narrativa:"Each plant receives a number from 1 to 40. A random number table determines which ones are studied.",
+      explicacionP1:"All plants have the same probability (8/40) of being chosen by chance. It is <strong>probabilistic</strong>.",
+      explicacionP2:"Complete numbering of the population + selection by pure chance = <strong>Simple Random Sampling</strong>.",
+      animacion:"aleatorio_simple"
+    },
+    { id:10, fase:2, titulo:"La Sierra Nature Reserve", icono:"🦎",
+      poblacion:{ total:36, columns:9, grupos:[
+        {nombre:"Mammals",emoji:"🦊",color:"#E63946",cantidad:12},
+        {nombre:"Birds",emoji:"🦅",color:"#457B9D",cantidad:12},
+        {nombre:"Reptiles",emoji:"🦎",color:"#22C55E",cantidad:12}
+      ]},
+      muestraCantidad:8, seleccionados:[0,1,9,10,18,19,27,28],
+      tipo:"noProbabilistico", subtipo:"Convenience", distribucion:"mezclado",
+      narrativa:"Only animals found on the main trail near the base camp are sampled.",
+      explicacionP1:"Only animals in one accessible zone were considered. Others had no opportunity. It is <strong>non-probabilistic</strong>.",
+      explicacionP2:"What was easiest to access is selected. This is <strong>Convenience Sampling</strong>.",
+      animacion:"conveniencia"
+    },
+    { id:11, fase:2, titulo:"New Dawn City", icono:"🏘️",
+      poblacion:{ total:42, columns:7, grupos:[
+        {nombre:"North Block",emoji:"🏠",color:"#E63946",cantidad:14},
+        {nombre:"Center Block",emoji:"🏘️",color:"#457B9D",cantidad:14},
+        {nombre:"South Block",emoji:"🏗️",color:"#F4A261",cantidad:14}
+      ]},
+      muestraCantidad:8, seleccionados:[1,6,11,16,21,26,31,36],
+      tipo:"probabilistico", subtipo:"Systematic", distribucion:"mezclado",
+      narrativa:"The 42 houses are numbered and selected with a fixed interval of 5, starting from house number 2.",
+      explicacionP1:"The fixed interval ensures that each house had known probability (1/5). It is <strong>probabilistic</strong>.",
+      explicacionP2:"Constant interval (k=5) from a starting point. This is <strong>Systematic Sampling</strong>.",
+      animacion:"sistematico", sistematicoInicio:1, sistematicoIntervalo:5
+    },
+    { id:12, fase:2, titulo:"South Distributor Warehouse", icono:"🏗️",
+      poblacion:{ total:45, columns:9, grupos:[
+        {nombre:"Electronics",emoji:"📺",color:"#457B9D",cantidad:15},
+        {nombre:"Clothing",emoji:"👕",color:"#E63946",cantidad:15},
+        {nombre:"Food",emoji:"🥫",color:"#22C55E",cantidad:15}
+      ]},
+      muestraCantidad:8, seleccionados:[3,9,18,24,31,35,40,43],
+      tipo:"noProbabilistico", subtipo:"Judgment", distribucion:"mezclado",
+      narrativa:"The supervisor manually selects the products that, by his experience, he considers most likely to have factory defects.",
+      explicacionP1:"The selection depends on the supervisor's personal criteria. There is no probability for each product. It is <strong>non-probabilistic</strong>.",
+      explicacionP2:"The researcher uses his experience and judgment to choose. This is <strong>Judgment Sampling</strong>.",
+      animacion:"juicio"
+    }
+  ]
+};
+const EJERCICIOS = EJERCICIOS_ALL[LANG];
 
 /* ========== ESTADO ========== */
 const state = {
@@ -1151,7 +1323,7 @@ function mostrarTransicion(){
 
 /* ========== PANTALLA FINAL ========== */
 function mostrarPantallaFinal(){
-  localStorage.setItem('simlab_mue', Date.now());
+  localStorage.setItem('simlab_done_simlab_mue', Date.now());
   obtenerNombreUsuario(nombre => {
     state.nombreUsuario = nombre;
     _renderPantallaFinal();

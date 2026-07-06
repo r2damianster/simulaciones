@@ -638,7 +638,7 @@
     <div class="app-layout">
         <aside class="sidebar">
             <div>
-                <h1>Máquina de Engranajes Argumentativos</h1>
+                <h1 data-i18n="machine_title">Máquina de Engranajes Argumentativos</h1>
                 <p class="subtitle">3 temas de dificultad creciente. Puntuación acumulada sobre 100. Cada error resta 5 puntos.</p>
             </div>
 
@@ -681,9 +681,9 @@
             </div>
 
             <div class="cinta-wrap">
-                <div class="cinta-label">🧾 Cinta de producción — conectores estampados</div>
+                <div class="cinta-label" data-i18n="machine_tape">🧾 Cinta de producción — conectores estampados</div>
                 <div class="cinta-produccion" id="cintaProduccion">
-                    <div class="cinta-vacia" id="cintaVacia">Aún no se ha estampado ningún conector...</div>
+                    <div class="cinta-vacia" id="cintaVacia" data-i18n="tape_empty">Aún no se ha estampado ningún conector...</div>
                 </div>
             </div>
         </main>
@@ -711,12 +711,12 @@
 
     <!-- PANTALLA FINAL -->
     <div class="modal-base" id="finalPanel">
-        <h3>¡Máquina Completa!</h3>
+        <h3 data-i18n="machine_done">¡Máquina Completa!</h3>
         <p style="color:#aaa; margin-top: 10px;">Tu rendimiento analítico tras los 3 temas:</p>
         <div id="finalScore">100</div>
         <p id="finalMessage" style="font-size: 1.1rem; color: #ccc;"></p>
         <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
-            <button id="restartBtn">↺ Reiniciar Máquina</button>
+            <button id="restartBtn" data-i18n="machine_restart">↺ Reiniciar Máquina</button>
             <a href="index.html" style="background:var(--metal-dark); color:var(--text-color); border:1px solid var(--metal-light); border-radius:8px; padding:12px 30px; text-decoration:none; font-weight:bold; display:inline-flex; align-items:center;">← Volver al inicio</a>
         </div>
     </div>
@@ -745,11 +745,17 @@
           es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
                 name_q:'¿Cómo te llamas?', name_ph:'Ingresa tu nombre',
                 name_note:'No te preguntaremos otra vez en esta sesión.', name_btn:'Continuar',
-                name_default:'Estudiante' },
+                name_default:'Estudiante',
+                machine_title:'Máquina de Engranajes Argumentativos', machine_tape:'Cinta de producción — conectores estampados',
+                tape_empty:'Aún no se ha estampado ningún conector...', machine_done:'¡Máquina Completa!',
+                machine_restart:'Reiniciar Máquina', machine_start:'Iniciar Máquina →' },
           en: { confirm_switch:'Switching language will restart the simulation. Continue?',
                 name_q:'What is your name?', name_ph:'Enter your name',
                 name_note:'We will not ask again during this session.', name_btn:'Continue',
-                name_default:'Student' }
+                name_default:'Student',
+                machine_title:'Argument Connector Gear Machine', machine_tape:'Production tape — stamped connectors',
+                tape_empty:'No connectors stamped yet...', machine_done:'Machine Complete!',
+                machine_restart:'Restart Machine', machine_start:'Start Machine →' }
         };
         function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
 
@@ -908,7 +914,7 @@
             const footer = document.getElementById('manualFooter');
             const closeBtn = document.getElementById('closeManualPanel');
             if (mode === 'intro') {
-                footer.innerHTML = '<button id="startMachineBtn">Iniciar Máquina →</button>';
+                footer.innerHTML = `<button id="startMachineBtn">${t('machine_start')}</button>`;
                 document.getElementById('startMachineBtn').addEventListener('click', startMachine);
                 closeBtn.style.display = 'none';
             } else {
@@ -1263,7 +1269,7 @@
             document.getElementById('overlay').classList.remove('show');
             renderTemaIndicator();
             buildMachine();
-            document.getElementById('cintaProduccion').innerHTML = '<div class="cinta-vacia" id="cintaVacia">Aún no se ha estampado ningún conector...</div>';
+            document.getElementById('cintaProduccion').innerHTML = `<div class="cinta-vacia" id="cintaVacia">${t('tape_empty')}</div>`;
         }
 
         function showToast(message, type) {

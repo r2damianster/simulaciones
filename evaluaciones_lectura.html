@@ -400,6 +400,26 @@
     <div id="app" style="position:relative; z-index:1; min-height:100vh;"></div>
 
     <script>
+    /* === i18n === */
+    function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+    function setLang(l){ localStorage.setItem('simlab_lang', l); }
+    const LANG = getLang();
+    document.documentElement.lang = LANG;
+    const I18N = {
+      es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?', name_q:'¿Cómo te llamas?', name_ph:'Tu nombre', name_note:'No te preguntaremos otra vez en esta sesión.', name_btn:'Continuar', name_default:'Estudiante' },
+      en: { confirm_switch:'Switching language will restart the simulation. Continue?', name_q:'What is your name?', name_ph:'Your name', name_note:'We will not ask again during this session.', name_btn:'Continue', name_default:'Student' }
+    };
+    function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+    const langBtn = document.getElementById('simLangBtn');
+    if(langBtn){
+      langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+      langBtn.addEventListener('click', () => {
+        if (!confirm(t('confirm_switch'))) return;
+        setLang(LANG === 'es' ? 'en' : 'es');
+        location.reload();
+      });
+    }
+
     // ============================================================
     // PERSONALIZACIÓN: NOMBRE DEL USUARIO
     // (solo en esta sesión del navegador, no se guarda permanentemente)
@@ -433,21 +453,36 @@
     // DATOS DE LA SIMULACIÓN
     // ============================================================
 
-    // Definición de criterios de la rúbrica
-    const criteria = {
-        L1: { code: 'L1', text: 'Identifica datos explícitos del texto', help: 'Menciona información que aparece directamente en el texto o en los datos proporcionados.', level: 'literal' },
-        L2: { code: 'L2', text: 'Usa vocabulario científico adecuado', help: 'Utiliza términos técnicos o científicos propios del tema de manera correcta.', level: 'literal' },
-        L3: { code: 'L3', text: 'Describe procesos o secuencias', help: 'Describe un proceso o secuencia de hechos tal como se presenta en la fuente.', level: 'literal' },
-        I1: { code: 'I1', text: 'Establece relaciones causa-efecto', help: 'Conecta dos o más hechos para establecer una relación de causa y efecto no explícita.', level: 'inferencial' },
-        I2: { code: 'I2', text: 'Infiere implicaciones o consecuencias', help: 'Deduce consecuencias o situaciones que van más allá de lo dicho directamente en el texto.', level: 'inferencial' },
-        I3: { code: 'I3', text: 'Interpreta datos o gráficos', help: 'Lee e interpreta datos cuantitativos, gráficos o tablas para extraer conclusiones.', level: 'inferencial' },
-        C1: { code: 'C1', text: 'Emite juicios valorativos fundamentados', help: 'Expresa una opinión o juicio sobre el contenido, apoyándose en evidencia o argumentos.', level: 'critico' },
-        C2: { code: 'C2', text: 'Propone alternativas o soluciones', help: 'Sugiere soluciones, alternativas o mejoras frente al problema planteado.', level: 'critico' },
-        C3: { code: 'C3', text: 'Evalúa la confiabilidad de las fuentes', help: 'Cuestiona la fuente, evalúa su confiabilidad o detecta sesgos y omisiones.', level: 'critico' },
+    // Definición de criterios de la rúbrica (bilingüe ES/EN)
+    const CRITERIA_ALL = {
+        es: {
+            L1: { code: 'L1', text: 'Identifica datos explícitos del texto', help: 'Menciona información que aparece directamente en el texto o en los datos proporcionados.', level: 'literal' },
+            L2: { code: 'L2', text: 'Usa vocabulario científico adecuado', help: 'Utiliza términos técnicos o científicos propios del tema de manera correcta.', level: 'literal' },
+            L3: { code: 'L3', text: 'Describe procesos o secuencias', help: 'Describe un proceso o secuencia de hechos tal como se presenta en la fuente.', level: 'literal' },
+            I1: { code: 'I1', text: 'Establece relaciones causa-efecto', help: 'Conecta dos o más hechos para establecer una relación de causa y efecto no explícita.', level: 'inferencial' },
+            I2: { code: 'I2', text: 'Infiere implicaciones o consecuencias', help: 'Deduce consecuencias o situaciones que van más allá de lo dicho directamente en el texto.', level: 'inferencial' },
+            I3: { code: 'I3', text: 'Interpreta datos o gráficos', help: 'Lee e interpreta datos cuantitativos, gráficos o tablas para extraer conclusiones.', level: 'inferencial' },
+            C1: { code: 'C1', text: 'Emite juicios valorativos fundamentados', help: 'Expresa una opinión o juicio sobre el contenido, apoyándose en evidencia o argumentos.', level: 'critico' },
+            C2: { code: 'C2', text: 'Propone alternativas o soluciones', help: 'Sugiere soluciones, alternativas o mejoras frente al problema planteado.', level: 'critico' },
+            C3: { code: 'C3', text: 'Evalúa la confiabilidad de las fuentes', help: 'Cuestiona la fuente, evalúa su confiabilidad o detecta sesgos y omisiones.', level: 'critico' },
+        },
+        en: {
+            L1: { code: 'L1', text: 'Identifies explicit data from the text', help: 'Mentions information that appears directly in the text or in the provided data.', level: 'literal' },
+            L2: { code: 'L2', text: 'Uses appropriate scientific vocabulary', help: 'Uses technical or scientific terms relevant to the topic correctly.', level: 'literal' },
+            L3: { code: 'L3', text: 'Describes processes or sequences', help: 'Describes a process or sequence of facts as it appears in the source.', level: 'literal' },
+            I1: { code: 'I1', text: 'Establishes cause-effect relationships', help: 'Connects two or more facts to establish a non-explicit cause-and-effect relationship.', level: 'inferencial' },
+            I2: { code: 'I2', text: 'Infers implications or consequences', help: 'Deduces consequences or situations beyond what is directly stated in the text.', level: 'inferencial' },
+            I3: { code: 'I3', text: 'Interprets data or graphs', help: 'Reads and interprets quantitative data, graphs, or tables to draw conclusions.', level: 'inferencial' },
+            C1: { code: 'C1', text: 'Makes reasoned value judgments', help: 'Expresses an opinion or judgment about the content, supported by evidence or arguments.', level: 'critico' },
+            C2: { code: 'C2', text: 'Proposes alternatives or solutions', help: 'Suggests solutions, alternatives, or improvements to the problem presented.', level: 'critico' },
+            C3: { code: 'C3', text: 'Evaluates source reliability', help: 'Questions the source, evaluates its reliability, or detects biases and omissions.', level: 'critico' }
+        }
     };
+    const CRITERIA = CRITERIA_ALL[LANG];
 
-    // Escritos de los estudiantes
-    const evaluations = [
+    // Escritos de los estudiantes (bilingüe ES/EN)
+    const EVALUATIONS_ALL = {
+    es: [
         {
             id: 1,
             student: 'Matías Rodríguez',
@@ -556,7 +591,118 @@
                 C3: { expected: true, msg: 'Evalúa la confiabilidad comparando dos fuentes con criterios explícitos: citación de estudios, revisión por pares, formación de los autores.' },
             }
         },
-    ];
+    ], en: [
+        {
+            id: 1,
+            student: 'Marcus Rodriguez',
+            grade: '3rd grade',
+            topic: 'Animals',
+            text: 'Animals eat different things. Lions eat meat because they are carnivores. Cows eat grass. All animals need water to live because if they don\'t drink water they die. I watched a documentary where monkeys eat fruit.',
+            pen: 'pencil',
+            rotation: '-0.6deg',
+            expected: new Set(['L1']),
+            feedback: {
+                L1: { expected: true, msg: 'Marcus identifies explicit data: lions eat meat, cows eat grass, and animals need water.' },
+                L2: { expected: false, msg: 'Notice that Marcus says "eat different things" instead of using terms like "diet" or "herbivore". Although he mentions "carnivore", the rest is very informal.' },
+                L3: { expected: false, msg: 'Marcus does not describe any process or sequence. He only lists isolated facts about different animals without connecting them.' }
+            }
+        },
+        {
+            id: 2,
+            student: 'Sophie Herrera',
+            grade: '4th grade',
+            topic: 'The Water Cycle',
+            text: 'In the water cycle, first water from the oceans and rivers evaporates due to the sun\'s heat. Then the water vapor rises and condenses to form clouds. When the clouds are heavy enough, precipitation occurs, which is when it rains or snows. The water returns to the land and oceans, and the cycle starts again.',
+            pen: 'blue',
+            rotation: '0.7deg',
+            expected: new Set(['L1', 'L2', 'L3']),
+            feedback: {
+                L1: { expected: true, msg: 'Sophie correctly identifies all the steps of the water cycle that are explicit in her writing.' },
+                L2: { expected: true, msg: 'Sophie uses precise scientific vocabulary: "evaporates", "condenses", "precipitation". These are terms specific to the topic.' },
+                L3: { expected: true, msg: 'Sophie describes the complete process in sequential order: evaporation → condensation → precipitation → return.' }
+            }
+        },
+        {
+            id: 3,
+            student: 'Thomas Vargas',
+            grade: '5th grade',
+            topic: 'Photosynthesis',
+            text: 'Plants make their own food through photosynthesis. For this they need sunlight, water, and carbon dioxide. I think that\'s why plants that are under a large tree grow less, because they get less light and cannot make enough food. If a plant doesn\'t have light, it turns yellow and can die.',
+            pen: 'black',
+            rotation: '-0.9deg',
+            expected: new Set(['L1', 'L2', 'I1']),
+            feedback: {
+                L1: { expected: true, msg: 'Thomas identifies explicit data about photosynthesis: it needs sunlight, water, and carbon dioxide.' },
+                L2: { expected: true, msg: 'Uses scientific terms correctly: "photosynthesis" and "carbon dioxide" in the appropriate way.' },
+                L3: { expected: false, msg: 'Thomas does not describe a step-by-step process. He explains what photosynthesis is but not the sequence in which it occurs.' },
+                I1: { expected: true, msg: 'Thomas establishes a clear cause-effect relationship: less light → less food → the plant grows less and turns yellow.' },
+                I2: { expected: false, msg: 'Thomas does not infer implications beyond the immediate situation. He doesn\'t extrapolate to other contexts or anticipate future consequences.' },
+                I3: { expected: false, msg: 'Thomas does not interpret any graph or numerical data. His reasoning is based on a general observation.' }
+            }
+        },
+        {
+            id: 4,
+            student: 'Isabella Muñoz',
+            grade: '6th grade',
+            topic: 'River Pollution',
+            text: 'According to the graph data, in the stretch of river that passes next to the paper mill, the number of fish dropped from 45 to only 8 in three years. This is because the mill dumps chemical waste into the water, which reduces dissolved oxygen. If the situation continues this way, in five years all aquatic life in that area could disappear. Also, people living nearby can no longer fish for food.',
+            pen: 'blue',
+            rotation: '0.5deg',
+            expected: new Set(['L1', 'L2', 'L3', 'I1', 'I2']),
+            feedback: {
+                L1: { expected: true, msg: 'Isabella identifies explicit data from the graph: the number of fish dropped from 45 to 8 in three years.' },
+                L2: { expected: true, msg: 'Uses precise vocabulary: "chemical waste", "dissolved oxygen", "aquatic life".' },
+                L3: { expected: true, msg: 'Isabella interprets the quantitative data from the graph (from 45 to 8 fish) and relates it to the geographic context.' },
+                I1: { expected: true, msg: 'Establishes the cause-effect chain: mill dumps waste → reduces oxygen → fish die.' },
+                I2: { expected: true, msg: 'Infers future consequences: "in five years all aquatic life could disappear" and the social impact: people can no longer fish for food.' },
+                I3: { expected: false, msg: 'Although Isabella mentions graph data, she doesn\'t make a deep interpretation of the data itself (trends, comparisons between river sections), but rather uses it to support her argument.' }
+            }
+        },
+        {
+            id: 5,
+            student: 'Diego Contreras',
+            grade: '7th grade',
+            topic: 'Climate Change',
+            text: 'I read an article that says climate change is only humanity\'s fault, but I don\'t agree with that. It\'s true that factories and cars pollute a lot, but the Earth had temperature changes before, like during the ice age. What does worry me is that the article says nothing about what poorer countries can do—countries that don\'t have the money to change their technologies.',
+            pen: 'black',
+            rotation: '-0.7deg',
+            expected: new Set(['L1', 'L2', 'I1', 'I2', 'C1', 'C3']),
+            feedback: {
+                L1: { expected: true, msg: 'Diego identifies explicit data from the article: that it blames humans for climate change.' },
+                L2: { expected: true, msg: 'Uses appropriate terms like "climate change" and "technologies" correctly.' },
+                L3: { expected: false, msg: 'Diego does not describe any process or sequence. His text is argumentative, not descriptive.' },
+                I1: { expected: true, msg: 'Diego connects factory and car pollution with climate change as a cause-effect relationship.' },
+                I2: { expected: true, msg: 'Infers an important implication: poorer countries cannot change their technologies, suggesting inequality in environmental responsibility.' },
+                I3: { expected: false, msg: 'Diego does not interpret data or graphs. His analysis is qualitative and argumentative, not based on quantitative evidence.' },
+                C1: { expected: true, msg: 'Diego makes a reasoned value judgment: he disagrees that it\'s "only humanity\'s fault", arguing that the Earth already experienced natural temperature changes.' },
+                C2: { expected: false, msg: 'Notice that Diego doesn\'t propose any alternative or solution to the problem. He only points out what\'s missing from the article.' },
+                C3: { expected: true, msg: 'Diego evaluates the article\'s reliability by identifying an important omission: it doesn\'t mention the situation of poorer countries, which reveals a bias.' }
+            }
+        },
+        {
+            id: 6,
+            student: 'Camila Rojas',
+            grade: '8th grade',
+            topic: 'Genetically Modified Foods',
+            text: 'After reading two texts about genetically modified foods, I can say the Ministry of Health text is more reliable because it cites three scientific studies published in peer-reviewed journals, while the environmental NGO text only presents opinions from people without scientific training. However, the Ministry does not mention possible long-term health effects of GMOs, which is a serious omission. My proposal is that long-term studies should be conducted for at least 20 years before approving any genetically modified food for human consumption, and the results should be made public.',
+            pen: 'blue',
+            rotation: '0.4deg',
+            expected: new Set(['L1', 'L2', 'L3', 'I1', 'I2', 'C1', 'C2', 'C3']),
+            feedback: {
+                L1: { expected: true, msg: 'Camila identifies explicit data from both texts: the Ministry cites studies, the NGO only presents opinions.' },
+                L2: { expected: true, msg: 'Precise technical vocabulary: "peer-reviewed journals", "long-term studies", "human consumption".' },
+                L3: { expected: true, msg: 'Camila interprets and compares qualitative data from two sources, evaluating the evidence each one presents.' },
+                I1: { expected: true, msg: 'Establishes a cause-effect relationship between the type of evidence (studies vs opinions) and each source\'s reliability.' },
+                I2: { expected: true, msg: 'Infers implications: the Ministry\'s omission about long-term effects is "serious", suggesting unconsidered risks.' },
+                I3: { expected: false, msg: 'Although Camila analyzes evidence from both sources, she doesn\'t interpret quantitative data or actual graphs. Her analysis is qualitative.' },
+                C1: { expected: true, msg: 'Makes a clear, reasoned value judgment: the Ministry is more reliable, but has a serious omission.' },
+                C2: { expected: true, msg: 'Proposes a concrete solution: 20-year follow-up studies with public results before approving GMOs.' },
+                C3: { expected: true, msg: 'Evaluates reliability by comparing two sources with explicit criteria: citation of studies, peer review, author qualifications.' }
+            }
+        }
+    ]};
+    const EVALUATIONS = EVALUATIONS_ALL[LANG];
+
 
     // ============================================================
     // ESTADO DE LA APLICACIÓN

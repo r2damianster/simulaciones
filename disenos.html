@@ -567,6 +567,7 @@
 <body>
 
 <a href="index.html" class="home-btn" title="Volver al inicio"><i class="fa-solid fa-house"></i></a>
+<button type="button" id="simLangBtn" style="position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;transition:transform .2s" aria-label="Cambiar idioma / Switch language"></button>
 
 <div class="grid-bg"></div>
 <div class="scanlines"></div>
@@ -1036,6 +1037,26 @@
 </main>
 
 <script>
+/* === i18n === */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+const I18N = {
+  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?' },
+  en: { confirm_switch:'Switching language will restart the simulation. Continue?' }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+const langBtn = document.getElementById('simLangBtn');
+if(langBtn){
+  langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+  langBtn.addEventListener('click', () => {
+    if (!confirm(t('confirm_switch'))) return;
+    setLang(LANG === 'es' ? 'en' : 'es');
+    location.reload();
+  });
+}
+
 // =============================================
 // PARTICULAS DE FONDO
 // =============================================
