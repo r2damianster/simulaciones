@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SimulAI: detecta alucinaciones de IA en investigación. Verifica constructos teóricos en Scopus. Aprende a identificar términos inventados.">
 <title>SimulAI — Alucinaciones en la Investigación</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23080c14'/%3E%3Ccircle cx='16' cy='16' r='13' fill='%2310a37f'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' dominant-baseline='middle' font-size='18' font-weight='bold' fill='%23000' font-family='system-ui'%3E🤖%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root{--bg:#080c14;--fg:#e2e8f0;--muted:#64748b;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.07);--ai-green:#10a37f;--ai-dark:#1a1f2e;--sidebar:#171a24;--user-bubble:#1e3a4f;--scopus:#f97316;--ok:#10b981;--err:#ef4444;--warn:#fbbf24}
+:root{--bg:#080c14;--fg:#e2e8f0;--muted:#64748b;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.07);--ai-green:#10a37f;--ai-dark:#1a1f2e;--sidebar:#171a24;--user-bubble:#1e3a4f;--scopus:#f97316;--ok:#10b981;--err:#ef4444;--warn:#fbbf24;--sim-home-fg:#10a37f;--sim-home-bg:rgba(16,163,127,0.15);--sim-home-bd:rgba(16,163,127,0.3);--sim-home-hi:#34D399}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow:hidden}
 h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
@@ -192,10 +194,19 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
 @media(max-width:768px){.cg-sidebar{display:none}.chat-messages{padding:1rem}.intro-content{flex-direction:column;text-align:center}.browser-frame{height:95vh;border-radius:0}#browser-wrapper{padding:0}.onboard-card{padding:1.5rem}}
+.sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--sim-home-fg);background:var(--sim-home-bg);border:1px solid var(--sim-home-bd);border-radius:10px;transition:transform .2s,color .2s}
+.sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+.sim-lang{position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;color:var(--sim-home-fg);background:var(--sim-home-bg);border:1px solid var(--sim-home-bd);border-radius:10px;transition:transform .2s,color .2s}
+.sim-lang:hover,.sim-lang:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
+
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+  <i class="fa-solid fa-house" aria-hidden="true"></i>
+</a>
+<button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
 
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 <div id="toast-container" role="alert" aria-live="polite"></div>
@@ -206,7 +217,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
 <div class="intro-text">
     <div style="display:inline-block;background:rgba(16,163,127,.08);border:1px solid rgba(16,163,127,.2);border-radius:99px;padding:.2rem .75rem;font-size:.68rem;color:var(--ai-green);font-weight:600;letter-spacing:.5px;margin-bottom:1rem">SIMULACION INTERACTIVA</div>
     <h1 style="font-size:clamp(2.2rem,5vw,3.5rem);font-weight:700;letter-spacing:-1.5px;line-height:1.1;margin-bottom:.6rem">Simul<span style="color:var(--ai-green)">AI</span></h1>
-    <p style="font-size:1rem;color:var(--muted);max-width:380px;line-height:1.7;margin-bottom:1.5rem">Cuando la inteligencia artificial <span style="color:var(--err);font-weight:600">inventa</span> la ciencia. Aprende a detectar alucinaciones en temas de investigacion.</p>
+    <p style="font-size:1rem;color:var(--muted);max-width:380px;line-height:1.7;margin-bottom:1.5rem">Cuando la inteligencia artificial <span style="color:var(--err);font-weight:600">inventa</span> la ciencia. Aprende a detectar alucinaciones en temas de investigación.</p>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.9rem;text-align:left;margin-bottom:1.5rem;font-size:.8rem;color:var(--muted);line-height:1.7">
         <div style="font-weight:600;color:var(--fg);margin-bottom:.4rem"><i class="fas fa-laptop" style="color:var(--ai-green);margin-right:.3rem"></i>Que vas a hacer</div>
         <ol style="padding-left:1.1rem">
@@ -293,7 +304,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
         <div class="field-error">Ingresa tu apellido</div>
     </div>
     <div class="onboard-field" id="field-genero">
-        <label>Genero</label>
+        <label>Género</label>
         <div class="gender-options">
             <div class="gender-opt" data-g="m" tabindex="0" role="radio" aria-checked="false">
                 <span class="g-icon"><i class="fas fa-mars" style="color:#60a5fa"></i></span>
@@ -380,38 +391,196 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
 </div>
 
 <script>
+/* ===== i18n ===== */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+
+const I18N = {
+  es: {
+    confirm_switch: 'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+    name_q: '¿Cómo te llamas?',
+    name_ph: 'Ingresa tu nombre',
+    name_note: 'No te preguntaremos otra vez en esta sesión.',
+    name_btn: 'Continuar',
+    name_default: 'Estudiante',
+    back_title: 'Volver al inicio',
+    simulacion_interactiva: 'SIMULACION INTERACTIVA',
+    simulai_title: 'Simul<span style="color:var(--ai-green)">AI</span>',
+    simulai_desc: 'Cuando la inteligencia artificial <span style="color:var(--err);font-weight:600">inventa</span> la ciencia. Aprende a detectar alucinaciones en temas de investigación.',
+    que_haras: 'Qué vas a hacer',
+    haras_1: 'Preguntarás temas a una IA',
+    haras_2: 'Elegirás un constructo que te guste',
+    haras_3: 'Lo verificarás en Scopus',
+    haras_4: 'Si no existe... volverás a intentar',
+    entrar_chat: 'Entrar al chat',
+    antes_empezar: 'Antes de empezar',
+    personaliza: 'Personaliza tu experiencia en la simulación',
+    nombre: 'Nombre',
+    apellido: 'Apellido',
+    genero: 'Género',
+    masculino: 'Masculino',
+    femenino: 'Femenino',
+    no_binario: 'No binario',
+    comenzar_sim: 'Comenzar simulación',
+    scopus_title: 'Scopus',
+    scopus_busqueda: 'Búsqueda',
+    scopus_tipo: 'Tipo: <strong>Artículo, Revisión</strong>',
+    scopus_idioma: 'Idioma: <strong>Español, Inglés</strong>',
+    scopus_anos: 'Años: <strong>2000-2024</strong>',
+    scopus_instrucciones: 'Haz clic en "Buscar" para verificar el constructo',
+    buscar_btn: 'Buscar',
+    buscando: 'Buscando...',
+    consultando: 'Consultando base de datos Scopus...',
+    siguiente_ronda: 'Siguiente ronda',
+    ver_resultados: 'Ver resultados',
+    sin_resultados: 'Sin resultados para:',
+    constructo_no_encontrado: 'Constructo no encontrado',
+    volver_chat: 'Volver al chat',
+    ronda: 'Ronda',
+    de: 'de',
+    intento: 'intento',
+    intentos: 'intentos',
+    busquedas: 'Búsquedas',
+    alucinaciones: 'Alucinaciones',
+    perfectas: 'Perfectas',
+    lecciones_aprendidas: 'Lecciones aprendidas',
+    tips_acumulados: 'Tips acumulados',
+    reiniciar_sim: 'Reiniciar simulación',
+    verificado: 'Verificado',
+    constructo_valido: 'Constructo válido',
+    constructo_legitimado: 'está legitimado en la literatura académica con múltiples publicaciones y citaciones.',
+    resultado_verificacion: 'resultados',
+    no_existe: 'No existe'
+  },
+  en: {
+    confirm_switch: 'Switching language will restart the simulation. Continue?',
+    name_q: 'What is your name?',
+    name_ph: 'Enter your name',
+    name_note: 'We will not ask again during this session.',
+    name_btn: 'Continue',
+    name_default: 'Student',
+    back_title: 'Back to home',
+    simulacion_interactiva: 'INTERACTIVE SIMULATION',
+    simulai_title: 'Simul<span style="color:var(--ai-green)">AI</span>',
+    simulai_desc: 'When artificial intelligence <span style="color:var(--err);font-weight:600">invents</span> science. Learn to detect AI hallucinations in research topics.',
+    que_haras: 'What you\'ll do',
+    haras_1: 'Ask an AI about research topics',
+    haras_2: 'Choose a construct you like',
+    haras_3: 'Verify it in Scopus',
+    haras_4: 'If it doesn\'t exist... try again',
+    entrar_chat: 'Enter chat',
+    antes_empezar: 'Before you start',
+    personaliza: 'Personalize your simulation experience',
+    nombre: 'Name',
+    apellido: 'Last name',
+    genero: 'Gender',
+    masculino: 'Male',
+    femenino: 'Female',
+    no_binario: 'Non-binary',
+    comenzar_sim: 'Start simulation',
+    scopus_title: 'Scopus',
+    scopus_busqueda: 'Search',
+    scopus_tipo: 'Type: <strong>Article, Review</strong>',
+    scopus_idioma: 'Language: <strong>Spanish, English</strong>',
+    scopus_anos: 'Years: <strong>2000-2024</strong>',
+    scopus_instrucciones: 'Click "Search" to verify the construct',
+    buscar_btn: 'Search',
+    buscando: 'Searching...',
+    consultando: 'Querying Scopus database...',
+    siguiente_ronda: 'Next round',
+    ver_resultados: 'See results',
+    sin_resultados: 'No results for:',
+    constructo_no_encontrado: 'Construct not found',
+    volver_chat: 'Back to chat',
+    ronda: 'Round',
+    de: 'of',
+    intento: 'attempt',
+    intentos: 'attempts',
+    busquedas: 'Searches',
+    alucinaciones: 'Hallucinations',
+    perfectas: 'Perfect',
+    lecciones_aprendidas: 'Lessons learned',
+    tips_acumulados: 'Accumulated tips',
+    reiniciar_sim: 'Restart simulation',
+    verificado: 'Verified',
+    constructo_valido: 'Valid construct',
+    constructo_legitimado: 'is legitimated in academic literature with multiple publications and citations.',
+    resultado_verificacion: 'results',
+    no_existe: 'Does not exist'
+  }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
 /* ===== DATOS ===== */
-const ROUNDS=[
-{area:"Educacion y Aprendizaje",userQuery:"Necesito un tema de investigacion sobre factores que influyen en el rendimiento estudiantil universitario. Algo novedoso pero con base teorica solida.",aiMsg:"Basandome en analisis de tendencias recientes en literatura educativa, te propongo estos temas. Cada uno incluye un constructo central:",options:[
+const ROUNDS_ALL = {
+es: [
+{area:"Educación y Aprendizaje",userQuery:"Necesito un tema de investigación sobre factores que influyen en el rendimiento estudiantil universitario. Algo novedoso pero con base teórica sólida.",aiMsg:"Basándome en análisis de tendencias recientes en literatura educativa, te propongo estos temas. Cada uno incluye un constructo central:",options:[
 {title:"Neuroaprendizaje inverso y su impacto en la retencion de conocimientos",construct:"Neuroaprendizaje inverso",desc:"Explora como el proceso inverso de neuroaprendizaje puede mejorar la memoria a largo plazo. Segun Gonzalez y Martinez (2023), este enfoque revolucionario muestra resultados prometedores.",real:false,why:"'Neuroaprendizaje inverso' no existe en la literatura. La IA tomo 'neuroaprendizaje' (termino divulgativo) y le anadio 'inverso' para crear la ilusion de novedad. La cita 'Gonzalez y Martinez (2023)' es inventada."},
 {title:"Autoeficacia academica como predictor del rendimiento en estudiantes de ingenieria",construct:"Autoeficacia academica",desc:"Analiza como la percepcion de capacidad propia influye en el desempeno. Basado en la teoria de Bandura (1997) con amplia evidencia empirica.",real:true,count:3847,articles:[{t:"Academic self-efficacy and academic performance: A meta-analytic review",a:"Pajares, F.",s:"Journal of Educational Psychology",y:2019,c:245},{t:"Self-efficacy beliefs and academic success: A quantitative synthesis",a:"Multon, K.D., Brown, S.D., Lent, R.W.",s:"Psychological Bulletin",y:2018,c:412},{t:"Academic self-efficacy in engineering students: A longitudinal study",a:"Villanueva, M.R., Bostic, J., Huber, C.",s:"European Journal of Engineering Education",y:2020,c:87},{t:"Self-efficacy and academic performance in first-year university students",a:"Chemers, M.M., Hu, L.T., Garcia, B.F.",s:"Journal of Educational Psychology",y:2017,c:534}]},
 {title:"Zona de desarrollo proximal extendida en entornos virtuales de aprendizaje",construct:"Zona de desarrollo proximal extendida",desc:"Investiga como la ZDP de Vygotsky se extiende en plataformas digitales. Este constructo emergente fue propuesto por Ramirez et al. (2022).",real:false,why:"La ZDP de Vygotsky SI es real. Pero 'Zona de Desarrollo Proximal Extendida' no existe como variante. La IA anadio 'extendida' para simular una actualizacion al contexto digital. Cita fabricada."},
 {title:"Metacognicion somatica y la regulacion del aprendizaje autorregulado",construct:"Metacognicion somatica",desc:"Examina la conexion entre conciencia corporal y procesos metacognitivos. Perspectiva innovadora propuesta por Fernandez y Liu (2023).",real:false,why:"'Metacognicion somatica' no existe. La IA fusiono 'metacognicion' (Flavell, 1979) con 'somatico' (terapia corporal) creando un termino que suena sofisticado pero es una alucinacion."}
 ]},
-{area:"Psicologia Organizacional",userQuery:"Busco un tema de investigacion sobre bienestar y rendimiento en el contexto laboral corporativo. Algo con valor practico.",aiMsg:"Excelente area de estudio. Te propongo estos temas con sus constructos teoricos centrales:",options:[
+{area:"Psicología Organizacional",userQuery:"Busco un tema de investigación sobre bienestar y rendimiento en el contexto laboral corporativo. Algo con valor práctico.",aiMsg:"Excelente área de estudio. Te propongo estos temas con sus constructos teóricos centrales:",options:[
 {title:"Burnout inverso proactivo: cuando el exceso de energia laboral genera agotamiento",construct:"Burnout inverso proactivo",desc:"Un nuevo enfoque que estudia como la sobre-motivacion puede llevar a formas atipicas de desgaste. Propuesto por Morales y Chen (2024).",real:false,why:"Completamente inventado. El burnout (Maslach, 1981) es real, pero 'inverso proactivo' son adjetivos contradictorios anadidos para generar curiosidad sin base cientifica."},
 {title:"Engagement laboral y su relacion con la satisfaccion del cliente en servicios",construct:"Engagement laboral",desc:"Analiza como el nivel de implicacion de los empleados impacta la experiencia del cliente. Basado en el modelo UWES de Schaufeli y Bakker (2003).",real:true,count:5621,articles:[{t:"Work engagement: A quantitative review and test of its relations with performance",a:"Rich, B.L., Lepine, J.A., Crawford, E.R.",s:"Personnel Psychology",y:2010,c:1892},{t:"The measurement of engagement and burnout: A confirmatory factor analytic approach",a:"Schaufeli, W.B., Salanova, M.",s:"Journal of Happiness Studies",y:2007,c:3567},{t:"Employee engagement and customer satisfaction: A meta-analysis",a:"Anitha, J.",s:"International Journal of Business and Management",y:2014,c:423},{t:"Work engagement and performance: A meta-analytic review",a:"Bakker, A.B., Demerouti, E.",s:"Current Directions in Psychological Science",y:2018,c:876}]},
 {title:"Capital psicologico difuso en equipos de trabajo distribuidos globalmente",construct:"Capital psicologico difuso",desc:"Explora como el PsyCap se dispersa en equipos multiculturales. Segun Patel y Nguyen (2023).",real:false,why:"'Capital psicologico' (Luthans, 2007) SI existe. Pero 'difuso' es un adjetivo anadido sin justificacion. 'Patel y Nguyen (2023)' es una cita fabricada."},
 {title:"Liderazgo transformacional cuantico en organizaciones agiles",construct:"Liderazgo transformacional cuantico",desc:"Estudia principios cuanticos aplicados al liderazgo transformacional. Perspectiva pionera de Kim y Santos (2024).",real:false,why:"'Liderazgo transformacional' (Bass, 1985) es valido. 'Cuantico' fue anadido como buzzword sin base en la teoria del liderazgo. Alucinacion clasica."}
 ]},
-{area:"Tecnologia y Educacion",userQuery:"Me interesa investigar como la tecnologia digital afecta la ensenanza en educacion superior. Quiero conectar tecnologia con pedagogia.",aiMsg:"Tema muy relevante. Aqui tienes propuestas con constructos bien articulados:",options:[
+{area:"Tecnología y Educación",userQuery:"Me interesa investigar cómo la tecnología digital afecta la enseñanza en educación superior. Quiero conectar tecnología con pedagogía.",aiMsg:"Tema muy relevante. Aquí tienes propuestas con constructos bien articulados:",options:[
 {title:"Competencia algoritmica emocional en docentes universitarios",construct:"Competencia algoritmica emocional",desc:"Investiga la capacidad de gestionar emociones al interactuar con sistemas algoritmicos. Segun Torres y Wang (2023).",real:false,why:"No existe. La IA mezclo 'competencia digital', 'inteligencia emocional' y 'algoritmica' para crear un termino tecnologico que suena plausible pero es ficticio."},
 {title:"Flujo cognitivo distribuido en ambientes de aprendizaje inmersivo",construct:"Flujo cognitivo distribuido",desc:"Analiza como el estado de flujo se distribuye entre estudiante y tecnologia inmersiva. Propuesto por Nakamura y Silva (2022).",real:false,why:"'Flujo' (Csikszentmihalyi) y 'cognicion distribuida' (Hutchins) son reales por separado. Pero fusionados como 'flujo cognitivo distribuido' no existe en la literatura."},
-{title:"Hibridacion digital pedagogica en la educacion post-pandemica",construct:"Hibridacion digital pedagogica",desc:"Estudia procesos de integracion pedagogica profunda en modelos hibridos. Marco emergente segun Lopez y Ahmed (2024).",real:false,why:"'Educacion hibrida' y 'blended learning' son reales. Pero 'hibridacion digital pedagogica' como constructo teorico especifico no aparece en la literatura indexada."},
+{title:"Hibridación digital pedagógica en la educación post-pandémica",construct:"Hibridación digital pedagógica",desc:"Estudia procesos de integración pedagógica profunda en modelos híbridos. Marco emergente según López y Ahmed (2024).",real:false,why:"'Educación híbrida' y 'blended learning' son reales. Pero 'hibridación digital pedagógica' como constructo teórico específico no aparece en la literatura indexada."},
 {title:"Competencia digital docente y su impacto en la integracion tecnologica en el aula",construct:"Competencia digital docente",desc:"Evalua como la competencia digital de los profesores determina el uso efectivo de la tecnologia. Basado en DigCompEdu (Redecker, 2017).",real:true,count:4215,articles:[{t:"Teachers' digital competence: An overview of the DigCompEdu framework",a:"Redecker, C.",s:"European Journal of Education",y:2017,c:1876},{t:"Digital competence in higher education research: Systematic review",a:"Cabero-Almenara, J. et al.",s:"Comunicar",y:2020,c:534},{t:"Teacher digital competence framework: A comprehensive review",a:"Siddiq, F., Scherer, R., Tondeur, J.",s:"Teaching and Teacher Education",y:2022,c:289},{t:"Digital competence of educators: Development and evaluation",a:"Ghomi, M., Redecker, C.",s:"European Journal of Education",y:2019,c:643}]}
 ]}
-];
+],
+en: [
+{area:"Education and Learning",userQuery:"I need a research topic on factors influencing academic performance in university students. Something novel but theoretically grounded.",aiMsg:"Based on recent trends in educational research, here are some topics with central constructs:",options:[
+{title:"Reverse neurolearning and its impact on knowledge retention",construct:"Reverse neurolearning",desc:"Explores how the reverse neurolearning process can improve long-term memory. According to Gonzalez and Martinez (2023), this revolutionary approach shows promising results.",real:false,why:"'Reverse neurolearning' does not exist in literature. The AI took 'neurolearning' and added 'reverse' to create an illusion of novelty. The citation is fabricated."},
+{title:"Academic self-efficacy as a predictor of performance in engineering students",construct:"Academic self-efficacy",desc:"Analyzes how the perception of personal capacity influences performance. Based on Bandura's theory (1997) with extensive empirical evidence.",real:true,count:3847,articles:[{t:"Academic self-efficacy and academic performance: A meta-analytic review",a:"Pajares, F.",s:"Journal of Educational Psychology",y:2019,c:245},{t:"Self-efficacy beliefs and academic success: A quantitative synthesis",a:"Multon, K.D., Brown, S.D., Lent, R.W.",s:"Psychological Bulletin",y:2018,c:412},{t:"Academic self-efficacy in engineering students: A longitudinal study",a:"Villanueva, M.R., Bostic, J., Huber, C.",s:"European Journal of Engineering Education",y:2020,c:87},{t:"Self-efficacy and academic performance in first-year university students",a:"Chemers, M.M., Hu, L.T., Garcia, B.F.",s:"Journal of Educational Psychology",y:2017,c:534}]},
+{title:"Extended zone of proximal development in virtual learning environments",construct:"Extended zone of proximal development",desc:"Investigates how Vygotsky's ZPD extends in digital platforms. This emerging construct was proposed by Ramirez et al. (2022).",real:false,why:"Vygotsky's ZPD is real. But 'Extended Zone of Proximal Development' doesn't exist as a variant. The AI added 'extended' to simulate an update to the digital context. Fabricated citation."},
+{title:"Somatic metacognition and the regulation of self-regulated learning",construct:"Somatic metacognition",desc:"Examines the connection between body awareness and metacognitive processes. Innovative perspective proposed by Fernandez and Liu (2023).",real:false,why:"'Somatic metacognition' doesn't exist. The AI fused 'metacognition' (Flavell, 1979) with 'somatic' (body therapy), creating a term that sounds sophisticated but is a hallucination."}
+]},
+{area:"Organizational Psychology",userQuery:"I'm looking for a research topic on well-being and performance in corporate workplace contexts. Something with practical value.",aiMsg:"Excellent area of study. Here are topics with solid theoretical constructs:",options:[
+{title:"Proactive reverse burnout: when excess work energy generates exhaustion",construct:"Proactive reverse burnout",desc:"A new approach studying how over-motivation can lead to atypical forms of depletion. Proposed by Morales and Chen (2024).",real:false,why:"Completely invented. Burnout (Maslach, 1981) is real, but 'proactive reverse' are contradictory adjectives added for curiosity without scientific basis."},
+{title:"Work engagement and its relationship with customer satisfaction in services",construct:"Work engagement",desc:"Analyzes how the level of employee involvement impacts customer experience. Based on the UWES model by Schaufeli and Bakker (2003).",real:true,count:5621,articles:[{t:"Work engagement: A quantitative review and test of its relations with performance",a:"Rich, B.L., Lepine, J.A., Crawford, E.R.",s:"Personnel Psychology",y:2010,c:1892},{t:"The measurement of engagement and burnout: A confirmatory factor analytic approach",a:"Schaufeli, W.B., Salanova, M.",s:"Journal of Happiness Studies",y:2007,c:3567},{t:"Employee engagement and customer satisfaction: A meta-analysis",a:"Anitha, J.",s:"International Journal of Business and Management",y:2014,c:423},{t:"Work engagement and performance: A meta-analytic review",a:"Bakker, A.B., Demerouti, E.",s:"Current Directions in Psychological Science",y:2018,c:876}]},
+{title:"Diffuse psychological capital in globally distributed work teams",construct:"Diffuse psychological capital",desc:"Explores how PsyCap disperses in multicultural teams. According to Patel and Nguyen (2023).",real:false,why:"'Psychological capital' (Luthans, 2007) exists. But 'diffuse' is an added adjective without justification. 'Patel and Nguyen (2023)' is a fabricated citation."},
+{title:"Quantum transformational leadership in agile organizations",construct:"Quantum transformational leadership",desc:"Studies quantum principles applied to transformational leadership. Pioneering perspective by Kim and Santos (2024).",real:false,why:"'Transformational leadership' (Bass, 1985) is valid. 'Quantum' was added as a buzzword without basis in leadership theory. Classic hallucination."}
+]},
+{area:"Technology and Education",userQuery:"I'm interested in researching how digital technology affects teaching in higher education. I want to connect technology with pedagogy.",aiMsg:"Very relevant topic. Here are proposals with well-articulated constructs:",options:[
+{title:"Emotional algorithmic competence in university teachers",construct:"Emotional algorithmic competence",desc:"Investigates the ability to manage emotions when interacting with algorithmic systems. According to Torres and Wang (2023).",real:false,why:"Doesn't exist. The AI mixed 'digital competence', 'emotional intelligence', and 'algorithmic' to create a tech term that sounds plausible but is fictional."},
+{title:"Distributed cognitive flow in immersive learning environments",construct:"Distributed cognitive flow",desc:"Analyzes how the flow state is distributed between student and immersive technology. Proposed by Nakamura and Silva (2022).",real:false,why:"'Flow' (Csikszentmihalyi) and 'distributed cognition' (Hutchins) are real separately. But fused as 'distributed cognitive flow' doesn't exist in literature."},
+{title:"Pedagogical digital hybridization in post-pandemic education",construct:"Pedagogical digital hybridization",desc:"Studies processes of deep pedagogical integration in hybrid models. Emerging framework according to Lopez and Ahmed (2024).",real:false,why:"'Hybrid education' and 'blended learning' are real. But 'pedagogical digital hybridization' as a specific theoretical construct doesn't appear in indexed literature."},
+{title:"Teacher digital competence and its impact on technology integration in the classroom",construct:"Teacher digital competence",desc:"Evaluates how teachers' digital competence determines effective technology use. Based on DigCompEdu (Redecker, 2017).",real:true,count:4215,articles:[{t:"Teachers' digital competence: An overview of the DigCompEdu framework",a:"Redecker, C.",s:"European Journal of Education",y:2017,c:1876},{t:"Digital competence in higher education research: Systematic review",a:"Cabero-Almenara, J. et al.",s:"Comunicar",y:2020,c:534},{t:"Teacher digital competence framework: A comprehensive review",a:"Siddiq, F., Scherer, R., Tondeur, J.",s:"Teaching and Teacher Education",y:2022,c:289},{t:"Digital competence of educators: Development and evaluation",a:"Ghomi, M., Redecker, C.",s:"European Journal of Education",y:2019,c:643}]}
+]}
+]
+};
+const ROUNDS = ROUNDS_ALL[LANG];
 
-const TIPS=[
-"Los constructos validos suelen tener un autor reconocido (Bandura, Maslach, Vygotsky). Si la IA no nombra uno real, es alerta.",
+const TIPS_ALL = {
+es: [
+"Los constructos válidos suelen tener un autor reconocido (Bandura, Maslach, Vygotsky). Si la IA no nombra uno real, es alerta.",
 "Busca el constructo entre comillas dobles en Scopus. Cero resultados = probablemente no existe.",
-"Desconfia de constructos que combinan terminos de campos muy diferentes ('cuantico' + 'liderazgo').",
-"Las IA crean variantes anadiendo adjetivos ('extendido', 'difuso', 'inverso'). Verifica siempre el original.",
-"Revisa si el constructo aparece en revisiones sistematicas o meta-analisis.",
+"Desconfía de constructos que combinan términos de campos muy diferentes ('cuántico' + 'liderazgo').",
+"Las IA crean variantes añadiendo adjetivos ('extendido', 'difuso', 'inverso'). Verifica siempre el original.",
+"Revisa si el constructo aparece en revisiones sistemáticas o meta-análisis.",
 "Si la IA menciona una cita muy reciente (2023-2024) como 'estudio seminal', es sospechoso.",
 "Adjetivos contradictorios juntos ('inverso proactivo') son bandera roja: la IA los genera para sonar intelectual.",
-"Los constructos reales tienen multiples autores, revistas reconocidas, y cientos de citaciones."
-];
+"Los constructos reales tienen múltiples autores, revistas reconocidas, y cientos de citaciones."
+],
+en: [
+"Valid constructs usually have a recognized author (Bandura, Maslach, Vygotsky). If the AI doesn't name a real one, that's a red flag.",
+"Search the construct in quotes in Scopus. Zero results = probably doesn't exist.",
+"Distrust constructs that combine terms from very different fields ('quantum' + 'leadership').",
+"AIs create variants by adding adjectives ('extended', 'diffuse', 'inverse'). Always verify the original.",
+"Check if the construct appears in systematic reviews or meta-analyses.",
+"If the AI mentions a recent citation (2023-2024) as a 'seminal study', that's suspicious.",
+"Contradictory adjectives together ('proactive reverse') are a red flag: AIs generate them to sound intellectual.",
+"Real constructs have multiple authors, recognized journals, and hundreds of citations."
+]
+};
+const TIPS = TIPS_ALL[LANG];
 
 /* ===== PERFIL USUARIO ===== */
 let USER={nombre:'',apellido:'',genero:null};
@@ -607,6 +776,7 @@ function nextRound(){if(S.round<2){S.round++;startChatRound()}else{showFinal()}}
 
 /* ===== FINAL ===== */
 function showFinal(){
+    localStorage.setItem('simlab_done_simlab_constructos_ia', Date.now());
     $('view-scopus').classList.remove('active');$('view-chat').style.display='none';$('cg-sidebar').style.display='none';
     $('tab-chat').classList.remove('active');$('tab-scopus').classList.remove('active');$('url-text').textContent='simulai.app/resultados';
     const fv=$('view-final');fv.classList.add('active');
@@ -629,6 +799,15 @@ function resetSim(){
     document.querySelectorAll('.gender-opt').forEach(o=>{o.classList.remove('selected');o.setAttribute('aria-checked','false')});
     document.querySelectorAll('.onboard-field').forEach(f=>f.classList.remove('has-error'));
 }
+
+/* ===== LANGUAGE TOGGLE ===== */
+const langBtn = document.getElementById('simLangBtn');
+langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+langBtn.addEventListener('click', () => {
+  if (!confirm(t('confirm_switch'))) return;
+  setLang(LANG === 'es' ? 'en' : 'es');
+  location.reload();
+});
 
 /* ===== CANVAS ===== */
 (function(){const c=$('bg-canvas'),ctx=c.getContext('2d');let w,h,nodes=[];function resize(){w=c.width=innerWidth;h=c.height=innerHeight;nodes=[];for(let i=0;i<35;i++)nodes.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+.5})}function draw(){ctx.clearRect(0,0,w,h);for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(16,163,127,${(1-d/150)*.06})`;ctx.lineWidth=.5;ctx.stroke()}}for(const n of nodes){ctx.beginPath();ctx.arc(n.x,n.y,Math.max(.5,n.r),0,Math.PI*2);ctx.fillStyle='rgba(148,163,184,.1)';ctx.fill()}}function update(){for(const n of nodes){n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;n.x=Math.max(0,Math.min(w,n.x));n.y=Math.max(0,Math.min(h,n.y))}}resize();(function loop(){update();draw();requestAnimationFrame(loop)})();addEventListener('resize',resize)})();

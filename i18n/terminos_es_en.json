@@ -1,0 +1,124 @@
+{
+  "_meta": {
+    "version": 1,
+    "creada": "2026-07-09",
+    "descripcion": "BD maestra ES-EN. Fuente de verdad terminológica. Las sims embeben copia sincronizada."
+  },
+  "ui_comun": {
+    "name_q": {
+      "es": "¿Cómo te llamas?",
+      "en": "What is your name?"
+    },
+    "name_ph": {
+      "es": "Ingresa tu nombre",
+      "en": "Enter your name"
+    },
+    "name_note": {
+      "es": "No te preguntaremos otra vez en esta sesión.",
+      "en": "We will not ask again during this session."
+    },
+    "name_btn": {
+      "es": "Continuar",
+      "en": "Continue"
+    },
+    "name_default": {
+      "es": "Estudiante",
+      "en": "Student"
+    },
+    "back_title": {
+      "es": "Volver al inicio",
+      "en": "Back to home"
+    },
+    "confirm_switch": {
+      "es": "Cambiar el idioma reiniciará la simulación. ¿Continuar?",
+      "en": "Switching language will restart the simulation. Continue?"
+    }
+  },
+  "terminos_pedagogicos": {
+    "constructo_teorico": {
+      "es": "constructo teórico",
+      "en": "theoretical construct",
+      "sims": ["constructos_ia"]
+    },
+    "alucinacion_ia": {
+      "es": "alucinación de IA",
+      "en": "AI hallucination",
+      "sims": ["constructos_ia"]
+    },
+    "base_datos_indexada": {
+      "es": "base de datos indexada",
+      "en": "indexed database",
+      "sims": ["constructos_ia"]
+    },
+    "validez_constructo": {
+      "es": "validez del constructo",
+      "en": "construct validity",
+      "sims": ["constructos_ia"]
+    },
+    "citacion": {
+      "es": "citación",
+      "en": "citation",
+      "sims": ["constructos_ia"]
+    },
+    "meta_analisis": {
+      "es": "meta-análisis",
+      "en": "meta-analysis",
+      "sims": ["constructos_ia"]
+    },
+    "revision_sistematica": {
+      "es": "revisión sistemática",
+      "en": "systematic review",
+      "sims": ["constructos_ia"]
+    },
+    "autoeficacia_academica": {
+      "es": "autoeficacia académica",
+      "en": "academic self-efficacy",
+      "sims": ["constructos_ia"]
+    },
+    "zona_desarrollo_proximal": {
+      "es": "zona de desarrollo proximal",
+      "en": "zone of proximal development",
+      "sims": ["constructos_ia"]
+    },
+    "metacognicion": {
+      "es": "metacognición",
+      "en": "metacognition",
+      "sims": ["constructos_ia"]
+    },
+    "burnout": {
+      "es": "burnout",
+      "en": "burnout",
+      "sims": ["constructos_ia"]
+    },
+    "engagement_laboral": {
+      "es": "engagement laboral",
+      "en": "work engagement",
+      "sims": ["constructos_ia"]
+    },
+    "capital_psicologico": {
+      "es": "capital psicológico",
+      "en": "psychological capital",
+      "sims": ["constructos_ia"]
+    },
+    "liderazgo_transformacional": {
+      "es": "liderazgo transformacional",
+      "en": "transformational leadership",
+      "sims": ["constructos_ia"]
+    },
+    "competencia_digital_docente": {
+      "es": "competencia digital docente",
+      "en": "teacher digital competence",
+      "sims": ["constructos_ia"]
+    },
+    "flujo_cognitivo": {
+      "es": "flujo cognitivo",
+      "en": "cognitive flow",
+      "sims": ["constructos_ia"]
+    },
+    "educacion_hibrida": {
+      "es": "educación híbrida",
+      "en": "hybrid education",
+      "sims": ["constructos_ia"]
+    }
+  }
+}

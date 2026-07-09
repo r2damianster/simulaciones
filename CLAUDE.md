@@ -22,6 +22,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `muestreo.html` | Simulador de Muestreos | Estadística — técnicas probabilísticas y no probabilísticas, simulaciones visuales con poblaciones de plantas, personas y fábricas |
 | `conectores.html` | Máquina de Engranajes Argumentativos | Redacción académica — conectores discursivos (adición, causalidad, contraste, ejemplificación, orden temporal, conclusión); mecánica 2-paso: tipo de relación → conector exacto; puntuación sobre 100, -5 por error |
 | `constructos.html` | Constructor de Constructos Teóricos | Epistemología — operacionalización de conceptos, validez de constructos, identificar alucinaciones de IA |
+| `constructos_IA.html` | SimulAI — Alucinaciones en la Investigación | Metodología — detección de alucinaciones en construcción de constructos; verificación en Scopus; tipología de adjetivación espuria, fusión cross-field, citas fabricadas |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 
@@ -59,6 +60,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 | `muestreo.html` | `#0A1410` (dark green) | `#34D399` (emerald) | Paisaje ecológico / naturaleza orgánica |
 | `peel.html` | `#14110d` (dark warm) | `#D4A24E` (gold) | Cuaderno del escritor — párrafo se escribe a mano con pluma animada sobre papel de renglones |
 | `conectores.html` | `#171310` (dark warm industrial) | `#d4af37` (gold) + `#34D399` (emerald, ex-neon) | Operario de la máquina — tira de palanca, estampa conectores en cinta de producción |
+| `constructos_IA.html` | `#080c14` (dark tech/AI) | `#10a37f` (emerald AI) | ChatGPT-like browser mock — avatar dinámico, chat interactivo, Scopus simulado, detección de alucinaciones |
 
 **Nota de rediseño (2026-07):** `peel.html`, `conectores.html`, `disenos.html` y `financiamiento_etica.html` fueron re-diseñadas para alinear su identidad visual con las simulaciones favoritas del usuario (observación, evaluaciones_lectura, muestreo, apa7/apa7_2): fondo oscuro cálido, acento dorado/esmeralda, tipografía serif en títulos. Más importante: cada una ganó un **elemento concreto/humano** que hace tangible la mecánica pedagógica (no solo estética) — ver detalle en cada fila de la tabla.
 
@@ -121,10 +123,8 @@ Donde `CLAVE` es el `data-key` de la tarjeta en index.html (la clave completa qu
 - evaluaciones_lectura.html: `simlab_eval` → `simlab_done_simlab_eval`
 - muestreo.html: `simlab_mue` → `simlab_done_simlab_mue`
 - conectores.html: `simlab_con` → `simlab_done_simlab_con`
-- financiamiento_etica.html: `simlab_fin` → `simlab_done_simlab_fin`
-- disenos.html: `simlab_des` → `simlab_done_simlab_des`
-- observación.html: `simlab_obs` → `simlab_done_simlab_obs`
 - constructos.html: `simlab_constructos` → `simlab_done_simlab_constructos`
+- constructos_IA.html: `simlab_constructos_ia` → `simlab_done_simlab_constructos_ia`
 
 En `index.html`, `isSimDone(key)` lee `simlab_done_${key}` (donde `key` = `data-key`) y muestra badge «✓ Completada».
 
@@ -352,6 +352,50 @@ Después de que el hook normaliza, Claude DEBE ejecutar MANUALMENTE:
    - Verificar back-link fijo (esquina sup-izq)
    - Completar sim → debe escribir `localStorage.simlab_done_*`
    - Volver a index → debe mostrar badge ✓ Completada
+
+### Paso 3: Protocolo i18n-BD (Bilingüe ES-EN + BD central de términos) — **Obligatorio desde 2026-07**
+
+A partir de `constructos_IA.html`, toda nueva simulación DEBE ser **bilingüe desde el origen**. La arquitectura de i18n y la BD de términos establecen la pauta:
+
+**BD Central:** `i18n/terminos_es_en.json`
+- Fuente de verdad para terminología pedagógica y UI común
+- Estructura: `{ "ui_comun": {...}, "terminos_pedagogicos": {...} }`
+- Cada entrada registra `"sims": ["sim1", "sim2"]` para trazabilidad
+
+**Patrón i18n en nueva sim (embebida, autosuficiente):**
+
+1. **Bloque i18n estándar** (copiar de `constructos_IA.html`):
+   ```javascript
+   function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+   function setLang(l){ localStorage.setItem('simlab_lang', l); }
+   const LANG = getLang();
+   document.documentElement.lang = LANG;
+   const I18N = { es: {...}, en: {...} };
+   function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+   ```
+
+2. **Rama ES y EN de datos pedagógicos:**
+   - Si la sim tiene arrays/objetos de contenido (rondas, opciones, tips, etc.)
+   - Definir `const DATA_ALL = { es: [rondas ES], en: [rondas EN] };`
+   - Luego `const DATA = DATA_ALL[LANG];`
+   - **Ambas ramas deben tener shape idéntico** (misma cardinalidad, campos)
+
+3. **Toggle de idioma `.sim-lang`:**
+   - Fijo top-right, espejo de `.sim-home`
+   - Show destino: `LANG === 'es' ? 'EN' : 'ES'`
+   - Con confirm: `if (!confirm(t('confirm_switch'))) return; setLang(...); location.reload();`
+
+4. **Población de BD:**
+   - Consultar `i18n/terminos_es_en.json` para términos ya registrados
+   - Si el término NO existe → añadirlo a la BD
+   - Cada término añadido debe listar la sim nueva en `"sims": [...]`
+
+5. **Verificación:**
+   - Cambiar idioma en navegador (toggle lang)
+   - Todos los strings deben reflejarse: UI, datos pedagógicos, botones, mensajes
+   - No debería haber quebrantos visuales ni texto duplicado
+
+**Razón del protocolo:** consistencia terminológica entre sims, mantenimiento centralizado, reutilización de traducción para UI común, reducción de duplicación.
 
 ### Referencia rápida: Claves y Categorías
 

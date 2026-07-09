@@ -376,6 +376,7 @@
         .sim-out.eval:hover { border-color: rgba(212,162,78,0.4); box-shadow: 0 24px 60px rgba(212,162,78,0.08); }
         .sim-out.mue:hover  { border-color: rgba(52,211,153,0.4);  box-shadow: 0 24px 60px rgba(52,211,153,0.08); }
         .sim-out.con:hover  { border-color: rgba(212,175,55,0.45); box-shadow: 0 24px 60px rgba(212,175,55,0.09); }
+        .sim-out.ia:hover   { border-color: rgba(16,163,127,0.45); box-shadow: 0 24px 60px rgba(16,163,127,0.09); }
 
         .sim-in {
             border-radius: calc(1.75rem - 4px); background: var(--card);
@@ -995,6 +996,32 @@
                                 <div class="sim-meta">
                                     <span class="sim-meta-chip">⏱ ~15 min</span>
                                     <span class="sim-meta-chip" data-i18n="level_basic">Básico</span>
+                                </div>
+                                <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
+                                    <span class="btn-sim-ico">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- SimulAI -->
+                <div class="sim-out ia reveal d4" data-cat="metodologia" data-key="simlab_constructos_ia" data-file="constructos_IA.html">
+                    <input type="hidden" data-done>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
+                    <a href="constructos_IA.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
+                        <div class="sim-in">
+                            <div class="sim-thumb">
+                                <span class="sim-thumb-icon" aria-hidden="true">🤖</span>
+                            </div>
+                            <div class="sim-body">
+                                <span class="sim-tag" data-i18n="card_ia_tag">Metodología</span>
+                                <div class="sim-title" data-i18n="card_ia_title">SimulAI — Alucinaciones en la Investigación</div>
+                                <p class="sim-desc" data-i18n="card_ia_desc">Detecta alucinaciones de IA en constructos teóricos. Verifica en Scopus y aprende a identificar términos inventados con adjetivos espurios.</p>
+                                <div class="sim-meta">
+                                    <span class="sim-meta-chip">⏱ ~20 min</span>
+                                    <span class="sim-meta-chip" data-i18n="level_postgrado">Posgrado</span>
                                 </div>
                                 <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
                                     <span data-i18n="btn_start">Iniciar Simulación</span>
