@@ -23,6 +23,7 @@ La selección no es aleatoria; depende del criterio del investigador. Introduce 
 | **Por cuota** | Se asegura una proporción de características (ej. 50% hombres, 50% mujeres). | No garantiza representatividad estadística. |
 | **Intencional/Propositivo** | El investigador elige casos "típicos" o "atípicos" intencionalmente. | Válido en investigación cualitativa. |
 | **Bola de nieve** | Participantes reclutan a otros (común en estudios de poblaciones ocultas). | Sesgado hacia redes de relación. |
+| **Casos Extremos** | Se eligen deliberadamente los casos con máximo y mínimo desempeño, descartando promedios. | Maximiza diferencias; requiere población claramente estratificable. |
 
 ## Error de Muestreo
 

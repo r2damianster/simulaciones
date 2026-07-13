@@ -162,6 +162,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   opacity:0;transition:all .35s;bottom:-6px;right:-6px;z-index:3;font-family:'Space Grotesk',sans-serif}
 .bola-nieve-badge.show{opacity:1;transform:scale(1)}
 
+.extremos-marker{top:12px;left:12px;display:flex;align-items:center;gap:6px;
+  background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);padding:6px 12px;border-radius:6px;
+  font-size:12px;color:var(--accent);font-weight:600;opacity:0;transition:opacity .4s}
+.extremos-marker.show{opacity:1}
+.extremos-gradient{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s;
+  background:linear-gradient(to bottom,rgba(52,211,153,.08) 0%,transparent 30%,transparent 70%,rgba(248,113,113,.08) 100%)}
+.extremos-gradient.show{opacity:1}
+
 /* Narrativa */
 .narrativa-card{width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
   padding:18px 22px;margin-bottom:20px;animation:fadeInUp .4s ease}
@@ -350,7 +358,8 @@ const GLOSARIO_ALL = {
         {nombre:"Por Conveniencia",desc:"Se eligen los elementos más accesibles o fáciles de alcanzar."},
         {nombre:"Por Juicio",desc:"El investigador selecciona los que considera representativos según su experiencia."},
         {nombre:"Bola de Nieve",desc:"Un sujeto inicial refiere a otros, y esos a más, en cadena."},
-        {nombre:"Por Cuotas",desc:"Se establece una cuota por categoría y se selecciona hasta completarla."}
+        {nombre:"Por Cuotas",desc:"Se establece una cuota por categoría y se selecciona hasta completarla."},
+        {nombre:"Casos Extremos",desc:"Se eligen deliberadamente los casos con máximo y mínimo desempeño, descartando los promedios, para maximizar diferencias."}
       ]}
   ],
   en: [
@@ -369,14 +378,15 @@ const GLOSARIO_ALL = {
         {nombre:"Convenience",desc:"Elements most accessible or easiest to reach are selected."},
         {nombre:"Judgment",desc:"Researcher selects those considered representative by experience."},
         {nombre:"Snowball",desc:"Initial subject refers others, and those refer more, in chain."},
-        {nombre:"Quota",desc:"Quota is set per category and selection continues until quota is filled."}
+        {nombre:"Quota",desc:"Quota is set per category and selection continues until quota is filled."},
+        {nombre:"Extreme Cases",desc:"Cases with maximum and minimum performance are deliberately chosen, discarding average cases, to maximize observed differences."}
       ]}
   ]
 };
 const GLOSARIO = GLOSARIO_ALL[LANG];
 
 const SUBTIPOS_PROB = LANG === 'es' ? ["Aleatorio Simple","Sistemático","Estratificado","Por Conglomerados"] : ["Simple Random","Systematic","Stratified","Cluster"];
-const SUBTIPOS_NO_PROB = LANG === 'es' ? ["Por Conveniencia","Por Juicio","Bola de Nieve","Por Cuotas"] : ["Convenience","Judgment","Snowball","Quota"];
+const SUBTIPOS_NO_PROB = LANG === 'es' ? ["Por Conveniencia","Por Juicio","Bola de Nieve","Por Cuotas","Casos Extremos"] : ["Convenience","Judgment","Snowball","Quota","Extreme Cases"];
 
 const EJERCICIOS_ALL = {
   es: [
@@ -545,6 +555,19 @@ const EJERCICIOS_ALL = {
       explicacionP1:"La selección depende del criterio personal del supervisor. No hay probabilidad para cada producto. Es <strong>no probabilístico</strong>.",
       explicacionP2:"El investigador usa su experiencia y juicio para elegir. Es <strong>Muestreo por Juicio</strong>.",
       animacion:"juicio"
+    },
+    { id:13, fase:2, titulo:"Aceleradora de Startups", icono:"🚀",
+      poblacion:{ total:45, columns:9, grupos:[
+        {nombre:"Alto Crecimiento",emoji:"🚀",color:"#34D399",cantidad:15},
+        {nombre:"Crecimiento Normal",emoji:"📈",color:"#FBBF24",cantidad:15},
+        {nombre:"Quiebra Temprana",emoji:"📉",color:"#F87171",cantidad:15}
+      ]},
+      muestraCantidad:12, seleccionados:[0,1,2,3,4,5,30,31,32,33,34,35],
+      tipo:"noProbabilistico", subtipo:"Casos Extremos", distribucion:"contiguo",
+      narrativa:"Se estudian solo los 6 casos con mayor éxito y los 6 con mayor fracaso de la cohorte, ignorando las startups de crecimiento promedio.",
+      explicacionP1:"Se seleccionaron solo los extremos (mejores y peores). Los casos promedio fueron descartados. Es <strong>no probabilístico</strong>.",
+      explicacionP2:"Se eligieron deliberadamente los casos más extremos para maximizar las diferencias observadas. Es <strong>Muestreo por Casos Extremos</strong>.",
+      animacion:"casos_extremos"
     }
   ],
   en: [
@@ -713,6 +736,19 @@ const EJERCICIOS_ALL = {
       explicacionP1:"The selection depends on the supervisor's personal criteria. There is no probability for each product. It is <strong>non-probabilistic</strong>.",
       explicacionP2:"The researcher uses his experience and judgment to choose. This is <strong>Judgment Sampling</strong>.",
       animacion:"juicio"
+    },
+    { id:13, fase:2, titulo:"Startup Accelerator", icono:"🚀",
+      poblacion:{ total:45, columns:9, grupos:[
+        {nombre:"High Growth",emoji:"🚀",color:"#34D399",cantidad:15},
+        {nombre:"Normal Growth",emoji:"📈",color:"#FBBF24",cantidad:15},
+        {nombre:"Early Failure",emoji:"📉",color:"#F87171",cantidad:15}
+      ]},
+      muestraCantidad:12, seleccionados:[0,1,2,3,4,5,30,31,32,33,34,35],
+      tipo:"noProbabilistico", subtipo:"Extreme Cases", distribucion:"contiguo",
+      narrativa:"Only the 6 most successful cases and 6 most failed cases are studied from the cohort, ignoring startups with average growth.",
+      explicacionP1:"Only the extremes (best and worst) were selected. Average cases were discarded. It is <strong>non-probabilistic</strong>.",
+      explicacionP2:"Cases that are most extreme were deliberately chosen to maximize observed differences. This is <strong>Extreme Cases Sampling</strong>.",
+      animacion:"casos_extremos"
     }
   ]
 };
@@ -1110,6 +1146,21 @@ async function animarSeleccion(ej){
       });
       break;
     }
+
+    case 'casos_extremos': {
+      const marker = document.createElement('div');
+      marker.className = 'extremos-marker anim-overlay';
+      marker.innerHTML = '<i class="fas fa-fire"></i> Máximos y Mínimos';
+      canvas.appendChild(marker);
+      const gradient = document.createElement('div');
+      gradient.className = 'extremos-gradient anim-overlay';
+      canvas.appendChild(gradient);
+      setTimeout(() => { marker.classList.add('show'); gradient.classList.add('show'); }, 100);
+      await delay(800);
+      sel.forEach(idx => { if(elems[idx]) elems[idx].classList.add('selected'); });
+      elems.forEach((el, i) => { if(!sel.has(i)) el.classList.add('dimmed'); });
+      break;
+    }
   }
   await delay(300);
 }
@@ -1335,12 +1386,11 @@ function _renderPantallaFinal(){
   const el = document.getElementById('screen-final');
 
   let rango, rangoColor, rangoIcono;
-  if(state.puntaje >= 105){ rango='Investigador Experto'; rangoColor='var(--accent)'; rangoIcono='🏆'; }
-  else if(state.puntaje >= 75){ rango='Asistente de Investigacion'; rangoColor='var(--warm)'; rangoIcono='🥈'; }
-  else if(state.puntaje >= 45){ rango='Estudiante en Practica'; rangoColor='#60A5FA'; rangoIcono='🥉'; }
+  const maxPts = EJERCICIOS.filter(e=>e.fase===1).length*10 + EJERCICIOS.filter(e=>e.fase===2).length*15;
+  if(state.puntaje >= maxPts*0.7){ rango='Investigador Experto'; rangoColor='var(--accent)'; rangoIcono='🏆'; }
+  else if(state.puntaje >= maxPts*0.5){ rango='Asistente de Investigacion'; rangoColor='var(--warm)'; rangoIcono='🥈'; }
+  else if(state.puntaje >= maxPts*0.3){ rango='Estudiante en Practica'; rangoColor='#60A5FA'; rangoIcono='🥉'; }
   else { rango='Necesitas repasar el glosario'; rangoColor='var(--error)'; rangoIcono='📖'; }
-
-  const maxPts = 6*10 + 6*15; // 150
   const fallidos = state.resultados.filter(r => !r.p1Correcta);
 
   el.innerHTML = `
