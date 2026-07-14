@@ -23,6 +23,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `conectores.html` | Máquina de Engranajes Argumentativos | Redacción académica — conectores discursivos (adición, causalidad, contraste, ejemplificación, orden temporal, conclusión); mecánica 2-paso: tipo de relación → conector exacto; puntuación sobre 100, -5 por error |
 | `constructos.html` | Constructor de Constructos Teóricos | Epistemología — operacionalización de conceptos, validez de constructos, identificar alucinaciones de IA |
 | `constructos_IA.html` | SimulAI — Alucinaciones en la Investigación | Metodología — detección de alucinaciones en construcción de constructos; verificación en Scopus; tipología de adjetivación espuria, fusión cross-field, citas fabricadas |
+| `revista.html` | OJS — Envío de Artículos Científicos | Metodología de publicación — proceso de envío, declaraciones éticas, metadatos, revisión por pares, evaluación a ciegas |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 

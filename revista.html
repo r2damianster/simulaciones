@@ -28,6 +28,10 @@
     --radius-sm: 6px;
     --shadow: 0 8px 32px rgba(0,0,0,0.3);
     --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --sim-home-fg: #00b894;
+    --sim-home-bg: rgba(0, 184, 148, 0.15);
+    --sim-home-bd: rgba(0, 184, 148, 0.3);
+    --sim-home-hi: #00d9af;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -793,6 +797,21 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
+
+  .sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
+    display:flex;align-items:center;justify-content:center;text-decoration:none;
+    color:var(--sim-home-fg, #888);background:var(--sim-home-bg, rgba(0,0,0,.35));
+    border:1px solid var(--sim-home-bd, rgba(255,255,255,.15));border-radius:10px;
+    transition:transform .2s, color .2s}
+  .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi, #fff);transform:scale(1.06)}
+
+  .sim-lang{position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;
+    color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
+    border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
+    transition:transform .2s,color .2s}
+  .sim-lang:hover,.sim-lang:focus-visible{color:var(--sim-home-hi,#fff);transform:scale(1.06)}
 </style>
 </head>
 <body>
@@ -803,11 +822,15 @@
 
 <!-- HEADER -->
 <header>
+  <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+    <i class="fa-solid fa-house" aria-hidden="true"></i>
+  </a>
   <div class="logo">
     <div class="logo-icon">OJS</div>
     <span>Revista Cient&iacute;fica</span>
   </div>
   <div class="header-right">
+    <button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
     <div class="user-badge" id="userBadge">
       <i class="fas fa-user-circle"></i>
       <span id="userBadgeName"></span>
@@ -1411,6 +1434,44 @@
 </div>
 
 <script>
+/* === i18n === */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+
+const I18N = {
+  es: {
+    page_title: 'OJS — Envío de Artículos Científicos',
+    meta_desc: 'Simulación interactiva de envío de artículos a revista científica. Practica el proceso editorial completo.',
+    confirm_switch: 'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+    name_q: '¿Cómo te llamas?',
+    name_ph: 'Ingresa tu nombre',
+    name_note: 'No te preguntaremos otra vez en esta sesión.',
+    name_btn: 'Continuar',
+    name_default: 'Investigador',
+  },
+  en: {
+    page_title: 'OJS — Scientific Article Submission',
+    meta_desc: 'Interactive simulation of article submission to a scientific journal. Practice the complete editorial process.',
+    confirm_switch: 'Switching language will restart the simulation. Continue?',
+    name_q: 'What is your name?',
+    name_ph: 'Enter your name',
+    name_note: 'We will not ask again during this session.',
+    name_btn: 'Continue',
+    name_default: 'Researcher',
+  }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
+function applyStaticI18n(){
+  if (LANG === 'es') return;
+  document.title = t('page_title');
+  const md = document.querySelector('meta[name="description"]');
+  if (md) md.content = t('meta_desc');
+}
+applyStaticI18n();
+
 // =============================================
 // ESTADO GLOBAL DE LA APLICACIÓN
 // =============================================
@@ -1640,6 +1701,42 @@ function handleLogin(e) {
   showToast(`Bienvenido, ${user.nombre}`, 'success');
   updateUIForLoggedIn();
   showScreen('screenDashboard');
+}
+
+function obtenerNombreUsuario(callback) {
+  const nombre = sessionStorage.getItem('nombreEstudianteSim');
+  if (nombre) {
+    callback(nombre);
+    return;
+  }
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.72);
+    display:flex;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(5px)`;
+  const modal = document.createElement('div');
+  modal.style.cssText = `background:var(--bg-elevated, #222);border:1px solid var(--border, rgba(255,255,255,0.1));
+    border-radius:12px;padding:32px;max-width:400px;text-align:center;`;
+  modal.innerHTML = `
+    <p style="font-size:16px;color:var(--fg, #fff);margin-bottom:24px;font-weight:600">${t('name_q')}</p>
+    <input type="text" id="input-nombre" style="width:100%;padding:10px 14px;border:1px solid var(--border, rgba(255,255,255,0.2));
+      border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg-card, #111);color:var(--fg, #fff);margin-bottom:16px"
+      placeholder="${t('name_ph')}" autocomplete="off">
+    <p style="font-size:12px;color:var(--fg-muted, #999);margin-bottom:20px">${t('name_note')}</p>
+    <button id="btn-continuar" style="background:var(--accent, #818cf8);color:var(--bg, #000);border:none;
+      padding:10px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">${t('name_btn')}</button>
+  `;
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  const inputNombre = modal.querySelector('#input-nombre');
+  const btnContinuar = modal.querySelector('#btn-continuar');
+  const submit = () => {
+    const nombre = inputNombre.value.trim() || t('name_default');
+    sessionStorage.setItem('nombreEstudianteSim', nombre);
+    overlay.remove();
+    callback(nombre);
+  };
+  btnContinuar.addEventListener('click', submit);
+  inputNombre.addEventListener('keypress', e => e.key === 'Enter' && submit());
+  inputNombre.focus();
 }
 
 function logout() {
@@ -2199,6 +2296,7 @@ function confirmSubmit() {
   closeModal();
   submissionCount++;
   sessionStorage.setItem('ojs_subCount', submissionCount.toString());
+  localStorage.setItem('simlab_done_simlab_revista', Date.now());
 
   // Generar ID de envío
   const idNum = String(submissionCount).padStart(4, '0');
@@ -2207,11 +2305,29 @@ function confirmSubmit() {
   document.getElementById('sidebar').classList.add('hidden');
   showScreen('screenSuccess');
   showToast('Art\u00edculo enviado exitosamente', 'success');
+
+  obtenerNombreUsuario(nombre => {
+    const successTitle = document.querySelector('#screenSuccess .success-screen h1');
+    if (successTitle) {
+      successTitle.textContent = nombre + ', tu artículo fue enviado con éxito';
+    }
+  });
 }
 
 // =============================================
 // LISTENER PARA DATOS DE INVESTIGACIÓN
 // =============================================
+// =============================================
+// TOGGLE DE IDIOMA
+// =============================================
+const langBtn = document.getElementById('simLangBtn');
+langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+langBtn.addEventListener('click', () => {
+  if (!confirm(t('confirm_switch'))) return;
+  setLang(LANG === 'es' ? 'en' : 'es');
+  location.reload();
+});
+
 document.getElementById('s5Datos').addEventListener('change', function() {
   const show = this.value.includes('repositorio p\u00fablico');
   document.getElementById('s5RepoGroup').style.display = show ? 'flex' : 'none';
