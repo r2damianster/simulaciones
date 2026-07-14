@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OJS — Envío de Artículos Científicos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@200;400;500;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #0e1117;
+    --bg-elevated: #161b22;
+    --bg-card: #1c2230;
+    --fg: #e6edf3;
+    --fg-muted: #8b949e;
+    --fg-dim: #484f58;
+    --accent: #00b894;
+    --accent-glow: rgba(0, 184, 148, 0.15);
+    --accent-dark: #009473;
+    --accent-secondary: #f0a500;
+    --danger: #f85149;
+    --danger-bg: rgba(248, 81, 73, 0.1);
+    --success: #3fb950;
+    --success-bg: rgba(63, 185, 80, 0.1);
+    --border: #30363d;
+    --border-focus: #00b894;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.3);
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* === FONDO ATMOSFÉRICO === */
+  .bg-atmosphere {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 600px 400px at 10% 20%, rgba(0,184,148,0.06), transparent),
+      radial-gradient(ellipse 500px 500px at 90% 80%, rgba(240,165,0,0.04), transparent),
+      radial-gradient(ellipse 800px 600px at 50% 50%, rgba(0,184,148,0.02), transparent);
+  }
+
+  .grid-pattern {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
+    background-image:
+      linear-gradient(var(--fg) 1px, transparent 1px),
+      linear-gradient(90deg, var(--fg) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* === HEADER === */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(14, 17, 23, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 900; font-size: 1.3rem;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; color: #fff; font-family: 'DM Sans', sans-serif; font-weight: 900;
+  }
+
+  .header-right {
+    display: flex; align-items: center; gap: 16px;
+  }
+
+  .user-badge {
+    display: none; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 20px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(0,184,148,0.2);
+    font-size: 0.82rem; color: var(--accent);
+  }
+
+  .user-badge.active { display: flex; }
+
+  .user-badge i { font-size: 0.75rem; }
+
+  .btn-logout {
+    display: none; background: none; border: 1px solid var(--border);
+    color: var(--fg-muted); padding: 6px 12px; border-radius: var(--radius-sm);
+    font-size: 0.8rem; cursor: pointer; transition: var(--transition);
+    font-family: inherit;
+  }
+
+  .btn-logout.active { display: block; }
+  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* === LAYOUT PRINCIPAL === */
+  .app-layout {
+    position: relative; z-index: 1;
+    display: flex; min-height: calc(100vh - 64px);
+  }
+
+  /* === SIDEBAR DE PROGRESO === */
+  .sidebar {
+    width: 320px; min-width: 320px;
+    background: var(--bg-elevated);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    display: flex; flex-direction: column;
+    transition: var(--transition);
+    overflow-y: auto;
+  }
+
+  .sidebar.hidden { display: none; }
+
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--fg-dim); margin-bottom: 1.5rem;
+  }
+
+  .step-list { list-style: none; flex: 1; }
+
+  .step-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 12px 0; position: relative;
+    cursor: default; transition: var(--transition);
+  }
+
+  .step-item:not(:last-child)::after {
+    content: ''; position: absolute;
+    left: 17px; top: 44px; bottom: -4px;
+    width: 2px; background: var(--border);
+    transition: var(--transition);
+  }
+
+  .step-item.completed:not(:last-child)::after { background: var(--accent); }
+  .step-item.active:not(:last-child)::after {
+    background: linear-gradient(to bottom, var(--accent), var(--border));
+  }
+
+  .step-circle {
+    width: 36px; height: 36px; min-width: 36px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 700;
+    background: var(--bg-card); border: 2px solid var(--border);
+    color: var(--fg-dim); transition: var(--transition);
+    position: relative; z-index: 2;
+  }
+
+  .step-item.active .step-circle {
+    border-color: var(--accent); color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+    background: rgba(0,184,148,0.08);
+  }
+
+  .step-item.completed .step-circle {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+  }
+
+  .step-label {
+    padding-top: 6px;
+    font-size: 0.88rem; font-weight: 500; color: var(--fg-muted);
+    transition: var(--transition);
+  }
+
+  .step-item.active .step-label { color: var(--fg); font-weight: 600; }
+  .step-item.completed .step-label { color: var(--fg-muted); }
+
+  .step-sublabel {
+    font-size: 0.75rem; color: var(--fg-dim); margin-top: 2px;
+  }
+
+  .step-item.locked { opacity: 0.35; }
+
+  /* === CONTENIDO PRINCIPAL === */
+  .main-content {
+    flex: 1; padding: 2.5rem 3rem;
+    max-width: 900px;
+    overflow-y: auto;
+  }
+
+  .main-content.full-width { max-width: 100%; padding: 3rem; }
+
+  /* === PANTALLAS (STEPS) === */
+  .screen {
+    display: none;
+    animation: screenIn 0.5s ease forwards;
+  }
+
+  .screen.active { display: block; }
+
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .screen-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .screen-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; font-weight: 900;
+    line-height: 1.2; margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--fg), var(--fg-muted));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .screen-header p {
+    color: var(--fg-muted); font-size: 0.95rem; max-width: 600px;
+  }
+
+  /* === FORMULARIOS === */
+  .form-grid {
+    display: grid; gap: 1.25rem;
+  }
+
+  .form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+
+  .form-group {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+
+  .form-group.full-width { grid-column: 1 / -1; }
+
+  .form-label {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--fg-muted); display: flex; align-items: center; gap: 6px;
+  }
+
+  .form-label .required { color: var(--accent-secondary); font-weight: 700; }
+
+  .form-label .help-icon {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--border); display: inline-flex;
+    align-items: center; justify-content: center;
+    font-size: 0.6rem; color: var(--fg-muted);
+    cursor: help; position: relative;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    background: var(--bg-card); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    color: var(--fg); font-family: inherit; font-size: 0.9rem;
+    transition: var(--transition); outline: none;
+    width: 100%;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .form-input.error, .form-select.error, .form-textarea.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px var(--danger-bg);
+  }
+
+  .form-input::placeholder, .form-textarea::placeholder {
+    color: var(--fg-dim);
+  }
+
+  .form-textarea { resize: vertical; min-height: 100px; line-height: 1.7; }
+
+  .form-select { cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238b949e' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .form-select option { background: var(--bg-card); color: var(--fg); }
+
+  .field-error {
+    font-size: 0.75rem; color: var(--danger);
+    display: none; align-items: center; gap: 4px; margin-top: 2px;
+  }
+
+  .field-error.visible { display: flex; }
+
+  .char-count {
+    font-size: 0.72rem; color: var(--fg-dim); text-align: right; margin-top: 2px;
+  }
+
+  .char-count.warning { color: var(--accent-secondary); }
+  .char-count.over { color: var(--danger); }
+
+  /* === CHECKBOX / RADIO === */
+  .checkbox-group, .radio-group {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  .check-item, .radio-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 16px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); cursor: pointer;
+    transition: var(--transition); background: var(--bg-card);
+  }
+
+  .check-item:hover, .radio-item:hover {
+    border-color: rgba(0,184,148,0.3);
+    background: rgba(0,184,148,0.03);
+  }
+
+  .check-item.selected, .radio-item.selected {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .check-box, .radio-circle {
+    width: 20px; height: 20px; min-width: 20px;
+    border: 2px solid var(--border); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition); margin-top: 1px;
+  }
+
+  .radio-circle { border-radius: 50%; }
+
+  .check-item.selected .check-box,
+  .check-item.checked .check-box {
+    background: var(--accent); border-color: var(--accent);
+  }
+
+  .radio-item.selected .radio-circle {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: inset 0 0 0 3px var(--bg-card);
+  }
+
+  .check-box i, .radio-circle i {
+    font-size: 0.65rem; color: #fff; opacity: 0; transition: var(--transition);
+  }
+
+  .check-item.selected .check-box i,
+  .check-item.checked .check-box i { opacity: 1; }
+
+  .check-text { font-size: 0.88rem; color: var(--fg); line-height: 1.5; }
+  .check-text small { display: block; color: var(--fg-muted); font-size: 0.78rem; margin-top: 2px; }
+
+  /* === BOTONES === */
+  .btn-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 2.5rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px; border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: var(--transition); border: none;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff; box-shadow: 0 4px 16px rgba(0,184,148,0.25);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 6px 24px rgba(0,184,148,0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4; cursor: not-allowed; transform: none;
+    box-shadow: none;
+  }
+
+  .btn-secondary {
+    background: transparent; border: 1.5px solid var(--border);
+    color: var(--fg-muted);
+  }
+
+  .btn-secondary:hover { border-color: var(--fg-muted); color: var(--fg); }
+
+  .btn-danger {
+    background: transparent; border: 1.5px solid var(--danger);
+    color: var(--danger);
+  }
+
+  .btn-danger:hover { background: var(--danger-bg); }
+
+  .btn-ghost {
+    background: none; border: none; color: var(--accent);
+    padding: 8px 16px; font-size: 0.85rem;
+  }
+
+  .btn-ghost:hover { text-decoration: underline; }
+
+  .btn-submit-final {
+    background: linear-gradient(135deg, var(--accent-secondary), #d4900a);
+    color: #000; font-weight: 700;
+    box-shadow: 0 4px 16px rgba(240,165,0,0.25);
+    padding: 14px 36px; font-size: 1rem;
+  }
+
+  .btn-submit-final:hover {
+    box-shadow: 0 6px 24px rgba(240,165,0,0.4);
+    transform: translateY(-1px);
+  }
+
+  /* === TARJETA INFORMATIVA === */
+  .info-card {
+    background: var(--accent-glow);
+    border: 1px solid rgba(0,184,148,0.15);
+    border-radius: var(--radius); padding: 16px 20px;
+    display: flex; gap: 12px; align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-card i { color: var(--accent); margin-top: 2px; }
+
+  .info-card p { font-size: 0.85rem; color: var(--fg-muted); line-height: 1.6; }
+
+  .warning-card {
+    background: rgba(240,165,0,0.08);
+    border-color: rgba(240,165,0,0.15);
+  }
+
+  .warning-card i { color: var(--accent-secondary); }
+
+  /* === FILE UPLOAD === */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius); padding: 2.5rem 2rem;
+    text-align: center; cursor: pointer;
+    transition: var(--transition); background: var(--bg-card);
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .upload-zone i.upload-icon {
+    font-size: 2.5rem; color: var(--fg-dim); margin-bottom: 1rem;
+    display: block; transition: var(--transition);
+  }
+
+  .upload-zone:hover i.upload-icon { color: var(--accent); }
+
+  .upload-zone p { color: var(--fg-muted); font-size: 0.9rem; }
+
+  .upload-zone .upload-hint {
+    font-size: 0.78rem; color: var(--fg-dim); margin-top: 6px;
+  }
+
+  .upload-zone input { display: none; }
+
+  .file-list { margin-top: 1rem; display: flex; flex-direction: column; gap: 8px; }
+
+  .file-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-radius: var(--radius-sm);
+    background: var(--bg-card); border: 1px solid var(--border);
+  }
+
+  .file-icon {
+    width: 40px; height: 40px; border-radius: 8px;
+    background: var(--accent-glow); display: flex;
+    align-items: center; justify-content: center;
+    color: var(--accent); font-size: 1rem;
+  }
+
+  .file-info { flex: 1; }
+  .file-info .file-name { font-size: 0.88rem; font-weight: 500; }
+  .file-info .file-size { font-size: 0.75rem; color: var(--fg-dim); }
+
+  .file-remove {
+    background: none; border: none; color: var(--fg-dim);
+    cursor: pointer; padding: 4px; transition: var(--transition);
+    font-size: 0.9rem;
+  }
+
+  .file-remove:hover { color: var(--danger); }
+
+  /* === TAG INPUT === */
+  .tag-container {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 10px 12px; min-height: 48px;
+    background: var(--bg-card); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); transition: var(--transition);
+    align-items: center; cursor: text;
+  }
+
+  .tag-container:focus-within {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 4px;
+    background: var(--accent-glow); border: 1px solid rgba(0,184,148,0.2);
+    font-size: 0.8rem; color: var(--accent);
+  }
+
+  .tag button {
+    background: none; border: none; color: var(--accent);
+    cursor: pointer; font-size: 0.7rem; padding: 0;
+    opacity: 0.6; transition: var(--transition);
+  }
+
+  .tag button:hover { opacity: 1; }
+
+  .tag-input {
+    border: none; background: none; outline: none;
+    color: var(--fg); font-family: inherit; font-size: 0.88rem;
+    flex: 1; min-width: 120px;
+  }
+
+  .tag-input::placeholder { color: var(--fg-dim); }
+
+  /* === AUTOR ADICIONAL === */
+  .author-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem;
+    position: relative; margin-bottom: 1rem;
+    animation: screenIn 0.3s ease forwards;
+  }
+
+  .author-card .author-num {
+    font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--accent); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .author-card .author-num::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .author-remove {
+    position: absolute; top: 12px; right: 12px;
+    background: none; border: none; color: var(--fg-dim);
+    cursor: pointer; transition: var(--transition); font-size: 0.85rem;
+  }
+
+  .author-remove:hover { color: var(--danger); }
+
+  /* === REVISIÓN FINAL === */
+  .review-section {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+
+  .review-section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: var(--transition);
+  }
+
+  .review-section-header:hover { background: rgba(255,255,255,0.02); }
+
+  .review-section-header h3 {
+    font-size: 0.95rem; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .review-section-header h3 i { color: var(--accent); font-size: 0.85rem; }
+
+  .review-section-header .chevron {
+    color: var(--fg-dim); transition: var(--transition);
+  }
+
+  .review-section.open .chevron { transform: rotate(180deg); }
+
+  .review-section-body {
+    padding: 20px; display: none;
+  }
+
+  .review-section.open .review-section-body { display: block; }
+
+  .review-row {
+    display: flex; gap: 12px; padding: 8px 0;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    font-size: 0.88rem;
+  }
+
+  .review-row:last-child { border-bottom: none; }
+
+  .review-key {
+    min-width: 180px; color: var(--fg-muted); font-weight: 500;
+  }
+
+  .review-value { color: var(--fg); flex: 1; }
+
+  .review-value .tag { margin: 2px 0; }
+
+  /* === CONFIRMACIÓN FINAL === */
+  .success-screen {
+    text-align: center; padding: 4rem 2rem;
+  }
+
+  .success-icon {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: var(--success-bg);
+    border: 3px solid var(--success);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 2rem; font-size: 2.5rem; color: var(--success);
+    animation: successPop 0.6s ease;
+  }
+
+  @keyframes successPop {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .success-screen h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem; font-weight: 900; margin-bottom: 0.75rem;
+  }
+
+  .success-screen .submission-id {
+    display: inline-block; padding: 8px 20px;
+    background: var(--accent-glow); border: 1px solid rgba(0,184,148,0.2);
+    border-radius: 20px; font-size: 0.9rem; color: var(--accent);
+    font-weight: 600; margin: 1rem 0 2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .success-steps {
+    text-align: left; max-width: 500px; margin: 0 auto 2.5rem;
+  }
+
+  .success-steps .s-step {
+    display: flex; gap: 14px; padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem; color: var(--fg-muted);
+  }
+
+  .success-steps .s-step:last-child { border-bottom: none; }
+
+  .success-steps .s-step i { color: var(--accent); margin-top: 3px; min-width: 16px; }
+
+  /* === LOGIN / REGISTRO === */
+  .auth-container {
+    max-width: 480px; margin: 0 auto;
+  }
+
+  .auth-tabs {
+    display: flex; gap: 0; margin-bottom: 2rem;
+    background: var(--bg-card); border-radius: var(--radius-sm);
+    padding: 4px; border: 1px solid var(--border);
+  }
+
+  .auth-tab {
+    flex: 1; padding: 10px; text-align: center;
+    font-size: 0.88rem; font-weight: 600; color: var(--fg-muted);
+    cursor: pointer; border-radius: 4px; transition: var(--transition);
+    border: none; background: none; font-family: inherit;
+  }
+
+  .auth-tab.active {
+    background: var(--accent); color: #fff;
+  }
+
+  .auth-form { display: none; }
+  .auth-form.active { display: block; animation: screenIn 0.3s ease; }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 1.5rem 0; color: var(--fg-dim); font-size: 0.8rem;
+  }
+
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* === TOAST === */
+  .toast-container {
+    position: fixed; top: 80px; right: 24px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  .toast {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px; border-radius: var(--radius-sm);
+    background: var(--bg-card); border: 1px solid var(--border);
+    box-shadow: var(--shadow); min-width: 300px;
+    animation: toastIn 0.4s ease;
+    font-size: 0.88rem;
+  }
+
+  .toast.success { border-color: rgba(63,185,80,0.3); }
+  .toast.success i { color: var(--success); }
+  .toast.error { border-color: rgba(248,81,73,0.3); }
+  .toast.error i { color: var(--danger); }
+  .toast.info { border-color: rgba(0,184,148,0.3); }
+  .toast.info i { color: var(--accent); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .toast.removing {
+    animation: toastOut 0.3s ease forwards;
+  }
+
+  @keyframes toastOut {
+    to { opacity: 0; transform: translateX(40px); }
+  }
+
+  /* === PASSWORD STRENGTH === */
+  .password-strength {
+    display: flex; gap: 4px; margin-top: 6px;
+  }
+
+  .pw-bar {
+    flex: 1; height: 3px; border-radius: 2px;
+    background: var(--border); transition: var(--transition);
+  }
+
+  .pw-bar.weak { background: var(--danger); }
+  .pw-bar.medium { background: var(--accent-secondary); }
+  .pw-bar.strong { background: var(--success); }
+
+  .pw-label {
+    font-size: 0.72rem; margin-top: 4px; color: var(--fg-dim);
+  }
+
+  /* === MODAL === */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center;
+    padding: 2rem;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 2rem;
+    max-width: 500px; width: 100%;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    animation: screenIn 0.3s ease;
+  }
+
+  .modal h2 {
+    font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem;
+  }
+
+  .modal p { color: var(--fg-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+  .modal-actions {
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+
+  /* === PARTICLES === */
+  .particles-canvas {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main-content { padding: 1.5rem; }
+    .main-content.full-width { padding: 1.5rem; }
+    .form-grid.cols-2 { grid-template-columns: 1fr; }
+    .review-row { flex-direction: column; gap: 4px; }
+    .review-key { min-width: unset; }
+    header { padding: 0 1rem; }
+  }
+
+  /* === SCROLLBAR === */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--fg-dim); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas class="particles-canvas" id="particlesCanvas"></canvas>
+<div class="bg-atmosphere"></div>
+<div class="grid-pattern"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">OJS</div>
+    <span>Revista Cient&iacute;fica</span>
+  </div>
+  <div class="header-right">
+    <div class="user-badge" id="userBadge">
+      <i class="fas fa-user-circle"></i>
+      <span id="userBadgeName"></span>
+    </div>
+    <button class="btn-logout" id="btnLogout" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i> Cerrar sesi&oacute;n
+    </button>
+  </div>
+</header>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h2 id="modalTitle">Confirmar env&iacute;o</h2>
+    <p id="modalMessage">Una vez enviado, el art&iacute;culo entrar&aacute; en proceso de revisi&oacute;n. Esta acci&oacute;n no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-submit-final" id="modalConfirmBtn" onclick="confirmSubmit()">
+        <i class="fas fa-paper-plane"></i> Confirmar env&iacute;o
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar hidden" id="sidebar">
+    <div class="sidebar-title">Progreso del env&iacute;o</div>
+    <ul class="step-list" id="stepList">
+      <li class="step-item active" data-step="1">
+        <div class="step-circle">1</div>
+        <div>
+          <div class="step-label">Inicio de env&iacute;o</div>
+          <div class="step-sublabel">Secci&oacute;n y tipo</div>
+        </div>
+      </li>
+      <li class="step-item locked" data-step="2">
+        <div class="step-circle">2</div>
+        <div>
+          <div class="step-label">Datos del art&iacute;culo</div>
+          <div class="step-sublabel">T&iacute;tulo, resumen, palabras clave</div>
+        </div>
+      </li>
+      <li class="step-item locked" data-step="3">
+        <div class="step-circle">3</div>
+        <div>
+          <div class="step-label">Autores adicionales</div>
+          <div class="step-sublabel">Co-autores y afiliaciones</div>
+        </div>
+      </li>
+      <li class="step-item locked" data-step="4">
+        <div class="step-circle">4</div>
+        <div>
+          <div class="step-label">Carga de archivos</div>
+          <div class="step-sublabel">Manuscrito y complementos</div>
+        </div>
+      </li>
+      <li class="step-item locked" data-step="5">
+        <div class="step-circle">5</div>
+        <div>
+          <div class="step-label">Metadatos</div>
+          <div class="step-sublabel">Financiaci&oacute;n, referencias</div>
+        </div>
+      </li>
+      <li class="step-item locked" data-step="6">
+        <div class="step-circle">6</div>
+        <div>
+          <div class="step-label">Declaraciones</div>
+          <div class="step-sublabel">&Eacute;tica y conflictos</div>
+        </div>
+      </li>
+      <li class="step-item locked" data-step="7">
+        <div class="step-circle">7</div>
+        <div>
+          <div class="step-label">Revisi&oacute;n final</div>
+          <div class="step-sublabel">Verificar todo antes de enviar</div>
+        </div>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content" id="mainContent">
+
+    <!-- ========== PANTALLA: AUTH ========== -->
+    <div class="screen active" id="screenAuth">
+      <div class="main-content full-width" style="padding:0;">
+        <div style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 64px);padding:2rem;">
+          <div class="auth-container">
+            <div style="text-align:center;margin-bottom:2rem;">
+              <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-family:'Playfair Display',serif;font-weight:900;font-size:1.4rem;color:#fff;">OJS</div>
+              <h1 style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;margin-bottom:0.5rem;">Sistema de Env&iacute;o de Art&iacute;culos</h1>
+              <p style="color:var(--fg-muted);font-size:0.9rem;">Accede a tu cuenta para iniciar el proceso de env&iacute;o</p>
+            </div>
+
+            <div class="auth-tabs">
+              <button class="auth-tab active" onclick="switchAuthTab('login')">Iniciar sesi&oacute;n</button>
+              <button class="auth-tab" onclick="switchAuthTab('register')">Registrarse</button>
+            </div>
+
+            <!-- LOGIN -->
+            <form class="auth-form active" id="formLogin" onsubmit="handleLogin(event)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Correo electr&oacute;nico <span class="required">*</span></label>
+                  <input type="email" class="form-input" id="loginEmail" placeholder="correo@universidad.edu" required>
+                  <div class="field-error" id="loginEmailError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Contrase&ntilde;a <span class="required">*</span></label>
+                  <input type="password" class="form-input" id="loginPassword" placeholder="Tu contrase&ntilde;a" required>
+                  <div class="field-error" id="loginPasswordError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group" style="margin-top:0.5rem;">
+                  <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar sesi&oacute;n
+                  </button>
+                </div>
+              </div>
+              <div class="divider">o</div>
+              <p style="text-align:center;font-size:0.85rem;color:var(--fg-muted);">
+                No tienes cuenta? <button type="button" class="btn-ghost" onclick="switchAuthTab('register')">Reg&iacute;strate aqu&iacute;</button>
+              </p>
+            </form>
+
+            <!-- REGISTRO -->
+            <form class="auth-form" id="formRegister" onsubmit="handleRegister(event)">
+              <div class="form-grid cols-2">
+                <div class="form-group">
+                  <label class="form-label">Nombre <span class="required">*</span></label>
+                  <input type="text" class="form-input" id="regNombre" placeholder="Juan" required>
+                  <div class="field-error" id="regNombreError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Apellido <span class="required">*</span></label>
+                  <input type="text" class="form-input" id="regApellido" placeholder="P&eacute;rez" required>
+                  <div class="field-error" id="regApellidoError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Correo electr&oacute;nico <span class="required">*</span></label>
+                  <input type="email" class="form-input" id="regEmail" placeholder="correo@universidad.edu" required>
+                  <div class="field-error" id="regEmailError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">ORCID <span style="color:var(--fg-dim);font-weight:400;">(opcional)</span></label>
+                  <input type="text" class="form-input" id="regOrcid" placeholder="0000-0000-0000-0000">
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Afiliaci&oacute;n institucional <span class="required">*</span></label>
+                  <input type="text" class="form-input" id="regAfiliacion" placeholder="Universidad Nacional de..." required>
+                  <div class="field-error" id="regAfiliacionError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Pa&iacute;s <span class="required">*</span></label>
+                  <select class="form-select" id="regPais" required>
+                    <option value="">Seleccionar...</option>
+                    <option>Argentina</option><option>Bolivia</option><option>Brasil</option>
+                    <option>Chile</option><option>Colombia</option><option>Costa Rica</option>
+                    <option>Cuba</option><option>Ecuador</option><option>El Salvador</option>
+                    <option>Espa&ntilde;a</option><option>Guatemala</option><option>Honduras</option>
+                    <option>M&eacute;xico</option><option>Nicaragua</option><option>Panam&aacute;</option>
+                    <option>Paraguay</option><option>Per&uacute;</option><option>R. Dominicana</option>
+                    <option>Uruguay</option><option>Venezuela</option><option>Otro</option>
+                  </select>
+                  <div class="field-error" id="regPaisError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Especialidad <span class="required">*</span></label>
+                  <select class="form-select" id="regEspecialidad" required>
+                    <option value="">Seleccionar...</option>
+                    <option>Ciencias Biol&oacute;gicas</option>
+                    <option>Ciencias Qu&iacute;micas</option>
+                    <option>Ciencias F&iacute;sicas</option>
+                    <option>Ciencias de la Computaci&oacute;n</option>
+                    <option>Ingenier&iacute;a</option>
+                    <option>Medicina y Salud</option>
+                    <option>Ciencias Sociales</option>
+                    <option>Humanidades</option>
+                    <option>Ciencias Agr&iacute;colas</option>
+                    <option>Matem&aacute;ticas</option>
+                    <option>Otra</option>
+                  </select>
+                  <div class="field-error" id="regEspecialidadError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Contrase&ntilde;a <span class="required">*</span></label>
+                  <input type="password" class="form-input" id="regPassword" placeholder="M&iacute;nimo 8 caracteres" required oninput="checkPasswordStrength(this.value)">
+                  <div class="password-strength" id="pwStrength">
+                    <div class="pw-bar" id="pw1"></div>
+                    <div class="pw-bar" id="pw2"></div>
+                    <div class="pw-bar" id="pw3"></div>
+                    <div class="pw-bar" id="pw4"></div>
+                  </div>
+                  <div class="pw-label" id="pwLabel"></div>
+                  <div class="field-error" id="regPasswordError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Confirmar contrase&ntilde;a <span class="required">*</span></label>
+                  <input type="password" class="form-input" id="regPassword2" placeholder="Repite tu contrase&ntilde;a" required>
+                  <div class="field-error" id="regPassword2Error"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group full-width" style="margin-top:0.5rem;">
+                  <div class="check-item" id="checkTerms" onclick="toggleCheck(this)">
+                    <div class="check-box"><i class="fas fa-check"></i></div>
+                    <div class="check-text">
+                      Acepto los t&eacute;rminos y condiciones de la revista, as&iacute; como la pol&iacute;tica de privacidad.
+                    </div>
+                  </div>
+                  <div class="field-error" id="regTermsError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+                </div>
+                <div class="form-group full-width" style="margin-top:0.5rem;">
+                  <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+                    <i class="fas fa-user-plus"></i> Crear cuenta
+                  </button>
+                </div>
+              </div>
+              <div class="divider">o</div>
+              <p style="text-align:center;font-size:0.85rem;color:var(--fg-muted);">
+                Ya tienes cuenta? <button type="button" class="btn-ghost" onclick="switchAuthTab('login')">Inicia sesi&oacute;n</button>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PANTALLA: DASHBOARD ========== -->
+    <div class="screen" id="screenDashboard">
+      <div class="main-content full-width" style="padding:0;">
+        <div style="padding:3rem;">
+          <div class="screen-header">
+            <h1>Bienvenido, <span id="dashUserName"></span></h1>
+            <p>Inicia un nuevo env&iacute;o de art&iacute;culo cient&iacute;fico a la revista.</p>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;margin-bottom:2rem;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+                <div style="width:42px;height:42px;border-radius:10px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;color:var(--accent);"><i class="fas fa-file-alt"></i></div>
+                <div>
+                  <div style="font-size:1.5rem;font-weight:900;" id="dashEnvCount">0</div>
+                  <div style="font-size:0.78rem;color:var(--fg-muted);">Env&iacute;os en proceso</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+                <div style="width:42px;height:42px;border-radius:10px;background:rgba(240,165,0,0.1);display:flex;align-items:center;justify-content:center;color:var(--accent-secondary);"><i class="fas fa-clock"></i></div>
+                <div>
+                  <div style="font-size:1.5rem;font-weight:900;" id="dashRevCount">0</div>
+                  <div style="font-size:0.78rem;color:var(--fg-muted);">En revisi&oacute;n</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+                <div style="width:42px;height:42px;border-radius:10px;background:var(--success-bg);display:flex;align-items:center;justify-content:center;color:var(--success);"><i class="fas fa-check-circle"></i></div>
+                <div>
+                  <div style="font-size:1.5rem;font-weight:900;" id="dashPubCount">0</div>
+                  <div style="font-size:0.78rem;color:var(--fg-muted);">Publicados</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="info-card">
+            <i class="fas fa-info-circle"></i>
+            <p>El proceso de env&iacute;o consta de 7 pasos. Deber&aacute;s completar cada etapa antes de poder avanzar a la siguiente. Los datos se guardan autom&aacute;ticamente en tu sesi&oacute;n.</p>
+          </div>
+          <button class="btn btn-primary" style="margin-top:1.5rem;" onclick="startSubmission()">
+            <i class="fas fa-plus"></i> Iniciar nuevo env&iacute;o
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== STEP 1: INICIO DE ENVÍO ========== -->
+    <div class="screen" id="screenStep1">
+      <div class="screen-header">
+        <h1>Paso 1: Inicio del env&iacute;o</h1>
+        <p>Selecciona la secci&oacute;n de la revista y el tipo de art&iacute;culo que deseas enviar.</p>
+      </div>
+      <div class="info-card">
+        <i class="fas fa-lightbulb"></i>
+        <p>Aseg&uacute;rate de seleccionar la secci&oacute;n correcta, ya que esto determinar&aacute; la plantilla y los revisores asignados.</p>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Secci&oacute;n de la revista <span class="required">*</span></label>
+          <select class="form-select" id="s1Seccion" required>
+            <option value="">Seleccionar secci&oacute;n...</option>
+            <option>Art&iacute;culos de investigaci&oacute;n</option>
+            <option>Art&iacute;culos de revisi&oacute;n</option>
+            <option>Comunicaciones breves</option>
+            <option>Casos cl&iacute;nicos</option>
+            <option>Notas t&eacute;cnicas</option>
+            <option>Cartas al editor</option>
+            <option>Ensayos</option>
+          </select>
+          <div class="field-error" id="s1SeccionError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Idioma del art&iacute;culo <span class="required">*</span></label>
+          <select class="form-select" id="s1Idioma" required>
+            <option value="">Seleccionar idioma...</option>
+            <option>Espa&ntilde;ol</option>
+            <option>Ingl&eacute;s</option>
+            <option>Portugu&eacute;s</option>
+          </select>
+          <div class="field-error" id="s1IdiomaError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">Comentarios para el editor <span style="color:var(--fg-dim);font-weight:400;">(opcional)</span></label>
+          <textarea class="form-textarea" id="s1Comentarios" placeholder="Informaci&oacute;n adicional que considere relevante para el editor..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToDashboard()"><i class="fas fa-arrow-left"></i> Volver</button>
+        <button class="btn btn-primary" onclick="validateStep1()">Siguiente <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ========== STEP 2: DATOS DEL ARTÍCULO ========== -->
+    <div class="screen" id="screenStep2">
+      <div class="screen-header">
+        <h1>Paso 2: Datos del art&iacute;culo</h1>
+        <p>Ingresa el t&iacute;tulo, resumen y palabras clave de tu art&iacute;culo.</p>
+      </div>
+      <div class="warning-card info-card">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>El t&iacute;tulo y el resumen son los elementos m&aacute;s visibles de tu art&iacute;culo. Red&aacute;ctalos con cuidado, ya que se usar&aacute;n en indexaciones y b&uacute;squedas.</p>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label class="form-label">T&iacute;tulo en espa&ntilde;ol <span class="required">*</span></label>
+          <input type="text" class="form-input" id="s2Titulo" placeholder="Ej: An&aacute;lisis comparativo de m&eacute;todos de..." maxlength="250" oninput="updateCharCount(this,'s2TituloCount',250)">
+          <div class="char-count" id="s2TituloCount">0 / 250</div>
+          <div class="field-error" id="s2TituloError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">T&iacute;tulo en ingl&eacute;s <span style="color:var(--fg-dim);font-weight:400;">(recomendado)</span></label>
+          <input type="text" class="form-input" id="s2TituloEn" placeholder="Ej: Comparative analysis of methods for..." maxlength="250" oninput="updateCharCount(this,'s2TituloEnCount',250)">
+          <div class="char-count" id="s2TituloEnCount">0 / 250</div>
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">Resumen / Abstract <span class="required">*</span></label>
+          <textarea class="form-textarea" id="s2Resumen" placeholder="Escriba el resumen de su art&iacute;culo (m&aacute;ximo 300 palabras). Debe incluir: objetivo, m&eacute;todo, resultados principales y conclusi&oacute;n." rows="6" maxlength="2500" oninput="updateWordCount(this,'s2ResumenCount',300)"></textarea>
+          <div class="char-count" id="s2ResumenCount">0 / 300 palabras</div>
+          <div class="field-error" id="s2ResumenError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">Palabras clave <span class="required">*</span> <span style="color:var(--fg-dim);font-weight:400;">(m&iacute;nimo 3, m&aacute;ximo 8)</span></label>
+          <div class="tag-container" id="s2TagsContainer" onclick="document.getElementById('s2TagInput').focus()">
+            <input type="text" class="tag-input" id="s2TagInput" placeholder="Escriba y presione Enter..." onkeydown="handleTagInput(event, 's2Tags')">
+          </div>
+          <div style="font-size:0.75rem;color:var(--fg-dim);margin-top:4px;" id="s2TagsCount">0 palabras clave</div>
+          <div class="field-error" id="s2TagsError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button class="btn btn-primary" onclick="validateStep2()">Siguiente <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ========== STEP 3: AUTORES ADICIONALES ========== -->
+    <div class="screen" id="screenStep3">
+      <div class="screen-header">
+        <h1>Paso 3: Autores adicionales</h1>
+        <p>Agrega los co-autores del art&iacute;culo. Ya est&aacute;s registrado como autor principal.</p>
+      </div>
+      <div class="info-card">
+        <i class="fas fa-users"></i>
+        <p>Todos los autores deben cumplir con los criterios de autor&iacute;a. El orden de los autores es importante y no podr&aacute; modificarse f&aacute;cilmente despu&eacute;s del env&iacute;o.</p>
+      </div>
+      <div style="margin-bottom:1rem;">
+        <div style="padding:14px 18px;background:var(--accent-glow);border:1px solid rgba(0,184,148,0.2);border-radius:var(--radius-sm);display:flex;align-items:center;gap:12px;">
+          <i class="fas fa-star" style="color:var(--accent-secondary);"></i>
+          <div>
+            <div style="font-size:0.88rem;font-weight:600;" id="s3MainAuthor">Autor principal</div>
+            <div style="font-size:0.78rem;color:var(--fg-muted);" id="s3MainAuthorDetail">--</div>
+          </div>
+          <div style="margin-left:auto;font-size:0.75rem;color:var(--accent);background:rgba(0,184,148,0.1);padding:4px 10px;border-radius:12px;">Principal</div>
+        </div>
+      </div>
+      <div id="s3AuthorsList"></div>
+      <button class="btn btn-ghost" onclick="addCoAuthor()" style="margin-bottom:1.5rem;">
+        <i class="fas fa-plus"></i> Agregar co-autor
+      </button>
+      <p style="font-size:0.82rem;color:var(--fg-dim);margin-bottom:1rem;">
+        <i class="fas fa-info-circle"></i> Si eres el &uacute;nico autor, puedes continuar sin agregar co-autores.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button class="btn btn-primary" onclick="validateStep3()">Siguiente <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ========== STEP 4: CARGA DE ARCHIVOS ========== -->
+    <div class="screen" id="screenStep4">
+      <div class="screen-header">
+        <h1>Paso 4: Carga de archivos</h1>
+        <p>Sube el manuscrito principal y los archivos complementarios.</p>
+      </div>
+      <div class="warning-card info-card">
+        <i class="fas fa-file-pdf"></i>
+        <p>El manuscrito principal debe estar en formato PDF, sin identificaci&oacute;n de autores (evaluaci&oacute;n a ciegas). Tama&ntilde;o m&aacute;ximo: 10 MB.</p>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label class="form-label">Manuscrito principal <span class="required">*</span></label>
+          <div class="upload-zone" id="uploadManuscrito" onclick="document.getElementById('fileManuscrito').click()">
+            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+            <p>Arrastra el archivo aqu&iacute; o haz clic para seleccionar</p>
+            <p class="upload-hint">PDF, DOCX o ODT &mdash; M&aacute;ximo 10 MB</p>
+            <input type="file" id="fileManuscrito" accept=".pdf,.docx,.odt" onchange="handleFileUpload(this,'manuscrito')">
+          </div>
+          <div class="file-list" id="fileListManuscrito"></div>
+          <div class="field-error" id="s4ManuscritoError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">Carta de presentaci&oacute;n <span style="color:var(--fg-dim);font-weight:400;">(recomendado)</span></label>
+          <div class="upload-zone" id="uploadCarta" onclick="document.getElementById('fileCarta').click()">
+            <i class="fas fa-envelope upload-icon"></i>
+            <p>Carta dirigida al editor principal</p>
+            <p class="upload-hint">PDF &mdash; M&aacute;ximo 5 MB</p>
+            <input type="file" id="fileCarta" accept=".pdf" onchange="handleFileUpload(this,'carta')">
+          </div>
+          <div class="file-list" id="fileListCarta"></div>
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">Archivos complementarios <span style="color:var(--fg-dim);font-weight:400;">(opcional)</span></label>
+          <div class="upload-zone" id="uploadComplementarios" onclick="document.getElementById('fileComplementarios').click()">
+            <i class="fas fa-paperclip upload-icon"></i>
+            <p>Figuras, tablas suplementarias, datos adicionales</p>
+            <p class="upload-hint">PDF, JPG, PNG, CSV, XLSX &mdash; M&aacute;ximo 20 MB</p>
+            <input type="file" id="fileComplementarios" accept=".pdf,.jpg,.jpeg,.png,.csv,.xlsx" multiple onchange="handleFileUpload(this,'complementarios')">
+          </div>
+          <div class="file-list" id="fileListComplementarios"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button class="btn btn-primary" onclick="validateStep4()">Siguiente <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ========== STEP 5: METADATOS ========== -->
+    <div class="screen" id="screenStep5">
+      <div class="screen-header">
+        <h1>Paso 5: Metadatos adicionales</h1>
+        <p>Informaci&oacute;n complementaria sobre financiaci&oacute;n, referencias y datos de investigaci&oacute;n.</p>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label class="form-label">Fuente de financiamiento</label>
+          <input type="text" class="form-input" id="s5Financiamiento" placeholder="Ej: Proyecto FONDECYT 123456, Universidad XYZ">
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">N&uacute;mero de referencias bibliogr&aacute;ficas <span class="required">*</span></label>
+          <input type="number" class="form-input" id="s5NumRefs" placeholder="Ej: 35" min="0" max="200">
+          <div class="field-error" id="s5NumRefsError"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">Datos de investigaci&oacute;n</label>
+          <select class="form-select" id="s5Datos">
+            <option value="">Seleccionar...</option>
+            <option>Los datos est&aacute;n disponibles en un repositorio p&uacute;blico</option>
+            <option>Los datos est&aacute;n disponibles bajo solicitud</option>
+            <option>Los datos no est&aacute;n disponibles por razones de confidencialidad</option>
+            <option>No aplica (art&iacute;culo de revisi&oacute;n/ensayo)</option>
+          </select>
+        </div>
+        <div class="form-group full-width" id="s5RepoGroup" style="display:none;">
+          <label class="form-label">URL del repositorio de datos</label>
+          <input type="url" class="form-input" id="s5RepoUrl" placeholder="https://doi.org/...">
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">Agradecimientos <span style="color:var(--fg-dim);font-weight:400;">(opcional)</span></label>
+          <textarea class="form-textarea" id="s5Agradecimientos" placeholder="Personas o instituciones que deseas agradecer..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(4)"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button class="btn btn-primary" onclick="validateStep5()">Siguiente <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ========== STEP 6: DECLARACIONES ========== -->
+    <div class="screen" id="screenStep6">
+      <div class="screen-header">
+        <h1>Paso 6: Declaraciones y certificaciones</h1>
+        <p>Debes aceptar todas las declaraciones obligatorias para continuar.</p>
+      </div>
+      <div class="info-card">
+        <i class="fas fa-shield-alt"></i>
+        <p>Estas declaraciones son un requisito de las normas de publicaci&oacute;n internacional (COPE, ICMJE). Tu honestidad acad&eacute;mica es fundamental.</p>
+      </div>
+      <div class="checkbox-group" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="check-item" id="decl1" onclick="toggleCheck(this)">
+          <div class="check-box"><i class="fas fa-check"></i></div>
+          <div class="check-text">
+            Originalidad <span class="required">*</span>
+            <small>Declaro que este art&iacute;culo es original, no ha sido publicado previamente, ni est&aacute; siendo considerado para publicaci&oacute;n en otra revista.</small>
+          </div>
+        </div>
+        <div class="check-item" id="decl2" onclick="toggleCheck(this)">
+          <div class="check-box"><i class="fas fa-check"></i></div>
+          <div class="check-text">
+            Autor&iacute;a <span class="required">*</span>
+            <small>Todas las personas listadas como autores cumplen con los criterios de autor&iacute;a. Ninguna persona que cumpla los criterios ha sido omitida.</small>
+          </div>
+        </div>
+        <div class="check-item" id="decl3" onclick="toggleCheck(this)">
+          <div class="check-box"><i class="fas fa-check"></i></div>
+          <div class="check-text">
+            &Eacute;tica de investigaci&oacute;n <span class="required">*</span>
+            <small>La investigaci&oacute;n se ha realizado respetando las normas &eacute;ticas aplicables. Si incluye seres humanos o animales, se cont&oacute; con la aprobaci&oacute;n del comit&eacute; de &eacute;tica correspondiente.</small>
+          </div>
+        </div>
+        <div class="check-item" id="decl4" onclick="toggleCheck(this)">
+          <div class="check-box"><i class="fas fa-check"></i></div>
+          <div class="check-text">
+            Conflictos de inter&eacute;s <span class="required">*</span>
+            <small>Declaro no tener conflictos de inter&eacute;s relevantes relacionados con este art&iacute;culo. En caso de existir, los he descrito en la secci&oacute;n correspondiente del manuscrito.</small>
+          </div>
+        </div>
+        <div class="check-item" id="decl5" onclick="toggleCheck(this)">
+          <div class="check-box"><i class="fas fa-check"></i></div>
+          <div class="check-text">
+            Consentimiento informado <span class="required">*</span>
+            <small>En caso de incluir datos de pacientes o participantes, se ha obtenido su consentimiento informado por escrito.</small>
+          </div>
+        </div>
+        <div class="check-item" id="decl6" onclick="toggleCheck(this)">
+          <div class="check-box"><i class="fas fa-check"></i></div>
+          <div class="check-text">
+            Licencia de publicaci&oacute;n <span class="required">*</span>
+            <small>Acepto que, en caso de aceptaci&oacute;n, el art&iacute;culo se publique bajo la licencia Creative Commons BY-NC 4.0.</small>
+          </div>
+        </div>
+        <div class="check-item" id="decl7" onclick="toggleCheck(this)">
+          <div class="check-box"><i class="fas fa-check"></i></div>
+          <div class="check-text">
+            Evaluaci&oacute;n a ciegas <span class="required">*</span>
+            <small>Confirmo que el archivo del manuscrito no contiene ninguna informaci&oacute;n que identifique a los autores (nombre, afiliaci&oacute;n, agradecimientos).</small>
+          </div>
+        </div>
+      </div>
+      <div class="field-error" id="s6DeclError" style="margin-top:0.75rem;"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(5)"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button class="btn btn-primary" onclick="validateStep6()">Siguiente <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ========== STEP 7: REVISIÓN FINAL ========== -->
+    <div class="screen" id="screenStep7">
+      <div class="screen-header">
+        <h1>Paso 7: Revisi&oacute;n final</h1>
+        <p>Verifica que toda la informaci&oacute;n sea correcta antes de enviar tu art&iacute;culo.</p>
+      </div>
+      <div class="warning-card info-card">
+        <i class="fas fa-search"></i>
+        <p>Revisa cuidadosamente cada secci&oacute;n. Una vez enviado, no podr&aacute;s modificar los datos sin contactar a la editorial.</p>
+      </div>
+      <div id="reviewContent"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(6)"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button class="btn btn-submit-final" onclick="openSubmitModal()">
+          <i class="fas fa-paper-plane"></i> Enviar art&iacute;culo
+        </button>
+      </div>
+    </div>
+
+    <!-- ========== PANTALLA: ÉXITO ========== -->
+    <div class="screen" id="screenSuccess">
+      <div class="main-content full-width" style="padding:0;">
+        <div class="success-screen">
+          <div class="success-icon"><i class="fas fa-check"></i></div>
+          <h1>Art&iacute;culo enviado con &eacute;xito</h1>
+          <p style="color:var(--fg-muted);font-size:1rem;max-width:500px;margin:0 auto;">
+            Tu art&iacute;culo ha sido registrado en nuestro sistema y ser&aacute; asignado a un editor de secci&oacute;n.
+          </p>
+          <div class="submission-id" id="submissionId">SUB-2025-0001</div>
+          <div class="success-steps">
+            <div class="s-step"><i class="fas fa-check"></i> <span>Se ha enviado un correo de confirmaci&oacute;n a tu direcci&oacute;n electr&oacute;nica.</span></div>
+            <div class="s-step"><i class="fas fa-check"></i> <span>El editor de secci&oacute;n revisar&aacute; tu env&iacute;o en un plazo de 3-5 d&iacute;as h&aacute;biles.</span></div>
+            <div class="s-step"><i class="fas fa-check"></i> <span>Podr&aacute;s realizar el seguimiento de tu art&iacute;culo desde tu panel.</span></div>
+            <div class="s-step"><i class="fas fa-check"></i> <span>Si es considerado apto, se enviar&aacute; a evaluaci&oacute;n por pares.</span></div>
+          </div>
+          <button class="btn btn-primary" onclick="goToDashboard()">
+            <i class="fas fa-home"></i> Volver al panel
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// =============================================
+// ESTADO GLOBAL DE LA APLICACIÓN
+// =============================================
+let currentStep = 0; // 0 = auth/dashboard
+let maxStepReached = 0;
+let submissionData = {};
+let coAuthors = [];
+let tags = [];
+let uploadedFiles = { manuscrito: null, carta: null, complementarios: [] };
+let registeredUsers = JSON.parse(sessionStorage.getItem('ojs_users') || '[]');
+let currentUser = JSON.parse(sessionStorage.getItem('ojs_currentUser') || 'null');
+let submissionCount = parseInt(sessionStorage.getItem('ojs_subCount') || '0');
+
+// =============================================
+// PARTÍCULAS DE FONDO
+// =============================================
+(function initParticles() {
+  const canvas = document.getElementById('particlesCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  const COUNT = 40;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < COUNT; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 2 + 0.5,
+      alpha: Math.random() * 0.3 + 0.05
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(0.5, p.r), 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0,184,148,${p.alpha})`;
+      ctx.fill();
+    });
+
+    // Líneas de conexión
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(0,184,148,${0.04 * (1 - dist / 150)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// =============================================
+// SISTEMA DE TOASTS
+// =============================================
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<i class="fas ${icons[type]}"></i> <span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('removing');
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// =============================================
+// UTILIDADES DE FORMULARIO
+// =============================================
+function showFieldError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.querySelector('span').textContent = msg;
+  el.classList.add('visible');
+  // También marcar el input hermano
+  const parent = el.parentElement;
+  const input = parent.querySelector('.form-input, .form-select, .form-textarea');
+  if (input) input.classList.add('error');
+}
+
+function clearFieldError(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('visible');
+  const parent = el.parentElement;
+  const input = parent.querySelector('.form-input, .form-select, .form-textarea');
+  if (input) input.classList.remove('error');
+}
+
+function clearAllErrors(prefix) {
+  document.querySelectorAll(`[id^="${prefix}"]`).forEach(el => {
+    if (el.id.endsWith('Error')) clearFieldError(el.id);
+  });
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('selected');
+  el.classList.toggle('checked');
+}
+
+function updateCharCount(input, countId, max) {
+  const len = input.value.length;
+  const el = document.getElementById(countId);
+  el.textContent = `${len} / ${max}`;
+  el.className = 'char-count' + (len > max * 0.9 ? (len > max ? ' over' : ' warning') : '');
+}
+
+function updateWordCount(textarea, countId, maxWords) {
+  const words = textarea.value.trim() ? textarea.value.trim().split(/\s+/).length : 0;
+  const el = document.getElementById(countId);
+  el.textContent = `${words} / ${maxWords} palabras`;
+  el.className = 'char-count' + (words > maxWords * 0.9 ? (words > maxWords ? ' over' : ' warning') : '');
+}
+
+// =============================================
+// SISTEMA DE AUTH
+// =============================================
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+  });
+  document.getElementById('formLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('formRegister').classList.toggle('active', tab === 'register');
+  // Limpiar errores
+  clearAllErrors('login');
+  clearAllErrors('reg');
+}
+
+function checkPasswordStrength(pw) {
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+  const bars = ['pw1', 'pw2', 'pw3', 'pw4'];
+  const labels = ['', 'D&eacute;bil', 'Regular', 'Buena', 'Excelente'];
+  const classes = ['', 'weak', 'medium', 'medium', 'strong'];
+
+  bars.forEach((id, i) => {
+    const bar = document.getElementById(id);
+    bar.className = 'pw-bar' + (i < score ? ` ${classes[score]}` : '');
+  });
+  document.getElementById('pwLabel').textContent = pw ? labels[score] : '';
+}
+
+function handleRegister(e) {
+  e.preventDefault();
+  clearAllErrors('reg');
+  let valid = true;
+
+  const nombre = document.getElementById('regNombre').value.trim();
+  const apellido = document.getElementById('regApellido').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const orcid = document.getElementById('regOrcid').value.trim();
+  const afiliacion = document.getElementById('regAfiliacion').value.trim();
+  const pais = document.getElementById('regPais').value;
+  const especialidad = document.getElementById('regEspecialidad').value;
+  const password = document.getElementById('regPassword').value;
+  const password2 = document.getElementById('regPassword2').value;
+  const terms = document.getElementById('checkTerms').classList.contains('checked');
+
+  if (!nombre) { showFieldError('regNombreError', 'El nombre es obligatorio'); valid = false; }
+  if (!apellido) { showFieldError('regApellidoError', 'El apellido es obligatorio'); valid = false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError('regEmailError', 'Ingresa un correo v\u00e1lido'); valid = false; }
+  else if (registeredUsers.find(u => u.email === email)) { showFieldError('regEmailError', 'Este correo ya est\u00e1 registrado'); valid = false; }
+  if (!afiliacion) { showFieldError('regAfiliacionError', 'La afiliaci\u00f3n es obligatoria'); valid = false; }
+  if (!pais) { showFieldError('regPaisError', 'Selecciona tu pa\u00eds'); valid = false; }
+  if (!especialidad) { showFieldError('regEspecialidadError', 'Selecciona tu especialidad'); valid = false; }
+  if (password.length < 8) { showFieldError('regPasswordError', 'M\u00ednimo 8 caracteres'); valid = false; }
+  if (password !== password2) { showFieldError('regPassword2Error', 'Las contrase\u00f1as no coinciden'); valid = false; }
+  if (!terms) { showFieldError('regTermsError', 'Debes aceptar los t\u00e9rminos'); valid = false; }
+
+  if (!valid) return;
+
+  const user = { nombre, apellido, email, orcid, afiliacion, pais, especialidad, password, fechaRegistro: new Date().toISOString() };
+  registeredUsers.push(user);
+  sessionStorage.setItem('ojs_users', JSON.stringify(registeredUsers));
+  currentUser = user;
+  sessionStorage.setItem('ojs_currentUser', JSON.stringify(currentUser));
+  showToast('Cuenta creada exitosamente', 'success');
+  updateUIForLoggedIn();
+  showScreen('screenDashboard');
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  clearAllErrors('login');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  const user = registeredUsers.find(u => u.email === email && u.password === password);
+  if (!user) {
+    showFieldError('loginEmailError', 'Correo o contrase\u00f1a incorrectos');
+    return;
+  }
+
+  currentUser = user;
+  sessionStorage.setItem('ojs_currentUser', JSON.stringify(currentUser));
+  showToast(`Bienvenido, ${user.nombre}`, 'success');
+  updateUIForLoggedIn();
+  showScreen('screenDashboard');
+}
+
+function logout() {
+  currentUser = null;
+  sessionStorage.removeItem('ojs_currentUser');
+  // Resetear estado del envío
+  currentStep = 0;
+  maxStepReached = 0;
+  submissionData = {};
+  coAuthors = [];
+  tags = [];
+  uploadedFiles = { manuscrito: null, carta: null, complementarios: [] };
+  updateUIForLoggedOut();
+  showScreen('screenAuth');
+  showToast('Sesi\u00f3n cerrada', 'info');
+}
+
+function updateUIForLoggedIn() {
+  document.getElementById('userBadge').classList.add('active');
+  document.getElementById('userBadgeName').textContent = `${currentUser.nombre} ${currentUser.apellido}`;
+  document.getElementById('btnLogout').classList.add('active');
+  document.getElementById('dashUserName').textContent = currentUser.nombre;
+  document.getElementById('dashEnvCount').textContent = submissionCount;
+}
+
+function updateUIForLoggedOut() {
+  document.getElementById('userBadge').classList.remove('active');
+  document.getElementById('btnLogout').classList.remove('active');
+  document.getElementById('sidebar').classList.add('hidden');
+}
+
+// =============================================
+// NAVEGACIÓN DE PANTALLAS
+// =============================================
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+}
+
+function goToDashboard() {
+  currentStep = 0;
+  document.getElementById('sidebar').classList.add('hidden');
+  document.getElementById('dashEnvCount').textContent = submissionCount;
+  showScreen('screenDashboard');
+}
+
+function startSubmission() {
+  // Limpiar estado previo
+  submissionData = {};
+  coAuthors = [];
+  tags = [];
+  uploadedFiles = { manuscrito: null, carta: null, complementarios: [] };
+  maxStepReached = 1;
+
+  // Limpiar formularios
+  document.querySelectorAll('#screenStep1 input, #screenStep1 select, #screenStep1 textarea').forEach(el => el.value = '');
+  document.querySelectorAll('#screenStep2 input, #screenStep2 select, #screenStep2 textarea').forEach(el => el.value = '');
+  document.getElementById('s2TagsContainer').querySelectorAll('.tag').forEach(t => t.remove());
+  tags = [];
+  updateTagCount();
+  document.getElementById('s3AuthorsList').innerHTML = '';
+  clearFileList('manuscrito');
+  clearFileList('carta');
+  clearFileList('complementarios');
+  document.querySelectorAll('#screenStep5 input, #screenStep5 select, #screenStep5 textarea').forEach(el => el.value = '');
+  document.getElementById('s5RepoGroup').style.display = 'none';
+  document.querySelectorAll('[id^="decl"]').forEach(el => { el.classList.remove('selected', 'checked'); });
+
+  // Limpiar errores
+  for (let i = 1; i <= 7; i++) clearAllErrors(`s${i}`);
+
+  // Mostrar sidebar y paso 1
+  document.getElementById('sidebar').classList.remove('hidden');
+  updateStepUI(1);
+  showScreen('screenStep1');
+
+  // Poblar info del autor principal en paso 3
+  if (currentUser) {
+    document.getElementById('s3MainAuthor').textContent = `${currentUser.nombre} ${currentUser.apellido}`;
+    document.getElementById('s3MainAuthorDetail').textContent = `${currentUser.afiliacion} — ${currentUser.email}`;
+  }
+}
+
+function goToStep(step) {
+  if (step > maxStepReached) return;
+  currentStep = step;
+  updateStepUI(step);
+  showScreen(`screenStep${step}`);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (step === 7) buildReview();
+}
+
+function updateStepUI(activeStep) {
+  document.querySelectorAll('.step-item').forEach((item, idx) => {
+    const stepNum = idx + 1;
+    item.classList.remove('active', 'completed', 'locked');
+    const circle = item.querySelector('.step-circle');
+
+    if (stepNum < activeStep) {
+      item.classList.add('completed');
+      circle.innerHTML = '<i class="fas fa-check" style="font-size:0.7rem;"></i>';
+    } else if (stepNum === activeStep) {
+      item.classList.add('active');
+      circle.textContent = stepNum;
+    } else if (stepNum > maxStepReached) {
+      item.classList.add('locked');
+      circle.textContent = stepNum;
+    } else {
+      circle.textContent = stepNum;
+    }
+  });
+}
+
+// =============================================
+// VALIDACIONES POR PASO
+// =============================================
+function saveStep1Data() {
+  submissionData.seccion = document.getElementById('s1Seccion').value;
+  submissionData.idioma = document.getElementById('s1Idioma').value;
+  submissionData.comentarios = document.getElementById('s1Comentarios').value.trim();
+}
+
+function validateStep1() {
+  clearAllErrors('s1');
+  let valid = true;
+  if (!document.getElementById('s1Seccion').value) { showFieldError('s1SeccionError', 'Selecciona una secci\u00f3n'); valid = false; }
+  if (!document.getElementById('s1Idioma').value) { showFieldError('s1IdiomaError', 'Selecciona un idioma'); valid = false; }
+  if (!valid) return;
+  saveStep1Data();
+  maxStepReached = Math.max(maxStepReached, 2);
+  goToStep(2);
+}
+
+function saveStep2Data() {
+  submissionData.titulo = document.getElementById('s2Titulo').value.trim();
+  submissionData.tituloEn = document.getElementById('s2TituloEn').value.trim();
+  submissionData.resumen = document.getElementById('s2Resumen').value.trim();
+  submissionData.palabrasClave = [...tags];
+}
+
+function validateStep2() {
+  clearAllErrors('s2');
+  let valid = true;
+  if (!document.getElementById('s2Titulo').value.trim()) { showFieldError('s2TituloError', 'El t\u00edtulo es obligatorio'); valid = false; }
+  const resumen = document.getElementById('s2Resumen').value.trim();
+  const wordCount = resumen ? resumen.split(/\s+/).length : 0;
+  if (!resumen) { showFieldError('s2ResumenError', 'El resumen es obligatorio'); valid = false; }
+  else if (wordCount < 50) { showFieldError('s2ResumenError', 'El resumen debe tener al menos 50 palabras'); valid = false; }
+  else if (wordCount > 300) { showFieldError('s2ResumenError', 'El resumen no puede exceder 300 palabras'); valid = false; }
+  if (tags.length < 3) { showFieldError('s2TagsError', 'Ingresa al menos 3 palabras clave'); valid = false; }
+  else if (tags.length > 8) { showFieldError('s2TagsError', 'M\u00e1ximo 8 palabras clave'); valid = false; }
+  if (!valid) return;
+  saveStep2Data();
+  maxStepReached = Math.max(maxStepReached, 3);
+  goToStep(3);
+}
+
+function saveStep3Data() {
+  submissionData.coAutores = coAuthors.map(a => ({...a}));
+}
+
+function validateStep3() {
+  // Validar co-autores si hay alguno
+  let valid = true;
+  document.querySelectorAll('.author-card').forEach((card, i) => {
+    const nombre = card.querySelector(`[id="caNombre_${i}"]`).value.trim();
+    const apellido = card.querySelector(`[id="caApellido_${i}"]`).value.trim();
+    const email = card.querySelector(`[id="caEmail_${i}"]`).value.trim();
+    const afiliacion = card.querySelector(`[id="caAfiliacion_${i}"]`).value.trim();
+
+    // Limpiar errores previos de este card
+    card.querySelectorAll('.field-error').forEach(e => e.classList.remove('visible'));
+    card.querySelectorAll('.form-input, .form-select').forEach(e => e.classList.remove('error'));
+
+    if (!nombre) { showCardError(card, `caNombre_${i}Error`, 'Obligatorio'); valid = false; }
+    if (!apellido) { showCardError(card, `caApellido_${i}Error`, 'Obligatorio'); valid = false; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showCardError(card, `caEmail_${i}Error`, 'Correo inv\u00e1lido'); valid = false; }
+    if (!afiliacion) { showCardError(card, `caAfiliacion_${i}Error`, 'Obligatorio'); valid = false; }
+  });
+
+  if (!valid) { showToast('Completa los datos de los co-autores', 'error'); return; }
+  saveStep3Data();
+  maxStepReached = Math.max(maxStepReached, 4);
+  goToStep(4);
+}
+
+function showCardError(card, errorId, msg) {
+  const el = card.querySelector(`#${errorId}`);
+  if (el) {
+    el.querySelector('span').textContent = msg;
+    el.classList.add('visible');
+  }
+  const namePart = errorId.replace('Error', '');
+  const input = card.querySelector(`#${namePart}`);
+  if (input) input.classList.add('error');
+}
+
+function validateStep4() {
+  clearAllErrors('s4');
+  if (!uploadedFiles.manuscrito) { showFieldError('s4ManuscritoError', 'Debes subir el manuscrito principal'); return; }
+  maxStepReached = Math.max(maxStepReached, 5);
+  goToStep(5);
+}
+
+function saveStep5Data() {
+  submissionData.financiamiento = document.getElementById('s5Financiamiento').value.trim();
+  submissionData.numRefs = document.getElementById('s5NumRefs').value;
+  submissionData.datosInvestigacion = document.getElementById('s5Datos').value;
+  submissionData.repoUrl = document.getElementById('s5RepoUrl').value.trim();
+  submissionData.agradecimientos = document.getElementById('s5Agradecimientos').value.trim();
+}
+
+function validateStep5() {
+  clearAllErrors('s5');
+  const numRefs = document.getElementById('s5NumRefs').value;
+  if (!numRefs || numRefs < 0) { showFieldError('s5NumRefsError', 'Ingresa el n\u00famero de referencias'); return; }
+  saveStep5Data();
+  maxStepReached = Math.max(maxStepReached, 6);
+  goToStep(6);
+}
+
+function saveStep6Data() {
+  submissionData.declaraciones = {};
+  for (let i = 1; i <= 7; i++) {
+    submissionData.declaraciones[`decl${i}`] = document.getElementById(`decl${i}`).classList.contains('checked');
+  }
+}
+
+function validateStep6() {
+  document.getElementById('s6DeclError').classList.remove('visible');
+  for (let i = 1; i <= 7; i++) {
+    if (!document.getElementById(`decl${i}`).classList.contains('checked')) {
+      showFieldError('s6DeclError', 'Debes aceptar todas las declaraciones obligatorias');
+      showToast('Falta aceptar declaraciones', 'error');
+      return;
+    }
+  }
+  saveStep6Data();
+  maxStepReached = Math.max(maxStepReached, 7);
+  goToStep(7);
+}
+
+// =============================================
+// TAGS (PALABRAS CLAVE)
+// =============================================
+function handleTagInput(e, containerId) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const input = e.target;
+    const value = input.value.trim().toLowerCase();
+    if (!value) return;
+    if (tags.includes(value)) { showToast('Palabra clave ya agregada', 'error'); return; }
+    if (tags.length >= 8) { showToast('M\u00e1ximo 8 palabras clave', 'error'); return; }
+
+    tags.push(value);
+    renderTags();
+    input.value = '';
+    updateTagCount();
+  }
+}
+
+function removeTag(tag) {
+  tags = tags.filter(t => t !== tag);
+  renderTags();
+  updateTagCount();
+}
+
+function renderTags() {
+  const container = document.getElementById('s2TagsContainer');
+  container.querySelectorAll('.tag').forEach(t => t.remove());
+  const input = document.getElementById('s2TagInput');
+  tags.forEach(tag => {
+    const el = document.createElement('span');
+    el.className = 'tag';
+    el.innerHTML = `${tag} <button type="button" onclick="removeTag('${tag}')">&times;</button>`;
+    container.insertBefore(el, input);
+  });
+}
+
+function updateTagCount() {
+  document.getElementById('s2TagsCount').textContent = `${tags.length} palabras clave`;
+}
+
+// =============================================
+// CO-AUTORES
+// =============================================
+let coAuthorCounter = 0;
+
+function addCoAuthor() {
+  if (coAuthors.length >= 10) { showToast('M\u00e1ximo 10 co-autores', 'error'); return; }
+  const idx = coAuthorCounter++;
+  coAuthors.push({ idx, nombre: '', apellido: '', email: '', orcid: '', afiliacion: '', pais: '' });
+
+  const container = document.getElementById('s3AuthorsList');
+  const card = document.createElement('div');
+  card.className = 'author-card';
+  card.id = `authorCard_${idx}`;
+  card.innerHTML = `
+    <button type="button" class="author-remove" onclick="removeCoAuthor(${idx})" aria-label="Eliminar co-autor"><i class="fas fa-times"></i></button>
+    <div class="author-num">Co-autor ${coAuthors.length}</div>
+    <div class="form-grid cols-2">
+      <div class="form-group">
+        <label class="form-label">Nombre <span class="required">*</span></label>
+        <input type="text" class="form-input" id="caNombre_${idx}" placeholder="Nombre">
+        <div class="field-error" id="caNombre_${idx}Error"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Apellido <span class="required">*</span></label>
+        <input type="text" class="form-input" id="caApellido_${idx}" placeholder="Apellido">
+        <div class="field-error" id="caApellido_${idx}Error"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correo <span class="required">*</span></label>
+        <input type="email" class="form-input" id="caEmail_${idx}" placeholder="correo@universidad.edu">
+        <div class="field-error" id="caEmail_${idx}Error"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ORCID</label>
+        <input type="text" class="form-input" id="caOrcid_${idx}" placeholder="0000-0000-0000-0000">
+      </div>
+      <div class="form-group full-width">
+        <label class="form-label">Afiliaci\u00f3n institucional <span class="required">*</span></label>
+        <input type="text" class="form-input" id="caAfiliacion_${idx}" placeholder="Universidad / Instituci\u00f3n">
+        <div class="field-error" id="caAfiliacion_${idx}Error"><i class="fas fa-exclamation-circle"></i> <span></span></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pa\u00eds</label>
+        <select class="form-select" id="caPais_${idx}">
+          <option value="">Seleccionar...</option>
+          <option>Argentina</option><option>Bolivia</option><option>Brasil</option>
+          <option>Chile</option><option>Colombia</option><option>Espa\u00f1a</option>
+          <option>M\u00e9xico</option><option>Per\u00fa</option><option>Otro</option>
+        </select>
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function removeCoAuthor(idx) {
+  const card = document.getElementById(`authorCard_${idx}`);
+  if (card) {
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(-20px)';
+    card.style.transition = '0.3s ease';
+    setTimeout(() => {
+      card.remove();
+      coAuthors = coAuthors.filter(a => a.idx !== idx);
+      // Renumerar
+      document.querySelectorAll('#s3AuthorsList .author-card').forEach((c, i) => {
+        c.querySelector('.author-num').textContent = `Co-autor ${i + 1}`;
+      });
+    }, 300);
+  }
+}
+
+// =============================================
+// UPLOAD DE ARCHIVOS
+// =============================================
+// Drag & Drop
+['uploadManuscrito', 'uploadCarta', 'uploadComplementarios'].forEach(zoneId => {
+  const zone = document.getElementById(zoneId);
+  if (!zone) return;
+  const type = zoneId.replace('upload', '').toLowerCase();
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const fileInput = zone.querySelector('input[type="file"]');
+    if (fileInput.files.length || e.dataTransfer.files.length) {
+      // Simular la subida
+      processFiles(e.dataTransfer.files, type);
+    }
+  });
+});
+
+function handleFileUpload(input, type) {
+  processFiles(input.files, type);
+  input.value = ''; // Resetear para permitir re-subir el mismo archivo
+}
+
+function processFiles(files, type) {
+  if (type === 'complementarios') {
+    Array.from(files).forEach(f => {
+      if (uploadedFiles.complementarios.length >= 5) {
+        showToast('M\u00e1ximo 5 archivos complementarios', 'error');
+        return;
+      }
+      uploadedFiles.complementarios.push({ name: f.name, size: f.size, type: f.type });
+    });
+    renderFileList('complementarios');
+  } else {
+    uploadedFiles[type] = { name: files[0].name, size: files[0].size, type: files[0].type };
+    renderFileList(type);
+  }
+  showToast('Archivo(s) cargado(s) correctamente', 'success');
+}
+
+function renderFileList(type) {
+  const listId = type === 'manuscrito' ? 'fileListManuscrito' : type === 'carta' ? 'fileListCarta' : 'fileListComplementarios';
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+
+  const files = type === 'complementarios' ? uploadedFiles.complementarios : (uploadedFiles[type] ? [uploadedFiles[type]] : []);
+
+  files.forEach((f, i) => {
+    const ext = f.name.split('.').pop().toUpperCase();
+    const icon = ext === 'PDF' ? 'fa-file-pdf' : ['DOCX','ODT'].includes(ext) ? 'fa-file-word' : ['JPG','JPEG','PNG'].includes(ext) ? 'fa-file-image' : ['CSV','XLSX'].includes(ext) ? 'fa-file-excel' : 'fa-file';
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.innerHTML = `
+      <div class="file-icon"><i class="fas ${icon}"></i></div>
+      <div class="file-info">
+        <div class="file-name">${f.name}</div>
+        <div class="file-size">${formatSize(f.size)} — ${ext}</div>
+      </div>
+      <button class="file-remove" onclick="removeFile('${type}', ${i})" aria-label="Eliminar archivo"><i class="fas fa-trash-alt"></i></button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function removeFile(type, index) {
+  if (type === 'complementarios') {
+    uploadedFiles.complementarios.splice(index, 1);
+  } else {
+    uploadedFiles[type] = null;
+  }
+  renderFileList(type);
+}
+
+function clearFileList(type) {
+  const listId = type === 'manuscrito' ? 'fileListManuscrito' : type === 'carta' ? 'fileListCarta' : 'fileListComplementarios';
+  document.getElementById(listId).innerHTML = '';
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+// =============================================
+// REVISIÓN FINAL
+// =============================================
+function buildReview() {
+  const container = document.getElementById('reviewContent');
+
+  // Sección 1: Inicio
+  const section1 = buildReviewSection('fa-rocket', 'Inicio del env\u00edo', [
+    ['Secci\u00f3n', submissionData.seccion],
+    ['Idioma', submissionData.idioma],
+    ['Comentarios', submissionData.comentarios || '—']
+  ]);
+
+  // Sección 2: Datos del artículo
+  const tagsHtml = submissionData.palabrasClave.map(t => `<span class="tag">${t}</span>`).join(' ');
+  const section2 = buildReviewSection('fa-file-alt', 'Datos del art\u00edculo', [
+    ['T\u00edtulo', submissionData.titulo],
+    ['T\u00edtulo (ingl\u00e9s)', submissionData.tituloEn || '—'],
+    ['Resumen', submissionData.resumen.substring(0, 200) + (submissionData.resumen.length > 200 ? '...' : '')],
+    ['Palabras clave', tagsHtml || '—']
+  ]);
+
+  // Sección 3: Autores
+  let authorsRows = [
+    ['Autor principal', `${currentUser.nombre} ${currentUser.apellido} — ${currentUser.afiliacion} (${currentUser.email})`]
+  ];
+  if (submissionData.coAutores && submissionData.coAutores.length > 0) {
+    // Obtener datos actualizados de los formularios
+    document.querySelectorAll('#s3AuthorsList .author-card').forEach((card, i) => {
+      const idx = card.id.replace('authorCard_', '');
+      const n = document.getElementById(`caNombre_${idx}`)?.value?.trim() || '';
+      const a = document.getElementById(`caApellido_${idx}`)?.value?.trim() || '';
+      const af = document.getElementById(`caAfiliacion_${idx}`)?.value?.trim() || '';
+      const em = document.getElementById(`caEmail_${idx}`)?.value?.trim() || '';
+      if (n || a) authorsRows.push([`Co-autor ${i + 1}`, `${n} ${a} — ${af} (${em})`]);
+    });
+  }
+  const section3 = buildReviewSection('fa-users', 'Autores', authorsRows);
+
+  // Sección 4: Archivos
+  let filesRows = [];
+  if (uploadedFiles.manuscrito) filesRows.push(['Manuscrito', `${uploadedFiles.manuscrito.name} (${formatSize(uploadedFiles.manuscrito.size)})`]);
+  else filesRows.push(['Manuscrito', '<span style="color:var(--danger);">No subido</span>']);
+  if (uploadedFiles.carta) filesRows.push(['Carta de presentaci\u00f3n', `${uploadedFiles.carta.name} (${formatSize(uploadedFiles.carta.size)})`]);
+  else filesRows.push(['Carta de presentaci\u00f3n', 'No subida']);
+  if (uploadedFiles.complementarios.length > 0) {
+    filesRows.push(['Complementarios', uploadedFiles.complementarios.map(f => f.name).join(', ')]);
+  } else {
+    filesRows.push(['Complementarios', 'Ninguno']);
+  }
+  const section4 = buildReviewSection('fa-paperclip', 'Archivos', filesRows);
+
+  // Sección 5: Metadatos
+  const section5 = buildReviewSection('fa-database', 'Metadatos', [
+    ['Financiamiento', submissionData.financiamiento || 'No especificado'],
+    ['N.\u00ba de referencias', submissionData.numRefs],
+    ['Datos de investigaci\u00f3n', submissionData.datosInvestigacion || 'No especificado'],
+    ['Repositorio', submissionData.repoUrl || '—'],
+    ['Agradecimientos', submissionData.agradecimientos || '—']
+  ]);
+
+  // Sección 6: Declaraciones
+  const declNames = ['Originalidad', 'Autor\u00eda', '\u00c9tica', 'Conflictos de inter\u00e9s', 'Consentimiento', 'Licencia', 'Evaluaci\u00f3n a ciegas'];
+  const declRows = declNames.map((name, i) => [
+    name,
+    submissionData.declaraciones?.[`decl${i + 1}`]
+      ? '<span style="color:var(--success);"><i class="fas fa-check-circle"></i> Aceptada</span>'
+      : '<span style="color:var(--danger);"><i class="fas fa-times-circle"></i> No aceptada</span>'
+  ]);
+  const section6 = buildReviewSection('fa-shield-alt', 'Declaraciones', declRows);
+
+  container.innerHTML = section1 + section2 + section3 + section4 + section5 + section6;
+
+  // Hacer las secciones colapsables
+  container.querySelectorAll('.review-section').forEach(s => {
+    s.querySelector('.review-section-header').addEventListener('click', () => {
+      s.classList.toggle('open');
+    });
+  });
+  // Abrir todas por defecto
+  container.querySelectorAll('.review-section').forEach(s => s.classList.add('open'));
+}
+
+function buildReviewSection(icon, title, rows) {
+  let rowsHtml = rows.map(([key, value]) =>
+    `<div class="review-row"><div class="review-key">${key}</div><div class="review-value">${value}</div></div>`
+  ).join('');
+  return `
+    <div class="review-section open">
+      <div class="review-section-header">
+        <h3><i class="fas ${icon}"></i> ${title}</h3>
+        <i class="fas fa-chevron-down chevron"></i>
+      </div>
+      <div class="review-section-body">${rowsHtml}</div>
+    </div>
+  `;
+}
+
+// =============================================
+// ENVÍO FINAL
+// =============================================
+function openSubmitModal() {
+  document.getElementById('confirmModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('confirmModal').classList.remove('active');
+}
+
+function confirmSubmit() {
+  closeModal();
+  submissionCount++;
+  sessionStorage.setItem('ojs_subCount', submissionCount.toString());
+
+  // Generar ID de envío
+  const idNum = String(submissionCount).padStart(4, '0');
+  document.getElementById('submissionId').textContent = `SUB-2025-${idNum}`;
+
+  document.getElementById('sidebar').classList.add('hidden');
+  showScreen('screenSuccess');
+  showToast('Art\u00edculo enviado exitosamente', 'success');
+}
+
+// =============================================
+// LISTENER PARA DATOS DE INVESTIGACIÓN
+// =============================================
+document.getElementById('s5Datos').addEventListener('change', function() {
+  const show = this.value.includes('repositorio p\u00fablico');
+  document.getElementById('s5RepoGroup').style.display = show ? 'flex' : 'none';
+});
+
+// =============================================
+// LIMPIAR ERRORES AL ESCRIBIR
+// =============================================
+document.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(el => {
+  el.addEventListener('input', function() {
+    this.classList.remove('error');
+    const errorEl = this.parentElement.querySelector('.field-error');
+    if (errorEl) errorEl.classList.remove('visible');
+  });
+  el.addEventListener('change', function() {
+    this.classList.remove('error');
+    const errorEl = this.parentElement.querySelector('.field-error');
+    if (errorEl) errorEl.classList.remove('visible');
+  });
+});
+
+// =============================================
+// INICIALIZACIÓN
+// =============================================
+(function init() {
+  if (currentUser) {
+    updateUIForLoggedIn();
+    showScreen('screenDashboard');
+  } else {
+    updateUIForLoggedOut();
+    showScreen('screenAuth');
+  }
+})();
+</script>
+</body>
+</html>
