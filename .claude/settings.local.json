@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git commit -m ' *)",
       "PowerShell(graphify *)",
-      "PowerShell(code-review-graph *)"
+      "PowerShell(code-review-graph *)",
+      "Bash(chmod +x .git/hooks/post-commit)"
     ],
     "additionalDirectories": [
       "c:\\Users\\User\\.claude\\projects\\c--Users-User-Documents-Desarrollo-Web-Simulaciones"
