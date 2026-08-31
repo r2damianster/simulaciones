@@ -748,13 +748,13 @@
             <div class="sim-controls">
                 <div class="sim-chips" role="group" aria-label="Filtrar por categoría" data-i18n-aria="filter_aria">
                     <button class="chip is-active" data-filter="*">
-                        <span data-i18n="chip_all">Todas</span> <span class="chip-count">11</span>
+                        <span data-i18n="chip_all">Todas</span> <span class="chip-count">12</span>
                     </button>
                     <button class="chip" data-filter="redaccion">
                         <span data-i18n="chip_writing">Redacción</span> <span class="chip-count">4</span>
                     </button>
                     <button class="chip" data-filter="metodologia">
-                        <span data-i18n="chip_method">Metodología</span> <span class="chip-count">3</span>
+                        <span data-i18n="chip_method">Metodología</span> <span class="chip-count">4</span>
                     </button>
                     <button class="chip" data-filter="estadistica">
                         <span data-i18n="chip_stats">Estadística</span> <span class="chip-count">1</span>
@@ -764,6 +764,9 @@
                     </button>
                     <button class="chip" data-filter="lectura">
                         <span data-i18n="chip_reading">Lectura</span> <span class="chip-count">1</span>
+                    </button>
+                    <button class="chip" data-filter="filosofia">
+                        <span data-i18n="chip_philosophy">Filosofía</span> <span class="chip-count">1</span>
                     </button>
                 </div>
                 <input type="search" class="sim-search" placeholder="Buscar simulación..." aria-label="Buscar simulación" data-i18n-ph="search_ph" data-i18n-aria="search_ph">
@@ -1060,7 +1063,7 @@
                 </div>
 
                 <!-- El Mundo de Sofía -->
-                <div class="sim-out sofia reveal d6" data-cat="metodologia" data-key="simlab_mundosofia1" data-file="mundoSofia1.html">
+                <div class="sim-out sofia reveal d6" data-cat="filosofia" data-key="simlab_mundosofia1" data-file="mundoSofia1.html">
                     <input type="hidden" data-done>
                     <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
                     <a href="mundoSofia1.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
@@ -1069,7 +1072,7 @@
                                 <span class="sim-thumb-icon" aria-hidden="true">🌰</span>
                             </div>
                             <div class="sim-body">
-                                <span class="sim-tag" data-i18n="card_sofia_tag">Metodología</span>
+                                <span class="sim-tag" data-i18n="card_sofia_tag">Filosofía</span>
                                 <div class="sim-title" data-i18n="card_sofia_title">El Mundo de Sofía — El Jardín del Edén</div>
                                 <p class="sim-desc" data-i18n="card_sofia_desc">Recorre el primer capítulo de la novela de Gaarder: preguntas filosóficas sobre la identidad, la existencia y el origen del universo.</p>
                                 <div class="sim-meta">
@@ -1150,6 +1153,7 @@
                 filter_aria:'Filter by category',
                 chip_all:'All', chip_writing:'Writing', chip_method:'Methodology',
                 chip_stats:'Statistics', chip_ethics:'Ethics', chip_reading:'Reading',
+                chip_philosophy:'Philosophy',
                 search_ph:'Search simulations...',
                 badge_done:'✓ Completed', btn_start:'Start Simulation',
                 level_basic:'Beginner', level_mid:'Intermediate', level_adv:'Advanced',

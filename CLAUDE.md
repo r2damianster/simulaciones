@@ -402,7 +402,7 @@ A partir de `constructos_IA.html`, toda nueva simulación DEBE ser **bilingüe d
 
 ### Referencia rápida: Claves y Categorías
 
-**Categorías válidas:** `redaccion`, `metodologia`, `estadistica`, `etica`, `lectura`
+**Categorías válidas:** `redaccion`, `metodologia`, `estadistica`, `etica`, `lectura`, `filosofia`
 
 **Claves de localStorage:** Derivadas del nombre archivo:
 - `mi-nueva-sim.html` → `simlab_mi_nueva_sim`
