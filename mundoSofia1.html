@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Mundo de Sofía — El Jardín del Edén</title>
+<meta name="description" content="Simulación narrativa e interactiva basada en el primer capítulo de El Mundo de Sofía: preguntas filosóficas sobre la identidad, la existencia y el origen del universo. SimLab ULEAM.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B0%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ========== Variables y reset ========== */
+:root {
+    --bg-deep: #0F1A0F;
+    --bg-forest: #162216;
+    --bg-warm: #1A1410;
+    --bg-mirror: #0E0E12;
+    --parchment: #F2E8D5;
+    --parchment-dim: #D9CBAD;
+    --text-dark: #2C1810;
+    --text-cream: #EDE4D3;
+    --gold: #C9975B;
+    --gold-glow: rgba(201,151,91,0.25);
+    --sage: #7A8E6B;
+    --rose: #B87A6E;
+    --deep-green: #3D5A3D;
+    --sim-home-fg: #C9975B;
+    --sim-home-bg: rgba(201,151,91,0.12);
+    --sim-home-bd: rgba(201,151,91,0.25);
+    --sim-home-hi: #E8C08A;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-deep);color:var(--text-cream);font-family:'Lora',serif}
+
+/* ========== Canvas de partículas ========== */
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ========== Sistema de escenas ========== */
+#app{position:relative;width:100%;height:100%;z-index:1}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;opacity:0;transform:translateY(40px);transition:opacity 1s ease,transform 1s ease;pointer-events:none;overflow-y:auto}
+.scene.active{opacity:1;transform:translateY(0);pointer-events:all}
+.scene.exiting{opacity:0;transform:translateY(-40px);pointer-events:none}
+
+/* ========== Indicador de progreso ========== */
+.progress{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;gap:0.6rem;z-index:100}
+.progress-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);transition:background 0.5s,transform 0.5s}
+.progress-dot.done{background:var(--gold);transform:scale(1.2)}
+.progress-dot.current{background:var(--gold);transform:scale(1.5);box-shadow:0 0 10px var(--gold-glow)}
+
+/* ========== Componentes compartidos ========== */
+.narrative{
+    background:var(--parchment);color:var(--text-dark);padding:2rem 2.2rem;max-width:580px;
+    border-radius:3px;line-height:1.85;font-size:1.05rem;
+    box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 0 60px rgba(0,0,0,0.04);
+    position:relative
+}
+.narrative::before{
+    content:'';position:absolute;inset:4px;border:1px solid rgba(0,0,0,0.06);border-radius:2px;pointer-events:none
+}
+.narrative p{margin-bottom:1em}
+.narrative p:last-child{margin-bottom:0}
+.narrative em{color:var(--rose);font-style:italic}
+.narrative .question-inline{font-family:'Playfair Display',serif;font-weight:700;font-size:1.15em;color:var(--text-dark);display:block;margin:1.2em 0;text-align:center}
+
+.philosophy-q{
+    font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2rem,5vw,3.2rem);
+    color:var(--gold);text-align:center;line-height:1.2;
+    text-shadow:0 0 60px var(--gold-glow);letter-spacing:-0.02em
+}
+.philosophy-q .interrogation{display:inline-block;animation:pulse-q 2s ease-in-out infinite;margin-left:0.1em}
+@keyframes pulse-q{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.15)}}
+
+.btn-continue{
+    margin-top:2rem;padding:0.8rem 2.4rem;background:transparent;
+    border:1px solid var(--gold);color:var(--gold);font-family:'Playfair Display',serif;
+    font-size:1rem;letter-spacing:0.08em;cursor:pointer;border-radius:2px;
+    transition:all 0.4s ease;opacity:0;transform:translateY(10px)
+}
+.btn-continue.visible{opacity:1;transform:translateY(0)}
+.btn-continue:hover{background:var(--gold);color:var(--bg-deep)}
+.btn-continue:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+
+.fade-in{animation:fadeIn 1.2s ease forwards}
+@keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+.delay-1{animation-delay:0.3s;opacity:0}
+.delay-2{animation-delay:0.7s;opacity:0}
+.delay-3{animation-delay:1.1s;opacity:0}
+.delay-4{animation-delay:1.5s;opacity:0}
+
+/* ========== ESCENA 0: PORTADA ========== */
+#scene-portada{background:radial-gradient(ellipse at 50% 80%,#1A2E1A 0%,#0F1A0F 60%,#080E08 100%)}
+.portada-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.4rem,7vw,4.5rem);color:var(--parchment);text-align:center;line-height:1.1;letter-spacing:-0.03em}
+.portada-sub{font-family:'Lora',serif;font-style:italic;font-size:clamp(0.95rem,2vw,1.2rem);color:var(--gold);margin-top:1rem;opacity:0.8;text-align:center}
+.portada-author{margin-top:0.5rem;font-size:0.9rem;color:var(--sage);text-align:center}
+.btn-begin{
+    margin-top:2.5rem;padding:1rem 3rem;background:var(--gold);color:var(--bg-deep);
+    border:none;font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+    letter-spacing:0.1em;cursor:pointer;border-radius:2px;transition:all 0.4s
+}
+.btn-begin:hover{transform:scale(1.05);box-shadow:0 0 40px var(--gold-glow)}
+.btn-begin:focus-visible{outline:2px solid var(--parchment);outline-offset:4px}
+.portada-ornament{width:60px;height:1px;background:var(--gold);margin:1.5rem auto;opacity:0.5}
+
+/* ========== ESCENA 1: CAMINO ========== */
+#scene-camino{background:radial-gradient(ellipse at 30% 70%,#1E3018 0%,#0F1A0F 70%)}
+.spring-visual{position:absolute;bottom:0;left:0;right:0;height:40%;pointer-events:none;overflow:hidden}
+.spring-ground{position:absolute;bottom:0;left:-5%;right:-5%;height:100%;background:linear-gradient(to top,#1A2E14,#162216 40%,transparent);border-radius:50% 50% 0 0/30% 30% 0 0}
+.spring-bush{position:absolute;bottom:0;border-radius:50% 50% 0 0;opacity:0.7}
+.spring-bush:nth-child(1){left:5%;width:120px;height:80px;background:radial-gradient(ellipse,#2A4A20,#1A3018)}
+.spring-bush:nth-child(2){left:25%;width:90px;height:60px;background:radial-gradient(ellipse,#2E4E22,#1E3518)}
+.spring-bush:nth-child(3){right:15%;width:140px;height:90px;background:radial-gradient(ellipse,#264820,#183018)}
+.spring-bush:nth-child(4){right:40%;width:80px;height:50px;background:radial-gradient(ellipse,#2C4C1E,#1C3216)}
+.spring-blossom{position:absolute;width:6px;height:6px;border-radius:50%;animation:blossom-sway 4s ease-in-out infinite}
+@keyframes blossom-sway{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(15deg)}}
+
+/* ========== ESCENA 2: BUZÓN ========== */
+#scene-buzon{background:radial-gradient(ellipse at 60% 50%,#1A1E14 0%,#0F1A0F 70%)}
+.mailbox-wrapper{position:relative;cursor:pointer;margin:1.5rem 0}
+.mailbox{width:80px;height:120px;position:relative;transition:transform 0.3s}
+.mailbox:hover{transform:scale(1.05)}
+.mailbox-body{width:70px;height:90px;background:linear-gradient(135deg,#5A4A3A,#3A2E22);border-radius:4px;position:absolute;bottom:0;left:5px;box-shadow:inset -5px 0 15px rgba(0,0,0,0.3)}
+.mailbox-lid{width:76px;height:16px;background:linear-gradient(135deg,#6A5A4A,#4A3E32);border-radius:8px 8px 0 0;position:absolute;top:0;left:2px;transform-origin:bottom left;transition:transform 0.6s ease;box-shadow:0 -2px 8px rgba(0,0,0,0.3)}
+.mailbox.opened .mailbox-lid{transform:rotate(-60deg)}
+.mailbox-post{width:8px;height:40px;background:linear-gradient(90deg,#4A3E32,#5A4A3A,#4A3E32);position:absolute;bottom:-40px;left:36px;border-radius:0 0 2px 2px}
+.mailbox-flag{width:4px;height:25px;background:#8A7A6A;position:absolute;right:-2px;bottom:30px;border-radius:1px;transform-origin:bottom center;transition:transform 0.4s}
+.mailbox-flag::after{content:'';width:12px;height:8px;background:var(--rose);position:absolute;top:0;right:0;border-radius:0 2px 2px 0}
+.mailbox.opened .mailbox-flag{transform:rotate(90deg)}
+.mailbox-hint{font-size:0.85rem;color:var(--sage);margin-top:0.5rem;text-align:center;transition:opacity 0.5s}
+.letter-reveal{
+    max-width:320px;padding:1.5rem 2rem;background:var(--parchment);color:var(--text-dark);
+    border-radius:2px;box-shadow:0 4px 30px rgba(0,0,0,0.5);
+    opacity:0;transform:translateY(20px) scale(0.9);transition:all 0.8s ease;
+    font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;text-align:center
+}
+.letter-reveal.visible{opacity:1;transform:translateY(0) scale(1)}
+
+/* ========== ESCENA 3: ESPEJO ========== */
+#scene-espejo{background:radial-gradient(ellipse at 50% 40%,#14141A 0%,#0E0E12 70%)}
+.mirror-frame{
+    width:clamp(180px,30vw,240px);height:clamp(240px,40vw,320px);
+    border:12px solid #3A3028;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+    position:relative;overflow:hidden;
+    box-shadow:0 0 0 4px #2A2018,0 0 60px rgba(0,0,0,0.6),inset 0 0 40px rgba(0,0,0,0.4);
+    background:linear-gradient(160deg,#1A1A22,#222230,#1A1A22)
+}
+.mirror-frame video,.mirror-frame .mirror-surface{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.mirror-surface{
+    background:radial-gradient(ellipse at 40% 35%,#2A2A35 0%,#18181F 50%,#101015 100%);
+    transition:background 0.1s
+}
+.mirror-glare{
+    position:absolute;top:10%;left:15%;width:30%;height:40%;
+    background:linear-gradient(135deg,rgba(255,255,255,0.06),transparent);pointer-events:none;border-radius:50%
+}
+.mirror-input-wrap{margin-top:1.5rem;width:100%;max-width:360px;opacity:0;transition:opacity 0.8s}
+.mirror-input-wrap.visible{opacity:1}
+.mirror-input{
+    width:100%;padding:0.9rem 1.2rem;background:rgba(255,255,255,0.05);
+    border:1px solid rgba(201,151,91,0.3);border-radius:3px;color:var(--text-cream);
+    font-family:'Lora',serif;font-size:1rem;text-align:center;outline:none;
+    transition:border-color 0.3s
+}
+.mirror-input:focus{border-color:var(--gold)}
+.mirror-input::placeholder{color:rgba(255,255,255,0.25);font-style:italic}
+.mirror-reflection{
+    max-width:440px;margin-top:1.5rem;text-align:center;font-size:0.95rem;
+    color:var(--text-cream);opacity:0.7;line-height:1.7;max-height:0;overflow:hidden;transition:max-height 1s ease,opacity 0.8s
+}
+.mirror-reflection.visible{max-height:600px;opacity:0.85}
+
+/* ========== ESCENA 4: JARDÍN ========== */
+#scene-jardin{background:radial-gradient(ellipse at 50% 60%,#2A1F14 0%,#1A1410 60%,#0F0E0A 100%)}
+.coin-container{perspective:600px;margin:1.5rem 0}
+.coin{
+    width:clamp(120px,20vw,160px);height:clamp(120px,20vw,160px);
+    position:relative;transform-style:preserve-3d;cursor:pointer;
+    transition:transform 0.9s cubic-bezier(0.4,0,0.2,1)
+}
+.coin.flipped{transform:rotateY(180deg)}
+.coin-face{
+    position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-family:'Playfair Display',serif;font-weight:900;font-size:1.1rem;letter-spacing:0.1em
+}
+.coin-vida{
+    background:radial-gradient(ellipse at 40% 35%,#D4A574,#B8864E,#8B6914);
+    color:#FFF8EE;box-shadow:0 4px 30px rgba(201,151,91,0.3),inset 0 -3px 8px rgba(0,0,0,0.2);
+    border:3px solid #A07840
+}
+.coin-muerte{
+    background:radial-gradient(ellipse at 40% 35%,#5A5A6A,#3A3A48,#22222E);
+    color:#C8C8D0;box-shadow:0 4px 30px rgba(0,0,0,0.4),inset 0 -3px 8px rgba(0,0,0,0.3);
+    border:3px solid #4A4A58;transform:rotateY(180deg)
+}
+.coin-hint{font-size:0.8rem;color:var(--sage);margin-top:0.5rem;transition:opacity 0.5s}
+.coin-text{
+    max-width:500px;text-align:center;margin-top:1.5rem;
+    font-size:0.95rem;line-height:1.7;opacity:0;max-height:0;overflow:hidden;
+    transition:max-height 1s ease,opacity 0.8s;color:var(--text-cream)
+}
+.coin-text.visible{max-height:500px;opacity:0.85}
+.letter2{
+    margin-top:1.5rem;max-width:320px;padding:1.5rem 2rem;background:var(--parchment);
+    color:var(--text-dark);border-radius:2px;box-shadow:0 4px 30px rgba(0,0,0,0.5);
+    font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;text-align:center;
+    opacity:0;transform:translateX(40px);transition:all 0.8s ease
+}
+.letter2.visible{opacity:1;transform:translateX(0)}
+
+/* ========== ESCENA 5: CALLEJÓN ========== */
+#scene-callejon{background:radial-gradient(ellipse at 50% 70%,#0A120A 0%,#060A06 70%)}
+.regress-container{position:relative;width:clamp(200px,40vw,300px);height:clamp(200px,40vw,300px);margin:1.5rem 0}
+.regress-circle{
+    position:absolute;border:1px solid rgba(201,151,91,0.3);border-radius:50%;
+    top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+    animation:regress-expand 6s ease-in-out infinite
+}
+.regress-circle:nth-child(1){width:10%;height:10%;animation-delay:0s;border-color:rgba(201,151,91,0.8)}
+.regress-circle:nth-child(2){width:30%;height:30%;animation-delay:1s}
+.regress-circle:nth-child(3){width:50%;height:50%;animation-delay:2s}
+.regress-circle:nth-child(4){width:70%;height:70%;animation-delay:3s}
+.regress-circle:nth-child(5){width:90%;height:90%;animation-delay:4s}
+.regress-circle:nth-child(6){width:110%;height:110%;animation-delay:5s;border-color:rgba(201,151,91,0.1)}
+@keyframes regress-expand{0%{transform:translate(-50%,-50%) scale(0);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+.regress-label{
+    position:absolute;font-size:0.7rem;color:var(--gold);opacity:0.6;
+    white-space:nowrap;font-style:italic
+}
+.callejon-text{
+    max-width:520px;text-align:center;font-size:0.95rem;line-height:1.75;
+    color:var(--text-cream);opacity:0.8
+}
+.callejon-text strong{color:var(--gold);font-weight:600}
+
+/* ========== ESCENA 6: ENIGMAS ========== */
+#scene-enigmas{background:radial-gradient(ellipse at 50% 50%,#12100E 0%,#0A0908 70%)}
+.enigmas-list{list-style:none;max-width:500px;width:100%}
+.enigma-item{
+    padding:1.2rem 1.5rem;border-left:2px solid var(--gold);margin-bottom:1.5rem;
+    opacity:0;transform:translateX(-20px);transition:all 0.8s ease;
+    background:rgba(201,151,91,0.03)
+}
+.enigma-item.visible{opacity:1;transform:translateX(0)}
+.enigma-num{font-family:'Playfair Display',serif;font-weight:900;font-size:0.8rem;color:var(--gold);letter-spacing:0.15em;margin-bottom:0.4rem}
+.enigma-text{font-size:1rem;line-height:1.6;color:var(--text-cream)}
+.enigma-text em{color:var(--rose);font-style:italic}
+.closing-text{
+    max-width:480px;text-align:center;margin-top:2rem;font-style:italic;
+    font-size:0.95rem;color:var(--sage);opacity:0;transition:opacity 1.5s ease;line-height:1.7
+}
+.closing-text.visible{opacity:1}
+
+/* ========== Responsive ========== */
+@media(max-width:600px){
+    .narrative{padding:1.4rem 1.3rem;font-size:0.95rem}
+    .philosophy-q{font-size:clamp(1.6rem,6vw,2.2rem)}
+    .mirror-frame{width:160px;height:210px;border-width:8px}
+    .coin{width:110px!important;height:110px!important}
+}
+@media(prefers-reduced-motion:reduce){
+    *{animation-duration:0.01ms!important;transition-duration:0.01ms!important}
+}
+
+/* ========== Back-link y toggle de idioma ========== */
+.sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
+    display:flex;align-items:center;justify-content:center;text-decoration:none;
+    color:var(--sim-home-fg);background:var(--sim-home-bg);
+    border:1px solid var(--sim-home-bd);border-radius:10px;
+    transition:transform .2s, color .2s}
+.sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+.sim-lang{position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    font-weight:600;font-size:13px;letter-spacing:.06em;font-family:'Lora',serif;
+    color:var(--sim-home-fg);background:var(--sim-home-bg);
+    border:1px solid var(--sim-home-bd);border-radius:10px;
+    transition:transform .2s,color .2s}
+.sim-lang:hover,.sim-lang:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab" data-i18n-title="back_title" data-i18n-aria="back_title">
+    <i class="fa-solid fa-house" aria-hidden="true"></i>
+</a>
+<button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
+
+<canvas id="particles" aria-hidden="true"></canvas>
+
+<div class="progress" id="progress" aria-label="Progreso del capítulo"></div>
+
+<div id="app">
+
+    <!-- ===== ESCENA 0: PORTADA ===== -->
+    <section class="scene active" id="scene-portada" aria-label="Portada">
+        <div class="portada-title fade-in">El Jardín<br>del Edén</div>
+        <div class="portada-ornament fade-in delay-1"></div>
+        <div class="portada-sub fade-in delay-2">El Mundo de Sofía — Capítulo I</div>
+        <div class="portada-author fade-in delay-3">Jostein Gaarder</div>
+        <button class="btn-begin fade-in delay-4" onclick="goTo(1)" aria-label="Comenzar la lectura">Comenzar</button>
+    </section>
+
+    <!-- ===== ESCENA 1: EL CAMINO ===== -->
+    <section class="scene" id="scene-camino" aria-label="El camino a casa">
+        <div class="spring-visual" aria-hidden="true">
+            <div class="spring-ground"></div>
+            <div class="spring-bush"></div>
+            <div class="spring-bush"></div>
+            <div class="spring-bush"></div>
+            <div class="spring-bush"></div>
+        </div>
+        <div class="narrative" id="camino-text" style="z-index:2">
+            <p>Sofía Amundsen volvía a casa después del instituto. Era uno de los primeros días de mayo. En algunos jardines se veían tupidas coronas de narcisos bajo los árboles frutales. Los abedules tenían ya una fina capa de encaje verde.</p>
+            <p>Jorunn opinaba que el cerebro humano era como un sofisticado ordenador. Sofía no estaba muy segura de estar de acuerdo. <em>Un ser humano tenía que ser algo más que una máquina.</em></p>
+            <span class="question-inline">¿Qué crees tú?</span>
+        </div>
+        <button class="btn-continue" id="btn-camino" onclick="goTo(2)">Continuar</button>
+    </section>
+
+    <!-- ===== ESCENA 2: EL BUZÓN ===== -->
+    <section class="scene" id="scene-buzon" aria-label="El buzón">
+        <p style="font-size:0.9rem;color:var(--sage);margin-bottom:0.5rem;z-index:2">Sofía miró el buzón al abrir la verja de su jardín.</p>
+        <div class="mailbox-wrapper" id="mailbox" onclick="openMailbox()" role="button" aria-label="Abrir el buzón" tabindex="0">
+            <div class="mailbox">
+                <div class="mailbox-lid"></div>
+                <div class="mailbox-body"></div>
+                <div class="mailbox-post"></div>
+                <div class="mailbox-flag"></div>
+            </div>
+            <div class="mailbox-hint" id="mailbox-hint">Toca para abrir</div>
+        </div>
+        <div class="letter-reveal" id="letter1">
+            ¿Quién eres?<span class="interrogation" style="color:var(--rose)">?</span>
+        </div>
+        <button class="btn-continue" id="btn-buzon" onclick="goTo(3)">Continuar</button>
+    </section>
+
+    <!-- ===== ESCENA 3: EL ESPEJO ===== -->
+    <section class="scene" id="scene-espejo" aria-label="El espejo">
+        <p style="font-size:0.85rem;color:rgba(255,255,255,0.4);margin-bottom:1rem;z-index:2">Se colocó delante del espejo y se miró fijamente a sí misma.</p>
+        <div class="mirror-frame" id="mirror-frame" aria-label="Espejo">
+            <div class="mirror-surface" id="mirror-surface"></div>
+            <video id="mirror-video" autoplay playsinline muted style="display:none"></video>
+            <div class="mirror-glare"></div>
+        </div>
+        <div class="mirror-input-wrap" id="mirror-input-wrap">
+            <input type="text" class="mirror-input" id="mirror-input" placeholder="¿Quién eres?" maxlength="80" aria-label="Escribe quién eres">
+        </div>
+        <div class="mirror-reflection" id="mirror-reflection">
+            <p style="margin-bottom:0.8em">Sofía intentaba imaginarse que extendía la mano presentándose con otro nombre, pero no servía. Todo el tiempo era otra chica la que se presentaba.</p>
+            <p style="margin-bottom:0.8em">¿Y si se hubiera llamado algo completamente distinto? ¿Habría sido otra?</p>
+            <p><em style="color:var(--rose)">Simplemente había surgido así como así. No se había elegido a sí misma. Ni siquiera había elegido ser un ser humano.</em></p>
+        </div>
+        <button class="btn-continue" id="btn-espejo" onclick="goTo(4)">Continuar</button>
+    </section>
+
+    <!-- ===== ESCENA 4: EL JARDÍN ===== -->
+    <section class="scene" id="scene-jardin" aria-label="El jardín">
+        <p style="font-size:0.85rem;color:rgba(255,255,255,0.4);margin-bottom:0.3rem;z-index:2">Conforme Sofía iba pensando en que existía...</p>
+        <div class="coin-container">
+            <div class="coin" id="coin" onclick="flipCoin()" role="button" aria-label="Voltear la moneda" tabindex="0">
+                <div class="coin-face coin-vida">VIDA</div>
+                <div class="coin-face coin-muerte">MUERTE</div>
+            </div>
+        </div>
+        <div class="coin-hint" id="coin-hint">Toca para voltear</div>
+        <div class="coin-text" id="coin-text">
+            <p>En cuanto se concentraba en que existía, inmediatamente surgía la idea del fin de la vida. Cuando conseguía tener una fuerte sensación de que un día desaparecería del todo, entendía realmente lo enormemente valiosa que es la vida.</p>
+            <p style="margin-top:0.8em"><em style="color:var(--gold)">La vida y la muerte eran como dos caras de una moneda.</em></p>
+        </div>
+        <div class="letter2" id="letter2">
+            ¿De dónde viene el mundo?
+        </div>
+        <button class="btn-continue" id="btn-jardin" onclick="goTo(5)">Continuar</button>
+    </section>
+
+    <!-- ===== ESCENA 5: EL CALLEJÓN ===== -->
+    <section class="scene" id="scene-callejon" aria-label="El Callejón">
+        <div class="regress-container" aria-hidden="true">
+            <div class="regress-circle"></div>
+            <div class="regress-circle"></div>
+            <div class="regress-circle"></div>
+            <div class="regress-circle"></div>
+            <div class="regress-circle"></div>
+            <div class="regress-circle"></div>
+            <span class="regress-label" style="top:12%;left:60%">¿Y eso de dónde viene?</span>
+            <span class="regress-label" style="top:32%;left:78%">¿Y eso?</span>
+            <span class="regress-label" style="top:58%;left:82%">¿Y eso?</span>
+        </div>
+        <div class="callejon-text" id="callejon-text" style="z-index:2">
+            <p style="margin-bottom:1em">Podría ser que el universo hubiera existido siempre. Pero había algo dentro de ella que protestaba. <strong>Todo lo que es, tiene que haber tenido un principio.</strong></p>
+            <p style="margin-bottom:1em">Si el universo hubiera nacido de otra cosa, esa otra cosa tendría a su vez que haber nacido de otra cosa. Sofía simplemente había aplazado el problema.</p>
+            <p style="margin-bottom:1em">Aunque Dios hubiera creado el universo, ¿qué? ¿Se creó él a sí mismo partiendo de la nada? <strong>Al fin y al cabo, algo tuvo que surgir en algún momento de donde no había nada de nada.</strong></p>
+            <p><em style="color:var(--rose)">¿Pero era eso posible?</em></p>
+        </div>
+        <button class="btn-continue" id="btn-callejon" onclick="goTo(6)">Continuar</button>
+    </section>
+
+    <!-- ===== ESCENA 6: LOS TRES ENIGMAS ===== -->
+    <section class="scene" id="scene-enigmas" aria-label="Los tres enigmas">
+        <div class="philosophy-q" style="margin-bottom:2rem;font-size:clamp(1.4rem,3.5vw,2rem);font-weight:400;color:var(--text-cream);opacity:0.6">Tres enigmas, sin resolver</div>
+        <ul class="enigmas-list" id="enigmas-list">
+            <li class="enigma-item">
+                <div class="enigma-num">ENIGMA I</div>
+                <div class="enigma-text">Quién había metido los dos sobres blancos en el buzón de Sofía.</div>
+            </li>
+            <li class="enigma-item">
+                <div class="enigma-num">ENIGMA II</div>
+                <div class="enigma-text">Aquellas difíciles preguntas que presentaban las cartas: <em>¿Quién eres? ¿De dónde viene el mundo?</em></div>
+            </li>
+            <li class="enigma-item">
+                <div class="enigma-num">ENIGMA III</div>
+                <div class="enigma-text">Quién era <em>Hilde Møller Knag</em> y por qué Sofía había recibido una felicitación de cumpleaños destinada a aquella chica desconocida.</div>
+            </li>
+        </ul>
+        <div class="closing-text" id="closing-text">
+            ¿Quién había arrancado a Sofía de lo cotidiano para de repente ponerla ante los grandes enigmas del universo?
+        </div>
+    </section>
+
+</div>
+
+<script>
+/* ==========================================================
+   i18n
+   ========================================================== */
+function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es'; }
+function setLang(l){ localStorage.setItem('simlab_lang', l); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+
+const I18N = {
+    es: {
+        page_title: 'El Mundo de Sofía — El Jardín del Edén',
+        meta_desc: 'Simulación narrativa e interactiva basada en el primer capítulo de El Mundo de Sofía: preguntas filosóficas sobre la identidad, la existencia y el origen del universo.',
+        confirm_switch: 'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+        back_title: 'Volver al inicio',
+        name_q: '¿Cómo te llamas?',
+        name_ph: 'Ingresa tu nombre',
+        name_note: 'No te preguntaremos otra vez en esta sesión.',
+        name_btn: 'Continuar',
+        name_default: 'Estudiante',
+    },
+    en: {
+        page_title: 'Sophie\'s World — The Garden of Eden',
+        meta_desc: 'Narrative, interactive simulation based on the opening chapter of Sophie\'s World: philosophical questions on identity, existence and the origin of the universe.',
+        confirm_switch: 'Switching language will restart the simulation. Continue?',
+        back_title: 'Back to home',
+        name_q: 'What is your name?',
+        name_ph: 'Enter your name',
+        name_note: 'We will not ask again during this session.',
+        name_btn: 'Continue',
+        name_default: 'Student',
+    }
+};
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
+
+function applyStaticI18n(){
+    if (LANG === 'es') return;
+    document.title = t('page_title');
+    const md = document.querySelector('meta[name="description"]');
+    if (md) md.content = t('meta_desc');
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+}
+applyStaticI18n();
+
+const simLangBtn = document.getElementById('simLangBtn');
+simLangBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
+simLangBtn.addEventListener('click', () => {
+    if (!confirm(t('confirm_switch'))) return;
+    setLang(LANG === 'es' ? 'en' : 'es');
+    location.reload();
+});
+
+/* ==========================================================
+   PERSONALIZACIÓN: NOMBRE DEL USUARIO
+   ========================================================== */
+function obtenerNombreUsuario(callback) {
+    const nombre = sessionStorage.getItem('nombreEstudianteSim');
+    if (nombre) { callback(nombre); return; }
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.72);
+        display:flex;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(5px)`;
+    const modal = document.createElement('div');
+    modal.style.cssText = `background:var(--bg-warm);border:1px solid var(--gold-glow);
+        border-radius:6px;padding:32px;max-width:400px;text-align:center;`;
+    modal.innerHTML = `
+        <p style="font-size:16px;color:var(--text-cream);margin-bottom:24px;font-weight:600;font-family:'Playfair Display',serif">${t('name_q')}</p>
+        <input type="text" id="input-nombre" style="width:100%;padding:10px 14px;border:1px solid rgba(201,151,91,0.3);
+            border-radius:3px;font-size:14px;font-family:'Lora',serif;background:rgba(255,255,255,0.05);color:var(--text-cream);margin-bottom:16px"
+            placeholder="${t('name_ph')}" autocomplete="off">
+        <p style="font-size:12px;color:var(--sage);margin-bottom:20px">${t('name_note')}</p>
+        <button id="btn-continuar" style="background:var(--gold);color:var(--bg-deep);border:none;
+            padding:10px 28px;border-radius:2px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Playfair Display',serif">${t('name_btn')}</button>
+    `;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    const inputNombre = modal.querySelector('#input-nombre');
+    const btnContinuar = modal.querySelector('#btn-continuar');
+    const submit = () => {
+        const nombre = inputNombre.value.trim() || t('name_default');
+        sessionStorage.setItem('nombreEstudianteSim', nombre);
+        overlay.remove();
+        callback(nombre);
+    };
+    btnContinuar.addEventListener('click', submit);
+    inputNombre.addEventListener('keypress', e => e.key === 'Enter' && submit());
+    inputNombre.focus();
+}
+
+/* ==========================================================
+   SISTEMA DE PARTÍCULAS — Pétalos que caen
+   ========================================================== */
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let petals = [];
+let particleMode = 'spring'; // 'spring' | 'firefly' | 'off'
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+/* Colores según modo */
+const springColors = ['#D4A574','#C48B7F','#E8C9A0','#F0D5B0','#B89070'];
+const fireflyColors = ['#C9975B','#E8C970','#A0D080'];
+
+class Petal {
+    constructor() { this.reset(true); }
+    reset(initial) {
+        this.x = Math.random() * canvas.width;
+        this.y = initial ? Math.random() * canvas.height : -15;
+        this.size = Math.random() * 6 + 3;
+        this.speedY = Math.random() * 0.8 + 0.3;
+        this.speedX = Math.random() * 0.6 - 0.3;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotSpeed = (Math.random() - 0.5) * 0.015;
+        this.opacity = Math.random() * 0.4 + 0.15;
+        this.wobbleAmp = Math.random() * 0.8 + 0.2;
+        this.wobbleSpeed = Math.random() * 0.015 + 0.005;
+        this.wobbleOffset = Math.random() * Math.PI * 2;
+        this.t = 0;
+        if (particleMode === 'spring') {
+            this.color = springColors[Math.floor(Math.random() * springColors.length)];
+        } else {
+            this.color = fireflyColors[Math.floor(Math.random() * fireflyColors.length)];
+            this.size = Math.random() * 3 + 1.5;
+            this.opacity = Math.random() * 0.6 + 0.2;
+            this.pulseSpeed = Math.random() * 0.03 + 0.01;
+        }
+    }
+    update() {
+        this.t++;
+        if (particleMode === 'spring') {
+            this.y += this.speedY;
+            this.x += this.speedX + Math.sin(this.t * this.wobbleSpeed + this.wobbleOffset) * this.wobbleAmp;
+            this.rotation += this.rotSpeed;
+            if (this.y > canvas.height + 20) this.reset(false);
+        } else {
+            /* Luciérnagas: movimiento suave y pulsante */
+            this.x += Math.sin(this.t * 0.008 + this.wobbleOffset) * 0.3;
+            this.y += Math.cos(this.t * 0.006 + this.wobbleOffset * 1.3) * 0.2;
+            this.opacity = 0.15 + Math.sin(this.t * this.pulseSpeed) * 0.35;
+            if (this.x < -20 || this.x > canvas.width + 20 || this.y < -20 || this.y > canvas.height + 20) this.reset(false);
+        }
+    }
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.globalAlpha = Math.max(0, this.opacity);
+        ctx.fillStyle = this.color;
+        if (particleMode === 'spring') {
+            ctx.beginPath();
+            ctx.ellipse(0, 0, this.size, this.size * 0.55, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            /* Luciérnaga: punto con halo */
+            const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size * 4);
+            grad.addColorStop(0, this.color);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, 0, this.size * 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = Math.min(1, this.opacity * 2);
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath();
+            ctx.arc(0, 0, this.size * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+}
+
+function initPetals(count) {
+    petals = [];
+    for (let i = 0; i < count; i++) petals.push(new Petal());
+}
+initPetals(35);
+
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    petals.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+function setParticleMode(mode, count) {
+    particleMode = mode;
+    initPetals(count || (mode === 'spring' ? 35 : 25));
+}
+
+/* ==========================================================
+   GESTIÓN DE ESCENAS
+   ========================================================== */
+const sceneIds = ['scene-portada','scene-camino','scene-buzon','scene-espejo','scene-jardin','scene-callejon','scene-enigmas'];
+let currentScene = 0;
+let transitioning = false;
+
+/* Construir indicador de progreso */
+const progressEl = document.getElementById('progress');
+sceneIds.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'progress-dot' + (i === 0 ? ' current' : '');
+    dot.dataset.index = i;
+    progressEl.appendChild(dot);
+});
+
+function updateProgress(index) {
+    progressEl.querySelectorAll('.progress-dot').forEach((d, i) => {
+        d.className = 'progress-dot';
+        if (i < index) d.classList.add('done');
+        if (i === index) d.classList.add('current');
+    });
+}
+
+function goTo(index) {
+    if (transitioning || index === currentScene || index < 0 || index >= sceneIds.length) return;
+    transitioning = true;
+
+    const oldEl = document.getElementById(sceneIds[currentScene]);
+    const newEl = document.getElementById(sceneIds[index]);
+
+    oldEl.classList.remove('active');
+    oldEl.classList.add('exiting');
+
+    setTimeout(() => {
+        oldEl.classList.remove('exiting');
+        newEl.classList.add('active');
+        currentScene = index;
+        updateProgress(index);
+        onSceneEnter(index);
+        setTimeout(() => { transitioning = false; }, 400);
+    }, 600);
+}
+
+/* ==========================================================
+   LÓGICA POR ESCENA — onSceneEnter
+   ========================================================== */
+function onSceneEnter(index) {
+    /* Mostrar botón continuar con delay */
+    const btnId = ['','','btn-buzon','btn-espejo','btn-jardin','btn-callejon',''][index];
+    if (btnId) {
+        const btn = document.getElementById(btnId);
+        btn.classList.remove('visible');
+        setTimeout(() => btn.classList.add('visible'), 2500);
+    }
+
+    switch(index) {
+        case 1: setupCamino(); break;
+        case 2: setupBuzon(); break;
+        case 3: setupEspejo(); break;
+        case 4: setupJardin(); break;
+        case 5: setupCallejon(); break;
+        case 6: setupEnigmas(); break;
+    }
+}
+
+/* --- Escena 1: Camino --- */
+function setupCamino() {
+    setParticleMode('spring', 40);
+    const btn = document.getElementById('btn-camino');
+    btn.classList.remove('visible');
+    setTimeout(() => btn.classList.add('visible'), 4000);
+    /* Añadir florecitas a los arbustos */
+    document.querySelectorAll('.spring-bush').forEach(bush => {
+        for (let i = 0; i < 5; i++) {
+            const b = document.createElement('div');
+            b.className = 'spring-blossom';
+            b.style.left = (15 + Math.random() * 70) + '%';
+            b.style.top = (10 + Math.random() * 50) + '%';
+            b.style.background = ['#F0D5B0','#E8C0A0','#D4A574','#C48B7F','#E8C9A0'][Math.floor(Math.random()*5)];
+            b.style.animationDelay = (Math.random() * 3) + 's';
+            b.style.animationDuration = (3 + Math.random() * 2) + 's';
+            bush.appendChild(b);
+        }
+    });
+}
+
+/* --- Escena 2: Buzón --- */
+let mailboxOpened = false;
+function setupBuzon() {
+    mailboxOpened = false;
+    document.getElementById('mailbox').classList.remove('opened');
+    document.getElementById('letter1').classList.remove('visible');
+    document.getElementById('mailbox-hint').style.opacity = '1';
+    document.getElementById('btn-buzon').classList.remove('visible');
+}
+function openMailbox() {
+    if (mailboxOpened) return;
+    mailboxOpened = true;
+    const mb = document.getElementById('mailbox');
+    mb.classList.add('opened');
+    document.getElementById('mailbox-hint').style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('letter1').classList.add('visible');
+        setTimeout(() => document.getElementById('btn-buzon').classList.add('visible'), 2000);
+    }, 700);
+}
+/* Accesibilidad: Enter en buzón */
+document.getElementById('mailbox').addEventListener('keydown', e => { if(e.key==='Enter') openMailbox(); });
+
+/* --- Escena 3: Espejo --- */
+let mirrorReady = false;
+function setupEspejo() {
+    setParticleMode('off', 0);
+    mirrorReady = false;
+    const inputWrap = document.getElementById('mirror-input-wrap');
+    const reflection = document.getElementById('mirror-reflection');
+    const input = document.getElementById('mirror-input');
+    inputWrap.classList.remove('visible');
+    reflection.classList.remove('visible');
+    reflection.style.maxHeight = '0';
+    input.value = '';
+    document.getElementById('btn-espejo').classList.remove('visible');
+
+    /* Intentar webcam */
+    const video = document.getElementById('mirror-video');
+    const surface = document.getElementById('mirror-surface');
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 420 } })
+        .then(stream => {
+            video.srcObject = stream;
+            video.style.display = 'block';
+            video.style.transform = 'scaleX(-1)';
+            surface.style.display = 'none';
+            mirrorReady = true;
+        })
+        .catch(() => {
+            setupMirrorFallback(surface);
+            mirrorReady = true;
+        });
+    } else {
+        setupMirrorFallback(surface);
+        mirrorReady = true;
+    }
+
+    /* Mostrar input tras un momento */
+    setTimeout(() => inputWrap.classList.add('visible'), 1500);
+}
+
+function setupMirrorFallback(surface) {
+    /* Efecto de espejo con el ratón */
+    const frame = document.getElementById('mirror-frame');
+    frame.addEventListener('mousemove', e => {
+        const rect = frame.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        surface.style.background = `radial-gradient(ellipse at ${x*100}% ${y*100}%, #2E2E3A, #1A1A22 50%, #101015)`;
+    });
+}
+
+/* Input del espejo */
+document.getElementById('mirror-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && this.value.trim()) {
+        const reflection = document.getElementById('mirror-reflection');
+        reflection.classList.add('visible');
+        this.disabled = true;
+        this.style.opacity = '0.5';
+        setTimeout(() => document.getElementById('btn-espejo').classList.add('visible'), 2500);
+    }
+});
+
+/* --- Escena 4: Jardín --- */
+let coinFlipped = false;
+let coinFlipCount = 0;
+function setupJardin() {
+    setParticleMode('spring', 15);
+    coinFlipped = false;
+    coinFlipCount = 0;
+    const coin = document.getElementById('coin');
+    coin.classList.remove('flipped');
+    document.getElementById('coin-hint').style.opacity = '1';
+    document.getElementById('coin-text').classList.remove('visible');
+    document.getElementById('coin-text').style.maxHeight = '0';
+    document.getElementById('letter2').classList.remove('visible');
+    document.getElementById('btn-jardin').classList.remove('visible');
+}
+function flipCoin() {
+    const coin = document.getElementById('coin');
+    coinFlipped = !coinFlipped;
+    coin.classList.toggle('flipped', coinFlipped);
+    coinFlipCount++;
+
+    if (coinFlipCount === 1) {
+        document.getElementById('coin-hint').style.opacity = '0';
+        setTimeout(() => {
+            const ct = document.getElementById('coin-text');
+            ct.style.maxHeight = '500px';
+            ct.classList.add('visible');
+        }, 600);
+    }
+    if (coinFlipCount === 2) {
+        setTimeout(() => {
+            document.getElementById('letter2').classList.add('visible');
+            setTimeout(() => document.getElementById('btn-jardin').classList.add('visible'), 2200);
+        }, 700);
+    }
+}
+document.getElementById('coin').addEventListener('keydown', e => { if(e.key==='Enter') flipCoin(); });
+
+/* --- Escena 5: Callejón --- */
+function setupCallejon() {
+    setParticleMode('firefly', 25);
+    const btn = document.getElementById('btn-callejon');
+    btn.classList.remove('visible');
+    setTimeout(() => btn.classList.add('visible'), 6000);
+}
+
+/* --- Escena 6: Enigmas --- */
+function setupEnigmas() {
+    setParticleMode('firefly', 15);
+    localStorage.setItem('simlab_done_simlab_mundosofia1', Date.now());
+    const items = document.querySelectorAll('.enigma-item');
+    items.forEach((item, i) => {
+        item.classList.remove('visible');
+        setTimeout(() => item.classList.add('visible'), 800 + i * 1200);
+    });
+    setTimeout(() => {
+        obtenerNombreUsuario(nombre => {
+            const closing = document.getElementById('closing-text');
+            closing.textContent = (LANG === 'es'
+                ? `${nombre}, ¿quién había arrancado a Sofía de lo cotidiano para de repente ponerla ante los grandes enigmas del universo? Y tú, ¿qué responderías?`
+                : `${nombre}, who had pulled Sophie out of everyday life to suddenly confront her with the great enigmas of the universe? And you — how would you answer?`);
+            closing.classList.add('visible');
+        });
+    }, 800 + items.length * 1200 + 1000);
+}
+
+/* ==========================================================
+   INICIALIZACIÓN
+   ========================================================== */
+onSceneEnter(0);
+</script>
+</body>
+</html>
