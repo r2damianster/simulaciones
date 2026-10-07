@@ -264,6 +264,21 @@ Reglas del patrón:
 
 ---
 
+## Guía de clase (preguntas para debatir)
+
+Todas las simulaciones (excepto `index.html`) incluyen una **guía sutil de preguntas** para conversar en clase. Componente autosuficiente, idéntico en cada archivo:
+
+- **Botón `.sim-guide`** (icono `fa-regular fa-comments`), fijo `top:14px; right:62px`, a la izquierda del toggle `.sim-lang`. Usa las variables `--sim-home-*` de la paleta.
+- **Panel lateral `#guidePanel`** con 3 pestañas: **Antes** (3 preguntas), **Durante** (4), **Después** (4). Se cierra con la X o con Esc. Solo preguntas, sin respuestas ni pistas para el docente.
+- **Aviso al terminar:** un `<script>` final envuelve `Storage.prototype.setItem`; cuando la sim escribe una clave `simlab_done_*`, aparece un aviso discreto («Ver preguntas») que abre la pestaña «Después» y el botón pulsa unos segundos. No se toca la lógica de cada sim.
+- **Datos:** `GUIDE_ALL = { es: {before, during, after}, en: {...} }` dentro del script del bloque. Misma cardinalidad (3/4/4) en ES y EN; EN es adaptación pedagógica, no traducción literal.
+- **Idioma:** el bloque lee `localStorage['simlab_lang']` y trae su propio diccionario de UI (no depende de `I18N` de la sim). Los términos de UI están registrados en `i18n/terminos_es_en.json` (`ui_comun.guide_*`).
+- **Documentación:** el banco completo de preguntas de cada sim está en la sección «Guía de clase» de su `.md` en `.claude/Simulaciones/`.
+
+Para una sim nueva: copiar el bloque (CSS `/* === Guía de clase`, botón + `<aside id="guidePanel">` + `<div id="guideToast">` tras `#simLangBtn`, y el `<script>` con `initClassGuide` antes de `</body>`) desde `peel.html`, y sustituir `GUIDE_ALL` por 11 preguntas ES + 11 EN.
+
+---
+
 ## Reglas para Claude
 
 - **Nunca romper la autosuficiencia** de cada archivo HTML: no separar en múltiples archivos.
@@ -273,6 +288,7 @@ Reglas del patrón:
 - Codificación: **UTF-8** siempre. Verificar que las tildes y ñ queden correctas.
 - **Bilingüe ES/EN obligatorio:** toda simulación (nueva o editada) debe funcionar 100% en ambos idiomas con el patrón i18n canónico (diccionario embebido, nunca `translations.js` compartido; idioma en `localStorage['simlab_lang']`; toggle `.sim-lang` top-right; `<html lang>` dinámico; contenido pedagógico como adaptación, no traducción literal). *(Adopción progresiva 2026-07: fases 0-2 completas (index, apa7, apa7_2, peel); fase 3-8 en curso (muestreo, conectores, financiamiento, disenos, evaluaciones, observación, constructos).)*
 - No commitear sin instrucción explícita.
+- **Guía de clase obligatoria:** toda simulación nueva debe incluir la guía de preguntas (ver sección «Guía de clase»): 3 Antes + 4 Durante + 4 Después, en ES y EN, y registrar su banco en el `.md` de `.claude/Simulaciones/`.
 - **Toda nueva simulación** debe: (1) enlazarse en `index.html` (tarjeta en `#simulaciones`, sim-grid con clase CSS propia), (2) listarse en la tabla "Simulaciones activas" de este archivo, (3) incluir botón/enlace `href="index.html"` para volver al inicio, (4) implementar captura de nombre del estudiante. Un hook (`PostToolUse:Write` → `.claude/hooks/check-sim-link.js`) recuerda esto automáticamente al crear el archivo.
 - **Captura de nombre obligatoria en pantalla final:** toda simulación debe incluir la función `obtenerNombreUsuario(callback)` que: usa `sessionStorage.getItem/setItem('nombreEstudianteSim')` para no preguntar dos veces en la misma sesión; si no hay nombre guardado, muestra un overlay modal con input + botón "Continuar"; llama `callback(nombre)` al confirmar. La pantalla final (`endGame()`, `showFinalScreen()` o equivalente) debe llamar `obtenerNombreUsuario(nombre => { ... })` y personalizar el mensaje con el nombre. Colores del overlay deben respetar la paleta de la simulación (usar variables CSS de la simulación para borde y acento).
 

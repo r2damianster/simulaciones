@@ -115,3 +115,44 @@ Bilingüe ES/EN obligatorio. La rama EN es **adaptación pedagógica**, no tradu
 3. Scopus mock con búsquedas reales (actualmente devuelve mock; puede conectarse a API real si es necesario)
 4. Badge ✓ Completada en index.html aparece después de simular
 5. Back-link funcional
+
+## Guía de clase — preguntas para conversar
+
+Panel flotante dentro de la simulación (botón de comentarios, arriba a la derecha). Al terminar la simulación aparece un aviso discreto que abre la pestaña «Después».
+
+### Español
+**Antes**
+1. ¿Qué es una «alucinación» de un modelo de lenguaje y por qué ocurre?
+2. ¿Por qué una cita falsa puede parecer completamente creíble?
+3. ¿Qué hacen hoy para verificar una referencia que les sugiere una herramienta de IA?
+
+**Durante**
+1. ¿Qué señal te hizo sospechar de una respuesta de la IA antes de verificarla en Scopus?
+2. ¿Qué tipo de alucinación identificaste: adjetivación espuria, fusión entre campos o cita fabricada?
+3. ¿Qué te dio más información al verificar: el título, los autores o el DOI?
+4. ¿Qué habría pasado si hubieras aceptado la respuesta sin verificarla?
+
+**Después**
+1. ¿Qué responsabilidad tiene el investigador por lo que una IA le sugiere y él publica?
+2. ¿Qué protocolo de verificación mínimo usarían antes de citar algo propuesto por una IA?
+3. ¿Es posible usar IA de forma útil en la revisión de literatura sin comprometer el rigor? ¿Cómo?
+4. Pidan a una IA tres referencias sobre un tema de su carrera y verifíquenlas. ¿Cuántas existen realmente?
+
+### English
+**Before**
+1. What is a language-model «hallucination» and why does it happen?
+2. Why can a fake citation look entirely credible?
+3. What do you currently do to verify a reference suggested by an AI tool?
+
+**During**
+1. What sign made you suspect the AI's answer before checking it in Scopus?
+2. Which kind of hallucination did you identify: spurious adjectives, cross-field fusion or fabricated citation?
+3. What gave you the most information when verifying: the title, the authors or the DOI?
+4. What would have happened if you had accepted the answer without verifying it?
+
+**After**
+1. What responsibility does the researcher bear for what an AI suggests and they publish?
+2. What minimum verification protocol would you apply before citing something proposed by an AI?
+3. Is it possible to use AI usefully in a literature review without compromising rigor? How?
+4. Ask an AI for three references on a topic from your degree and verify them. How many really exist?
+

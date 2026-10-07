@@ -92,3 +92,44 @@ Normas internacionales de publicación ética que rigen:
 - **PubMed/MEDLINE:** Biomedicina y salud
 - **DOAJ (Directory of Open Access Journals):** Revistas OA verificadas
 - **Google Scholar:** Acceso amplio, baja verificación de calidad
+
+## Guía de clase — preguntas para conversar
+
+Panel flotante dentro de la simulación (botón de comentarios, arriba a la derecha). Al terminar la simulación aparece un aviso discreto que abre la pestaña «Después».
+
+### Español
+**Antes**
+1. ¿Qué pasos creen que existen entre terminar un manuscrito y verlo publicado?
+2. ¿Para qué sirve la revisión por pares y qué problemas puede tener?
+3. ¿Por qué una revista pide declaraciones éticas, conflicto de intereses y contribución de autores?
+
+**Durante**
+1. ¿Qué metadatos completaste y cuáles te parecieron irrelevantes? ¿Por qué importan para que otros te encuentren?
+2. ¿Qué declaración ética tuviste que pensar con más cuidado y por qué?
+3. ¿Qué cambia en la evaluación cuando es «a ciegas» y qué debe hacer el autor para mantener el anonimato?
+4. ¿Qué decisión de la revista (aceptar, revisar, rechazar) te parece más difícil de aceptar para un autor?
+
+**Después**
+1. ¿Cómo debería un autor responder a un dictamen con el que no está de acuerdo?
+2. ¿Qué limitaciones tiene la evaluación a ciegas y qué alternativas existen (abierta, posterior a la publicación)?
+3. ¿Qué relación hay entre un proceso editorial transparente y la confianza en la ciencia?
+4. Simulen en grupo una respuesta a revisores: ¿cómo agradecen, aceptan y debaten sin perder rigor ni tono?
+
+### English
+**Before**
+1. Which steps do you think lie between finishing a manuscript and seeing it published?
+2. What is peer review for, and what problems can it have?
+3. Why does a journal ask for ethics statements, conflict of interest and author contributions?
+
+**During**
+1. Which metadata did you fill in and which seemed irrelevant? Why do they matter for others to find you?
+2. Which ethics statement did you have to think about most carefully and why?
+3. What changes in the review when it is «blind», and what must the author do to keep anonymity?
+4. Which journal decision (accept, revise, reject) seems hardest for an author to accept?
+
+**After**
+1. How should an author respond to a report they disagree with?
+2. What are the limits of blind review and what alternatives exist (open, post-publication)?
+3. What is the relation between a transparent editorial process and trust in science?
+4. As a group, simulate a response to reviewers: how do you thank, accept and disagree without losing rigor or tone?
+

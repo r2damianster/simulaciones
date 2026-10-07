@@ -562,7 +562,7 @@
                 transition-duration: 0.01ms !important;
             }
         }
-
+    
         /* === Guía de clase (preguntas para debatir) === */
         .sim-guide{position:fixed;top:14px;right:62px;z-index:200;width:40px;height:40px;
             display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;
@@ -570,30 +570,39 @@
             border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
             transition:transform .2s,color .2s}
         .sim-guide:hover,.sim-guide:focus-visible,.sim-guide[aria-expanded="true"]{color:var(--sim-home-hi,#fff);transform:scale(1.06)}
+        .sim-guide.is-pulsing{animation:guidePulse 1.6s ease-in-out 4}
+        @keyframes guidePulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 7px var(--sim-home-bd,rgba(255,255,255,.2))}}
         .guide-panel{position:fixed;top:0;right:0;bottom:0;z-index:300;width:min(380px,100vw);
-            display:flex;flex-direction:column;background:var(--bg-card,#111);color:var(--fg,#ddd);
-            border-left:1px solid var(--border-bright,rgba(255,255,255,.15));box-shadow:-12px 0 32px rgba(0,0,0,.45);
+            display:flex;flex-direction:column;color:#e8e6e1;
+            background:color-mix(in srgb,var(--sim-home-fg,#888) 9%,#0d0d0d);
+            border-left:1px solid var(--sim-home-bd,rgba(255,255,255,.15));box-shadow:-12px 0 32px rgba(0,0,0,.5);
             transform:translateX(100%);visibility:hidden;transition:transform .3s ease,visibility 0s linear .3s}
         .guide-panel.is-open{transform:translateX(0);visibility:visible;transition:transform .3s ease}
         .guide-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 18px 12px}
         .guide-title{font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--sim-home-fg,#fff);margin:0}
         .guide-close{width:32px;height:32px;cursor:pointer;color:inherit;background:transparent;
-            border:1px solid var(--border,rgba(255,255,255,.15));border-radius:8px;font-size:14px}
+            border:1px solid rgba(255,255,255,.18);border-radius:8px;font-size:14px}
         .guide-close:hover,.guide-close:focus-visible{color:var(--sim-home-hi,#fff)}
-        .guide-tabs{display:flex;gap:6px;padding:0 18px 12px;border-bottom:1px solid var(--border,rgba(255,255,255,.1))}
+        .guide-tabs{display:flex;gap:6px;padding:0 18px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
         .guide-tab{flex:1;padding:8px 6px;cursor:pointer;font:inherit;font-size:12px;color:inherit;
-            background:transparent;border:1px solid var(--border,rgba(255,255,255,.15));border-radius:8px;opacity:.7}
+            background:transparent;border:1px solid rgba(255,255,255,.18);border-radius:8px;opacity:.7}
         .guide-tab[aria-selected="true"]{opacity:1;color:var(--sim-home-hi,#fff);background:var(--sim-home-bg,rgba(255,255,255,.08));border-color:var(--sim-home-bd,rgba(255,255,255,.3))}
-        .guide-questions{flex:1;overflow-y:auto;margin:0;padding:16px 18px 24px 38px;line-height:1.55;font-size:14px}
+        .guide-questions{flex:1;overflow-y:auto;margin:0;padding:16px 18px 24px 38px;line-height:1.55;font-size:14px;text-align:left}
         .guide-questions li{margin-bottom:14px;padding-left:4px}
         .guide-questions li::marker{color:var(--sim-home-fg,#fff);font-weight:600}
-        .guide-final{max-width:560px;margin:28px auto 0;text-align:left;padding:18px 20px;
-            border:1px dashed var(--sim-home-bd,rgba(255,255,255,.25));border-radius:12px;background:var(--sim-home-bg,rgba(255,255,255,.04))}
-        .guide-final-title{margin:0 0 10px;font-size:14px;font-weight:600;letter-spacing:.04em;color:var(--sim-home-fg,#fff)}
-        .guide-final ul{margin:0;padding-left:20px;line-height:1.6;font-size:14px}
-        .guide-final li{margin-bottom:8px}
+        .guide-toast{position:fixed;left:50%;bottom:20px;z-index:250;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+            display:flex;align-items:center;gap:12px;max-width:min(520px,calc(100vw - 32px));padding:10px 14px;
+            font-size:13px;line-height:1.4;color:#e8e6e1;border-radius:12px;
+            background:color-mix(in srgb,var(--sim-home-fg,#888) 12%,#0d0d0d);
+            border:1px solid var(--sim-home-bd,rgba(255,255,255,.2));box-shadow:0 8px 24px rgba(0,0,0,.45);
+            transition:opacity .4s ease,transform .4s ease}
+        .guide-toast.is-visible{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+        .guide-toast-open{flex-shrink:0;padding:6px 12px;cursor:pointer;font:inherit;font-size:12px;font-weight:600;
+            color:var(--sim-home-hi,#fff);background:var(--sim-home-bg,rgba(255,255,255,.08));
+            border:1px solid var(--sim-home-bd,rgba(255,255,255,.3));border-radius:8px}
+        .guide-toast-dismiss{flex-shrink:0;width:24px;height:24px;cursor:pointer;color:inherit;opacity:.6;background:transparent;border:none;font-size:13px}
         @media (max-width:480px){.sim-guide{right:60px}}
-        @media (prefers-reduced-motion:reduce){.guide-panel{transition:none}}
+        @media (prefers-reduced-motion:reduce){.guide-panel,.guide-toast{transition:none}.sim-guide.is-pulsing{animation:none}}
     </style>
 </head>
 <body>
@@ -609,6 +618,7 @@
   <div class="guide-tabs" role="tablist" id="guideTabs"></div>
   <ol class="guide-questions" id="guideQuestions"></ol>
 </aside>
+<div class="guide-toast" id="guideToast" role="status"></div>
 
 <div class="grid-bg"></div>
 <div class="scanlines"></div>
@@ -1060,7 +1070,6 @@
             <i class="fa-solid fa-flask-vial" style="font-size:2.5rem;color:var(--fg-bright);margin-bottom:16px;"></i>
             <h2 id="final-titulo" style="font-family:'Orbitron',sans-serif;color:var(--fg-bright);font-size:1.4rem;margin-bottom:12px;letter-spacing:1px;">PROTOCOLO COMPLETADO</h2>
             <p style="color:var(--fg);max-width:560px;margin:0 auto;line-height:1.7;">Has ejecutado los tres diseños y comparado su capacidad de inferencia causal. Solo el experimento puro, con asignación aleatoria y grupo control equivalente, permite atribuir causalidad.</p>
-            <div class="guide-final" id="guideFinal"></div>
             <a href="index.html" class="home-btn" style="display:inline-flex;margin-top:24px;"><i class="fa-solid fa-house mr-2"></i>Volver al inicio</a>
         </div>
     </section>
@@ -1085,14 +1094,8 @@ function setLang(l){ localStorage.setItem('simlab_lang', l); }
 const LANG = getLang();
 document.documentElement.lang = LANG;
 const I18N = {
-  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
-        guide_btn:'Guía de clase', guide_title:'Para conversar en clase', guide_close:'Cerrar',
-        guide_before:'Antes', guide_during:'Durante', guide_after:'Después',
-        guide_final_title:'Para conversar en clase' },
-  en: { confirm_switch:'Switching language will restart the simulation. Continue?',
-        guide_btn:'Class guide', guide_title:'Class discussion questions', guide_close:'Close',
-        guide_before:'Before', guide_during:'During', guide_after:'After',
-        guide_final_title:'Questions for class discussion' }
+  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?' },
+  en: { confirm_switch:'Switching language will restart the simulation. Continue?' }
 };
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
 const langBtn = document.getElementById('simLangBtn');
@@ -1104,118 +1107,6 @@ if(langBtn){
     location.reload();
   });
 }
-
-/* === Guía de clase: preguntas para debatir (antes / durante / después) === */
-const GUIDE_ALL = {
-  es: {
-    before: [
-      '¿Qué diferencia a un experimento de una simple observación? ¿Qué debe hacer el investigador que en la observación no hace?',
-      '¿Por qué no siempre podemos asignar personas al azar a un tratamiento? Den ejemplos de su área donde sea imposible o poco ético.',
-      '¿Qué significa que un estudio tenga «validez interna»? ¿Qué cosas podrían hacernos creer que un tratamiento funcionó cuando no fue así?'
-    ],
-    during: [
-      '¿Qué otra explicación, además del tratamiento, podría haber producido el cambio que observas en BRAIN y PINKY?',
-      'En el preexperimento, ¿qué te falta para saber qué habría pasado sin el tratamiento?',
-      'En el cuasiexperimento, ¿qué ganó el diseño al añadir un grupo de comparación? ¿Qué sigue sin estar garantizado?',
-      'Si los grupos ya eran distintos antes del tratamiento, ¿cómo cambia la interpretación de la diferencia final?'
-    ],
-    after: [
-      '¿Qué hace la asignación aleatoria que ningún otro control puede hacer por sí solo?',
-      '¿Es el cuasiexperimento un «experimento de segunda clase»? Argumenten a favor y en contra.',
-      'Una autoridad aplica un programa en escuelas voluntarias y lo compara con las no voluntarias. ¿Qué diseño es, qué amenazas tiene y cómo las corregirían?',
-      'Describan una investigación de su carrera donde solo sería viable un cuasiexperimento. ¿Qué precauciones tomarían para sostener sus conclusiones?'
-    ]
-  },
-  en: {
-    before: [
-      'What sets an experiment apart from plain observation? What must the researcher do that observation does not require?',
-      'Why can we not always assign people to a treatment at random? Give examples from your field where it is impossible or unethical.',
-      'What does it mean for a study to have «internal validity»? What could make us believe a treatment worked when it did not?'
-    ],
-    during: [
-      'Besides the treatment, what other explanation could have produced the change you see in BRAIN and PINKY?',
-      'In the pre-experiment, what is missing to know what would have happened without the treatment?',
-      'In the quasi-experiment, what did the design gain by adding a comparison group? What is still not guaranteed?',
-      'If the groups already differed before the treatment, how does that change the way you read the final difference?'
-    ],
-    after: [
-      'What does random assignment do that no other control can do on its own?',
-      'Is the quasi-experiment a «second-class experiment»? Argue for and against.',
-      'An authority runs a program in volunteer schools and compares it with non-volunteer ones. Which design is this, what threats does it carry and how would you correct them?',
-      'Describe a study from your degree where only a quasi-experiment would be feasible. What precautions would you take to support your conclusions?'
-    ]
-  }
-};
-const GUIDE = GUIDE_ALL[LANG];
-const GUIDE_PHASES = ['before', 'during', 'after'];
-
-function initClassGuide(){
-  const guideButton = document.getElementById('simGuideBtn');
-  const guidePanel = document.getElementById('guidePanel');
-  const tabsContainer = document.getElementById('guideTabs');
-  const questionsList = document.getElementById('guideQuestions');
-  const closeButton = document.getElementById('guideClose');
-  if (!guideButton || !guidePanel) return;
-
-  guideButton.setAttribute('aria-label', t('guide_btn'));
-  guideButton.title = t('guide_btn');
-  closeButton.setAttribute('aria-label', t('guide_close'));
-  document.getElementById('guideTitle').textContent = t('guide_title');
-
-  function showPhase(phaseKey){
-    tabsContainer.querySelectorAll('.guide-tab').forEach(tabButton => {
-      tabButton.setAttribute('aria-selected', String(tabButton.dataset.phase === phaseKey));
-    });
-    questionsList.replaceChildren();
-    GUIDE[phaseKey].forEach(questionText => {
-      const questionItem = document.createElement('li');
-      questionItem.textContent = questionText;
-      questionsList.appendChild(questionItem);
-    });
-    questionsList.scrollTop = 0;
-  }
-
-  GUIDE_PHASES.forEach(phaseKey => {
-    const tabButton = document.createElement('button');
-    tabButton.type = 'button';
-    tabButton.className = 'guide-tab';
-    tabButton.setAttribute('role', 'tab');
-    tabButton.dataset.phase = phaseKey;
-    tabButton.textContent = t('guide_' + phaseKey);
-    tabButton.addEventListener('click', () => showPhase(phaseKey));
-    tabsContainer.appendChild(tabButton);
-  });
-
-  function setPanelOpen(isOpen){
-    guidePanel.classList.toggle('is-open', isOpen);
-    guideButton.setAttribute('aria-expanded', String(isOpen));
-    if (isOpen) closeButton.focus(); else guideButton.focus();
-  }
-  guideButton.addEventListener('click', () => setPanelOpen(!guidePanel.classList.contains('is-open')));
-  closeButton.addEventListener('click', () => setPanelOpen(false));
-  document.addEventListener('keydown', keyEvent => {
-    if (keyEvent.key === 'Escape' && guidePanel.classList.contains('is-open')) setPanelOpen(false);
-  });
-
-  showPhase('before');
-
-  /* Bloque final: las preguntas de «Después» aparecen solas al terminar */
-  const finalBlock = document.getElementById('guideFinal');
-  if (finalBlock){
-    const finalTitle = document.createElement('p');
-    finalTitle.className = 'guide-final-title';
-    finalTitle.textContent = t('guide_final_title');
-    const finalList = document.createElement('ul');
-    GUIDE.after.slice(0, 3).forEach(questionText => {
-      const finalItem = document.createElement('li');
-      finalItem.textContent = questionText;
-      finalList.appendChild(finalItem);
-    });
-    finalBlock.append(finalTitle, finalList);
-  }
-}
-initClassGuide();
-
 // =============================================
 // PARTICULAS DE FONDO
 // =============================================
@@ -1979,5 +1870,154 @@ animate();
 window.lab3D = { reaccionar };
 </script>
 
+
+<script>
+/* === Guía de clase: preguntas para debatir (antes / durante / después) ===
+   Bloque autosuficiente: lee el idioma de localStorage['simlab_lang'] y se activa
+   al detectar que la simulación escribe su clave 'simlab_done_*'. */
+(function initClassGuide(){
+  const guideLang = localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es';
+  const GUIDE_UI = {
+    es: { btn:'Guía de clase', title:'Para conversar en clase', close:'Cerrar',
+          before:'Antes', during:'Durante', after:'Después',
+          toast:'Hay preguntas para conversar en clase sobre lo que acabas de hacer.', toastOpen:'Ver preguntas' },
+    en: { btn:'Class guide', title:'Class discussion questions', close:'Close',
+          before:'Before', during:'During', after:'After',
+          toast:'There are class discussion questions about what you just did.', toastOpen:'See questions' }
+  };
+  const GUIDE_ALL = {
+  "es": {
+    "before": [
+      "¿Qué diferencia a un experimento de una simple observación? ¿Qué debe hacer el investigador que en la observación no hace?",
+      "¿Por qué no siempre podemos asignar personas al azar a un tratamiento? Den ejemplos de su área donde sea imposible o poco ético.",
+      "¿Qué significa que un estudio tenga «validez interna»? ¿Qué cosas podrían hacernos creer que un tratamiento funcionó cuando no fue así?"
+    ],
+    "during": [
+      "¿Qué otra explicación, además del tratamiento, podría haber producido el cambio que observas en BRAIN y PINKY?",
+      "En el preexperimento, ¿qué te falta para saber qué habría pasado sin el tratamiento?",
+      "En el cuasiexperimento, ¿qué ganó el diseño al añadir un grupo de comparación? ¿Qué sigue sin estar garantizado?",
+      "Si los grupos ya eran distintos antes del tratamiento, ¿cómo cambia la interpretación de la diferencia final?"
+    ],
+    "after": [
+      "¿Qué hace la asignación aleatoria que ningún otro control puede hacer por sí solo?",
+      "¿Es el cuasiexperimento un «experimento de segunda clase»? Argumenten a favor y en contra.",
+      "Una autoridad aplica un programa en escuelas voluntarias y lo compara con las no voluntarias. ¿Qué diseño es, qué amenazas tiene y cómo las corregirían?",
+      "Describan una investigación de su carrera donde solo sería viable un cuasiexperimento. ¿Qué precauciones tomarían para sostener sus conclusiones?"
+    ]
+  },
+  "en": {
+    "before": [
+      "What sets an experiment apart from plain observation? What must the researcher do that observation does not require?",
+      "Why can we not always assign people to a treatment at random? Give examples from your field where it is impossible or unethical.",
+      "What does it mean for a study to have «internal validity»? What could make us believe a treatment worked when it did not?"
+    ],
+    "during": [
+      "Besides the treatment, what other explanation could have produced the change you see in BRAIN and PINKY?",
+      "In the pre-experiment, what is missing to know what would have happened without the treatment?",
+      "In the quasi-experiment, what did the design gain by adding a comparison group? What is still not guaranteed?",
+      "If the groups already differed before the treatment, how does that change the way you read the final difference?"
+    ],
+    "after": [
+      "What does random assignment do that no other control can do on its own?",
+      "Is the quasi-experiment a «second-class experiment»? Argue for and against.",
+      "An authority runs a program in volunteer schools and compares it with non-volunteer ones. Which design is this, what threats does it carry and how would you correct them?",
+      "Describe a study from your degree where only a quasi-experiment would be feasible. What precautions would you take to support your conclusions?"
+    ]
+  }
+};
+  const guideUi = GUIDE_UI[guideLang];
+  const guideQuestions = GUIDE_ALL[guideLang];
+  const guidePhases = ['before', 'during', 'after'];
+
+  const guideButton = document.getElementById('simGuideBtn');
+  const guidePanel = document.getElementById('guidePanel');
+  const tabsContainer = document.getElementById('guideTabs');
+  const questionsList = document.getElementById('guideQuestions');
+  const closeButton = document.getElementById('guideClose');
+  const guideToast = document.getElementById('guideToast');
+  if (!guideButton || !guidePanel) return;
+
+  guideButton.setAttribute('aria-label', guideUi.btn);
+  guideButton.title = guideUi.btn;
+  closeButton.setAttribute('aria-label', guideUi.close);
+  document.getElementById('guideTitle').textContent = guideUi.title;
+
+  function showPhase(phaseKey){
+    tabsContainer.querySelectorAll('.guide-tab').forEach(tabButton => {
+      tabButton.setAttribute('aria-selected', String(tabButton.dataset.phase === phaseKey));
+    });
+    questionsList.replaceChildren();
+    guideQuestions[phaseKey].forEach(questionText => {
+      const questionItem = document.createElement('li');
+      questionItem.textContent = questionText;
+      questionsList.appendChild(questionItem);
+    });
+    questionsList.scrollTop = 0;
+  }
+
+  guidePhases.forEach(phaseKey => {
+    const tabButton = document.createElement('button');
+    tabButton.type = 'button';
+    tabButton.className = 'guide-tab';
+    tabButton.setAttribute('role', 'tab');
+    tabButton.dataset.phase = phaseKey;
+    tabButton.textContent = guideUi[phaseKey];
+    tabButton.addEventListener('click', () => showPhase(phaseKey));
+    tabsContainer.appendChild(tabButton);
+  });
+
+  function setPanelOpen(isOpen){
+    guidePanel.classList.toggle('is-open', isOpen);
+    guideButton.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen) { hideToast(); closeButton.focus(); } else { guideButton.focus(); }
+  }
+  guideButton.addEventListener('click', () => setPanelOpen(!guidePanel.classList.contains('is-open')));
+  closeButton.addEventListener('click', () => setPanelOpen(false));
+  document.addEventListener('keydown', keyEvent => {
+    if (keyEvent.key === 'Escape' && guidePanel.classList.contains('is-open')) setPanelOpen(false);
+  });
+
+  let toastTimer = null;
+  function hideToast(){
+    clearTimeout(toastTimer);
+    guideToast.classList.remove('is-visible');
+    guideButton.classList.remove('is-pulsing');
+  }
+  function announceCompletion(){
+    if (guidePanel.classList.contains('is-open')) return;
+    guideToast.replaceChildren();
+    const toastText = document.createElement('span');
+    toastText.textContent = guideUi.toast;
+    const openButton = document.createElement('button');
+    openButton.type = 'button';
+    openButton.className = 'guide-toast-open';
+    openButton.textContent = guideUi.toastOpen;
+    openButton.addEventListener('click', () => { showPhase('after'); setPanelOpen(true); });
+    const dismissButton = document.createElement('button');
+    dismissButton.type = 'button';
+    dismissButton.className = 'guide-toast-dismiss';
+    dismissButton.setAttribute('aria-label', guideUi.close);
+    dismissButton.textContent = '✕';
+    dismissButton.addEventListener('click', hideToast);
+    guideToast.append(toastText, openButton, dismissButton);
+    guideToast.classList.add('is-visible');
+    guideButton.classList.add('is-pulsing');
+    toastTimer = setTimeout(hideToast, 20000);
+  }
+
+  /* Detecta el fin de la simulación sin tocar su lógica interna */
+  try {
+    const nativeSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(storageKey, storageValue){
+      nativeSetItem.apply(this, arguments);
+      if (this === window.localStorage && String(storageKey).indexOf('simlab_done_') === 0) {
+        setTimeout(announceCompletion, 1500);
+      }
+    };
+  } catch (storageError) { /* sin aviso automático; el botón sigue disponible */ }
+
+  showPhase('before');
+})();
+</script>
 </body>
 </html>

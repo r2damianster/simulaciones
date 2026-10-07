@@ -48,3 +48,44 @@ La escena del espejo solicita `getUserMedia` para mostrar el reflejo real del es
 
 - Gaarder, J. (1991). *Sofies verden* [El Mundo de Sofía]. Aschehoug.
 - Argumento cosmológico y regreso al infinito: tradición aristotélico-tomista (primer motor inmóvil).
+
+## Guía de clase — preguntas para conversar
+
+Panel flotante dentro de la simulación (botón de comentarios, arriba a la derecha). Al terminar la simulación aparece un aviso discreto que abre la pestaña «Después».
+
+### Español
+**Antes**
+1. ¿Cuál es la diferencia entre hacerse una pregunta filosófica y buscar un dato?
+2. ¿Cuándo fue la última vez que se preguntaron «¿quién soy?» o «¿de dónde viene todo?»
+3. ¿Por qué los niños suelen hacer mejores preguntas filosóficas que los adultos?
+
+**Durante**
+1. ¿Qué te inquietó más de las preguntas que recibe Sofía y por qué?
+2. Si tuvieras que responder tú la pregunta «¿quién eres?», ¿qué responderías sin usar tu nombre ni tu profesión?
+3. ¿Qué te sugiere la escena de la moneda sobre la vida y la muerte?
+4. ¿Qué te hizo sentir el espejo en la historia: curiosidad, incomodidad, extrañeza?
+
+**Después**
+1. ¿Qué diferencia hay entre una respuesta filosófica, una científica y una religiosa a la pregunta por el origen del universo?
+2. ¿Es mejor tener una buena pregunta que una respuesta rápida? Argumenten.
+3. ¿Qué papel cumple el asombro en el pensamiento filosófico?
+4. Formulen en grupo una pregunta filosófica sobre su vida universitaria y debatan dos respuestas posibles.
+
+### English
+**Before**
+1. What is the difference between asking a philosophical question and looking up a fact?
+2. When was the last time you asked yourself «who am I?» or «where does everything come from?»
+3. Why do children often ask better philosophical questions than adults?
+
+**During**
+1. What unsettled you most about the questions Sophie receives, and why?
+2. If you had to answer «who are you?», what would you say without using your name or profession?
+3. What does the coin scene suggest to you about life and death?
+4. What did the mirror make you feel in the story: curiosity, discomfort, strangeness?
+
+**After**
+1. What is the difference between a philosophical, a scientific and a religious answer to the question of the universe's origin?
+2. Is it better to have a good question than a quick answer? Argue your case.
+3. What role does wonder play in philosophical thinking?
+4. As a group, formulate a philosophical question about your university life and debate two possible answers.
+

@@ -77,3 +77,44 @@ A continuación, se presentan ejemplos de cómo se transformarían las notas seg
 ### Sujeto: "Ana" (Uso de tecnología)
 * **Nota Descriptiva:** Camina sola por el sendero este. Mira la pantalla del móvil periódicamente. Auriculares visibles. No establece contacto visual con transeúntes.
 * **Nota Reflexiva:** La tecnología parece actuar como una barrera de interacción, creando una "presencia ausente" donde el sujeto está físicamente en la plaza pero mentalmente en el espacio digital.
+
+## Guía de clase — preguntas para conversar
+
+Panel flotante dentro de la simulación (botón de comentarios, arriba a la derecha). Al terminar la simulación aparece un aviso discreto que abre la pestaña «Después».
+
+### Español
+**Antes**
+1. ¿Qué diferencia a «mirar» de «observar» en investigación? ¿Qué vuelve sistemática una observación?
+2. ¿Cuándo conviene que el investigador participe en la situación observada y cuándo conviene que no?
+3. ¿Qué sesgos creen que aparecen cuando una persona sabe que está siendo observada?
+
+**Durante**
+1. ¿Qué anotaste como hecho y qué anotaste como interpretación? ¿Podrías separarlos en tu nota de campo?
+2. ¿Qué cambiaría en lo que registras si pasaras de una observación estructurada a una no estructurada?
+3. ¿Qué detalle del contexto casi se te escapa y habría cambiado tu conclusión?
+4. ¿Qué decisión de «dónde mirar» condicionó lo que pudiste ver?
+
+**Después**
+1. ¿Qué tipo de observación elegirían para estudiar un aula, un hospital o una red social, y por qué?
+2. ¿Cómo distinguirían la descripción densa de una simple lista de conductas?
+3. ¿Qué estrategias reducen el sesgo del observador sin eliminar la riqueza del dato cualitativo?
+4. Diseñen en grupo una guía de observación de 5 categorías para un problema de su carrera. ¿Cómo comprobarían que dos observadores la usan igual?
+
+### English
+**Before**
+1. What separates «looking» from «observing» in research? What makes an observation systematic?
+2. When is it better for the researcher to take part in the observed situation, and when not?
+3. What biases do you think appear when people know they are being observed?
+
+**During**
+1. What did you note as fact and what as interpretation? Could you separate them in your field note?
+2. What would change in what you record if you moved from structured to unstructured observation?
+3. Which contextual detail almost slipped by and would have changed your conclusion?
+4. Which «where to look» decision shaped what you were able to see?
+
+**After**
+1. Which type of observation would you choose to study a classroom, a hospital or a social network, and why?
+2. How would you tell thick description from a mere list of behaviors?
+3. Which strategies reduce observer bias without losing the richness of qualitative data?
+4. As a group, design a 5-category observation guide for a problem in your field. How would you check that two observers use it the same way?
+

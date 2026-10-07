@@ -384,6 +384,47 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
+    
+        /* === Guía de clase (preguntas para debatir) === */
+        .sim-guide{position:fixed;top:14px;right:62px;z-index:200;width:40px;height:40px;
+            display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;
+            color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
+            border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
+            transition:transform .2s,color .2s}
+        .sim-guide:hover,.sim-guide:focus-visible,.sim-guide[aria-expanded="true"]{color:var(--sim-home-hi,#fff);transform:scale(1.06)}
+        .sim-guide.is-pulsing{animation:guidePulse 1.6s ease-in-out 4}
+        @keyframes guidePulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 7px var(--sim-home-bd,rgba(255,255,255,.2))}}
+        .guide-panel{position:fixed;top:0;right:0;bottom:0;z-index:300;width:min(380px,100vw);
+            display:flex;flex-direction:column;color:#e8e6e1;
+            background:color-mix(in srgb,var(--sim-home-fg,#888) 9%,#0d0d0d);
+            border-left:1px solid var(--sim-home-bd,rgba(255,255,255,.15));box-shadow:-12px 0 32px rgba(0,0,0,.5);
+            transform:translateX(100%);visibility:hidden;transition:transform .3s ease,visibility 0s linear .3s}
+        .guide-panel.is-open{transform:translateX(0);visibility:visible;transition:transform .3s ease}
+        .guide-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 18px 12px}
+        .guide-title{font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--sim-home-fg,#fff);margin:0}
+        .guide-close{width:32px;height:32px;cursor:pointer;color:inherit;background:transparent;
+            border:1px solid rgba(255,255,255,.18);border-radius:8px;font-size:14px}
+        .guide-close:hover,.guide-close:focus-visible{color:var(--sim-home-hi,#fff)}
+        .guide-tabs{display:flex;gap:6px;padding:0 18px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+        .guide-tab{flex:1;padding:8px 6px;cursor:pointer;font:inherit;font-size:12px;color:inherit;
+            background:transparent;border:1px solid rgba(255,255,255,.18);border-radius:8px;opacity:.7}
+        .guide-tab[aria-selected="true"]{opacity:1;color:var(--sim-home-hi,#fff);background:var(--sim-home-bg,rgba(255,255,255,.08));border-color:var(--sim-home-bd,rgba(255,255,255,.3))}
+        .guide-questions{flex:1;overflow-y:auto;margin:0;padding:16px 18px 24px 38px;line-height:1.55;font-size:14px;text-align:left}
+        .guide-questions li{margin-bottom:14px;padding-left:4px}
+        .guide-questions li::marker{color:var(--sim-home-fg,#fff);font-weight:600}
+        .guide-toast{position:fixed;left:50%;bottom:20px;z-index:250;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+            display:flex;align-items:center;gap:12px;max-width:min(520px,calc(100vw - 32px));padding:10px 14px;
+            font-size:13px;line-height:1.4;color:#e8e6e1;border-radius:12px;
+            background:color-mix(in srgb,var(--sim-home-fg,#888) 12%,#0d0d0d);
+            border:1px solid var(--sim-home-bd,rgba(255,255,255,.2));box-shadow:0 8px 24px rgba(0,0,0,.45);
+            transition:opacity .4s ease,transform .4s ease}
+        .guide-toast.is-visible{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+        .guide-toast-open{flex-shrink:0;padding:6px 12px;cursor:pointer;font:inherit;font-size:12px;font-weight:600;
+            color:var(--sim-home-hi,#fff);background:var(--sim-home-bg,rgba(255,255,255,.08));
+            border:1px solid var(--sim-home-bd,rgba(255,255,255,.3));border-radius:8px}
+        .guide-toast-dismiss{flex-shrink:0;width:24px;height:24px;cursor:pointer;color:inherit;opacity:.6;background:transparent;border:none;font-size:13px}
+        @media (max-width:480px){.sim-guide{right:60px}}
+        @media (prefers-reduced-motion:reduce){.guide-panel,.guide-toast{transition:none}.sim-guide.is-pulsing{animation:none}}
     </style>
 </head>
 <body>
@@ -392,7 +433,18 @@
     <div class="bg-orb bg-orb-2"></div>
     <div class="bg-orb bg-orb-3"></div>
 
-    <button type="button" class="sim-lang" id="simLangBtn" style="position:fixed;top:14px;right:14px;z-index:200;width:40px;height:40px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;transition:transform .2s,color .2s"></button><a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
+    <button type="button" class="sim-lang" id="simLangBtn" style="position:fixed;top:14px;right:14px;z-index:200;width:40px;height:40px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;transition:transform .2s,color .2s"></button>
+<button type="button" class="sim-guide" id="simGuideBtn" aria-expanded="false" aria-controls="guidePanel" aria-label="Guía de clase" title="Guía de clase"><i class="fa-regular fa-comments" aria-hidden="true"></i></button>
+<aside class="guide-panel" id="guidePanel" role="dialog" aria-labelledby="guideTitle">
+  <div class="guide-header">
+    <h2 class="guide-title" id="guideTitle"></h2>
+    <button type="button" class="guide-close" id="guideClose" aria-label="Cerrar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+  </div>
+  <div class="guide-tabs" role="tablist" id="guideTabs"></div>
+  <ol class="guide-questions" id="guideQuestions"></ol>
+</aside>
+<div class="guide-toast" id="guideToast" role="status"></div>
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
       <i class="fa-solid fa-house" aria-hidden="true"></i>
     </a>
 
@@ -1247,5 +1299,154 @@
     // ============================================================
     render();
     </script>
+
+<script>
+/* === Guía de clase: preguntas para debatir (antes / durante / después) ===
+   Bloque autosuficiente: lee el idioma de localStorage['simlab_lang'] y se activa
+   al detectar que la simulación escribe su clave 'simlab_done_*'. */
+(function initClassGuide(){
+  const guideLang = localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es';
+  const GUIDE_UI = {
+    es: { btn:'Guía de clase', title:'Para conversar en clase', close:'Cerrar',
+          before:'Antes', during:'Durante', after:'Después',
+          toast:'Hay preguntas para conversar en clase sobre lo que acabas de hacer.', toastOpen:'Ver preguntas' },
+    en: { btn:'Class guide', title:'Class discussion questions', close:'Close',
+          before:'Before', during:'During', after:'After',
+          toast:'There are class discussion questions about what you just did.', toastOpen:'See questions' }
+  };
+  const GUIDE_ALL = {
+  "es": {
+    "before": [
+      "¿Qué significa «comprender» un texto? ¿Es lo mismo recordar datos que entender una idea?",
+      "¿Qué diferencia hay entre una respuesta literal, una inferencial y una crítica?",
+      "¿Qué errores de escritura de un niño pueden esconder un buen razonamiento?"
+    ],
+    "during": [
+      "¿Qué evidencia del texto del estudiante te hizo ubicarlo en un nivel y no en otro?",
+      "¿Dudaste entre dos niveles? ¿Qué criterio de la rúbrica te ayudó a decidir?",
+      "¿Cómo evitarías que la ortografía o la caligrafía contaminen tu juicio sobre la comprensión?",
+      "¿Qué retroalimentación le darías a este estudiante para que avance al siguiente nivel?"
+    ],
+    "after": [
+      "¿Qué ventajas y límites tiene evaluar con una rúbrica progresiva frente a una nota numérica?",
+      "¿Cómo influye el sesgo del evaluador (cansancio, expectativas previas) y cómo se reduce?",
+      "¿Cómo adaptarían el análisis a estudiantes de distintas edades sin perder equidad?",
+      "Evalúen en parejas el mismo escrito por separado y comparen. ¿Dónde diferieron y por qué?"
+    ]
+  },
+  "en": {
+    "before": [
+      "What does it mean to «understand» a text? Is remembering facts the same as grasping an idea?",
+      "What is the difference between a literal, an inferential and a critical answer?",
+      "Which writing mistakes by a child can hide good reasoning?"
+    ],
+    "during": [
+      "What evidence in the student's text made you place them at one level and not another?",
+      "Did you hesitate between two levels? Which rubric criterion helped you decide?",
+      "How would you keep spelling or handwriting from contaminating your judgment of comprehension?",
+      "What feedback would you give this student to move up to the next level?"
+    ],
+    "after": [
+      "What are the advantages and limits of assessing with a progressive rubric versus a numeric grade?",
+      "How does evaluator bias (fatigue, prior expectations) operate and how is it reduced?",
+      "How would you adapt the analysis to students of different ages without losing fairness?",
+      "In pairs, assess the same text separately and compare. Where did you differ and why?"
+    ]
+  }
+};
+  const guideUi = GUIDE_UI[guideLang];
+  const guideQuestions = GUIDE_ALL[guideLang];
+  const guidePhases = ['before', 'during', 'after'];
+
+  const guideButton = document.getElementById('simGuideBtn');
+  const guidePanel = document.getElementById('guidePanel');
+  const tabsContainer = document.getElementById('guideTabs');
+  const questionsList = document.getElementById('guideQuestions');
+  const closeButton = document.getElementById('guideClose');
+  const guideToast = document.getElementById('guideToast');
+  if (!guideButton || !guidePanel) return;
+
+  guideButton.setAttribute('aria-label', guideUi.btn);
+  guideButton.title = guideUi.btn;
+  closeButton.setAttribute('aria-label', guideUi.close);
+  document.getElementById('guideTitle').textContent = guideUi.title;
+
+  function showPhase(phaseKey){
+    tabsContainer.querySelectorAll('.guide-tab').forEach(tabButton => {
+      tabButton.setAttribute('aria-selected', String(tabButton.dataset.phase === phaseKey));
+    });
+    questionsList.replaceChildren();
+    guideQuestions[phaseKey].forEach(questionText => {
+      const questionItem = document.createElement('li');
+      questionItem.textContent = questionText;
+      questionsList.appendChild(questionItem);
+    });
+    questionsList.scrollTop = 0;
+  }
+
+  guidePhases.forEach(phaseKey => {
+    const tabButton = document.createElement('button');
+    tabButton.type = 'button';
+    tabButton.className = 'guide-tab';
+    tabButton.setAttribute('role', 'tab');
+    tabButton.dataset.phase = phaseKey;
+    tabButton.textContent = guideUi[phaseKey];
+    tabButton.addEventListener('click', () => showPhase(phaseKey));
+    tabsContainer.appendChild(tabButton);
+  });
+
+  function setPanelOpen(isOpen){
+    guidePanel.classList.toggle('is-open', isOpen);
+    guideButton.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen) { hideToast(); closeButton.focus(); } else { guideButton.focus(); }
+  }
+  guideButton.addEventListener('click', () => setPanelOpen(!guidePanel.classList.contains('is-open')));
+  closeButton.addEventListener('click', () => setPanelOpen(false));
+  document.addEventListener('keydown', keyEvent => {
+    if (keyEvent.key === 'Escape' && guidePanel.classList.contains('is-open')) setPanelOpen(false);
+  });
+
+  let toastTimer = null;
+  function hideToast(){
+    clearTimeout(toastTimer);
+    guideToast.classList.remove('is-visible');
+    guideButton.classList.remove('is-pulsing');
+  }
+  function announceCompletion(){
+    if (guidePanel.classList.contains('is-open')) return;
+    guideToast.replaceChildren();
+    const toastText = document.createElement('span');
+    toastText.textContent = guideUi.toast;
+    const openButton = document.createElement('button');
+    openButton.type = 'button';
+    openButton.className = 'guide-toast-open';
+    openButton.textContent = guideUi.toastOpen;
+    openButton.addEventListener('click', () => { showPhase('after'); setPanelOpen(true); });
+    const dismissButton = document.createElement('button');
+    dismissButton.type = 'button';
+    dismissButton.className = 'guide-toast-dismiss';
+    dismissButton.setAttribute('aria-label', guideUi.close);
+    dismissButton.textContent = '✕';
+    dismissButton.addEventListener('click', hideToast);
+    guideToast.append(toastText, openButton, dismissButton);
+    guideToast.classList.add('is-visible');
+    guideButton.classList.add('is-pulsing');
+    toastTimer = setTimeout(hideToast, 20000);
+  }
+
+  /* Detecta el fin de la simulación sin tocar su lógica interna */
+  try {
+    const nativeSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(storageKey, storageValue){
+      nativeSetItem.apply(this, arguments);
+      if (this === window.localStorage && String(storageKey).indexOf('simlab_done_') === 0) {
+        setTimeout(announceCompletion, 1500);
+      }
+    };
+  } catch (storageError) { /* sin aviso automático; el botón sigue disponible */ }
+
+  showPhase('before');
+})();
+</script>
 </body>
 </html>

@@ -31,3 +31,44 @@ Documento de referencia para la séptima edición de las normas de estilo de la 
 5. Sangría francesa faltante en referencias.
 6. Tipografía: cambios entre Times New Roman y Arial sin motivo.
 7. Encabezados no jerarquizados correctamente.
+
+## Guía de clase — preguntas para conversar
+
+Panel flotante dentro de la simulación (botón de comentarios, arriba a la derecha). Al terminar la simulación aparece un aviso discreto que abre la pestaña «Después».
+
+### Español
+**Antes**
+1. ¿Para qué sirve un formato común como APA en la comunicación científica? ¿Qué se perdería sin él?
+2. ¿Qué errores de formato creen que son los más frecuentes en los trabajos de estudiantes?
+3. ¿Qué diferencia hay entre una cita y una paráfrasis, y cuándo hay que citar en cada caso?
+
+**Durante**
+1. ¿Qué error corregiste primero y por qué lo consideraste el más grave?
+2. ¿Qué regla tuviste que consultar porque no la recordabas? ¿Dónde la buscarías en un caso real?
+3. ¿Qué corrección afecta la integridad académica (autoría, fuentes) y cuál solo la presentación?
+4. ¿Hubo algún error que casi pasas por alto? ¿Qué estrategia de revisión te habría ayudado a verlo?
+
+**Después**
+1. ¿Es el formato una cuestión superficial o parte del rigor académico? Argumenten ambas posturas.
+2. ¿Qué ventajas y riesgos tiene delegar el formato de referencias en un gestor bibliográfico?
+3. ¿Cómo se relaciona el uso correcto de citas con la prevención del plagio?
+4. Intercambien un párrafo propio con un compañero y revisen únicamente citas y referencias. ¿Qué errores aparecieron?
+
+### English
+**Before**
+1. What is a shared format such as APA for in scientific communication? What would be lost without it?
+2. Which formatting errors do you think are most frequent in student work?
+3. What is the difference between a quotation and a paraphrase, and when must you cite in each case?
+
+**During**
+1. Which error did you fix first and why did you consider it the most serious?
+2. Which rule did you have to look up because you did not remember it? Where would you look it up in a real case?
+3. Which correction affects academic integrity (authorship, sources) and which only presentation?
+4. Was there an error you almost missed? Which review strategy would have helped you see it?
+
+**After**
+1. Is format a superficial matter or part of academic rigor? Argue both positions.
+2. What are the advantages and risks of delegating reference formatting to a reference manager?
+3. How is the correct use of citations related to preventing plagiarism?
+4. Swap a paragraph of your own with a classmate and review only citations and references. What errors showed up?
+

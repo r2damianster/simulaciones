@@ -55,3 +55,44 @@ Cierran argumentaciones o resumen ideas.
 | **sin embargo, no obstante** | Inicio o interior | Coma después: "; sin embargo, ..." |
 | **por lo tanto, en consecuencia** | Interior u final | Comas alrededor o punto y coma |
 | **por ejemplo** | Interior o tras pausa | Coma(s) alrededor: ", por ejemplo, " |
+
+## Guía de clase — preguntas para conversar
+
+Panel flotante dentro de la simulación (botón de comentarios, arriba a la derecha). Al terminar la simulación aparece un aviso discreto que abre la pestaña «Después».
+
+### Español
+**Antes**
+1. ¿Qué función cumplen los conectores en un texto académico? ¿Qué pasa con un texto que no los usa?
+2. ¿Pueden dos conectores parecer intercambiables y, sin embargo, cambiar el sentido de la oración?
+3. ¿Qué conectores usan en exceso al escribir? ¿Por qué creen que ocurre?
+
+**Durante**
+1. Antes de elegir el conector, ¿qué relación lógica identificaste entre las dos ideas?
+2. ¿Qué error cometiste y qué relación confundiste (causa/consecuencia, contraste/concesión)?
+3. ¿Qué cambia en el mensaje si reemplazas «sin embargo» por «por lo tanto»?
+4. ¿Hay oraciones donde ningún conector es necesario? ¿Cómo lo reconoces?
+
+**Después**
+1. ¿Un conector puede ocultar un razonamiento débil? Den un ejemplo.
+2. ¿Cómo se usa la puntuación junto con el conector para marcar la relación entre ideas?
+3. Tomen un párrafo propio y subrayen sus conectores: ¿expresan la relación lógica que realmente existe?
+4. Reescriban un párrafo sin conectores y luego con ellos. ¿Qué ganó o perdió el texto?
+
+### English
+**Before**
+1. What function do connectors serve in an academic text? What happens to a text that does not use them?
+2. Can two connectors look interchangeable and yet change the meaning of a sentence?
+3. Which connectors do you overuse when writing? Why do you think that happens?
+
+**During**
+1. Before choosing the connector, which logical relation did you identify between the two ideas?
+2. Which mistake did you make and which relation did you mix up (cause/effect, contrast/concession)?
+3. What changes in the message if you replace «however» with «therefore»?
+4. Are there sentences where no connector is needed? How do you recognize them?
+
+**After**
+1. Can a connector hide weak reasoning? Give an example.
+2. How is punctuation used together with the connector to mark the relation between ideas?
+3. Take a paragraph of your own and underline its connectors: do they express the logical relation that actually exists?
+4. Rewrite a paragraph without connectors and then with them. What did the text gain or lose?
+
