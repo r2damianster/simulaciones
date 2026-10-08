@@ -60,6 +60,10 @@
     "guide_toast_open": {
       "es": "Ver preguntas",
       "en": "See questions"
+    },
+    "guide_popout": {
+      "es": "Abrir en pestaña nueva",
+      "en": "Open in new tab"
     }
   },
   "terminos_pedagogicos": {

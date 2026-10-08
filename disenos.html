@@ -563,13 +563,15 @@
             }
         }
     
+    
         /* === Guía de clase (preguntas para debatir) === */
-        .sim-guide{position:fixed;top:14px;right:62px;z-index:200;width:40px;height:40px;
+        .sim-guide{position:fixed;top:50%;right:0;z-index:200;width:30px;height:84px;transform:translateY(-50%);
             display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;
             color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
-            border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
-            transition:transform .2s,color .2s}
-        .sim-guide:hover,.sim-guide:focus-visible,.sim-guide[aria-expanded="true"]{color:var(--sim-home-hi,#fff);transform:scale(1.06)}
+            border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-right:none;border-radius:12px 0 0 12px;
+            -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+            transition:width .2s,color .2s}
+        .sim-guide:hover,.sim-guide:focus-visible,.sim-guide[aria-expanded="true"]{color:var(--sim-home-hi,#fff);width:36px}
         .sim-guide.is-pulsing{animation:guidePulse 1.6s ease-in-out 4}
         @keyframes guidePulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 7px var(--sim-home-bd,rgba(255,255,255,.2))}}
         .guide-panel{position:fixed;top:0;right:0;bottom:0;z-index:300;width:min(380px,100vw);
@@ -580,9 +582,10 @@
         .guide-panel.is-open{transform:translateX(0);visibility:visible;transition:transform .3s ease}
         .guide-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 18px 12px}
         .guide-title{font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--sim-home-fg,#fff);margin:0}
-        .guide-close{width:32px;height:32px;cursor:pointer;color:inherit;background:transparent;
+        .guide-actions{display:flex;gap:6px}
+        .guide-close,.guide-popout{width:32px;height:32px;cursor:pointer;color:inherit;background:transparent;
             border:1px solid rgba(255,255,255,.18);border-radius:8px;font-size:14px}
-        .guide-close:hover,.guide-close:focus-visible{color:var(--sim-home-hi,#fff)}
+        .guide-close:hover,.guide-close:focus-visible,.guide-popout:hover,.guide-popout:focus-visible{color:var(--sim-home-hi,#fff)}
         .guide-tabs{display:flex;gap:6px;padding:0 18px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
         .guide-tab{flex:1;padding:8px 6px;cursor:pointer;font:inherit;font-size:12px;color:inherit;
             background:transparent;border:1px solid rgba(255,255,255,.18);border-radius:8px;opacity:.7}
@@ -601,7 +604,6 @@
             color:var(--sim-home-hi,#fff);background:var(--sim-home-bg,rgba(255,255,255,.08));
             border:1px solid var(--sim-home-bd,rgba(255,255,255,.3));border-radius:8px}
         .guide-toast-dismiss{flex-shrink:0;width:24px;height:24px;cursor:pointer;color:inherit;opacity:.6;background:transparent;border:none;font-size:13px}
-        @media (max-width:480px){.sim-guide{right:60px}}
         @media (prefers-reduced-motion:reduce){.guide-panel,.guide-toast{transition:none}.sim-guide.is-pulsing{animation:none}}
     </style>
 </head>
@@ -613,7 +615,10 @@
 <aside class="guide-panel" id="guidePanel" role="dialog" aria-labelledby="guideTitle">
   <div class="guide-header">
     <h2 class="guide-title" id="guideTitle"></h2>
-    <button type="button" class="guide-close" id="guideClose" aria-label="Cerrar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    <div class="guide-actions">
+      <button type="button" class="guide-popout" id="guidePopout" aria-label="Abrir en pestaña nueva" title="Abrir en pestaña nueva"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></button>
+      <button type="button" class="guide-close" id="guideClose" aria-label="Cerrar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
   </div>
   <div class="guide-tabs" role="tablist" id="guideTabs"></div>
   <ol class="guide-questions" id="guideQuestions"></ol>
@@ -1870,7 +1875,6 @@ animate();
 window.lab3D = { reaccionar };
 </script>
 
-
 <script>
 /* === Guía de clase: preguntas para debatir (antes / durante / después) ===
    Bloque autosuficiente: lee el idioma de localStorage['simlab_lang'] y se activa
@@ -1878,10 +1882,10 @@ window.lab3D = { reaccionar };
 (function initClassGuide(){
   const guideLang = localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es';
   const GUIDE_UI = {
-    es: { btn:'Guía de clase', title:'Para conversar en clase', close:'Cerrar',
+    es: { btn:'Guía de clase', title:'Para conversar en clase', close:'Cerrar', popout:'Abrir en pestaña nueva',
           before:'Antes', during:'Durante', after:'Después',
           toast:'Hay preguntas para conversar en clase sobre lo que acabas de hacer.', toastOpen:'Ver preguntas' },
-    en: { btn:'Class guide', title:'Class discussion questions', close:'Close',
+    en: { btn:'Class guide', title:'Class discussion questions', close:'Close', popout:'Open in new tab',
           before:'Before', during:'During', after:'After',
           toast:'There are class discussion questions about what you just did.', toastOpen:'See questions' }
   };
@@ -1940,6 +1944,9 @@ window.lab3D = { reaccionar };
   guideButton.setAttribute('aria-label', guideUi.btn);
   guideButton.title = guideUi.btn;
   closeButton.setAttribute('aria-label', guideUi.close);
+  const popoutButton = document.getElementById('guidePopout');
+  popoutButton.setAttribute('aria-label', guideUi.popout);
+  popoutButton.title = guideUi.popout;
   document.getElementById('guideTitle').textContent = guideUi.title;
 
   function showPhase(phaseKey){
@@ -1976,6 +1983,32 @@ window.lab3D = { reaccionar };
   document.addEventListener('keydown', keyEvent => {
     if (keyEvent.key === 'Escape' && guidePanel.classList.contains('is-open')) setPanelOpen(false);
   });
+
+  /* Abre la guía completa en una pestaña nueva (útil para proyectarla o tenerla aparte) */
+  function openGuideInNewTab(){
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--sim-home-fg').trim() || '#10a37f';
+    const escapeHtml = rawText => rawText.replace(/[&<>"]/g, character => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[character]));
+    const sectionsHtml = guidePhases.map(phaseKey =>
+      '<section><h2>' + escapeHtml(guideUi[phaseKey]) + '</h2><ol>' +
+      guideQuestions[phaseKey].map(questionText => '<li>' + escapeHtml(questionText) + '</li>').join('') +
+      '</ol></section>').join('');
+    const simulationName = escapeHtml(document.title || '');
+    const pageHtml = '<!doctype html><html lang="' + guideLang + '"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>' + simulationName + ' — ' + escapeHtml(guideUi.title) + '</title><style>' +
+      ':root{--accent:' + accentColor + '}*{box-sizing:border-box}' +
+      'body{margin:0;background:#0f0f0f;color:#e8e6e1;font:17px/1.6 Georgia,"Times New Roman",serif}' +
+      'main{max-width:760px;margin:0 auto;padding:40px 24px 64px}' +
+      'h1{margin:0 0 4px;font-size:28px;color:var(--accent)}.sim{margin:0 0 32px;opacity:.65;font-size:15px}' +
+      'h2{margin:36px 0 12px;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:6px}' +
+      'ol{margin:0;padding-left:26px}li{margin-bottom:16px;padding-left:6px}li::marker{color:var(--accent);font-weight:700}' +
+      '@media print{body{background:#fff;color:#111}h1,h2,li::marker{color:#111}}' +
+      '</style></head><body><main><h1>' + escapeHtml(guideUi.title) + '</h1><p class="sim">' + simulationName + '</p>' +
+      sectionsHtml + '</main></body></html>';
+    const pageUrl = URL.createObjectURL(new Blob([pageHtml], { type: 'text/html;charset=utf-8' }));
+    window.open(pageUrl, 'simlab_guide');
+  }
+  popoutButton.addEventListener('click', openGuideInNewTab);
 
   let toastTimer = null;
   function hideToast(){

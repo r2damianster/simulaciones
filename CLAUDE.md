@@ -268,14 +268,15 @@ Reglas del patrón:
 
 Todas las simulaciones (excepto `index.html`) incluyen una **guía sutil de preguntas** para conversar en clase. Componente autosuficiente, idéntico en cada archivo:
 
-- **Botón `.sim-guide`** (icono `fa-regular fa-comments`), fijo `top:14px; right:62px`, a la izquierda del toggle `.sim-lang`. Usa las variables `--sim-home-*` de la paleta.
+- **Pestaña `.sim-guide`** (icono `fa-regular fa-comments`): lengüeta pegada al borde derecho, centrada verticalmente (`top:50%; right:0`). Evita chocar con los controles de las esquinas (home, idioma, barras superiores).
 - **Panel lateral `#guidePanel`** con 3 pestañas: **Antes** (3 preguntas), **Durante** (4), **Después** (4). Se cierra con la X o con Esc. Solo preguntas, sin respuestas ni pistas para el docente.
+- **Abrir en pestaña nueva:** el botón `#guidePopout` del panel genera una página autónoma (Blob URL, ventana nombrada `simlab_guide`) con las tres secciones completas, pensada para proyectar o tener aparte.
 - **Aviso al terminar:** un `<script>` final envuelve `Storage.prototype.setItem`; cuando la sim escribe una clave `simlab_done_*`, aparece un aviso discreto («Ver preguntas») que abre la pestaña «Después» y el botón pulsa unos segundos. No se toca la lógica de cada sim.
 - **Datos:** `GUIDE_ALL = { es: {before, during, after}, en: {...} }` dentro del script del bloque. Misma cardinalidad (3/4/4) en ES y EN; EN es adaptación pedagógica, no traducción literal.
 - **Idioma:** el bloque lee `localStorage['simlab_lang']` y trae su propio diccionario de UI (no depende de `I18N` de la sim). Los términos de UI están registrados en `i18n/terminos_es_en.json` (`ui_comun.guide_*`).
 - **Documentación:** el banco completo de preguntas de cada sim está en la sección «Guía de clase» de su `.md` en `.claude/Simulaciones/`.
 
-Para una sim nueva: copiar el bloque (CSS `/* === Guía de clase`, botón + `<aside id="guidePanel">` + `<div id="guideToast">` tras `#simLangBtn`, y el `<script>` con `initClassGuide` antes de `</body>`) desde `peel.html`, y sustituir `GUIDE_ALL` por 11 preguntas ES + 11 EN.
+Para una sim nueva: copiar el bloque (CSS `/* === Guía de clase`, pestaña + `<aside id="guidePanel">` + `<div id="guideToast">` tras `#simLangBtn`, y el `<script>` con `initClassGuide` antes de `</body>`) desde `peel.html`, y sustituir `GUIDE_ALL` por 11 preguntas ES + 11 EN.
 
 ---
 
