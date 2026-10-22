@@ -25,6 +25,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `constructos_IA.html` | SimulAI — Alucinaciones en la Investigación | Metodología — detección de alucinaciones en construcción de constructos; verificación en Scopus; tipología de adjetivación espuria, fusión cross-field, citas fabricadas |
 | `revista.html` | OJS — Envío de Artículos Científicos | Metodología de publicación — proceso de envío, declaraciones éticas, metadatos, revisión por pares, evaluación a ciegas |
 | `mundoSofia1.html` | El Mundo de Sofía — El Jardín del Edén | Filosofía — primer capítulo de la novela de Jostein Gaarder, narrativa interactiva sobre identidad, existencia y origen del universo |
+| `el-reto-del-toolmaker.html` | El Reto del Toolmaker | Metodología / IA educativa — 3 fases: apps genéricas con límites (paywall, datos, contexto), especificar un prompt claro para construir una herramienta con IA, y ajustarla; mide frustración y ajuste herramienta–necesidad |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 
@@ -64,6 +65,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 | `conectores.html` | `#171310` (dark warm industrial) | `#d4af37` (gold) + `#34D399` (emerald, ex-neon) | Operario de la máquina — tira de palanca, estampa conectores en cinta de producción |
 | `constructos_IA.html` | `#080c14` (dark tech/AI) | `#10a37f` (emerald AI) | ChatGPT-like browser mock — avatar dinámico, chat interactivo, Scopus simulado, detección de alucinaciones |
 | `mundoSofia1.html` | `#0F1A0F` (dark forest) | `#C9975B` (gold) | Narrativa literaria por escenas — pétalos/luciérnagas animados en canvas, buzón interactivo, espejo con webcam, moneda 3D (vida/muerte) |
+| `el-reto-del-toolmaker.html` | dark warm | `#D4A24E` (gold) | Serious game docente — Profe Arturito guía; apps genéricas vs. app propia generada por prompt |
 
 **Nota de rediseño (2026-07):** `peel.html`, `conectores.html`, `disenos.html` y `financiamiento_etica.html` fueron re-diseñadas para alinear su identidad visual con las simulaciones favoritas del usuario (observación, evaluaciones_lectura, muestreo, apa7/apa7_2): fondo oscuro cálido, acento dorado/esmeralda, tipografía serif en títulos. Más importante: cada una ganó un **elemento concreto/humano** que hace tangible la mecánica pedagógica (no solo estética) — ver detalle en cada fila de la tabla.
 
@@ -128,6 +130,7 @@ Donde `CLAVE` es el `data-key` de la tarjeta en index.html (la clave completa qu
 - conectores.html: `simlab_con` → `simlab_done_simlab_con`
 - constructos.html: `simlab_constructos` → `simlab_done_simlab_constructos`
 - constructos_IA.html: `simlab_constructos_ia` → `simlab_done_simlab_constructos_ia`
+- el-reto-del-toolmaker.html: `simlab_toolmaker` → `simlab_done_simlab_toolmaker`
 
 En `index.html`, `isSimDone(key)` lee `simlab_done_${key}` (donde `key` = `data-key`) y muestra badge «✓ Completada».
 

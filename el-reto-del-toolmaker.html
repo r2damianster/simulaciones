@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>El Reto del Toolmaker · Serious game para docentes</title>
+<meta name="description" content="Serious game universitario: las apps genéricas siempre imponen límites; cuando el docente sabe especificar con claridad lo que necesita, puede crear con IA una herramienta propia y ajustarla.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%A0%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  /* ===== Design tokens ===== */
+  :root {
+    --bg: #14110d;
+    --card: #1d1914;
+    --card-2: #221d16;
+    --text: #ece6da;
+    --muted: #b9b09e;
+    --gold: #D4A24E;
+    --gold-hi: #E8BC6A;
+    --emerald: #34D399;
+    --error: #e5604d;
+    --border: rgba(236,230,218,0.10);
+    --border-strong: rgba(236,230,218,0.22);
+    --shadow: 0 8px 30px rgba(0,0,0,0.45);
+    --sim-home-fg: #D4A24E;
+    --sim-home-bg: rgba(212,162,78,.15);
+    --sim-home-bd: rgba(212,162,78,.3);
+    --sim-home-hi: #E8BC6A;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --t: 250ms ease;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Sans 3', system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    min-height: 100vh;
+    padding: 70px 16px 80px;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, .title-font { font-family: 'Playfair Display', Georgia, serif; }
+
+  /* ===== Fixed buttons ===== */
+  .sim-home, .sim-lang {
+    position: fixed;
+    top: 14px;
+    width: 40px; height: 40px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    color: var(--sim-home-fg);
+    background: var(--sim-home-bg);
+    border: 1px solid var(--sim-home-bd);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    z-index: 200;
+    transition: all var(--t);
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+  }
+  .sim-home { left: 14px; }
+  .sim-lang { right: 14px; letter-spacing: .5px; }
+  .sim-home:hover, .sim-lang:hover {
+    color: var(--sim-home-hi);
+    background: rgba(212,162,78,.25);
+    border-color: var(--sim-home-hi);
+  }
+  .sim-home:focus-visible, .sim-lang:focus-visible {
+    outline: 2px solid var(--gold-hi);
+    outline-offset: 2px;
+  }
+
+  /* ===== Progress bar ===== */
+  .progress-wrap { max-width: 920px; margin: 8px auto 24px; padding: 0 8px; }
+  .progress-track { display: flex; align-items: center; gap: 8px; }
+  .milestone {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 8px 6px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    transition: all var(--t);
+  }
+  .milestone.active { color: var(--gold); border-color: var(--gold); background: rgba(212,162,78,.08); }
+  .milestone.done { color: var(--emerald); border-color: var(--emerald); background: rgba(52,211,153,.08); }
+
+  /* ===== Layout ===== */
+  .container { max-width: 920px; margin: 0 auto; }
+
+  /* ===== Cards ===== */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-title { font-size: 1.4rem; margin: 0 0 8px; color: var(--text); }
+  .card-sub { color: var(--muted); font-size: 0.95rem; margin: 0 0 16px; }
+
+  /* ===== Buttons ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--card-2);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--t);
+    text-decoration: none;
+  }
+  .btn:hover { border-color: var(--gold); color: var(--gold); }
+  .btn:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+  .btn-primary { background: var(--gold); color: #1a1208; border-color: var(--gold); }
+  .btn-primary:hover { background: var(--gold-hi); color: #1a1208; border-color: var(--gold-hi); }
+  .btn-emerald { background: var(--emerald); color: #07251a; border-color: var(--emerald); }
+  .btn-emerald:hover { background: #4ee6ac; color: #07251a; }
+  .btn-ghost { background: transparent; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* ===== Avatar ===== */
+  .avatar-wrap { display: flex; gap: 14px; align-items: flex-start; margin: 16px 0; }
+  .avatar-img {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    flex-shrink: 0;
+    background: var(--card-2);
+  }
+  .avatar-fallback {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    background: var(--card-2);
+    border: 2px solid var(--gold);
+    flex-shrink: 0;
+  }
+  .speech-bubble {
+    background: var(--card-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 12px 16px;
+    position: relative;
+    flex: 1;
+  }
+  .speech-bubble::before {
+    content: '';
+    position: absolute;
+    left: -7px; top: 16px;
+    width: 12px; height: 12px;
+    background: var(--card-2);
+    border-left: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+    transform: rotate(45deg);
+  }
+  .speech-name { font-weight: 700; color: var(--gold); font-size: .9rem; }
+  .speech-text { color: var(--text); }
+
+  /* ===== Chips ===== */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+  .chip {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: var(--card-2);
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all var(--t);
+    min-height: 36px;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: inherit;
+  }
+  .chip:hover { border-color: var(--gold); }
+  .chip.selected { background: rgba(212,162,78,.18); border-color: var(--gold); color: var(--gold-hi); }
+  .chip:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+
+  /* ===== App cards (phase 1) ===== */
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 12px 0;
+  }
+  .app-card {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    cursor: pointer;
+    transition: all var(--t);
+    text-align: left;
+    color: var(--text);
+    font-family: inherit;
+  }
+  .app-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .app-card.selected { border-color: var(--gold); background: rgba(212,162,78,.10); }
+  .app-card.tried { opacity: .85; }
+  .app-name { font-weight: 700; color: var(--gold); margin-bottom: 4px; }
+  .app-desc { font-size: .85rem; color: var(--muted); }
+
+  /* ===== Meters ===== */
+  .meter {
+    background: rgba(0,0,0,.3);
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    margin: 8px 0;
+    border: 1px solid var(--border);
+  }
+  .meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--emerald), var(--gold), var(--error));
+    transition: width 600ms ease;
+    width: 0%;
+  }
+  .meter-label { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+
+  /* ===== Mini interaction area ===== */
+  .mini-area {
+    background: rgba(0,0,0,.25);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    min-height: 100px;
+    margin: 10px 0;
+  }
+  .student-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .student-av {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--card-2);
+    border: 1px solid var(--border-strong);
+    font-size: 14px;
+    animation: pop 300ms ease;
+  }
+
+  /* ===== Paywall ===== */
+  .paywall {
+    background: rgba(229,96,77,.12);
+    border: 1px solid var(--error);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-top: 10px;
+    text-align: center;
+    animation: pop 350ms ease;
+    color: var(--error);
+    font-size: .9rem;
+  }
+  @keyframes pop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* ===== Messages stream ===== */
+  .msg-stream { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+  .msg-item {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all var(--t);
+  }
+  .msg-item:hover { border-color: var(--gold); }
+  .msg-item.matched { opacity: .5; text-decoration: line-through; }
+
+  /* ===== Form fields ===== */
+  .field { margin-bottom: 14px; }
+  .field-label { font-size: .9rem; color: var(--muted); margin-bottom: 6px; display: block; }
+  .field-input {
+    width: 100%;
+    background: var(--card-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 15px;
+    margin-top: 6px;
+  }
+  .field-input:focus { outline: 2px solid var(--gold-hi); outline-offset: 0; border-color: var(--gold); }
+  input[type="range"] { width: 100%; accent-color: var(--gold); }
+  .slider-value { color: var(--gold); font-weight: 700; margin-left: 8px; }
+
+  /* ===== Prompt preview ===== */
+  .prompt-preview {
+    background: #0f0c08;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: var(--emerald);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    min-height: 60px;
+  }
+
+  /* ===== Terminal ===== */
+  .terminal {
+    background: #0a0805;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: var(--emerald);
+    min-height: 140px;
+    margin: 12px 0;
+  }
+  .terminal-line { opacity: 0; animation: fadeIn .4s forwards; }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  /* ===== Phone frame ===== */
+  .phone-frame {
+    background: #0a0805;
+    border: 8px solid #2a241c;
+    border-radius: 28px;
+    max-width: 380px;
+    margin: 16px auto;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .phone-bar {
+    background: #1d1914;
+    padding: 6px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .phone-content { background: #14110d; padding: 14px; min-height: 420px; }
+
+  /* ===== In-app quiz ===== */
+  .app-logo { text-align: center; font-family: 'Playfair Display', serif; font-size: 1.25rem; color: var(--gold); margin-bottom: 10px; font-weight: 700; }
+  .app-q { background: var(--card-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+  .app-q-text { font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+  .app-opt {
+    display: block; width: 100%; text-align: left;
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all var(--t);
+    font-family: inherit;
+  }
+  .app-opt:hover:not(:disabled) { border-color: var(--gold); }
+  .app-opt.correct { background: rgba(52,211,153,.15); border-color: var(--emerald); color: var(--emerald); }
+  .app-opt.wrong { background: rgba(229,96,77,.15); border-color: var(--error); color: var(--error); }
+  .app-opt:disabled { cursor: default; }
+
+  /* ===== Grade table ===== */
+  .grade-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+  .grade-table th, .grade-table td { border: 1px solid var(--border); padding: 5px 8px; text-align: left; }
+  .grade-table th { background: var(--card-2); color: var(--gold); }
+  .grade-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+
+  /* ===== Compare table ===== */
+  .compare-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: .9rem; }
+  .compare-table th, .compare-table td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+  .compare-table th { background: var(--card-2); color: var(--gold); }
+
+  /* ===== Modal ===== */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 500;
+    padding: 20px;
+    animation: fadeIn .3s forwards;
+  }
+  .modal-card {
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: var(--shadow);
+  }
+
+  /* ===== Badges ===== */
+  .score-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(212,162,78,.12);
+    color: var(--gold);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: .85rem;
+    font-weight: 700;
+    border: 1px solid var(--gold);
+  }
+  .ver-badge {
+    display: inline-block;
+    background: rgba(52,211,153,.15);
+    color: var(--emerald);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: .75rem;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+
+  /* ===== Diff block ===== */
+  .diff-block {
+    background: #0f0c08;
+    border-left: 3px solid var(--emerald);
+    padding: 8px 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: var(--emerald);
+    margin: 8px 0;
+    border-radius: 4px;
+  }
+
+  /* ===== Reflection ===== */
+  .reflect-q {
+    background: var(--card-2);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    margin: 8px 0;
+    border-radius: 4px;
+    font-style: italic;
+  }
+
+  /* ===== Limits notice ===== */
+  .limits-notice {
+    background: rgba(229,96,77,.08);
+    border: 1px solid rgba(229,96,77,.4);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin: 12px 0;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 64px 12px 60px; }
+    .card { padding: 16px; }
+    .card-title { font-size: 1.15rem; }
+    .avatar-img, .avatar-fallback { width: 48px; height: 48px; font-size: 24px; }
+    .app-grid { grid-template-columns: 1fr; }
+    .phone-frame { max-width: 100%; }
+    .milestone { font-size: 10px; padding: 6px 4px; }
+    .grid-2 { grid-template-columns: 1fr !important; }
+  }
+
+  /* ===== Reduced motion ===== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+    }
+  }
+
+  /* ===== Utilities ===== */
+  .hidden { display: none !important; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .spacer { flex: 1; }
+  .text-gold { color: var(--gold); }
+  .text-emerald { color: var(--emerald); }
+  .text-error { color: var(--error); }
+  .text-muted { color: var(--muted); }
+  .text-center { text-align: center; }
+  .mt-12 { margin-top: 12px; }
+  .mb-12 { margin-bottom: 12px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .screen { animation: screenIn 400ms ease; }
+  @keyframes screenIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        /* === Guía de clase (preguntas para debatir) === */
+        .sim-guide{position:fixed;top:50%;right:0;z-index:200;width:30px;height:84px;transform:translateY(-50%);
+            display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;
+            color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
+            border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-right:none;border-radius:12px 0 0 12px;
+            -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+            transition:width .2s,color .2s}
+        .sim-guide:hover,.sim-guide:focus-visible,.sim-guide[aria-expanded="true"]{color:var(--sim-home-hi,#fff);width:36px}
+        .sim-guide.is-pulsing{animation:guidePulse 1.6s ease-in-out 4}
+        @keyframes guidePulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 7px var(--sim-home-bd,rgba(255,255,255,.2))}}
+        .guide-panel{position:fixed;top:0;right:0;bottom:0;z-index:300;width:min(380px,100vw);
+            display:flex;flex-direction:column;color:#e8e6e1;
+            background:color-mix(in srgb,var(--sim-home-fg,#888) 9%,#0d0d0d);
+            border-left:1px solid var(--sim-home-bd,rgba(255,255,255,.15));box-shadow:-12px 0 32px rgba(0,0,0,.5);
+            transform:translateX(100%);visibility:hidden;transition:transform .3s ease,visibility 0s linear .3s}
+        .guide-panel.is-open{transform:translateX(0);visibility:visible;transition:transform .3s ease}
+        .guide-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 18px 12px}
+        .guide-title{font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--sim-home-fg,#fff);margin:0}
+        .guide-actions{display:flex;gap:6px}
+        .guide-close,.guide-popout{width:32px;height:32px;cursor:pointer;color:inherit;background:transparent;
+            border:1px solid rgba(255,255,255,.18);border-radius:8px;font-size:14px}
+        .guide-close:hover,.guide-close:focus-visible,.guide-popout:hover,.guide-popout:focus-visible{color:var(--sim-home-hi,#fff)}
+        .guide-tabs{display:flex;gap:6px;padding:0 18px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+        .guide-tab{flex:1;padding:8px 6px;cursor:pointer;font:inherit;font-size:12px;color:inherit;
+            background:transparent;border:1px solid rgba(255,255,255,.18);border-radius:8px;opacity:.7}
+        .guide-tab[aria-selected="true"]{opacity:1;color:var(--sim-home-hi,#fff);background:var(--sim-home-bg,rgba(255,255,255,.08));border-color:var(--sim-home-bd,rgba(255,255,255,.3))}
+        .guide-questions{flex:1;overflow-y:auto;margin:0;padding:16px 18px 24px 38px;line-height:1.55;font-size:14px;text-align:left}
+        .guide-questions li{margin-bottom:14px;padding-left:4px}
+        .guide-questions li::marker{color:var(--sim-home-fg,#fff);font-weight:600}
+        .guide-toast{position:fixed;left:50%;bottom:20px;z-index:250;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+            display:flex;align-items:center;gap:12px;max-width:min(520px,calc(100vw - 32px));padding:10px 14px;
+            font-size:13px;line-height:1.4;color:#e8e6e1;border-radius:12px;
+            background:color-mix(in srgb,var(--sim-home-fg,#888) 12%,#0d0d0d);
+            border:1px solid var(--sim-home-bd,rgba(255,255,255,.2));box-shadow:0 8px 24px rgba(0,0,0,.45);
+            transition:opacity .4s ease,transform .4s ease}
+        .guide-toast.is-visible{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+        .guide-toast-open{flex-shrink:0;padding:6px 12px;cursor:pointer;font:inherit;font-size:12px;font-weight:600;
+            color:var(--sim-home-hi,#fff);background:var(--sim-home-bg,rgba(255,255,255,.08));
+            border:1px solid var(--sim-home-bd,rgba(255,255,255,.3));border-radius:8px}
+        .guide-toast-dismiss{flex-shrink:0;width:24px;height:24px;cursor:pointer;color:inherit;opacity:.6;background:transparent;border:none;font-size:13px}
+        @media (prefers-reduced-motion:reduce){.guide-panel,.guide-toast{transition:none}.sim-guide.is-pulsing{animation:none}}
+</style>
+</head>
+<body>
+<!-- Fixed: home button -->
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio">
+  <i class="fa-solid fa-house"></i>
+</a>
+<!-- Fixed: language button -->
+<button class="sim-lang" id="langBtn" title="Switch language" aria-label="Switch language">EN</button>
+<button type="button" class="sim-guide" id="simGuideBtn" aria-expanded="false" aria-controls="guidePanel" aria-label="Guía de clase" title="Guía de clase"><i class="fa-regular fa-comments" aria-hidden="true"></i></button>
+<aside class="guide-panel" id="guidePanel" role="dialog" aria-labelledby="guideTitle">
+  <div class="guide-header">
+    <h2 class="guide-title" id="guideTitle"></h2>
+    <div class="guide-actions">
+      <button type="button" class="guide-popout" id="guidePopout" aria-label="Abrir en pestaña nueva" title="Abrir en pestaña nueva"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></button>
+      <button type="button" class="guide-close" id="guideClose" aria-label="Cerrar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+  </div>
+  <div class="guide-tabs" role="tablist" id="guideTabs"></div>
+  <ol class="guide-questions" id="guideQuestions"></ol>
+</aside>
+<div class="guide-toast" id="guideToast" role="status"></div>
+
+<!-- Progress bar -->
+<div class="progress-wrap">
+  <div class="progress-track" id="progressTrack">
+    <div class="milestone active" data-phase="1"><i class="fa-solid fa-list-check"></i> <span data-key="phase1_title"></span></div>
+    <div class="milestone" data-phase="2"><i class="fa-solid fa-wand-magic-sparkles"></i> <span data-key="phase2_title"></span></div>
+    <div class="milestone" data-phase="3"><i class="fa-solid fa-sliders"></i> <span data-key="phase3_title"></span></div>
+  </div>
+</div>
+
+<!-- Main container -->
+<main class="container" id="main" aria-live="polite"></main>
+
+<script>
+/* ============================================================
+   i18n — bilingual ES/EN
+   ============================================================ */
+function getLang(){ return localStorage.getItem('simlab_lang')==='en'?'en':'es'; }
+function setLang(language){ localStorage.setItem('simlab_lang',language); }
+const LANG = getLang();
+document.documentElement.lang = LANG;
+
+const I18N = {
+  es: {
+    confirm_switch: "¿Cambiar al idioma inglés? Se reiniciará la simulación.",
+    name_q: "¿Cómo te llamas?",
+    name_ph: "Escribe tu nombre",
+    name_note: "Solo lo usaremos para personalizar tu experiencia.",
+    name_btn: "Continuar",
+    name_default: "Docente",
+    phase1_title: "Elige tu app",
+    phase2_title: "Plan B: constrúyela",
+    phase3_title: "Ajústala",
+    welcome: "¡Hola, {name}! Soy Profe Arturito.",
+    welcome_text: "Vamos a vivir un reto: elegir apps genéricas para tu clase y luego construir la tuya. Toma decisiones y observa qué pasa. ¿List@?",
+    start_btn: "Comenzar el reto",
+    phase1_intro: "Fase 1 — Cuatro retos con apps genéricas",
+    phase1_intro_text: "Para cada situación, prueba las apps disponibles. Cada una tendrá un límite. Tu frustración subirá con cada intento.",
+    next_challenge: "Siguiente reto",
+    finish_phase1: "Terminar fase 1",
+    try_again: "Probar otra app",
+    tried_apps: "Apps probadas",
+    frustration: "Frustración del docente",
+    points: "Puntos",
+    paywall_msg: "Límite alcanzado: 6 jugadores. Pásate a Pro USD 12/mes para continuar.",
+    paywall_2: "Sin resultados individuales. Solo verás un promedio.",
+    paywall_3: "Exportación bloqueada. Suscríbete para exportar.",
+    lock_msg: "Edición de contexto local: disponible solo en plan Premium.",
+    lock_2: "Imágenes locales: no soportadas en este plan.",
+    lock_3: "Contenido predefinido: no editable.",
+    data_meter: "Datos consumidos",
+    data_collect: "Datos que la app recolecta",
+    add_student: "Agregar estudiante",
+    msg_instruction: "Toca cada mensaje para asignarlo a la nota correcta.",
+    assigned: "Asignados: {n}/5",
+    students_label: "Estudiantes",
+    phase1_summary_title: "Resumen de Fase 1",
+    phase1_summary_text: "Toda opción tuvo un precio: un muro de pago, datos sin vincular, contextos ajenos, conectividad cara.",
+    ajuste_label: "Ajuste herramienta–necesidad",
+    phase2_intro: "Fase 2 — Plan B: constrúyela tú",
+    phase2_intro_text: "¿Y si, en vez de adaptarte a la app, la app se adapta a ti? Especifica con claridad lo que necesitas. La IA construirá tu herramienta.",
+    field_what: "¿Qué debe hacer?",
+    field_who: "¿Para quién? (n.º de estudiantes)",
+    field_context: "¿Contexto local?",
+    field_not: "¿Qué NO debe hacer?",
+    field_lang: "¿Idioma?",
+    optional_note: "Pulsa un chip o escribe tu propio texto.",
+    prompt_label: "Prompt armado",
+    what_quiz: "Quiz de repaso",
+    what_notes: "Registrar notas",
+    what_both: "Ambos",
+    ctx_port: "Puerto",
+    ctx_fishing: "Pesca",
+    ctx_tourism: "Turismo",
+    ctx_none: "Ninguno",
+    not_pay: "Cobrar",
+    not_account: "Pedir cuenta",
+    not_data: "Usar muchos datos",
+    not_ads: "Mostrar publicidad",
+    lang_es: "Español",
+    lang_en: "Inglés",
+    lang_both: "Ambos",
+    generate_btn: "Generar",
+    refine_btn: "Refinar prompt",
+    score_spec: "Puntuación de especificación",
+    spec_low: "Tu especificación es ambigua. La app generada tiene una función menos. Refina el prompt para obtener una herramienta completa.",
+    spec_ok: "Especificación clara. La app generada está completa.",
+    terminal_analyzing: "Analizando requisitos…",
+    terminal_iface: "Generando interfaz…",
+    terminal_grades: "Conectando libro de notas…",
+    terminal_name: "Aplicando nombre: {name}…",
+    terminal_done: "Listo.",
+    preview_label: "Vista previa funcional",
+    phase3_intro: "Fase 3 — Ajústala",
+    phase3_intro_text: "Tu app ya existe. Ahora pídele cambios. Cada uno se aplica en vivo y sube la versión de tu herramienta.",
+    change1: "Que califique automáticamente",
+    change2: "Que hable de mi contexto",
+    change3: "Que funcione en español e inglés",
+    change4: "Que forme equipos",
+    change_min: "Elige al menos 3 cambios",
+    apply_changes: "Aplicar cambios seleccionados",
+    changes_applied: "{n} cambios aplicados",
+    change_diff: "Mini-prompt de seguimiento",
+    contradiction_warn: "Ojo: este cambio contradice algo de tu especificación inicial. Iterar sobre una buena base es parte del proceso.",
+    phase3_done: "Terminar",
+    end_title: "{name}, tu app Quiz-{name} v{ver} está lista",
+    end_compare: "Antes vs. después",
+    end_msg_key: "El recurso escaso no fue programar, fue especificar con claridad.",
+    end_limits_title: "Crear no es mantener",
+    end_limits_text: "Toda herramienta propia requiere cuidar datos, respaldo y continuidad. ¿Quién la mantiene si tú no estás?",
+    end_reflect_title: "Dos preguntas para llevarte",
+    end_reflect1: "¿Qué necesitas especificar con claridad la próxima vez que elijas o construyas una herramienta?",
+    end_reflect2: "¿Quién mantendrá tu herramienta si tú no estás? ¿Qué plan mínimo necesitas?",
+    download_btn: "Llévate tu app",
+    replay_btn: "Jugar de nuevo",
+    home_btn: "Volver al inicio",
+    limit_paywall: "Muro de pago",
+    limit_no_grades: "Notas sin vincular a mensajes",
+    limit_no_export: "Exportación bloqueada",
+    limit_no_context: "Contexto ajeno (nieve/Nueva York)",
+    limit_data: "Datos móviles caros (80 MB)",
+    disappeared: "Limitaciones que desaparecieron",
+    next_phase: "Siguiente fase",
+    app_label: "App",
+    q_correct: "¡Correcto!",
+    q_wrong: "Incorrecto.",
+    your_grade: "Nota",
+    approved: "Aprobado",
+    reinforce: "Refuerzo",
+    teams_ranking: "Ranking por equipos",
+    team_a: "Equipo Puerto",
+    team_b: "Equipo Pesca",
+    team_c: "Equipo Turismo",
+    inapp_lang_btn: "EN",
+    inapp_lang_btn_es: "ES",
+    question1: "¿Qué producto llega al puerto de Manta para exportarse?",
+    question2: "¿Cuál es una actividad económica típica de Manta?",
+    question3: "¿Qué pasa con la pesca en temporada alta?",
+    opt1_a: "Atún", opt1_b: "Nieve", opt1_c: "Vino",
+    opt2_a: "Turismo de playa", opt2_b: "Esquí", opt2_c: "Minería",
+    opt3_a: "Aumenta la captura", opt3_b: "Se cierra el puerto", opt3_c: "Se acaba el pescado",
+    quiz_intro: "Responde el mini-quiz de 3 preguntas. Tu nota se registrará en el libro.",
+    grades_book: "Libro de notas",
+    not_specified: "(no especificado)",
+    prompt_skeleton: "Crea una app [{what}] para {who} estudiantes{context}{nots}, en {lang}. Llámala Quiz-{name}.",
+    challenge: "Reto",
+    of: "de",
+    situation: "Situación",
+    msg1: "María: ¿Mi nota del parcial?",
+    msg2: "José: ¿Saco 8 o 9?",
+    msg3: "Luis: ¿Cómo voy en notas?",
+    msg4: "Ana: ¿Mi promedio?",
+    msg5: "Carlos: ¿Cuándo veo mi nota?",
+    generic_q1: "¿Cuánto es 7 × 8?",
+    generic_q2: "¿Capital de Ecuador?",
+    generic_q3: "¿Cuánto es 5 + 3 × 2?",
+    generic_opt1a: "54", generic_opt1b: "56", generic_opt1c: "58",
+    generic_opt2a: "Quito", generic_opt2b: "Guayaquil", generic_opt2c: "Cuenca",
+    generic_opt3a: "16", generic_opt3b: "11", generic_opt3c: "10"
+  },
+  en: {
+    confirm_switch: "Switch to Spanish? The simulation will restart.",
+    name_q: "What's your name?",
+    name_ph: "Type your name",
+    name_note: "We'll only use it to personalize your experience.",
+    name_btn: "Continue",
+    name_default: "Teacher",
+    phase1_title: "Pick your app",
+    phase2_title: "Plan B: build it",
+    phase3_title: "Tune it",
+    welcome: "Hi, {name}! I'm Profe Arturito.",
+    welcome_text: "We'll go through a challenge: pick generic apps for your class, then build your own. Make decisions and watch what happens. Ready?",
+    start_btn: "Start the challenge",
+    phase1_intro: "Phase 1 — Four challenges with generic apps",
+    phase1_intro_text: "For each situation, try the available apps. Each one has a limit. Your frustration rises with every attempt.",
+    next_challenge: "Next challenge",
+    finish_phase1: "Finish phase 1",
+    try_again: "Try another app",
+    tried_apps: "Apps tried",
+    frustration: "Teacher's frustration",
+    points: "Points",
+    paywall_msg: "Limit reached: 6 players. Upgrade to Pro USD 12/mo to continue.",
+    paywall_2: "No individual results. You'll only see an average.",
+    paywall_3: "Export locked. Subscribe to export.",
+    lock_msg: "Local context editing: Premium plan only.",
+    lock_2: "Local images: not supported on this plan.",
+    lock_3: "Predefined content: not editable.",
+    data_meter: "Data consumed",
+    data_collect: "Data the app collects",
+    add_student: "Add student",
+    msg_instruction: "Tap each message to assign it to the correct grade.",
+    assigned: "Assigned: {n}/5",
+    students_label: "Students",
+    phase1_summary_title: "Phase 1 summary",
+    phase1_summary_text: "Every choice had a price: a paywall, unlinked data, foreign contexts, costly connectivity.",
+    ajuste_label: "Tool–need fit",
+    phase2_intro: "Phase 2 — Plan B: build it yourself",
+    phase2_intro_text: "What if, instead of adapting to the app, the app adapted to you? Specify clearly what you need. AI will build your tool.",
+    field_what: "What should it do?",
+    field_who: "For whom? (number of students)",
+    field_context: "Local context?",
+    field_not: "What should it NOT do?",
+    field_lang: "Language?",
+    optional_note: "Pick a chip or type your own text.",
+    prompt_label: "Assembled prompt",
+    what_quiz: "Review quiz",
+    what_notes: "Record grades",
+    what_both: "Both",
+    ctx_port: "Port",
+    ctx_fishing: "Fishing",
+    ctx_tourism: "Tourism",
+    ctx_none: "None",
+    not_pay: "Charge money",
+    not_account: "Require account",
+    not_data: "Use heavy data",
+    not_ads: "Show ads",
+    lang_es: "Spanish",
+    lang_en: "English",
+    lang_both: "Both",
+    generate_btn: "Generate",
+    refine_btn: "Refine prompt",
+    score_spec: "Specification score",
+    spec_low: "Your specification is ambiguous. The generated app is missing one function. Refine the prompt to get a complete tool.",
+    spec_ok: "Clear specification. The generated app is complete.",
+    terminal_analyzing: "Analyzing requirements…",
+    terminal_iface: "Generating interface…",
+    terminal_grades: "Connecting grade book…",
+    terminal_name: "Applying name: {name}…",
+    terminal_done: "Done.",
+    preview_label: "Functional preview",
+    phase3_intro: "Phase 3 — Tune it",
+    phase3_intro_text: "Your app exists now. Now ask for changes. Each one applies live and bumps your tool's version.",
+    change1: "Auto-grade answers",
+    change2: "Speak about my context",
+    change3: "Work in Spanish and English",
+    change4: "Form teams",
+    change_min: "Pick at least 3 changes",
+    apply_changes: "Apply selected changes",
+    changes_applied: "{n} changes applied",
+    change_diff: "Follow-up mini-prompt",
+    contradiction_warn: "Heads up: this change contradicts something in your initial spec. Iterating on a good base is part of the process.",
+    phase3_done: "Finish",
+    end_title: "{name}, your app Quiz-{name} v{ver} is ready",
+    end_compare: "Before vs. after",
+    end_msg_key: "The scarce resource wasn't coding — it was specifying clearly.",
+    end_limits_title: "Creating isn't maintaining",
+    end_limits_text: "Every tool of your own requires caring for data, backups and continuity. Who maintains it if you're not around?",
+    end_reflect_title: "Two questions to take with you",
+    end_reflect1: "What do you need to specify clearly next time you choose or build a tool?",
+    end_reflect2: "Who will maintain your tool if you're not around? What minimum plan do you need?",
+    download_btn: "Take your app",
+    replay_btn: "Play again",
+    home_btn: "Back to home",
+    limit_paywall: "Paywall",
+    limit_no_grades: "Grades not linked to messages",
+    limit_no_export: "Export locked",
+    limit_no_context: "Foreign context (snow/New York)",
+    limit_data: "Costly mobile data (80 MB)",
+    disappeared: "Limitations that disappeared",
+    next_phase: "Next phase",
+    app_label: "App",
+    q_correct: "Correct!",
+    q_wrong: "Incorrect.",
+    your_grade: "Grade",
+    approved: "Approved",
+    reinforce: "Needs reinforcement",
+    teams_ranking: "Team ranking",
+    team_a: "Team Port",
+    team_b: "Team Fishing",
+    team_c: "Team Tourism",
+    inapp_lang_btn: "ES",
+    inapp_lang_btn_es: "EN",
+    question1: "What product arrives at the port of Manta for export?",
+    question2: "Which is a typical economic activity in Manta?",
+    question3: "What happens during peak fishing season?",
+    opt1_a: "Tuna", opt1_b: "Snow", opt1_c: "Wine",
+    opt2_a: "Beach tourism", opt2_b: "Skiing", opt2_c: "Mining",
+    opt3_a: "Catch increases", opt3_b: "Port closes", opt3_c: "Fish runs out",
+    quiz_intro: "Answer the 3-question mini-quiz. Your grade will be recorded in the book.",
+    grades_book: "Grade book",
+    not_specified: "(not specified)",
+    prompt_skeleton: "Create a [{what}] app for {who} students{context}{nots}, in {lang}. Call it Quiz-{name}.",
+    challenge: "Challenge",
+    of: "of",
+    situation: "Situation",
+    msg1: "Mary: My midterm grade?",
+    msg2: "Joe: Did I get 8 or 9?",
+    msg3: "Luke: How am I doing on grades?",
+    msg4: "Anna: My average?",
+    msg5: "Charles: When do I see my grade?",
+    generic_q1: "What is 7 × 8?",
+    generic_q2: "Capital of Ecuador?",
+    generic_q3: "What is 5 + 3 × 2?",
+    generic_opt1a: "54", generic_opt1b: "56", generic_opt1c: "58",
+    generic_opt2a: "Quito", generic_opt2b: "Guayaquil", generic_opt2c: "Cuenca",
+    generic_opt3a: "16", generic_opt3b: "11", generic_opt3c: "10"
+  }
+};
+
+function t(key, vars){
+  let str = (I18N[LANG] && I18N[LANG][key]) || I18N.es[key] || key;
+  if (vars) {
+    for (const varKey in vars) {
+      str = str.replace(new RegExp('\\{' + varKey + '\\}', 'g'), vars[varKey]);
+    }
+  }
+  return str;
+}
+
+/* ============================================================
+   Challenges data — ES + EN with identical structure
+   ============================================================ */
+const CHALLENGES_ALL = {
+  es: [
+    {
+      id: 1,
+      theme: "Gamificación",
+      icon: "fa-gamepad",
+      situation: "Quieres gamificar un repaso con tu clase de 30 estudiantes.",
+      apps: [
+        { name: "KaPlay", desc: "Versión gratuita: admite 6 jugadores." },
+        { name: "QuizMate", desc: "30 jugadores, pero sin ver resultados individuales." },
+        { name: "PlayLearn", desc: "Todo incluido, pero cuesta USD 12/mes." }
+      ],
+      miniType: "students",
+      miniConfig: { limit: 6, total: 30 }
+    },
+    {
+      id: 2,
+      theme: "Comunicación y calificación",
+      icon: "fa-comments",
+      situation: "25 estudiantes te escriben por WhatsApp, correo y el aula virtual preguntando por sus notas.",
+      apps: [
+        { name: "ChatClass", desc: "Mensajería; no registra notas." },
+        { name: "GradeBook Pro", desc: "Notas; sin mensajes." },
+        { name: "CampusHub", desc: "Todo en uno; exportación bloqueada." }
+      ],
+      miniType: "messages",
+      miniConfig: { total: 5 }
+    },
+    {
+      id: 3,
+      theme: "Contextualización",
+      icon: "fa-map-location-dot",
+      situation: "Tu clase es en Manta, Ecuador; tus estudiantes conocen el puerto, la pesca y el turismo.",
+      apps: [
+        { name: "TemplaHub", desc: "Plantillas con nieve y Nueva York; editar contexto es premium." },
+        { name: "EduCards", desc: "Editable pero sin imágenes locales." },
+        { name: "LearnLab", desc: "Contenido ya hecho, no editable." }
+      ],
+      miniType: "context",
+      miniConfig: {}
+    },
+    {
+      id: 4,
+      theme: "Conectividad y datos",
+      icon: "fa-signal",
+      situation: "Tus estudiantes usan datos móviles limitados y te preocupa dónde se guardan sus datos.",
+      apps: [
+        { name: "StreamQuiz", desc: "Video pesado, 80 MB por sesión." },
+        { name: "CloudClass", desc: "Pide cuenta con datos personales; servidores en el extranjero." },
+        { name: "LiteApp", desc: "Liviana, pero sin reportes." }
+      ],
+      miniType: "data",
+      miniConfig: { megabytes: 80 }
+    }
+  ],
+  en: [
+    {
+      id: 1,
+      theme: "Gamification",
+      icon: "fa-gamepad",
+      situation: "You want to gamify a review with your 30-student class.",
+      apps: [
+        { name: "KaPlay", desc: "Free tier: only 6 players." },
+        { name: "QuizMate", desc: "30 players, but no individual results." },
+        { name: "PlayLearn", desc: "Everything included, but USD 12/mo." }
+      ],
+      miniType: "students",
+      miniConfig: { limit: 6, total: 30 }
+    },
+    {
+      id: 2,
+      theme: "Communication and grading",
+      icon: "fa-comments",
+      situation: "25 students message you via WhatsApp, email and the LMS asking about their grades.",
+      apps: [
+        { name: "ChatClass", desc: "Messaging; no grade book." },
+        { name: "GradeBook Pro", desc: "Grades; no messages." },
+        { name: "CampusHub", desc: "All-in-one; export locked." }
+      ],
+      miniType: "messages",
+      miniConfig: { total: 5 }
+    },
+    {
+      id: 3,
+      theme: "Contextualization",
+      icon: "fa-map-location-dot",
+      situation: "Your class is in Manta, Ecuador; your students know the port, fishing and tourism.",
+      apps: [
+        { name: "TemplaHub", desc: "Templates with snow and New York; editing context is premium." },
+        { name: "EduCards", desc: "Editable but no local images." },
+        { name: "LearnLab", desc: "Ready-made content, not editable." }
+      ],
+      miniType: "context",
+      miniConfig: {}
+    },
+    {
+      id: 4,
+      theme: "Connectivity and data",
+      icon: "fa-signal",
+      situation: "Your students use limited mobile data and you worry where their data is stored.",
+      apps: [
+        { name: "StreamQuiz", desc: "Heavy video, 80 MB per session." },
+        { name: "CloudClass", desc: "Requires account with personal data; servers abroad." },
+        { name: "LiteApp", desc: "Lightweight, but no reports." }
+      ],
+      miniType: "data",
+      miniConfig: { megabytes: 80 }
+    }
+  ]
+};
+const CHALLENGES = CHALLENGES_ALL[LANG];
+
+/* ============================================================
+   Global state
+   ============================================================ */
+const state = {
+  phase: 0,
+  userName: "",
+  safeName: "",
+  appName: "",
+  phase1: {
+    challengeIndex: 0,
+    scores: [0, 0, 0, 0],
+    triedApps: [[false,false,false],[false,false,false],[false,false,false],[false,false,false]],
+    selectedApps: [-1, -1, -1, -1],
+    frustration: 0,
+    miniState: {}
+  },
+  phase2: {
+    what: null,
+    who: 30,
+    context: null,
+    nots: [],
+    lang: null,
+    specScore: 0,
+    generated: false
+  },
+  phase3: {
+    selected: [],
+    applied: [],
+    version: "1.0",
+    ajuste: 38
+  }
+};
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+function escapeHtml(text){
+  return String(text).replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[ch]));
+}
+
+function sanitizeAppName(name){
+  const firstWord = String(name || '').trim().split(/\s+/)[0] || t('name_default');
+  const cleaned = firstWord.replace(/[^A-Za-z0-9-]/g, '').slice(0, 14);
+  return cleaned || (LANG === 'es' ? 'Docente' : 'Teacher');
+}
+
+const mainElement = document.getElementById('main');
+
+function setProgress(phase){
+  document.querySelectorAll('.milestone').forEach(milestone => {
+    const milestonePhase = parseInt(milestone.dataset.phase, 10);
+    milestone.classList.remove('active', 'done');
+    if (milestonePhase < phase) milestone.classList.add('done');
+    else if (milestonePhase === phase) milestone.classList.add('active');
+  });
+}
+
+function render(html){
+  mainElement.innerHTML = html;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function avatarBubble(text){
+  return `
+    <div class="avatar-wrap" aria-live="polite">
+      <img src="avatarProfeArturito.jpg" class="avatar-img" alt="Profe Arturito"
+           onerror="this.outerHTML='<span class=\\'avatar-fallback\\' aria-hidden=\\'true\\'>🧑‍🏫</span>'">
+      <div class="speech-bubble">
+        <div class="speech-name">Profe Arturito</div>
+        <div class="speech-text">${text}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   Name capture (obtenerNombreUsuario)
+   ============================================================ */
+function obtenerNombreUsuario(callback){
+  const stored = sessionStorage.getItem('nombreEstudianteSim');
+  if (stored && stored.trim()) { callback(stored); return; }
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.innerHTML = `
+    <div class="modal-card">
+      <h2 class="card-title">${t('name_q')}</h2>
+      <p class="card-sub">${t('name_note')}</p>
+      <input type="text" class="field-input" id="nameInput" placeholder="${escapeHtml(t('name_ph'))}" maxlength="40" aria-label="${escapeHtml(t('name_q'))}">
+      <button class="btn btn-primary mt-12" id="nameBtn" style="width:100%">${t('name_btn')}</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  const input = overlay.querySelector('#nameInput');
+  input.focus();
+  function confirmName(){
+    let value = input.value.trim();
+    if (!value) value = t('name_default');
+    sessionStorage.setItem('nombreEstudianteSim', value);
+    overlay.remove();
+    callback(value);
+  }
+  overlay.querySelector('#nameBtn').addEventListener('click', confirmName);
+  input.addEventListener('keydown', event => { if (event.key === 'Enter') confirmName(); });
+}
+
+/* ============================================================
+   Language button
+   ============================================================ */
+document.getElementById('langBtn').addEventListener('click', () => {
+  if (confirm(t('confirm_switch'))) {
+    setLang(LANG === 'es' ? 'en' : 'es');
+    location.reload();
+  }
+});
+
+function updateStaticLabels(){
+  document.querySelectorAll('[data-key]').forEach(element => {
+    element.textContent = t(element.dataset.key);
+  });
+  document.getElementById('langBtn').textContent = (LANG === 'es' ? 'EN' : 'ES');
+}
+updateStaticLabels();
+if (LANG === 'en') document.title = 'The Toolmaker Challenge · Serious game for teachers';
+
+/* ============================================================
+   Welcome / Start
+   ============================================================ */
+function startGame(){
+  obtenerNombreUsuario(name => {
+    state.userName = name;
+    state.safeName = sanitizeAppName(name);
+    state.appName = 'Quiz-' + state.safeName;
+    render(`
+      <div class="screen">
+        <div class="card">
+          <h1 class="card-title">${t('welcome', { name: escapeHtml(name) })}</h1>
+          ${avatarBubble(t('welcome_text'))}
+          <button class="btn btn-primary" onclick="startPhase1()">${t('start_btn')} <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+    `);
+  });
+}
+
+/* ============================================================
+   PHASE 1 — generic apps
+   ============================================================ */
+function startPhase1(){
+  state.phase = 1;
+  setProgress(1);
+  state.phase1.challengeIndex = 0;
+  state.phase1.scores = [0, 0, 0, 0];
+  state.phase1.triedApps = [[false,false,false],[false,false,false],[false,false,false],[false,false,false]];
+  state.phase1.selectedApps = [-1, -1, -1, -1];
+  state.phase1.frustration = 0;
+  state.phase1.miniState = {};
+  renderChallenge();
+}
+
+function renderChallenge(){
+  const challengeIndex = state.phase1.challengeIndex;
+  const challenge = CHALLENGES[challengeIndex];
+  const tried = state.phase1.triedApps[challengeIndex];
+
+  const appsHtml = challenge.apps.map((app, appIndex) => `
+    <button class="app-card ${tried[appIndex] ? 'tried' : ''} ${state.phase1.selectedApps[challengeIndex] === appIndex ? 'selected' : ''}"
+            onclick="handleAppChoice(${challengeIndex}, ${appIndex})"
+            aria-label="${escapeHtml(app.name)}: ${escapeHtml(app.desc)}">
+      <div class="app-name">${escapeHtml(app.name)}</div>
+      <div class="app-desc">${escapeHtml(app.desc)}</div>
+    </button>
+  `).join('');
+
+  const isLast = challengeIndex === CHALLENGES.length - 1;
+
+  render(`
+    <div class="screen">
+      <div class="card">
+        <div class="row mb-12">
+          <span class="score-badge"><i class="fa-solid ${challenge.icon}"></i> ${t('challenge')} ${challengeIndex + 1} ${t('of')} ${CHALLENGES.length}: ${escapeHtml(challenge.theme)}</span>
+          <div class="spacer"></div>
+          <span class="score-badge"><i class="fa-solid fa-coins"></i> ${t('points')}: ${state.phase1.scores[challengeIndex]}</span>
+        </div>
+        <p class="card-sub"><strong>${t('situation')}:</strong> ${escapeHtml(challenge.situation)}</p>
+        <div class="app-grid">${appsHtml}</div>
+        <div id="miniArea"></div>
+        <div class="mt-12">
+          <div class="meter-label"><span>${t('frustration')}</span><span>${state.phase1.frustration}/100</span></div>
+          <div class="meter"><div class="meter-fill" style="width:${state.phase1.frustration}%"></div></div>
+        </div>
+        <div class="row mt-12">
+          <div class="spacer"></div>
+          <button class="btn ${isLast ? 'btn-emerald' : 'btn-primary'}"
+                  onclick="nextChallenge()"
+                  ${state.phase1.selectedApps[challengeIndex] === -1 ? 'disabled' : ''}>
+            ${isLast ? t('finish_phase1') : t('next_challenge')} <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  `);
+
+  // Re-render mini interaction if an app was already selected
+  if (state.phase1.selectedApps[challengeIndex] !== -1) {
+    renderMiniInteraction(challenge, state.phase1.selectedApps[challengeIndex]);
+  }
+}
+
+function handleAppChoice(challengeIndex, appIndex){
+  const challenge = CHALLENGES[challengeIndex];
+  const wasTried = state.phase1.triedApps[challengeIndex][appIndex];
+  if (!wasTried) {
+    state.phase1.triedApps[challengeIndex][appIndex] = true;
+  }
+  state.phase1.selectedApps[challengeIndex] = appIndex;
+
+  // Scoring: base by app, minus penalty for extra tries
+  const scoreMap = [10, 6, 3];
+  const baseScore = scoreMap[appIndex];
+  const triesCount = state.phase1.triedApps[challengeIndex].filter(Boolean).length;
+  const penalty = Math.max(0, triesCount - 1);
+  state.phase1.scores[challengeIndex] = Math.max(0, baseScore - penalty);
+
+  // Frustration rises per attempt
+  state.phase1.frustration = Math.min(100, state.phase1.frustration + 8);
+
+  renderMiniInteraction(challenge, appIndex);
+  renderChallenge();
+}
+
+function renderMiniInteraction(challenge, appIndex){
+  const area = document.getElementById('miniArea');
+  if (!area) return;
+  let html = '<div class="mini-area">';
+  const config = challenge.miniConfig;
+
+  if (challenge.miniType === 'students') {
+    // Add students one by one; on the 7th, KaPlay shows paywall
+    const stateKey = 'students_' + state.phase1.challengeIndex;
+    if (!state.phase1.miniState[stateKey]) {
+      state.phase1.miniState[stateKey] = { count: 0, locked: false };
+    }
+    const miniState = state.phase1.miniState[stateKey];
+
+    html += `<p class="text-muted">${t('students_label')}: <span id="studentCount">${miniState.count}</span> / ${config.total}</p>`;
+    html += '<div class="student-row" id="studentRow">';
+    for (let i = 0; i < miniState.count; i++) {
+      html += `<span class="student-av">${getAvatarEmoji(i)}</span>`;
+    }
+    html += '</div>';
+
+    if (miniState.locked && appIndex === 0) {
+      html += `<div class="paywall"><i class="fa-solid fa-lock"></i> ${t('paywall_msg')}</div>`;
+    } else if (appIndex === 1) {
+      html += `<div class="paywall"><i class="fa-solid fa-eye-slash"></i> ${t('paywall_2')}</div>`;
+    } else if (appIndex === 2) {
+      html += `<div class="paywall"><i class="fa-solid fa-credit-card"></i> ${t('paywall_3')}</div>`;
+    }
+
+    if (!miniState.locked) {
+      html += `<button class="btn btn-ghost mt-12" onclick="addStudent(${state.phase1.challengeIndex}, ${appIndex})"><i class="fa-solid fa-plus"></i> ${t('add_student')}</button>`;
+    }
+  } else if (challenge.miniType === 'messages') {
+    const messages = [t('msg1'), t('msg2'), t('msg3'), t('msg4'), t('msg5')];
+    html += `<p class="text-muted">${t('msg_instruction')}</p>`;
+    html += `<p class="text-gold" id="assignedLabel">${t('assigned', { n: 0 })}</p>`;
+    html += '<div class="msg-stream">';
+    messages.forEach((message, messageIndex) => {
+      html += `<div class="msg-item" onclick="assignMessage(this)">${escapeHtml(message)}</div>`;
+    });
+    html += '</div>';
+    if (appIndex === 0) {
+      html += `<div class="paywall"><i class="fa-solid fa-unlink"></i> ${t('limit_no_grades')}</div>`;
+    } else if (appIndex === 1) {
+      html += `<div class="paywall"><i class="fa-solid fa-message-slash"></i> ${t('paywall_2')}</div>`;
+    } else {
+      html += `<div class="paywall"><i class="fa-solid fa-lock"></i> ${t('paywall_3')}</div>`;
+    }
+  } else if (challenge.miniType === 'context') {
+    html += `<p class="text-muted">${t('situation')}: Manta — puerto, pesca, turismo</p>`;
+    html += `<div style="padding:10px;border:1px solid var(--border);border-radius:8px;margin:6px 0;">
+      <div class="text-muted">📍 Plantilla: "Nueva York en invierno" <span class="text-error">(ajeno)</span></div>
+      <div class="text-muted mt-12">✏️ Intento de cambiar a "Puerto de Manta"</div>
+    </div>`;
+    if (appIndex === 0) {
+      html += `<div class="paywall"><i class="fa-solid fa-lock"></i> ${t('lock_msg')}</div>`;
+    } else if (appIndex === 1) {
+      html += `<div class="paywall"><i class="fa-solid fa-image"></i> ${t('lock_2')}</div>`;
+    } else {
+      html += `<div class="paywall"><i class="fa-solid fa-lock"></i> ${t('lock_3')}</div>`;
+    }
+  } else if (challenge.miniType === 'data') {
+    const megabytes = appIndex === 0 ? 80 : (appIndex === 1 ? 25 : 5);
+    html += `<div class="meter-label"><span>${t('data_meter')}</span><span>${megabytes} MB</span></div>`;
+    html += `<div class="meter"><div class="meter-fill" style="width:${Math.min(100, megabytes)}%"></div></div>`;
+    html += `<p class="text-muted mt-12">${t('data_collect')}:</p>`;
+    const collectedData = appIndex === 0
+      ? ['Ubicación', 'Cookies de terceros', 'Historial de video']
+      : appIndex === 1
+        ? ['Nombre completo', 'Correo', 'Teléfono', 'Ubicación', 'Datos de pago']
+        : ['Solo progreso del quiz'];
+    html += '<ul class="text-muted" style="margin:4px 0 0 18px;padding:0;font-size:.85rem;">';
+    collectedData.forEach(item => { html += `<li>${escapeHtml(item)}</li>`; });
+    html += '</ul>';
+    if (appIndex === 2) {
+      html += `<div class="paywall"><i class="fa-solid fa-chart-simple"></i> ${t('lock_3')}</div>`;
+    }
+  }
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function getAvatarEmoji(index){
+  const emojis = ['🧑','👩','👨','👧','👦','🧒','👩‍🦱','👨‍🦱','👩‍🦰','👨‍🦰'];
+  return emojis[index % emojis.length];
+}
+
+window.addStudent = function(challengeIndex, appIndex){
+  const challenge = CHALLENGES[challengeIndex];
+  const config = challenge.miniConfig;
+  const stateKey = 'students_' + challengeIndex;
+  if (!state.phase1.miniState[stateKey]) state.phase1.miniState[stateKey] = { count: 0, locked: false };
+  const miniState = state.phase1.miniState[stateKey];
+  if (miniState.locked) return;
+  miniState.count++;
+  // KaPlay: lock at limit (6)
+  if (appIndex === 0 && miniState.count >= config.limit) {
+    miniState.locked = true;
+  }
+  renderMiniInteraction(challenge, appIndex);
+};
+
+window.assignMessage = function(element){
+  element.classList.add('matched');
+  const matched = document.querySelectorAll('.msg-item.matched').length;
+  const label = document.getElementById('assignedLabel');
+  if (label) label.textContent = t('assigned', { n: matched });
+};
+
+function nextChallenge(){
+  const challengeIndex = state.phase1.challengeIndex;
+  if (challengeIndex < CHALLENGES.length - 1) {
+    state.phase1.challengeIndex = challengeIndex + 1;
+    renderChallenge();
+  } else {
+    finishPhase1();
+  }
+}
+
+function finishPhase1(){
+  // Tool-need fit: derived from points (max 40), range 30-45
+  const totalScore = state.phase1.scores.reduce((acc, score) => acc + score, 0);
+  const ajuste = Math.round(30 + (totalScore / 40) * 15);
+  state.phase3.ajuste = ajuste;
+
+  render(`
+    <div class="screen">
+      <div class="card">
+        <h2 class="card-title">${t('phase1_summary_title')}</h2>
+        ${avatarBubble(t('phase1_summary_text'))}
+        <div class="mt-12">
+          <div class="meter-label"><span>${t('ajuste_label')}</span><span id="ajusteNum">0/100</span></div>
+          <div class="meter"><div class="meter-fill" id="ajusteBar" style="width:0%"></div></div>
+        </div>
+        <div class="row mt-12">
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="startPhase2()">${t('next_phase')} <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+  `);
+  // Animate the ajuste bar
+  setTimeout(() => {
+    const bar = document.getElementById('ajusteBar');
+    const num = document.getElementById('ajusteNum');
+    if (bar) bar.style.width = ajuste + '%';
+    if (num) {
+      let current = 0;
+      const interval = setInterval(() => {
+        current += 2;
+        if (current >= ajuste) { current = ajuste; clearInterval(interval); }
+        num.textContent = current + '/100';
+      }, 30);
+    }
+  }, 200);
+}
+
+/* ============================================================
+   PHASE 2 — prompt builder
+   ============================================================ */
+function startPhase2(){
+  state.phase = 2;
+  setProgress(2);
+  renderPromptBuilder();
+}
+
+function renderPromptBuilder(){
+  const builder = state.phase2;
+  render(`
+    <div class="screen">
+      <div class="card">
+        <h2 class="card-title">${t('phase2_intro')}</h2>
+        ${avatarBubble(t('phase2_intro_text'))}
+
+        <div class="field">
+          <label class="field-label">${t('field_what')}</label>
+          <div class="chips">
+            ${['quiz', 'notes', 'both'].map(key => `<button class="chip ${builder.what === key ? 'selected' : ''}" onclick="selectField('what','${key}')">${t('what_' + key)}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">${t('field_who')} <span class="slider-value" id="whoVal">${builder.who}</span></label>
+          <input type="range" min="1" max="60" value="${builder.who}" oninput="state.phase2.who=parseInt(this.value,10);document.getElementById('whoVal').textContent=this.value;updatePromptPreview();">
+        </div>
+
+        <div class="field">
+          <label class="field-label">${t('field_context')}</label>
+          <div class="chips">
+            ${['port', 'fishing', 'tourism', 'none'].map(key => `<button class="chip ${builder.context === key ? 'selected' : ''}" onclick="selectField('context','${key}')">${t('ctx_' + key)}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">${t('field_not')}</label>
+          <div class="chips">
+            ${['pay', 'account', 'data', 'ads'].map(key => `<button class="chip ${builder.nots.includes(key) ? 'selected' : ''}" onclick="toggleNot('${key}')">${t('not_' + key)}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">${t('field_lang')}</label>
+          <div class="chips">
+            ${['es', 'en', 'both'].map(key => `<button class="chip ${builder.lang === key ? 'selected' : ''}" onclick="selectField('lang','${key}')">${t('lang_' + key)}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">${t('prompt_label')}</label>
+          <div class="prompt-preview" id="promptPreview"></div>
+        </div>
+
+        <div class="row mt-12">
+          <span class="score-badge"><i class="fa-solid fa-gauge"></i> ${t('score_spec')}: <span id="specScore">0</span>/100</span>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="generateApp()">${t('generate_btn')} <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        </div>
+      </div>
+    </div>
+  `);
+  updatePromptPreview();
+  updateSpecScore();
+}
+
+window.selectField = function(field, value){
+  state.phase2[field] = value;
+  renderPromptBuilder();
+};
+
+window.toggleNot = function(value){
+  const notsArray = state.phase2.nots;
+  const foundIndex = notsArray.indexOf(value);
+  if (foundIndex >= 0) notsArray.splice(foundIndex, 1);
+  else notsArray.push(value);
+  renderPromptBuilder();
+};
+
+function buildPromptText(){
+  const builder = state.phase2;
+  const whatMap = { quiz: t('what_quiz'), notes: t('what_notes'), both: t('what_both') };
+  const contextMap = { port: t('ctx_port'), fishing: t('ctx_fishing'), tourism: t('ctx_tourism'), none: t('ctx_none') };
+  const langMap = { es: t('lang_es'), en: t('lang_en'), both: t('lang_both') };
+  const what = builder.what ? whatMap[builder.what] : t('not_specified');
+  const context = builder.context ? `, contexto: ${contextMap[builder.context]}` : '';
+  const nots = builder.nots.length ? `, sin: ${builder.nots.map(key => t('not_' + key)).join(', ')}` : '';
+  const lang = builder.lang ? langMap[builder.lang] : t('not_specified');
+  return t('prompt_skeleton', { what, who: builder.who, context, nots, lang, name: state.safeName });
+}
+
+window.updatePromptPreview = function(){
+  const element = document.getElementById('promptPreview');
+  if (element) element.textContent = buildPromptText();
+};
+
+function computeSpecScore(){
+  const builder = state.phase2;
+  let score = 0;
+  if (builder.what) score += 20;
+  if (builder.context) score += 20;
+  if (builder.nots.length > 0) score += 20;
+  if (builder.lang) score += 20;
+  score += 20; // who is always set
+  // Penalties
+  if (builder.nots.length === 0) score -= 10;
+  // Contradiction: "no heavy data" + "both" (more features = more data)
+  if (builder.nots.includes('data') && builder.what === 'both') score -= 15;
+  return Math.max(0, Math.min(100, score));
+}
+
+window.updateSpecScore = function(){
+  const score = computeSpecScore();
+  state.phase2.specScore = score;
+  const element = document.getElementById('specScore');
+  if (element) element.textContent = score;
+};
+
+window.generateApp = function(){
+  const score = computeSpecScore();
+  state.phase2.specScore = score;
+  if (score < 60) {
+    renderRefinePrompt();
+  } else {
+    state.phase2.generated = true;
+    runTerminalAnimation();
+  }
+};
+
+function renderRefinePrompt(){
+  render(`
+    <div class="screen">
+      <div class="card">
+        <h2 class="card-title">${t('spec_low').split('.')[0]}.</h2>
+        ${avatarBubble(t('spec_low'))}
+        <button class="btn btn-primary mt-12" onclick="renderPromptBuilder()">${t('refine_btn')} <i class="fa-solid fa-arrow-rotate-left"></i></button>
+      </div>
+    </div>
+  `);
+}
+
+function runTerminalAnimation(){
+  const lines = [
+    t('terminal_analyzing'),
+    t('terminal_iface'),
+    t('terminal_grades'),
+    t('terminal_name', { name: state.appName }),
+    t('terminal_done')
+  ];
+  render(`
+    <div class="screen">
+      <div class="card">
+        <h2 class="card-title">${t('generate_btn')}…</h2>
+        <div class="terminal" id="terminal"></div>
+      </div>
+    </div>
+  `);
+  const terminal = document.getElementById('terminal');
+  lines.forEach((line, lineIndex) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'terminal-line';
+      div.textContent = '> ' + line;
+      terminal.appendChild(div);
+      if (lineIndex === lines.length - 1) {
+        setTimeout(showPreview, 800);
+      }
+    }, lineIndex * 800);
+  });
+}
+
+function showPreview(){
+  state.phase = 2;
+  setProgress(2);
+  render(`
+    <div class="screen">
+      <div class="card">
+        <h2 class="card-title">${t('preview_label')}: ${escapeHtml(state.appName)} <span class="ver-badge">v1.0</span></h2>
+        ${avatarBubble(t('spec_ok'))}
+        <div id="phonePreview"></div>
+        <div class="row mt-12">
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="startPhase3()">${t('next_phase')} <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+  `);
+  renderPhonePreview({ autoGrade: false, context: false, bilingual: false, teams: false, version: '1.0' });
+}
+
+/* ============================================================
+   Phone preview (mini-app)
+   ============================================================ */
+let inAppLang = LANG;
+
+function renderPhonePreview(options){
+  const wrap = document.getElementById('phonePreview');
+  if (!wrap) return;
+  const questions = getQuizQuestions(options.context);
+  const students = generateStudents(state.phase2.who);
+  const langToggle = options.bilingual ? `
+    <button class="app-opt" style="margin-bottom:8px;text-align:center;" onclick="toggleInAppLang()">
+      <i class="fa-solid fa-language"></i> ${inAppLang === 'es' ? t('inapp_lang_btn') : t('inapp_lang_btn_es')}
+    </button>` : '';
+  const teamRanking = options.teams ? `
+    <div class="app-q">
+      <div class="app-q-text"><i class="fa-solid fa-trophy"></i> ${t('teams_ranking')}</div>
+      <div style="font-size:12px;line-height:1.8;">
+        <div style="color:#60a5fa;">🟦 ${t('team_a')}: 8 pts</div>
+        <div style="color:#34D399;">🟩 ${t('team_b')}: 6 pts</div>
+        <div style="color:#f59e0b;">🟨 ${t('team_c')}: 5 pts</div>
+      </div>
+    </div>` : '';
+
+  wrap.innerHTML = `
+    <div class="phone-frame">
+      <div class="phone-bar"><i class="fa-solid fa-circle" style="color:#e5604d;font-size:6px;"></i> <i class="fa-solid fa-circle" style="color:#D4A24E;font-size:6px;"></i> <i class="fa-solid fa-circle" style="color:#34D399;font-size:6px;"></i> &nbsp; ${escapeHtml(state.appName)} v${escapeHtml(options.version)}</div>
+      <div class="phone-content">
+        <div class="app-logo">🛠️ ${escapeHtml(state.appName)}</div>
+        ${langToggle}
+        <p class="text-muted" style="font-size:12px;">${t('quiz_intro')}</p>
+        <div id="quizArea">${renderQuizQuestions(questions)}</div>
+        ${teamRanking}
+        <div class="app-q">
+          <div class="app-q-text"><i class="fa-solid fa-book"></i> ${t('grades_book')} (${state.phase2.who} ${t('students_label')})</div>
+          <table class="grade-table">
+            <thead><tr><th>#</th><th>${t('students_label')}</th>${options.autoGrade ? '<th>' + t('approved') + '</th>' : ''}<th>${t('your_grade')}</th></tr></thead>
+            <tbody>${renderGradeRows(students, options.autoGrade)}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.toggleInAppLang = function(){
+  inAppLang = inAppLang === 'es' ? 'en' : 'es';
+  const applied = state.phase3.applied;
+  const wrap = document.getElementById('phonePreview');
+  if (wrap) {
+    renderPhonePreview({
+      autoGrade: applied.includes(0),
+      context: applied.includes(1),
+      bilingual: applied.includes(2),
+      teams: applied.includes(3),
+      version: state.phase3.version
+    });
+  }
+};
+
+function getQuizQuestions(contextualized){
+  if (contextualized) {
+    return [
+      { question: t('question1'), options: [t('opt1_a'), t('opt1_b'), t('opt1_c')], correct: 0 },
+      { question: t('question2'), options: [t('opt2_a'), t('opt2_b'), t('opt2_c')], correct: 0 },
+      { question: t('question3'), options: [t('opt3_a'), t('opt3_b'), t('opt3_c')], correct: 0 }
+    ];
+  }
+  return [
+    { question: t('generic_q1'), options: [t('generic_opt1a'), t('generic_opt1b'), t('generic_opt1c')], correct: 1 },
+    { question: t('generic_q2'), options: [t('generic_opt2a'), t('generic_opt2b'), t('generic_opt2c')], correct: 0 },
+    { question: t('generic_q3'), options: [t('generic_opt3a'), t('generic_opt3b'), t('generic_opt3c')], correct: 1 }
+  ];
+}
+
+function renderQuizQuestions(questions){
+  return questions.map((question, questionIndex) => `
+    <div class="app-q" data-question="${questionIndex}">
+      <div class="app-q-text">${questionIndex + 1}. ${escapeHtml(question.question)}</div>
+      ${question.options.map((option, optionIndex) => `
+        <button class="app-opt" onclick="answerQuiz(${questionIndex}, ${optionIndex})"
+                data-correct="${question.correct === optionIndex}">${escapeHtml(option)}</button>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+window.answerQuiz = function(questionIndex, optionIndex){
+  const block = document.querySelector(`.app-q[data-question="${questionIndex}"]`);
+  if (!block) return;
+  const buttons = block.querySelectorAll('.app-opt');
+  buttons.forEach((button, buttonIndex) => {
+    button.disabled = true;
+    if (button.dataset.correct === 'true') button.classList.add('correct');
+    else if (buttonIndex === optionIndex) button.classList.add('wrong');
+  });
+  // Update first grade row
+  const firstRow = document.querySelector('.grade-table tbody tr');
+  if (firstRow) {
+    const isCorrect = buttons[optionIndex].dataset.correct === 'true';
+    const cells = firstRow.querySelectorAll('td');
+    const gradeCell = cells[cells.length - 1];
+    gradeCell.textContent = isCorrect ? '10' : '5';
+    if (cells.length >= 4) {
+      const statusCell = cells[cells.length - 2];
+      statusCell.textContent = isCorrect ? t('approved') : t('reinforce');
+      statusCell.style.color = isCorrect ? 'var(--emerald)' : 'var(--error)';
+    }
+  }
+};
+
+function generateStudents(count){
+  const namesEs = ['Ana','Luis','María','José','Carlos','Sofía','Pedro','Elena','Diego','Laura','Andrés','Carmen','Miguel','Lucía','Javier','Paula','Sergio','Isabel','David','Raquel','Pablo','Marta','Iván','Cristina','Marcos','Beatriz','Álvaro','Nuria','Hugo','Sara'];
+  const namesEn = ['Anna','Luke','Mary','Joe','Charles','Sophie','Peter','Elena','James','Laura','Andrew','Carmen','Mike','Lucy','Jason','Paul','Steve','Isabel','David','Rachel','Paul','Martha','Ivan','Christine','Mark','Bea','Alvaro','Nuria','Hugo','Sara'];
+  const names = LANG === 'es' ? namesEs : namesEn;
+  const list = [];
+  for (let i = 0; i < count; i++) {
+    list.push(names[i % names.length] + (i >= names.length ? ' ' + (Math.floor(i / names.length) + 1) : ''));
+  }
+  return list;
+}
+
+function renderGradeRows(students, autoGrade){
+  const rows = students.slice(0, Math.min(students.length, 10)).map((student, studentIndex) => `
+    <tr>
+      <td>${studentIndex + 1}</td>
+      <td>${escapeHtml(student)}</td>
+      ${autoGrade ? `<td>—</td>` : ''}
+      <td>—</td>
+    </tr>
+  `).join('');
+  const extra = students.length > 10
+    ? `<tr><td colspan="${autoGrade ? 4 : 3}" class="text-muted text-center">… +${students.length - 10} ${t('students_label')}</td></tr>`
+    : '';
+  return rows + extra;
+}
+
+/* ============================================================
+   PHASE 3 — adjustments
+   ============================================================ */
+function startPhase3(){
+  state.phase = 3;
+  setProgress(3);
+  state.phase3.selected = [];
+  state.phase3.applied = [];
+  state.phase3.version = '1.0';
+  renderPhase3();
+}
+
+function renderPhase3(){
+  const changes = [
+    { index: 0, key: 'change1', icon: 'fa-check-double' },
+    { index: 1, key: 'change2', icon: 'fa-map-location-dot' },
+    { index: 2, key: 'change3', icon: 'fa-language' },
+    { index: 3, key: 'change4', icon: 'fa-people-group' }
+  ];
+  render(`
+    <div class="screen">
+      <div class="card">
+        <h2 class="card-title">${t('phase3_intro')}</h2>
+        ${avatarBubble(t('phase3_intro_text'))}
+        <p class="text-muted">${t('change_min')}</p>
+        <div class="chips">
+          ${changes.map(change => `<button class="chip ${state.phase3.selected.includes(change.index) ? 'selected' : ''}" onclick="toggleChange(${change.index})"><i class="fa-solid ${change.icon}"></i> ${t(change.key)}</button>`).join('')}
+        </div>
+        <div class="row mt-12">
+          <span class="score-badge"><i class="fa-solid fa-code-branch"></i> v${state.phase3.version}</span>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="applyChanges()" ${state.phase3.selected.length < 3 ? 'disabled' : ''}>${t('apply_changes')} <i class="fa-solid fa-bolt"></i></button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+window.toggleChange = function(changeIndex){
+  const selected = state.phase3.selected;
+  const foundIndex = selected.indexOf(changeIndex);
+  if (foundIndex >= 0) selected.splice(foundIndex, 1);
+  else selected.push(changeIndex);
+  renderPhase3();
+};
+
+window.applyChanges = function(){
+  state.phase3.applied = [...state.phase3.selected];
+  const bumps = state.phase3.applied.length;
+  state.phase3.version = '1.' + bumps;
+  const targetAjuste = 90 + Math.min(5, bumps);
+  renderAppliedView(targetAjuste);
+};
+
+function renderAppliedView(targetAjuste){
+  const diffMap = {
+    0: '> add: auto_grading();  // score + status per student',
+    1: '> add: context.localize("Manta");  // questions + emojis',
+    2: '> add: i18n.toggle(es,en);  // language switch',
+    3: '> add: teams.rank();  // colored ranking'
+  };
+  const diffs = state.phase3.applied.map(index => `<div class="diff-block">${diffMap[index]}</div>`).join('');
+
+  // Contradiction checks
+  let contradiction = '';
+  if (state.phase3.applied.includes(1) && (state.phase2.context === 'none' || !state.phase2.context)) {
+    contradiction = avatarBubble(t('contradiction_warn'));
+  } else if (state.phase3.applied.includes(2) && state.phase2.lang && state.phase2.lang !== 'both') {
+    contradiction = avatarBubble(t('contradiction_warn'));
+  }
+
+  render(`
+    <div class="screen">
+      <div class="card">
+        <h2 class="card-title">${t('changes_applied', { n: state.phase3.applied.length })}</h2>
+        ${contradiction}
+        <div class="field-label">${t('change_diff')}</div>
+        ${diffs}
+        <div class="mt-12">
+          <div class="meter-label"><span>${t('ajuste_label')}</span><span id="ajusteNum3">${state.phase3.ajuste}/100</span></div>
+          <div class="meter"><div class="meter-fill" id="ajusteBar3" style="width:${state.phase3.ajuste}%"></div></div>
+        </div>
+        <div id="phonePreview"></div>
+        <div class="row mt-12">
+          <div class="spacer"></div>
+          <button class="btn btn-emerald" onclick="endGame()">${t('phase3_done')} <i class="fa-solid fa-flag-checkered"></i></button>
+        </div>
+      </div>
+    </div>
+  `);
+  // Animate ajuste
+  setTimeout(() => {
+    const bar = document.getElementById('ajusteBar3');
+    const num = document.getElementById('ajusteNum3');
+    if (bar) bar.style.width = targetAjuste + '%';
+    if (num) {
+      let current = state.phase3.ajuste;
+      const interval = setInterval(() => {
+        current += 2;
+        if (current >= targetAjuste) { current = targetAjuste; clearInterval(interval); }
+        num.textContent = current + '/100';
+      }, 30);
+    }
+  }, 200);
+  state.phase3.ajuste = targetAjuste;
+
+  renderPhonePreview({
+    autoGrade: state.phase3.applied.includes(0),
+    context: state.phase3.applied.includes(1),
+    bilingual: state.phase3.applied.includes(2),
+    teams: state.phase3.applied.includes(3),
+    version: state.phase3.version
+  });
+}
+
+/* ============================================================
+   END GAME — closure
+   ============================================================ */
+function endGame(){
+  state.phase = 4;
+  setProgress(3);
+  document.querySelectorAll('.milestone').forEach(milestone => {
+    milestone.classList.remove('active');
+    milestone.classList.add('done');
+  });
+  localStorage.setItem('simlab_done_simlab_toolmaker', Date.now());
+
+  const initialAjuste = 38;
+  const finalAjuste = state.phase3.ajuste;
+  const initialFrustration = state.phase1.frustration;
+  const finalFrustration = Math.max(0, 100 - finalAjuste);
+
+  const limitations = [
+    { icon: 'fa-credit-card', text: t('limit_paywall') },
+    { icon: 'fa-unlink', text: t('limit_no_grades') },
+    { icon: 'fa-lock', text: t('limit_no_export') },
+    { icon: 'fa-map', text: t('limit_no_context') }
+  ];
+
+  obtenerNombreUsuario(name => {
+    state.userName = name;
+    state.safeName = sanitizeAppName(name);
+    state.appName = 'Quiz-' + state.safeName;
+
+    render(`
+      <div class="screen">
+        <div class="card text-center">
+          <h1 class="card-title">${t('end_title', { name: escapeHtml(name), ver: state.phase3.version })}</h1>
+          <div style="font-size:48px;margin:12px 0;">🎉</div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">${t('end_compare')}</h2>
+          <div class="grid-2">
+            <div>
+              <div class="text-muted">${LANG === 'es' ? 'Apps genéricas' : 'Generic apps'}</div>
+              <div style="font-size:2rem;font-weight:700;color:var(--error);">${initialAjuste}/100</div>
+              <div class="text-muted">${t('frustration')}: ${initialFrustration}/100</div>
+            </div>
+            <div>
+              <div class="text-muted">${LANG === 'es' ? 'Tu app' : 'Your app'}</div>
+              <div style="font-size:2rem;font-weight:700;color:var(--emerald);">${finalAjuste}/100</div>
+              <div class="text-muted">${t('frustration')}: ${finalFrustration}/100</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">${t('disappeared')}</h3>
+          <table class="compare-table">
+            <thead><tr><th>#</th><th>${t('app_label')}</th></tr></thead>
+            <tbody>
+              ${limitations.map((limitation, limitationIndex) => `
+                <tr>
+                  <td>${limitationIndex + 1}</td>
+                  <td><i class="fa-solid ${limitation.icon}"></i> ${escapeHtml(limitation.text)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card text-center" style="border-color:var(--gold);">
+          <p style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin:8px 0;">"${escapeHtml(t('end_msg_key'))}"</p>
+        </div>
+
+        <div class="card limits-notice">
+          <h3 class="card-title"><i class="fa-solid fa-triangle-exclamation"></i> ${t('end_limits_title')}</h3>
+          <p>${t('end_limits_text')}</p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">${t('end_reflect_title')}</h3>
+          <div class="reflect-q">1. ${t('end_reflect1')}</div>
+          <div class="reflect-q">2. ${t('end_reflect2')}</div>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <button class="btn btn-primary" onclick="downloadApp()"><i class="fa-solid fa-download"></i> ${t('download_btn')}</button>
+            <div class="spacer"></div>
+            <button class="btn" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> ${t('replay_btn')}</button>
+            <a href="index.html" class="btn"><i class="fa-solid fa-house"></i> ${t('home_btn')}</a>
+          </div>
+        </div>
+      </div>
+    `);
+  });
+}
+
+/* ============================================================
+   Downloadable standalone HTML app
+   ============================================================ */
+window.downloadApp = function(){
+  const htmlContent = buildDownloadableApp();
+  const blob = new Blob([htmlContent], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = state.appName + '.html';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+};
+
+function buildDownloadableApp(){
+  const safeName = state.safeName;
+  const appName = state.appName;
+  const version = state.phase3.version;
+  const contextualized = state.phase3.applied.includes(1);
+  const bilingual = state.phase3.applied.includes(2);
+  const autoGrade = state.phase3.applied.includes(0);
+  const teams = state.phase3.applied.includes(3);
+  const questions = getQuizQuestions(contextualized);
+  const students = generateStudents(state.phase2.who);
+  const title = appName + ' v' + version + ' — ' + state.userName;
+
+  return `<!DOCTYPE html>
+<html lang="${LANG}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(title)}</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#14110d;color:#ece6da;margin:0;padding:20px;line-height:1.5;}
+.container{max-width:500px;margin:0 auto;}
+.card{background:#1d1914;border:1px solid rgba(236,230,218,0.1);border-radius:12px;padding:18px;margin-bottom:14px;}
+h1{font-size:1.4rem;color:#D4A24E;margin:0 0 8px;}
+h3{color:#D4A24E;margin:0 0 8px;font-size:1.05rem;}
+.q{background:#221d16;border:1px solid rgba(236,230,218,0.1);border-radius:8px;padding:12px;margin:10px 0;}
+.q-text{font-weight:600;margin-bottom:8px;font-size:14px;}
+.opt{display:block;width:100%;text-align:left;background:#14110d;border:1px solid rgba(236,230,218,0.2);color:#ece6da;padding:8px 10px;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:14px;font-family:inherit;}
+.opt:hover:not(:disabled){border-color:#D4A24E;}
+.opt.correct{background:rgba(52,211,153,0.15);border-color:#34D399;color:#34D399;}
+.opt.wrong{background:rgba(229,96,77,0.15);border-color:#e5604d;color:#e5604d;}
+.opt:disabled{cursor:default;}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+th,td{border:1px solid rgba(236,230,218,0.1);padding:5px 8px;text-align:left;}
+th{background:#221d16;color:#D4A24E;}
+.lang-btn{background:#D4A24E;color:#1a1208;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600;margin-bottom:8px;font-family:inherit;}
+.muted{color:#b9b09e;font-size:13px;}
+.ver{display:inline-block;background:rgba(52,211,153,0.15);color:#34D399;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700;margin-left:6px;}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<h1>🛠️ ${escapeHtml(appName)} <span class="ver">v${escapeHtml(version)}</span></h1>
+<p class="muted">${LANG === 'es' ? 'Creada por' : 'Created by'} ${escapeHtml(state.userName)} ${LANG === 'es' ? 'con El Reto del Toolmaker.' : 'with The Toolmaker Challenge.'}</p>
+${bilingual ? '<button class="lang-btn" onclick="toggleLang()"><i>🌐</i> ' + (LANG === 'es' ? 'EN' : 'ES') + '</button>' : ''}
+</div>
+<div class="card">
+<p class="muted">${LANG === 'es' ? 'Responde el mini-quiz de 3 preguntas. Tu nota se registrará en el libro.' : 'Answer the 3-question mini-quiz. Your grade will be recorded in the book.'}</p>
+<div id="quiz"></div>
+</div>
+${teams ? `<div class="card">
+<h3>🏆 ${LANG === 'es' ? 'Ranking por equipos' : 'Team ranking'}</h3>
+<div style="font-size:14px;line-height:1.8;">
+<div>🟦 ${LANG === 'es' ? 'Equipo Puerto' : 'Team Port'}: 8 pts</div>
+<div>🟩 ${LANG === 'es' ? 'Equipo Pesca' : 'Team Fishing'}: 6 pts</div>
+<div>🟨 ${LANG === 'es' ? 'Equipo Turismo' : 'Team Tourism'}: 5 pts</div>
+</div>
+</div>` : ''}
+<div class="card">
+<h3>📚 ${LANG === 'es' ? 'Libro de notas' : 'Grade book'} (${state.phase2.who} ${LANG === 'es' ? 'estudiantes' : 'students'})</h3>
+<table>
+<thead><tr><th>#</th><th>${LANG === 'es' ? 'Estudiante' : 'Student'}</th>${autoGrade ? '<th>' + (LANG === 'es' ? 'Estado' : 'Status') + '</th>' : ''}<th>${LANG === 'es' ? 'Nota' : 'Grade'}</th></tr></thead>
+<tbody id="grades"></tbody>
+</table>
+</div>
+</div>
+<script>
+var QUESTIONS = ${JSON.stringify(questions)};
+var STUDENTS = ${JSON.stringify(students)};
+var AUTO = ${autoGrade ? 'true' : 'false'};
+var BIL = ${bilingual ? 'true' : 'false'};
+var curLang = "${LANG}";
+var labels = {
+  es: { approved: "Aprobado", reinforce: "Refuerzo" },
+  en: { approved: "Approved", reinforce: "Needs reinforcement" }
+};
+function labelOf(key) { return labels[curLang][key]; }
+function renderQuiz() {
+  var html = "";
+  QUESTIONS.forEach(function(question, questionIndex) {
+    html += '<div class="q" data-question="' + questionIndex + '"><div class="q-text">' + (questionIndex + 1) + ". " + question.question + "</div>";
+    question.options.forEach(function(option, optionIndex) {
+      html += '<button class="opt" onclick="answerQuiz(' + questionIndex + "," + optionIndex + ')" data-correct="' + (question.correct === optionIndex ? 1 : 0) + '">' + option + "</button>";
+    });
+    html += "</div>";
+  });
+  document.getElementById("quiz").innerHTML = html;
+}
+function answerQuiz(questionIndex, optionIndex) {
+  var block = document.querySelector('.q[data-question="' + questionIndex + '"]');
+  if (!block) return;
+  var buttons = block.querySelectorAll(".opt");
+  var isCorrect = buttons[optionIndex].dataset.correct === "1";
+  buttons.forEach(function(button, buttonIndex) {
+    button.disabled = true;
+    if (button.dataset.correct === "1") button.classList.add("correct");
+    else if (buttonIndex === optionIndex) button.classList.add("wrong");
+  });
+  var rows = document.querySelectorAll("#grades tr");
+  if (rows[0]) {
+    var cells = rows[0].querySelectorAll("td");
+    var lastIdx = cells.length - 1;
+    cells[lastIdx].textContent = isCorrect ? "10" : "5";
+    if (AUTO && cells.length >= 4) {
+      cells[lastIdx - 1].textContent = isCorrect ? labelOf("approved") : labelOf("reinforce");
+      cells[lastIdx - 1].style.color = isCorrect ? "#34D399" : "#e5604d";
+    }
+  }
+}
+function renderGrades() {
+  var html = "";
+  STUDENTS.slice(0, 10).forEach(function(student, studentIndex) {
+    html += "<tr><td>" + (studentIndex + 1) + "</td><td>" + student + "</td>" + (AUTO ? "<td>—</td>" : "") + "<td>—</td></tr>";
+  });
+  if (STUDENTS.length > 10) {
+    html += '<tr><td colspan="' + (AUTO ? 4 : 3) + '" style="text-align:center;color:#b9b09e;">… +' + (STUDENTS.length - 10) + "</td></tr>";
+  }
+  document.getElementById("grades").innerHTML = html;
+}
+function toggleLang() {
+  curLang = curLang === "es" ? "en" : "es";
+  renderQuiz();
+  renderGrades();
+}
+renderQuiz();
+renderGrades();
+<\/script>
+
+</body>
+</html>`;
+}
+
+/* ============================================================
+   Expose functions to window and boot
+   ============================================================ */
+window.startGame = startGame;
+window.startPhase1 = startPhase1;
+window.startPhase2 = startPhase2;
+window.startPhase3 = startPhase3;
+window.endGame = endGame;
+window.handleAppChoice = handleAppChoice;
+window.nextChallenge = nextChallenge;
+window.renderPromptBuilder = renderPromptBuilder;
+window.generateApp = generateApp;
+window.applyChanges = applyChanges;
+window.toggleChange = toggleChange;
+window.selectField = selectField;
+window.toggleNot = toggleNot;
+window.updatePromptPreview = updatePromptPreview;
+window.updateSpecScore = updateSpecScore;
+window.answerQuiz = answerQuiz;
+window.downloadApp = downloadApp;
+
+// Boot the game
+startGame();
+</script>
+<script>
+/* === Guía de clase: preguntas para debatir (antes / durante / después) ===
+   Bloque autosuficiente: lee el idioma de localStorage['simlab_lang'] y se activa
+   al detectar que la simulación escribe su clave 'simlab_done_*'. */
+(function initClassGuide(){
+  const guideLang = localStorage.getItem('simlab_lang') === 'en' ? 'en' : 'es';
+  const GUIDE_UI = {
+    es: { btn:'Guía de clase', title:'Para conversar en clase', close:'Cerrar', popout:'Abrir en pestaña nueva',
+          before:'Antes', during:'Durante', after:'Después',
+          toast:'Hay preguntas para conversar en clase sobre lo que acabas de hacer.', toastOpen:'Ver preguntas' },
+    en: { btn:'Class guide', title:'Class discussion questions', close:'Close', popout:'Open in new tab',
+          before:'Before', during:'During', after:'After',
+          toast:'There are class discussion questions about what you just did.', toastOpen:'See questions' }
+  };
+  const GUIDE_ALL = {
+  "es": {
+    "before": [
+      "¿Qué necesitas realmente de una app para tu clase: registrar notas, evaluar, motivar? ¿Qué límites te han frustrado antes en herramientas genéricas?",
+      "¿Qué costos no monetarios tiene una app «gratuita» (datos, tiempo, dependencia, contexto ajeno)?",
+      "¿Qué significa especificar con claridad una necesidad? ¿Qué información daría a alguien que debe construir tu herramienta?"
+    ],
+    "during": [
+      "¿Qué límite de cada app genérica fue el que más te frenó (muro de pago, datos, contexto, conectividad)? ¿Era previsible?",
+      "¿Qué datos de tus estudiantes estaba recolectando la app y para qué podrían usarse?",
+      "¿Qué campo del prompt cambió más el resultado: qué debe hacer, para quién, contexto, qué NO debe hacer o idioma?",
+      "Cuando la especificación fue ambigua, ¿qué le faltó a la app generada? ¿Cómo lo corregiste al refinar?"
+    ],
+    "after": [
+      "¿Cuándo conviene adaptarse a una app existente y cuándo construir una herramienta propia con IA?",
+      "¿Qué riesgos hay al construir con IA (errores, privacidad, mantenimiento) y cómo verificarías la herramienta antes de usarla con estudiantes?",
+      "¿Qué ajustes pedirías a tu herramienta en tu propio contexto de enseñanza? Redacta el prompt completo.",
+      "¿Qué cambia en el rol docente cuando pasa de «usuario de apps» a «diseñador de herramientas»?"
+    ]
+  },
+  "en": {
+    "before": [
+      "What do you really need from a class app: logging grades, assessing, motivating? Which limits in generic tools have frustrated you before?",
+      "What non-monetary costs does a «free» app carry (data, time, dependency, foreign context)?",
+      "What does specifying a need clearly mean? What information would you give someone building your tool?"
+    ],
+    "during": [
+      "Which limit of each generic app slowed you down most (paywall, data, context, connectivity)? Was it predictable?",
+      "What student data was the app collecting, and what could it be used for?",
+      "Which prompt field changed the result most: what it must do, for whom, context, what it must NOT do, or language?",
+      "When the specification was ambiguous, what was missing from the generated app? How did you fix it when refining?"
+    ],
+    "after": [
+      "When is it better to adapt to an existing app and when to build your own tool with AI?",
+      "What risks come with building using AI (errors, privacy, maintenance) and how would you verify the tool before using it with students?",
+      "What adjustments would you ask your tool for in your own teaching context? Write the full prompt.",
+      "What changes in the teacher's role when moving from «app user» to «tool designer»?"
+    ]
+  }
+};
+  const guideUi = GUIDE_UI[guideLang];
+  const guideQuestions = GUIDE_ALL[guideLang];
+  const guidePhases = ['before', 'during', 'after'];
+
+  const guideButton = document.getElementById('simGuideBtn');
+  const guidePanel = document.getElementById('guidePanel');
+  const tabsContainer = document.getElementById('guideTabs');
+  const questionsList = document.getElementById('guideQuestions');
+  const closeButton = document.getElementById('guideClose');
+  const guideToast = document.getElementById('guideToast');
+  if (!guideButton || !guidePanel) return;
+
+  guideButton.setAttribute('aria-label', guideUi.btn);
+  guideButton.title = guideUi.btn;
+  closeButton.setAttribute('aria-label', guideUi.close);
+  const popoutButton = document.getElementById('guidePopout');
+  popoutButton.setAttribute('aria-label', guideUi.popout);
+  popoutButton.title = guideUi.popout;
+  document.getElementById('guideTitle').textContent = guideUi.title;
+
+  function showPhase(phaseKey){
+    tabsContainer.querySelectorAll('.guide-tab').forEach(tabButton => {
+      tabButton.setAttribute('aria-selected', String(tabButton.dataset.phase === phaseKey));
+    });
+    questionsList.replaceChildren();
+    guideQuestions[phaseKey].forEach(questionText => {
+      const questionItem = document.createElement('li');
+      questionItem.textContent = questionText;
+      questionsList.appendChild(questionItem);
+    });
+    questionsList.scrollTop = 0;
+  }
+
+  guidePhases.forEach(phaseKey => {
+    const tabButton = document.createElement('button');
+    tabButton.type = 'button';
+    tabButton.className = 'guide-tab';
+    tabButton.setAttribute('role', 'tab');
+    tabButton.dataset.phase = phaseKey;
+    tabButton.textContent = guideUi[phaseKey];
+    tabButton.addEventListener('click', () => showPhase(phaseKey));
+    tabsContainer.appendChild(tabButton);
+  });
+
+  function setPanelOpen(isOpen){
+    guidePanel.classList.toggle('is-open', isOpen);
+    guideButton.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen) { hideToast(); closeButton.focus(); } else { guideButton.focus(); }
+  }
+  guideButton.addEventListener('click', () => setPanelOpen(!guidePanel.classList.contains('is-open')));
+  closeButton.addEventListener('click', () => setPanelOpen(false));
+  document.addEventListener('keydown', keyEvent => {
+    if (keyEvent.key === 'Escape' && guidePanel.classList.contains('is-open')) setPanelOpen(false);
+  });
+
+  /* Abre la guía completa en una pestaña nueva (útil para proyectarla o tenerla aparte) */
+  function openGuideInNewTab(){
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--sim-home-fg').trim() || '#10a37f';
+    const escapeHtml = rawText => rawText.replace(/[&<>"]/g, character => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[character]));
+    const sectionsHtml = guidePhases.map(phaseKey =>
+      '<section><h2>' + escapeHtml(guideUi[phaseKey]) + '</h2><ol>' +
+      guideQuestions[phaseKey].map(questionText => '<li>' + escapeHtml(questionText) + '</li>').join('') +
+      '</ol></section>').join('');
+    const simulationName = escapeHtml(document.title || '');
+    const pageHtml = '<!doctype html><html lang="' + guideLang + '"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>' + simulationName + ' — ' + escapeHtml(guideUi.title) + '</title><style>' +
+      ':root{--accent:' + accentColor + '}*{box-sizing:border-box}' +
+      'body{margin:0;background:#0f0f0f;color:#e8e6e1;font:17px/1.6 Georgia,"Times New Roman",serif}' +
+      'main{max-width:760px;margin:0 auto;padding:40px 24px 64px}' +
+      'h1{margin:0 0 4px;font-size:28px;color:var(--accent)}.sim{margin:0 0 32px;opacity:.65;font-size:15px}' +
+      'h2{margin:36px 0 12px;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:6px}' +
+      'ol{margin:0;padding-left:26px}li{margin-bottom:16px;padding-left:6px}li::marker{color:var(--accent);font-weight:700}' +
+      '@media print{body{background:#fff;color:#111}h1,h2,li::marker{color:#111}}' +
+      '</style></head><body><main><h1>' + escapeHtml(guideUi.title) + '</h1><p class="sim">' + simulationName + '</p>' +
+      sectionsHtml + '</main></body></html>';
+    const pageUrl = URL.createObjectURL(new Blob([pageHtml], { type: 'text/html;charset=utf-8' }));
+    window.open(pageUrl, 'simlab_guide');
+  }
+  popoutButton.addEventListener('click', openGuideInNewTab);
+
+  let toastTimer = null;
+  function hideToast(){
+    clearTimeout(toastTimer);
+    guideToast.classList.remove('is-visible');
+    guideButton.classList.remove('is-pulsing');
+  }
+  function announceCompletion(){
+    if (guidePanel.classList.contains('is-open')) return;
+    guideToast.replaceChildren();
+    const toastText = document.createElement('span');
+    toastText.textContent = guideUi.toast;
+    const openButton = document.createElement('button');
+    openButton.type = 'button';
+    openButton.className = 'guide-toast-open';
+    openButton.textContent = guideUi.toastOpen;
+    openButton.addEventListener('click', () => { showPhase('after'); setPanelOpen(true); });
+    const dismissButton = document.createElement('button');
+    dismissButton.type = 'button';
+    dismissButton.className = 'guide-toast-dismiss';
+    dismissButton.setAttribute('aria-label', guideUi.close);
+    dismissButton.textContent = '✕';
+    dismissButton.addEventListener('click', hideToast);
+    guideToast.append(toastText, openButton, dismissButton);
+    guideToast.classList.add('is-visible');
+    guideButton.classList.add('is-pulsing');
+    toastTimer = setTimeout(hideToast, 20000);
+  }
+
+  /* Detecta el fin de la simulación sin tocar su lógica interna */
+  try {
+    const nativeSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(storageKey, storageValue){
+      nativeSetItem.apply(this, arguments);
+      if (this === window.localStorage && String(storageKey).indexOf('simlab_done_') === 0) {
+        setTimeout(announceCompletion, 1500);
+      }
+    };
+  } catch (storageError) { /* sin aviso automático; el botón sigue disponible */ }
+
+  showPhase('before');
+})();
+</script>
+</body>
+</html>

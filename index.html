@@ -378,6 +378,7 @@
         .sim-out.con:hover  { border-color: rgba(212,175,55,0.45); box-shadow: 0 24px 60px rgba(212,175,55,0.09); }
         .sim-out.ia:hover   { border-color: rgba(16,163,127,0.45); box-shadow: 0 24px 60px rgba(16,163,127,0.09); }
         .sim-out.sofia:hover { border-color: rgba(201,151,91,0.45); box-shadow: 0 24px 60px rgba(201,151,91,0.09); }
+        .sim-out.toolmaker:hover { border-color: rgba(212,162,78,0.45); box-shadow: 0 24px 60px rgba(212,162,78,0.09); }
 
         .sim-in {
             border-radius: calc(1.75rem - 4px); background: var(--card);
@@ -1088,6 +1089,32 @@
                     </a>
                 </div>
 
+                <!-- El Reto del Toolmaker -->
+                <div class="sim-out toolmaker reveal d1" data-cat="metodologia" data-key="simlab_toolmaker" data-file="el-reto-del-toolmaker.html">
+                    <input type="hidden" data-done>
+                    <div class="sim-badge-done" data-i18n="badge_done">✓ Completada</div>
+                    <a href="el-reto-del-toolmaker.html" class="sim-out-link" style="display:block;height:100%;position:relative;z-index:1;">
+                        <div class="sim-in">
+                            <div class="sim-thumb">
+                                <span class="sim-thumb-icon" aria-hidden="true">🛠️</span>
+                            </div>
+                            <div class="sim-body">
+                                <span class="sim-tag" data-i18n="card_toolmaker_tag">Metodología</span>
+                                <div class="sim-title" data-i18n="card_toolmaker_title">El Reto del Toolmaker</div>
+                                <p class="sim-desc" data-i18n="card_toolmaker_desc">Descubre los límites de las apps genéricas y aprende a especificar con claridad lo que necesitas para crear con IA tu propia herramienta docente y ajustarla.</p>
+                                <div class="sim-meta">
+                                    <span class="sim-meta-chip">⏱ ~15 min</span>
+                                    <span class="sim-meta-chip" data-i18n="level_mid">Intermedio</span>
+                                </div>
+                                <button class="btn-sim" style="background:none;border:none;padding:10px 18px;cursor:pointer;">
+                                    <span data-i18n="btn_start">Iniciar Simulación</span>
+                                    <span class="btn-sim-ico">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
             </div>
         </div>
     </section>
@@ -1185,6 +1212,18 @@
                 card_con_tag:'Academic Writing',
                 card_con_title:'Argumentative Gears Machine',
                 card_con_desc:'Connect academic statements by choosing the logical relation type and the exact connector. Every mistake costs points in this advanced challenge.',
+                card_ia_tag:'Methodology',
+                card_ia_title:'SimulAI — Hallucinations in Research',
+                card_ia_desc:'Detect AI hallucinations when building theoretical constructs: verify sources in Scopus and spot spurious adjectives, cross-field fusion and fabricated citations.',
+                card_revista_tag:'Methodology',
+                card_revista_title:'OJS — Scientific Article Submission',
+                card_revista_desc:'Walk through the full article submission process of a scientific journal. Practice ethical statements, peer review and publication metadata.',
+                card_sofia_tag:'Philosophy',
+                card_sofia_title:'Sophie’s World — The Garden of Eden',
+                card_sofia_desc:'Go through the first chapter of Gaarder’s novel: philosophical questions about identity, existence and the origin of the universe.',
+                card_toolmaker_tag:'Methodology',
+                card_toolmaker_title:'The Toolmaker Challenge',
+                card_toolmaker_desc:'Discover the limits of generic apps and learn to specify clearly what you need to build, with AI, your own teaching tool and fine-tune it.',
                 /* footer */
                 footer_role:'University Lecturer &nbsp;·&nbsp; PhD Candidate in Psychodidactics, UPV/EHU (Spain)',
                 /* JS strings */
@@ -1370,6 +1409,7 @@
 
         document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
+        document.getElementById('cnt-sims').textContent = document.querySelectorAll('.sim-out').length;
         updateSimDisplay();
     </script>
 </body>
