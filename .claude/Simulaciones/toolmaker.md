@@ -10,7 +10,7 @@ Serious game para docentes: las apps genéricas siempre imponen límites; cuando
 | Fase | Mecánica | Aprendizaje |
 |---|---|---|
 | 1. Elige tu app | Una sola pantalla: tabla 4 necesidades × 3 apps. Al tocar una app aparecen ✓/✗ y su puntaje (todas 2/4). Veredicto: «Ninguna cumple las 4». | Toda herramienta genérica falla en algo: costo, datos, contexto. |
-| 2. Plan B: constrúyela | Se arma un prompt con campos (qué debe hacer, para quién, contexto, qué NO debe hacer, idioma). La «especificación» se puntúa; si es ambigua la app generada pierde una función. | Especificar con claridad es el recurso escaso, no programar. |
+| 2. Plan B: constrúyela (la app generada refleja la especificación: qué hacer → quiz y/o libro de notas; contexto (multi) → preguntas y etiqueta; «qué NO» → insignias verdes (garantizado) o rojas (molestia: cuenta, 80 MB, publicidad, plan de pago con 6 estudiantes); idioma → idioma de la app / selector) | Se arma un prompt con campos (qué debe hacer, para quién, contexto, qué NO debe hacer, idioma). La «especificación» se puntúa; si es ambigua la app generada pierde una función. | Especificar con claridad es el recurso escaso, no programar. |
 | 3. Ajústala | Elegir al menos 3 cambios (calificar automático, contexto, bilingüe, equipos); la versión sube en vivo. | Iteración: la herramienta evoluciona con peticiones precisas. |
 
 Pantalla final: comparación antes/después (apps genéricas vs. app propia), limitaciones que desaparecieron y descarga de la app generada. Escribe `simlab_done_simlab_toolmaker`.

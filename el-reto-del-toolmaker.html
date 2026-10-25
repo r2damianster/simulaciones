@@ -371,6 +371,7 @@
     border-bottom: 1px solid var(--border);
   }
   .phone-content { background: #14110d; padding: 14px; min-height: 420px; }
+  .app-frame { display: block; width: 100%; height: 560px; border: 0; background: #14110d; }
 
   /* ===== In-app quiz ===== */
   .app-logo { text-align: center; font-family: 'Playfair Display', serif; font-size: 1.25rem; color: var(--gold); margin-bottom: 10px; font-weight: 700; }
@@ -651,6 +652,20 @@ const I18N = {
     what_quiz: "Quiz de repaso",
     what_notes: "Registrar notas",
     what_both: "Ambos",
+    app_score: "Puntaje",
+    app_context: "📍 Contexto",
+    app_locked: "🔒 {n} estudiantes más con el Plan Pro",
+    app_ad_banner: "📢 ¡Oferta! Compra ya y gana premios",
+    app_free_yes: "✓ Sin costo",
+    app_free_no: "💲 Plan gratis: 6 estudiantes · Pro USD 12/mes",
+    app_account_yes: "✓ Sin cuenta",
+    app_account_no: "👤 Pide cuenta (correo y teléfono)",
+    app_data_yes: "🪶 Modo ligero · 2 MB",
+    app_data_no: "📶 80 MB por sesión",
+    app_ads_yes: "✓ Sin publicidad",
+    app_ads_no: "📢 Con publicidad",
+    created_by: "Creada por",
+    created_with: "con El Reto del Toolmaker.",
     ctx_rural: "Escuela rural",
     ctx_public: "Colegio público",
     ctx_private: "Colegio privado",
@@ -797,6 +812,20 @@ const I18N = {
     what_quiz: "Review quiz",
     what_notes: "Record grades",
     what_both: "Both",
+    app_score: "Score",
+    app_context: "📍 Context",
+    app_locked: "🔒 {n} more students on the Pro plan",
+    app_ad_banner: "📢 Sale! Buy now and win prizes",
+    app_free_yes: "✓ No cost",
+    app_free_no: "💲 Free plan: 6 students · Pro USD 12/mo",
+    app_account_yes: "✓ No account",
+    app_account_no: "👤 Requires account (email and phone)",
+    app_data_yes: "🪶 Light mode · 2 MB",
+    app_data_no: "📶 80 MB per session",
+    app_ads_yes: "✓ No ads",
+    app_ads_no: "📢 With ads",
+    created_by: "Created by",
+    created_with: "with The Toolmaker Challenge.",
     ctx_rural: "Rural school",
     ctx_public: "Public school",
     ctx_private: "Private school",
@@ -1359,124 +1388,102 @@ function showPreview(){
       </div>
     </div>
   `);
-  renderPhonePreview({ autoGrade: false, context: false, bilingual: false, teams: false, version: '1.0' });
+  renderPhonePreview();
 }
 
 /* ============================================================
-   Phone preview (mini-app)
+   Generated app — ONE source of truth
+   The preview (iframe) and the downloaded file are the same HTML,
+   built from the player's specification (phase 2) + changes (phase 3).
    ============================================================ */
-let inAppLang = LANG;
-
-function renderPhonePreview(options){
-  const wrap = document.getElementById('phonePreview');
-  if (!wrap) return;
-  const questions = getQuizQuestions(options.context);
-  const students = generateStudents(state.phase2.who);
-  const langToggle = options.bilingual ? `
-    <button class="app-opt" style="margin-bottom:8px;text-align:center;" onclick="toggleInAppLang()">
-      <i class="fa-solid fa-language"></i> ${inAppLang === 'es' ? t('inapp_lang_btn') : t('inapp_lang_btn_es')}
-    </button>` : '';
-  const teamRanking = options.teams ? `
-    <div class="app-q">
-      <div class="app-q-text"><i class="fa-solid fa-trophy"></i> ${t('teams_ranking')}</div>
-      <div style="font-size:12px;line-height:1.8;">
-        <div style="color:#60a5fa;">🟦 ${t('team_a')}: 8 pts</div>
-        <div style="color:#34D399;">🟩 ${t('team_b')}: 6 pts</div>
-        <div style="color:#f59e0b;">🟨 ${t('team_c')}: 5 pts</div>
-      </div>
-    </div>` : '';
-
-  wrap.innerHTML = `
-    <div class="phone-frame">
-      <div class="phone-bar"><i class="fa-solid fa-circle" style="color:#e5604d;font-size:6px;"></i> <i class="fa-solid fa-circle" style="color:#D4A24E;font-size:6px;"></i> <i class="fa-solid fa-circle" style="color:#34D399;font-size:6px;"></i> &nbsp; ${escapeHtml(state.appName)} v${escapeHtml(options.version)}</div>
-      <div class="phone-content">
-        <div class="app-logo">🛠️ ${escapeHtml(state.appName)}</div>
-        ${langToggle}
-        <p class="text-muted" style="font-size:12px;">${t('quiz_intro')}</p>
-        <div id="quizArea">${renderQuizQuestions(questions)}</div>
-        ${teamRanking}
-        <div class="app-q">
-          <div class="app-q-text"><i class="fa-solid fa-book"></i> ${t('grades_book')} (${state.phase2.who} ${t('students_label')})</div>
-          <table class="grade-table">
-            <thead><tr><th>#</th><th>${t('students_label')}</th>${options.autoGrade ? '<th>' + t('approved') + '</th>' : ''}<th>${t('your_grade')}</th></tr></thead>
-            <tbody>${renderGradeRows(students, options.autoGrade)}</tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-window.toggleInAppLang = function(){
-  inAppLang = inAppLang === 'es' ? 'en' : 'es';
-  const applied = state.phase3.applied;
-  const wrap = document.getElementById('phonePreview');
-  if (wrap) {
-    renderPhonePreview({
-      autoGrade: applied.includes(0),
-      context: applied.includes(1),
-      bilingual: applied.includes(2),
-      teams: applied.includes(3),
-      version: state.phase3.version
-    });
+const CONTEXT_QUESTIONS = {
+  es: {
+    rural: [
+      { q: "Una huerta escolar produce 12 lechugas por semana. ¿Cuántas en 4 semanas?", o: ["36", "48", "52"], c: 1 },
+      { q: "En una escuela rural sin internet, ¿qué recurso sirve para repasar?", o: ["Fichas impresas", "Videollamada", "Streaming"], c: 0 }
+    ],
+    public: [
+      { q: "Un curso de 40 estudiantes se divide en 4 grupos iguales. ¿Cuántos por grupo?", o: ["8", "10", "12"], c: 1 },
+      { q: "Hay 25 textos para 40 estudiantes. ¿Cuántos textos faltan?", o: ["10", "15", "25"], c: 1 }
+    ],
+    private: [
+      { q: "Una excursión cuesta $15 por estudiante. ¿Cuánto cuesta para 20?", o: ["$300", "$150", "$35"], c: 0 },
+      { q: "18 de 24 familias pagaron la cuota. ¿Qué porcentaje pagó?", o: ["65 %", "75 %", "85 %"], c: 1 }
+    ],
+    university: [
+      { q: "En una muestra de 50 estudiantes, 10 respondieron «sí». ¿Qué porcentaje es?", o: ["10 %", "20 %", "50 %"], c: 1 },
+      { q: "«Nivel de satisfacción: bajo, medio, alto» es una variable…", o: ["Nominal", "Ordinal", "De razón"], c: 1 }
+    ],
+    port: [
+      { q: "¿Qué producto sale del puerto de Manta para exportarse?", o: ["Atún", "Nieve", "Vino"], c: 0 },
+      { q: "Un barco descarga 120 cajas por hora. ¿Cuántas en 3 horas?", o: ["240", "360", "420"], c: 1 }
+    ],
+    fishing: [
+      { q: "¿Qué pasa con la pesca en temporada alta?", o: ["Aumenta la captura", "Se cierra el puerto", "Se acaba el pescado"], c: 0 },
+      { q: "Una lancha captura 25 kg por viaje. ¿Cuántos kg en 4 viajes?", o: ["75", "100", "125"], c: 1 }
+    ],
+    tourism: [
+      { q: "¿Cuál es una actividad turística típica de Manta?", o: ["Turismo de playa", "Esquí", "Minería"], c: 0 },
+      { q: "Un hotel tiene 30 habitaciones y 20 ocupadas. ¿Qué porcentaje está libre?", o: ["10 %", "33 %", "50 %"], c: 1 }
+    ]
+  },
+  en: {
+    rural: [
+      { q: "A school garden grows 12 lettuces a week. How many in 4 weeks?", o: ["36", "48", "52"], c: 1 },
+      { q: "In a rural school with no internet, which resource helps review?", o: ["Printed flashcards", "Video call", "Streaming"], c: 0 }
+    ],
+    public: [
+      { q: "A class of 40 students splits into 4 equal groups. How many per group?", o: ["8", "10", "12"], c: 1 },
+      { q: "There are 25 textbooks for 40 students. How many are missing?", o: ["10", "15", "25"], c: 1 }
+    ],
+    private: [
+      { q: "A field trip costs $15 per student. How much for 20 students?", o: ["$300", "$150", "$35"], c: 0 },
+      { q: "18 of 24 families paid the fee. What percentage paid?", o: ["65%", "75%", "85%"], c: 1 }
+    ],
+    university: [
+      { q: "In a sample of 50 students, 10 answered “yes”. What percentage is that?", o: ["10%", "20%", "50%"], c: 1 },
+      { q: "“Satisfaction level: low, medium, high” is a variable of which scale?", o: ["Nominal", "Ordinal", "Ratio"], c: 1 }
+    ],
+    port: [
+      { q: "What product leaves the port of Manta for export?", o: ["Tuna", "Snow", "Wine"], c: 0 },
+      { q: "A ship unloads 120 crates per hour. How many in 3 hours?", o: ["240", "360", "420"], c: 1 }
+    ],
+    fishing: [
+      { q: "What happens during peak fishing season?", o: ["Catch increases", "Port closes", "Fish runs out"], c: 0 },
+      { q: "A boat catches 25 kg per trip. How many kg in 4 trips?", o: ["75", "100", "125"], c: 1 }
+    ],
+    tourism: [
+      { q: "Which is a typical tourist activity in Manta?", o: ["Beach tourism", "Skiing", "Mining"], c: 0 },
+      { q: "A hotel has 30 rooms and 20 are occupied. What percentage is free?", o: ["10%", "33%", "50%"], c: 1 }
+    ]
   }
 };
 
-function getQuizQuestions(contextualized){
-  if (contextualized) {
-    return [
-      { question: t('question1'), options: [t('opt1_a'), t('opt1_b'), t('opt1_c')], correct: 0 },
-      { question: t('question2'), options: [t('opt2_a'), t('opt2_b'), t('opt2_c')], correct: 0 },
-      { question: t('question3'), options: [t('opt3_a'), t('opt3_b'), t('opt3_c')], correct: 0 }
-    ];
+function buildQuestions(contextKeys, language, localize){
+  const contextBanks = contextKeys.map(contextKey => CONTEXT_QUESTIONS[language][contextKey]);
+  const questionPool = [];
+  for (let round = 0; round < 2; round++) {
+    contextBanks.forEach(bank => { if (bank[round]) questionPool.push(bank[round]); });
   }
-  return [
-    { question: t('generic_q1'), options: [t('generic_opt1a'), t('generic_opt1b'), t('generic_opt1c')], correct: 1 },
-    { question: t('generic_q2'), options: [t('generic_opt2a'), t('generic_opt2b'), t('generic_opt2c')], correct: 0 },
-    { question: t('generic_q3'), options: [t('generic_opt3a'), t('generic_opt3b'), t('generic_opt3c')], correct: 1 }
+  const dictionary = I18N[language];
+  const genericQuestions = [
+    { q: dictionary.generic_q1, o: [dictionary.generic_opt1a, dictionary.generic_opt1b, dictionary.generic_opt1c], c: 1 },
+    { q: dictionary.generic_q2, o: [dictionary.generic_opt2a, dictionary.generic_opt2b, dictionary.generic_opt2c], c: 0 },
+    { q: dictionary.generic_q3, o: [dictionary.generic_opt3a, dictionary.generic_opt3b, dictionary.generic_opt3c], c: 1 }
   ];
+  let genericIndex = 0;
+  while (questionPool.length < 3) questionPool.push(genericQuestions[genericIndex++]);
+  return questionPool.slice(0, 3).map(item => ({
+    question: (localize ? '📍 ' : '') + item.q,
+    options: item.o,
+    correct: item.c
+  }));
 }
 
-function renderQuizQuestions(questions){
-  return questions.map((question, questionIndex) => `
-    <div class="app-q" data-question="${questionIndex}">
-      <div class="app-q-text">${questionIndex + 1}. ${escapeHtml(question.question)}</div>
-      ${question.options.map((option, optionIndex) => `
-        <button class="app-opt" onclick="answerQuiz(${questionIndex}, ${optionIndex})"
-                data-correct="${question.correct === optionIndex}">${escapeHtml(option)}</button>
-      `).join('')}
-    </div>
-  `).join('');
-}
-
-window.answerQuiz = function(questionIndex, optionIndex){
-  const block = document.querySelector(`.app-q[data-question="${questionIndex}"]`);
-  if (!block) return;
-  const buttons = block.querySelectorAll('.app-opt');
-  buttons.forEach((button, buttonIndex) => {
-    button.disabled = true;
-    if (button.dataset.correct === 'true') button.classList.add('correct');
-    else if (buttonIndex === optionIndex) button.classList.add('wrong');
-  });
-  // Update first grade row
-  const firstRow = document.querySelector('.grade-table tbody tr');
-  if (firstRow) {
-    const isCorrect = buttons[optionIndex].dataset.correct === 'true';
-    const cells = firstRow.querySelectorAll('td');
-    const gradeCell = cells[cells.length - 1];
-    gradeCell.textContent = isCorrect ? '10' : '5';
-    if (cells.length >= 4) {
-      const statusCell = cells[cells.length - 2];
-      statusCell.textContent = isCorrect ? t('approved') : t('reinforce');
-      statusCell.style.color = isCorrect ? 'var(--emerald)' : 'var(--error)';
-    }
-  }
-};
-
-function generateStudents(count){
+function generateStudents(count, language){
   const namesEs = ['Ana','Luis','María','José','Carlos','Sofía','Pedro','Elena','Diego','Laura','Andrés','Carmen','Miguel','Lucía','Javier','Paula','Sergio','Isabel','David','Raquel','Pablo','Marta','Iván','Cristina','Marcos','Beatriz','Álvaro','Nuria','Hugo','Sara'];
   const namesEn = ['Anna','Luke','Mary','Joe','Charles','Sophie','Peter','Elena','James','Laura','Andrew','Carmen','Mike','Lucy','Jason','Paul','Steve','Isabel','David','Rachel','Paul','Martha','Ivan','Christine','Mark','Bea','Alvaro','Nuria','Hugo','Sara'];
-  const names = LANG === 'es' ? namesEs : namesEn;
+  const names = language === 'es' ? namesEs : namesEn;
   const list = [];
   for (let i = 0; i < count; i++) {
     list.push(names[i % names.length] + (i >= names.length ? ' ' + (Math.floor(i / names.length) + 1) : ''));
@@ -1484,19 +1491,247 @@ function generateStudents(count){
   return list;
 }
 
-function renderGradeRows(students, autoGrade){
-  const rows = students.slice(0, Math.min(students.length, 10)).map((student, studentIndex) => `
-    <tr>
-      <td>${studentIndex + 1}</td>
-      <td>${escapeHtml(student)}</td>
-      ${autoGrade ? `<td>—</td>` : ''}
-      <td>—</td>
-    </tr>
-  `).join('');
-  const extra = students.length > 10
-    ? `<tr><td colspan="${autoGrade ? 4 : 3}" class="text-muted text-center">… +${students.length - 10} ${t('students_label')}</td></tr>`
-    : '';
-  return rows + extra;
+/* Everything the generated app needs, resolved for both languages */
+function getAppSpec(){
+  const builder = state.phase2;
+  const applied = state.phase3.applied;
+  const chosenContexts = builder.context.filter(contextKey => contextKey !== 'none');
+  const localize = applied.includes(1);
+  const contextKeys = chosenContexts.length ? chosenContexts : (localize ? ['port'] : []);
+  const what = builder.what || 'both';
+  const textKeys = ['quiz_intro', 'grades_book', 'students_label', 'approved', 'reinforce', 'your_grade',
+    'teams_ranking', 'team_a', 'team_b', 'team_c', 'app_score', 'app_context', 'app_locked', 'app_ad_banner',
+    'app_free_yes', 'app_free_no', 'app_account_yes', 'app_account_no', 'app_data_yes', 'app_data_no',
+    'app_ads_yes', 'app_ads_no', 'created_by', 'created_with'];
+  const spec = {
+    appName: state.appName,
+    userName: escapeHtml(state.userName),
+    version: state.phase3.version,
+    showQuiz: what !== 'notes',
+    showGrades: what !== 'quiz',
+    who: builder.who,
+    autoGrade: applied.includes(0),
+    teams: applied.includes(3),
+    localize,
+    bilingualToggle: builder.lang === 'both' || applied.includes(2),
+    defaultLang: (builder.lang === 'es' || builder.lang === 'en') ? builder.lang : LANG,
+    guarantees: {
+      free: builder.nots.includes('pay'),
+      noAccount: builder.nots.includes('account'),
+      lightData: builder.nots.includes('data'),
+      noAds: builder.nots.includes('ads')
+    },
+    freeLimit: 6,
+    text: {},
+    questions: {},
+    students: {},
+    contextLabels: {}
+  };
+  ['es', 'en'].forEach(language => {
+    spec.text[language] = {};
+    textKeys.forEach(textKey => { spec.text[language][textKey] = I18N[language][textKey]; });
+    spec.questions[language] = buildQuestions(contextKeys, language, localize);
+    spec.students[language] = generateStudents(builder.who, language);
+    spec.contextLabels[language] = contextKeys.map(contextKey => I18N[language]['ctx_' + contextKey]).join(' + ');
+  });
+  return spec;
+}
+
+/* Runs INSIDE the generated app (serialized with toString) — keep it self-contained */
+function generatedAppRuntime(SPEC){
+  let currentLang = SPEC.defaultLang;
+  let answeredCount = 0;
+  let correctCount = 0;
+  const root = document.getElementById('app');
+
+  function text(key){ return SPEC.text[currentLang][key]; }
+  function pill(isGood, label){
+    return '<span class="pill ' + (isGood ? 'good' : 'bad') + '">' + label + '</span>';
+  }
+
+  function gradeRows(){
+    const students = SPEC.students[currentLang];
+    const visibleCount = SPEC.guarantees.free ? students.length : Math.min(students.length, SPEC.freeLimit);
+    const shownCount = Math.min(visibleCount, 10);
+    let html = '';
+    for (let i = 0; i < shownCount; i++) {
+      const gradeCell = SPEC.showQuiz
+        ? '<td class="grade">—</td>'
+        : '<td><input class="grade-input" type="number" min="0" max="10" step="0.5" data-row="' + i + '"></td>';
+      html += '<tr data-row="' + i + '"><td>' + (i + 1) + '</td><td>' + students[i] + '</td>' +
+        (SPEC.autoGrade ? '<td class="status">—</td>' : '') + gradeCell + '</tr>';
+    }
+    const columns = SPEC.autoGrade ? 4 : 3;
+    if (visibleCount > shownCount) {
+      html += '<tr><td colspan="' + columns + '" class="muted center">… +' + (visibleCount - shownCount) + '</td></tr>';
+    }
+    if (visibleCount < students.length) {
+      html += '<tr><td colspan="' + columns + '" class="locked">' +
+        text('app_locked').replace('{n}', students.length - visibleCount) + '</td></tr>';
+    }
+    return html;
+  }
+
+  function render(){
+    document.documentElement.lang = currentLang;
+    const guarantees = SPEC.guarantees;
+    let html = '<div class="card"><h1>🛠️ ' + SPEC.appName + ' <span class="ver">v' + SPEC.version + '</span></h1>' +
+      '<p class="muted">' + text('created_by') + ' ' + SPEC.userName + ' ' + text('created_with') + '</p>';
+    if (SPEC.bilingualToggle) {
+      html += '<button class="lang-btn" id="langBtn">🌐 ' + (currentLang === 'es' ? 'EN' : 'ES') + '</button>';
+    }
+    html += '<div class="pills">' +
+      pill(guarantees.free, guarantees.free ? text('app_free_yes') : text('app_free_no')) +
+      pill(guarantees.noAccount, guarantees.noAccount ? text('app_account_yes') : text('app_account_no')) +
+      pill(guarantees.lightData, guarantees.lightData ? text('app_data_yes') : text('app_data_no')) +
+      pill(guarantees.noAds, guarantees.noAds ? text('app_ads_yes') : text('app_ads_no')) +
+      '</div>';
+    const contextLabel = SPEC.contextLabels[currentLang];
+    if (contextLabel) html += '<p class="context">' + text('app_context') + ': <strong>' + contextLabel + '</strong></p>';
+    html += '</div>';
+    if (!guarantees.noAds) html += '<div class="ad">' + text('app_ad_banner') + '</div>';
+
+    if (SPEC.showQuiz) {
+      html += '<div class="card"><p class="muted">' + text('quiz_intro') + '</p>';
+      SPEC.questions[currentLang].forEach((item, questionIndex) => {
+        html += '<div class="q" data-question="' + questionIndex + '"><div class="q-text">' + (questionIndex + 1) + '. ' + item.question + '</div>';
+        item.options.forEach((option, optionIndex) => {
+          html += '<button class="opt" data-q="' + questionIndex + '" data-o="' + optionIndex + '" data-correct="' + (item.correct === optionIndex ? 1 : 0) + '">' + option + '</button>';
+        });
+        html += '</div>';
+      });
+      html += '<p class="score" id="score"></p></div>';
+    }
+
+    if (SPEC.teams) {
+      html += '<div class="card"><h3>🏆 ' + text('teams_ranking') + '</h3><div class="teams">' +
+        '<div style="color:#60a5fa">🟦 ' + text('team_a') + ': 8 pts</div>' +
+        '<div style="color:#34D399">🟩 ' + text('team_b') + ': 6 pts</div>' +
+        '<div style="color:#f59e0b">🟨 ' + text('team_c') + ': 5 pts</div></div></div>';
+    }
+
+    if (SPEC.showGrades) {
+      html += '<div class="card"><h3>📚 ' + text('grades_book') + ' (' + SPEC.who + ' ' + text('students_label') + ')</h3>' +
+        '<table><thead><tr><th>#</th><th>' + text('students_label') + '</th>' +
+        (SPEC.autoGrade ? '<th>' + text('approved') + '</th>' : '') + '<th>' + text('your_grade') + '</th></tr></thead>' +
+        '<tbody>' + gradeRows() + '</tbody></table></div>';
+    }
+    root.innerHTML = html;
+    bindEvents();
+    refreshScore();
+  }
+
+  function setStatus(row, grade){
+    const statusCell = row.querySelector('.status');
+    if (!statusCell) return;
+    const isApproved = grade >= 7;
+    statusCell.textContent = isApproved ? text('approved') : text('reinforce');
+    statusCell.style.color = isApproved ? '#34D399' : '#e5604d';
+  }
+
+  function refreshScore(){
+    const scoreElement = document.getElementById('score');
+    if (scoreElement && answeredCount > 0) {
+      scoreElement.textContent = text('app_score') + ': ' + correctCount + '/' + SPEC.questions[currentLang].length;
+      if (SPEC.autoGrade && !SPEC.showGrades) {
+        const isApproved = (correctCount / answeredCount) * 10 >= 7;
+        scoreElement.textContent += ' · ' + (isApproved ? text('approved') : text('reinforce'));
+      }
+    }
+    if (SPEC.showQuiz && answeredCount > 0) {
+      const firstRow = document.querySelector('#app tbody tr[data-row="0"]');
+      if (firstRow) {
+        const grade = Math.round((correctCount / answeredCount) * 100) / 10;
+        firstRow.querySelector('.grade').textContent = grade;
+        setStatus(firstRow, grade);
+      }
+    }
+  }
+
+  function bindEvents(){
+    const languageButton = document.getElementById('langBtn');
+    if (languageButton) {
+      languageButton.addEventListener('click', () => { currentLang = currentLang === 'es' ? 'en' : 'es'; answeredCount = 0; correctCount = 0; render(); });
+    }
+    document.querySelectorAll('.opt').forEach(button => {
+      button.addEventListener('click', () => {
+        const block = button.closest('.q');
+        const isCorrect = button.dataset.correct === '1';
+        block.querySelectorAll('.opt').forEach(optionButton => {
+          optionButton.disabled = true;
+          if (optionButton.dataset.correct === '1') optionButton.classList.add('correct');
+          else if (optionButton === button) optionButton.classList.add('wrong');
+        });
+        answeredCount++;
+        if (isCorrect) correctCount++;
+        refreshScore();
+      });
+    });
+    document.querySelectorAll('.grade-input').forEach(input => {
+      input.addEventListener('input', () => {
+        const grade = parseFloat(input.value);
+        if (!isNaN(grade)) setStatus(input.closest('tr'), grade);
+      });
+    });
+  }
+
+  render();
+}
+
+const GENERATED_APP_CSS = `
+*{box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:#14110d;color:#ece6da;margin:0;padding:14px;line-height:1.5;}
+.container{max-width:520px;margin:0 auto;}
+.card{background:#1d1914;border:1px solid rgba(236,230,218,0.1);border-radius:12px;padding:16px;margin-bottom:12px;}
+h1{font-size:1.3rem;color:#D4A24E;margin:0 0 6px;}
+h3{color:#D4A24E;margin:0 0 8px;font-size:1.02rem;}
+.q{background:#221d16;border:1px solid rgba(236,230,218,0.1);border-radius:8px;padding:12px;margin:10px 0;}
+.q-text{font-weight:600;margin-bottom:8px;font-size:14px;}
+.opt{display:block;width:100%;text-align:left;background:#14110d;border:1px solid rgba(236,230,218,0.2);color:#ece6da;padding:8px 10px;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:14px;font-family:inherit;}
+.opt:hover:not(:disabled){border-color:#D4A24E;}
+.opt.correct{background:rgba(52,211,153,0.15);border-color:#34D399;color:#34D399;}
+.opt.wrong{background:rgba(229,96,77,0.15);border-color:#e5604d;color:#e5604d;}
+.opt:disabled{cursor:default;}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+th,td{border:1px solid rgba(236,230,218,0.1);padding:5px 8px;text-align:left;}
+th{background:#221d16;color:#D4A24E;}
+.grade-input{width:64px;background:#14110d;border:1px solid rgba(236,230,218,0.2);color:#ece6da;border-radius:4px;padding:3px 6px;font-family:inherit;}
+.lang-btn{background:#D4A24E;color:#1a1208;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600;margin:6px 0;font-family:inherit;}
+.muted{color:#b9b09e;font-size:13px;margin:4px 0;}
+.center{text-align:center;}
+.ver{display:inline-block;background:rgba(52,211,153,0.15);color:#34D399;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700;margin-left:6px;}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.pill{font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid;}
+.pill.good{color:#34D399;border-color:rgba(52,211,153,.5);background:rgba(52,211,153,.1);}
+.pill.bad{color:#e5604d;border-color:rgba(229,96,77,.5);background:rgba(229,96,77,.1);}
+.context{margin:10px 0 0;font-size:13px;color:#D4A24E;}
+.ad{background:repeating-linear-gradient(45deg,#3a2a12,#3a2a12 10px,#2d200d 10px,#2d200d 20px);color:#f5c26b;text-align:center;padding:10px;border-radius:8px;margin-bottom:12px;font-weight:700;}
+.locked{text-align:center;color:#e5604d;background:rgba(229,96,77,.08);}
+.score{font-weight:700;color:#D4A24E;margin:8px 0 0;}
+.teams{font-size:14px;line-height:1.8;}
+`;
+
+function buildDownloadableApp(){
+  const spec = getAppSpec();
+  const safeJson = JSON.stringify(spec).replace(/</g, '\\u003c');
+  const title = spec.appName + ' v' + spec.version + ' — ' + state.userName;
+  return '<!DOCTYPE html>\n<html lang="' + spec.defaultLang + '">\n<head>\n<meta charset="UTF-8">\n' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>' + escapeHtml(title) + '</title>\n' +
+    '<style>' + GENERATED_APP_CSS + '</style>\n</head>\n<body>\n<div class="container" id="app"></div>\n' +
+    '<script>\n(' + generatedAppRuntime.toString() + ')(' + safeJson + ');\n<' + '/script>\n</body>\n</html>';
+}
+
+/* The preview is the generated app itself, running in a sandboxed frame */
+function renderPhonePreview(){
+  const wrap = document.getElementById('phonePreview');
+  if (!wrap) return;
+  const documentHtml = buildDownloadableApp();
+  wrap.innerHTML = `
+    <div class="phone-frame">
+      <div class="phone-bar"><i class="fa-solid fa-circle" style="color:#e5604d;font-size:6px;"></i> <i class="fa-solid fa-circle" style="color:#D4A24E;font-size:6px;"></i> <i class="fa-solid fa-circle" style="color:#34D399;font-size:6px;"></i> &nbsp; ${escapeHtml(state.appName)} v${escapeHtml(state.phase3.version)}</div>
+      <iframe class="app-frame" sandbox="allow-scripts" title="${escapeHtml(state.appName)}" srcdoc="${escapeHtml(documentHtml)}"></iframe>
+    </div>
+  `;
 }
 
 /* ============================================================
@@ -1605,13 +1840,7 @@ function renderAppliedView(targetAjuste){
   }, 200);
   state.phase3.ajuste = targetAjuste;
 
-  renderPhonePreview({
-    autoGrade: state.phase3.applied.includes(0),
-    context: state.phase3.applied.includes(1),
-    bilingual: state.phase3.applied.includes(2),
-    teams: state.phase3.applied.includes(3),
-    version: state.phase3.version
-  });
+  renderPhonePreview();
 }
 
 /* ============================================================
@@ -1725,138 +1954,6 @@ window.downloadApp = function(){
   URL.revokeObjectURL(url);
 };
 
-function buildDownloadableApp(){
-  const safeName = state.safeName;
-  const appName = state.appName;
-  const version = state.phase3.version;
-  const contextualized = state.phase3.applied.includes(1);
-  const bilingual = state.phase3.applied.includes(2);
-  const autoGrade = state.phase3.applied.includes(0);
-  const teams = state.phase3.applied.includes(3);
-  const questions = getQuizQuestions(contextualized);
-  const students = generateStudents(state.phase2.who);
-  const title = appName + ' v' + version + ' — ' + state.userName;
-
-  return `<!DOCTYPE html>
-<html lang="${LANG}">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${escapeHtml(title)}</title>
-<style>
-body{font-family:system-ui,sans-serif;background:#14110d;color:#ece6da;margin:0;padding:20px;line-height:1.5;}
-.container{max-width:500px;margin:0 auto;}
-.card{background:#1d1914;border:1px solid rgba(236,230,218,0.1);border-radius:12px;padding:18px;margin-bottom:14px;}
-h1{font-size:1.4rem;color:#D4A24E;margin:0 0 8px;}
-h3{color:#D4A24E;margin:0 0 8px;font-size:1.05rem;}
-.q{background:#221d16;border:1px solid rgba(236,230,218,0.1);border-radius:8px;padding:12px;margin:10px 0;}
-.q-text{font-weight:600;margin-bottom:8px;font-size:14px;}
-.opt{display:block;width:100%;text-align:left;background:#14110d;border:1px solid rgba(236,230,218,0.2);color:#ece6da;padding:8px 10px;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:14px;font-family:inherit;}
-.opt:hover:not(:disabled){border-color:#D4A24E;}
-.opt.correct{background:rgba(52,211,153,0.15);border-color:#34D399;color:#34D399;}
-.opt.wrong{background:rgba(229,96,77,0.15);border-color:#e5604d;color:#e5604d;}
-.opt:disabled{cursor:default;}
-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
-th,td{border:1px solid rgba(236,230,218,0.1);padding:5px 8px;text-align:left;}
-th{background:#221d16;color:#D4A24E;}
-.lang-btn{background:#D4A24E;color:#1a1208;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600;margin-bottom:8px;font-family:inherit;}
-.muted{color:#b9b09e;font-size:13px;}
-.ver{display:inline-block;background:rgba(52,211,153,0.15);color:#34D399;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700;margin-left:6px;}
-</style>
-</head>
-<body>
-<div class="container">
-<div class="card">
-<h1>🛠️ ${escapeHtml(appName)} <span class="ver">v${escapeHtml(version)}</span></h1>
-<p class="muted">${LANG === 'es' ? 'Creada por' : 'Created by'} ${escapeHtml(state.userName)} ${LANG === 'es' ? 'con El Reto del Toolmaker.' : 'with The Toolmaker Challenge.'}</p>
-${bilingual ? '<button class="lang-btn" onclick="toggleLang()"><i>🌐</i> ' + (LANG === 'es' ? 'EN' : 'ES') + '</button>' : ''}
-</div>
-<div class="card">
-<p class="muted">${LANG === 'es' ? 'Responde el mini-quiz de 3 preguntas. Tu nota se registrará en el libro.' : 'Answer the 3-question mini-quiz. Your grade will be recorded in the book.'}</p>
-<div id="quiz"></div>
-</div>
-${teams ? `<div class="card">
-<h3>🏆 ${LANG === 'es' ? 'Ranking por equipos' : 'Team ranking'}</h3>
-<div style="font-size:14px;line-height:1.8;">
-<div>🟦 ${LANG === 'es' ? 'Equipo Puerto' : 'Team Port'}: 8 pts</div>
-<div>🟩 ${LANG === 'es' ? 'Equipo Pesca' : 'Team Fishing'}: 6 pts</div>
-<div>🟨 ${LANG === 'es' ? 'Equipo Turismo' : 'Team Tourism'}: 5 pts</div>
-</div>
-</div>` : ''}
-<div class="card">
-<h3>📚 ${LANG === 'es' ? 'Libro de notas' : 'Grade book'} (${state.phase2.who} ${LANG === 'es' ? 'estudiantes' : 'students'})</h3>
-<table>
-<thead><tr><th>#</th><th>${LANG === 'es' ? 'Estudiante' : 'Student'}</th>${autoGrade ? '<th>' + (LANG === 'es' ? 'Estado' : 'Status') + '</th>' : ''}<th>${LANG === 'es' ? 'Nota' : 'Grade'}</th></tr></thead>
-<tbody id="grades"></tbody>
-</table>
-</div>
-</div>
-<script>
-var QUESTIONS = ${JSON.stringify(questions)};
-var STUDENTS = ${JSON.stringify(students)};
-var AUTO = ${autoGrade ? 'true' : 'false'};
-var BIL = ${bilingual ? 'true' : 'false'};
-var curLang = "${LANG}";
-var labels = {
-  es: { approved: "Aprobado", reinforce: "Refuerzo" },
-  en: { approved: "Approved", reinforce: "Needs reinforcement" }
-};
-function labelOf(key) { return labels[curLang][key]; }
-function renderQuiz() {
-  var html = "";
-  QUESTIONS.forEach(function(question, questionIndex) {
-    html += '<div class="q" data-question="' + questionIndex + '"><div class="q-text">' + (questionIndex + 1) + ". " + question.question + "</div>";
-    question.options.forEach(function(option, optionIndex) {
-      html += '<button class="opt" onclick="answerQuiz(' + questionIndex + "," + optionIndex + ')" data-correct="' + (question.correct === optionIndex ? 1 : 0) + '">' + option + "</button>";
-    });
-    html += "</div>";
-  });
-  document.getElementById("quiz").innerHTML = html;
-}
-function answerQuiz(questionIndex, optionIndex) {
-  var block = document.querySelector('.q[data-question="' + questionIndex + '"]');
-  if (!block) return;
-  var buttons = block.querySelectorAll(".opt");
-  var isCorrect = buttons[optionIndex].dataset.correct === "1";
-  buttons.forEach(function(button, buttonIndex) {
-    button.disabled = true;
-    if (button.dataset.correct === "1") button.classList.add("correct");
-    else if (buttonIndex === optionIndex) button.classList.add("wrong");
-  });
-  var rows = document.querySelectorAll("#grades tr");
-  if (rows[0]) {
-    var cells = rows[0].querySelectorAll("td");
-    var lastIdx = cells.length - 1;
-    cells[lastIdx].textContent = isCorrect ? "10" : "5";
-    if (AUTO && cells.length >= 4) {
-      cells[lastIdx - 1].textContent = isCorrect ? labelOf("approved") : labelOf("reinforce");
-      cells[lastIdx - 1].style.color = isCorrect ? "#34D399" : "#e5604d";
-    }
-  }
-}
-function renderGrades() {
-  var html = "";
-  STUDENTS.slice(0, 10).forEach(function(student, studentIndex) {
-    html += "<tr><td>" + (studentIndex + 1) + "</td><td>" + student + "</td>" + (AUTO ? "<td>—</td>" : "") + "<td>—</td></tr>";
-  });
-  if (STUDENTS.length > 10) {
-    html += '<tr><td colspan="' + (AUTO ? 4 : 3) + '" style="text-align:center;color:#b9b09e;">… +' + (STUDENTS.length - 10) + "</td></tr>";
-  }
-  document.getElementById("grades").innerHTML = html;
-}
-function toggleLang() {
-  curLang = curLang === "es" ? "en" : "es";
-  renderQuiz();
-  renderGrades();
-}
-renderQuiz();
-renderGrades();
-<\/script>
-
-</body>
-</html>`;
-}
-
 /* ============================================================
    Expose functions to window and boot
    ============================================================ */
@@ -1876,7 +1973,6 @@ window.toggleContext = toggleContext;
 window.toggleNot = toggleNot;
 window.updatePromptPreview = updatePromptPreview;
 window.updateSpecScore = updateSpecScore;
-window.answerQuiz = answerQuiz;
 window.downloadApp = downloadApp;
 
 // Boot the game
