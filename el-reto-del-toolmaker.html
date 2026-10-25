@@ -651,6 +651,12 @@ const I18N = {
     what_quiz: "Quiz de repaso",
     what_notes: "Registrar notas",
     what_both: "Ambos",
+    ctx_rural: "Escuela rural",
+    ctx_public: "Colegio público",
+    ctx_private: "Colegio privado",
+    ctx_university: "Universidad",
+    prompt_context: "contexto",
+    prompt_without: "sin",
     ctx_port: "Puerto",
     ctx_fishing: "Pesca",
     ctx_tourism: "Turismo",
@@ -791,6 +797,12 @@ const I18N = {
     what_quiz: "Review quiz",
     what_notes: "Record grades",
     what_both: "Both",
+    ctx_rural: "Rural school",
+    ctx_public: "Public school",
+    ctx_private: "Private school",
+    ctx_university: "University",
+    prompt_context: "context",
+    prompt_without: "without",
     ctx_port: "Port",
     ctx_fishing: "Fishing",
     ctx_tourism: "Tourism",
@@ -940,7 +952,7 @@ const state = {
   phase2: {
     what: null,
     who: 30,
-    context: null,
+    context: [],
     nots: [],
     lang: null,
     specScore: 0,
@@ -1176,7 +1188,7 @@ function renderPromptBuilder(){
         <div class="field">
           <label class="field-label">${t('field_context')}</label>
           <div class="chips">
-            ${['port', 'fishing', 'tourism', 'none'].map(key => `<button class="chip ${builder.context === key ? 'selected' : ''}" onclick="selectField('context','${key}')">${t('ctx_' + key)}</button>`).join('')}
+            ${['rural', 'public', 'private', 'university', 'port', 'fishing', 'tourism', 'none'].map(key => `<button class="chip ${builder.context.includes(key) ? 'selected' : ''}" onclick="toggleContext('${key}')">${t('ctx_' + key)}</button>`).join('')}
           </div>
         </div>
 
@@ -1216,6 +1228,22 @@ window.selectField = function(field, value){
   renderPromptBuilder();
 };
 
+window.toggleContext = function(value){
+  const contextArray = state.phase2.context;
+  const foundIndex = contextArray.indexOf(value);
+  if (foundIndex >= 0) {
+    contextArray.splice(foundIndex, 1);
+  } else if (value === 'none') {
+    contextArray.length = 0;
+    contextArray.push('none');
+  } else {
+    const noneIndex = contextArray.indexOf('none');
+    if (noneIndex >= 0) contextArray.splice(noneIndex, 1);
+    contextArray.push(value);
+  }
+  renderPromptBuilder();
+};
+
 window.toggleNot = function(value){
   const notsArray = state.phase2.nots;
   const foundIndex = notsArray.indexOf(value);
@@ -1227,11 +1255,10 @@ window.toggleNot = function(value){
 function buildPromptText(){
   const builder = state.phase2;
   const whatMap = { quiz: t('what_quiz'), notes: t('what_notes'), both: t('what_both') };
-  const contextMap = { port: t('ctx_port'), fishing: t('ctx_fishing'), tourism: t('ctx_tourism'), none: t('ctx_none') };
-  const langMap = { es: t('lang_es'), en: t('lang_en'), both: t('lang_both') };
+    const langMap = { es: t('lang_es'), en: t('lang_en'), both: t('lang_both') };
   const what = builder.what ? whatMap[builder.what] : t('not_specified');
-  const context = builder.context ? `, contexto: ${contextMap[builder.context]}` : '';
-  const nots = builder.nots.length ? `, sin: ${builder.nots.map(key => t('not_' + key)).join(', ')}` : '';
+  const context = builder.context.length ? `, ${t('prompt_context')}: ${builder.context.map(key => t('ctx_' + key)).join(' + ')}` : '';
+  const nots = builder.nots.length ? `, ${t('prompt_without')}: ${builder.nots.map(key => t('not_' + key)).join(', ')}` : '';
   const lang = builder.lang ? langMap[builder.lang] : t('not_specified');
   return t('prompt_skeleton', { what, who: builder.who, context, nots, lang, name: state.safeName });
 }
@@ -1245,7 +1272,7 @@ function computeSpecScore(){
   const builder = state.phase2;
   let score = 0;
   if (builder.what) score += 20;
-  if (builder.context) score += 20;
+  if (builder.context.length) score += 20;
   if (builder.nots.length > 0) score += 20;
   if (builder.lang) score += 20;
   score += 20; // who is always set
@@ -1529,7 +1556,7 @@ window.applyChanges = function(){
 function renderAppliedView(targetAjuste){
   const diffMap = {
     0: '> add: auto_grading();  // score + status per student',
-    1: '> add: context.localize("Manta");  // questions + emojis',
+    1: `> add: context.localize("${escapeHtml(state.phase2.context.filter(key => key !== 'none').map(key => t('ctx_' + key)).join(' + ') || 'Manta')}");  // questions + emojis`,
     2: '> add: i18n.toggle(es,en);  // language switch',
     3: '> add: teams.rank();  // colored ranking'
   };
@@ -1537,7 +1564,7 @@ function renderAppliedView(targetAjuste){
 
   // Contradiction checks
   let contradiction = '';
-  if (state.phase3.applied.includes(1) && (state.phase2.context === 'none' || !state.phase2.context)) {
+  if (state.phase3.applied.includes(1) && (!state.phase2.context.length || state.phase2.context.includes('none'))) {
     contradiction = avatarBubble(t('contradiction_warn'));
   } else if (state.phase3.applied.includes(2) && state.phase2.lang && state.phase2.lang !== 'both') {
     contradiction = avatarBubble(t('contradiction_warn'));
@@ -1845,6 +1872,7 @@ window.generateApp = generateApp;
 window.applyChanges = applyChanges;
 window.toggleChange = toggleChange;
 window.selectField = selectField;
+window.toggleContext = toggleContext;
 window.toggleNot = toggleNot;
 window.updatePromptPreview = updatePromptPreview;
 window.updateSpecScore = updateSpecScore;
