@@ -25,7 +25,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | `constructos_IA.html` | SimulAI — Alucinaciones en la Investigación | Metodología — detección de alucinaciones en construcción de constructos; verificación en Scopus; tipología de adjetivación espuria, fusión cross-field, citas fabricadas |
 | `revista.html` | OJS — Envío de Artículos Científicos | Metodología de publicación — proceso de envío, declaraciones éticas, metadatos, revisión por pares, evaluación a ciegas |
 | `mundoSofia1.html` | El Mundo de Sofía — El Jardín del Edén | Filosofía — primer capítulo de la novela de Jostein Gaarder, narrativa interactiva sobre identidad, existencia y origen del universo |
-| `el-reto-del-toolmaker.html` | El Reto del Toolmaker | Metodología / IA educativa — 3 fases: apps genéricas con límites (paywall, datos, contexto), especificar un prompt claro para construir una herramienta con IA, y ajustarla; mide frustración y ajuste herramienta–necesidad |
+| `el-reto-del-toolmaker.html` | El Reto del Toolmaker | Metodología / IA educativa — 3 fases: tabla visual de apps genéricas con límites (✓/✗ en una pantalla), especificar un prompt claro para construir una herramienta con IA, y ajustarla; mide frustración y ajuste herramienta–necesidad |
 
 Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 

@@ -9,7 +9,7 @@ Serious game para docentes: las apps genéricas siempre imponen límites; cuando
 
 | Fase | Mecánica | Aprendizaje |
 |---|---|---|
-| 1. Elige tu app | 4 retos (gamificación, evaluación, mensajes/notas, contexto local) con 3 apps cada uno; cada app tiene un límite (muro de pago, datos sin vincular, exportación bloqueada, contexto ajeno). Sube la «frustración del docente». | Toda herramienta genérica tiene un costo: dinero, datos, contexto. |
+| 1. Elige tu app | Una sola pantalla: tabla 4 necesidades × 3 apps. Al tocar una app aparecen ✓/✗ y su puntaje (todas 2/4). Veredicto: «Ninguna cumple las 4». | Toda herramienta genérica falla en algo: costo, datos, contexto. |
 | 2. Plan B: constrúyela | Se arma un prompt con campos (qué debe hacer, para quién, contexto, qué NO debe hacer, idioma). La «especificación» se puntúa; si es ambigua la app generada pierde una función. | Especificar con claridad es el recurso escaso, no programar. |
 | 3. Ajústala | Elegir al menos 3 cambios (calificar automático, contexto, bilingüe, equipos); la versión sube en vivo. | Iteración: la herramienta evoluciona con peticiones precisas. |
 

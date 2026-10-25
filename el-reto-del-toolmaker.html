@@ -216,6 +216,30 @@
   .app-name { font-weight: 700; color: var(--gold); margin-bottom: 4px; }
   .app-desc { font-size: .85rem; color: var(--muted); }
 
+
+  /* ===== Phase 1 comparison table ===== */
+  .p1-hint { color: var(--muted); font-size: .9rem; margin: 0 0 10px; }
+  .p1-table-wrap { overflow-x: auto; }
+  .p1-table { width: 100%; border-collapse: separate; border-spacing: 6px; text-align: center; }
+  .p1-need { text-align: left; font-weight: 600; font-size: .9rem; white-space: nowrap; }
+  .p1-need-icon { font-size: 1.2rem; margin-right: 4px; }
+  .p1-app {
+    width: 100%; padding: 12px 8px; cursor: pointer; font-family: inherit; font-weight: 700;
+    color: var(--gold); background: var(--card-2); border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm); transition: all var(--t);
+  }
+  .p1-app:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .p1-app.is-open { background: rgba(212,162,78,.12); border-color: var(--gold); }
+  .p1-cell { padding: 10px 6px; border-radius: 8px; background: rgba(0,0,0,.25); animation: pop 300ms ease; }
+  .p1-hidden { color: var(--muted); animation: none; opacity: .5; }
+  .p1-mark { display: block; font-size: 1.6rem; font-weight: 700; line-height: 1; }
+  .p1-ok .p1-mark { color: var(--emerald); }
+  .p1-no { background: rgba(229,96,77,.12); }
+  .p1-no .p1-mark { color: var(--error); }
+  .p1-why { display: block; font-size: .72rem; color: var(--muted); margin-top: 2px; }
+  .p1-score { font-size: 1.2rem; font-weight: 700; color: var(--gold); padding-top: 6px; }
+  .p1-verdict { text-align: center; font-weight: 700; color: var(--gold-hi); margin: 12px 0 0; animation: pop 350ms ease; }
+
   /* ===== Meters ===== */
   .meter {
     background: rgba(0,0,0,.3);
@@ -587,10 +611,13 @@ const I18N = {
     phase2_title: "Plan B: constrúyela",
     phase3_title: "Ajústala",
     welcome: "¡Hola, {name}! Soy Profe Arturito.",
-    welcome_text: "Vamos a vivir un reto: elegir apps genéricas para tu clase y luego construir la tuya. Toma decisiones y observa qué pasa. ¿List@?",
+    welcome_text: "Prueba apps genéricas. Luego crea la tuya con IA.",
     start_btn: "Comenzar el reto",
     phase1_intro: "Fase 1 — Cuatro retos con apps genéricas",
     phase1_intro_text: "Para cada situación, prueba las apps disponibles. Cada una tendrá un límite. Tu frustración subirá con cada intento.",
+    p1_hint: "Toca cada app",
+    p1_verdict: "Ninguna cumple las 4. ¿Y si la creas tú?",
+    p1_go: "Crear la mía",
     next_challenge: "Siguiente reto",
     finish_phase1: "Terminar fase 1",
     try_again: "Probar otra app",
@@ -724,10 +751,13 @@ const I18N = {
     phase2_title: "Plan B: build it",
     phase3_title: "Tune it",
     welcome: "Hi, {name}! I'm Profe Arturito.",
-    welcome_text: "We'll go through a challenge: pick generic apps for your class, then build your own. Make decisions and watch what happens. Ready?",
+    welcome_text: "Try generic apps. Then build your own with AI.",
     start_btn: "Start the challenge",
     phase1_intro: "Phase 1 — Four challenges with generic apps",
     phase1_intro_text: "For each situation, try the available apps. Each one has a limit. Your frustration rises with every attempt.",
+    p1_hint: "Tap each app",
+    p1_verdict: "None meets all 4. What if you build it?",
+    p1_go: "Build mine",
     next_challenge: "Next challenge",
     finish_phase1: "Finish phase 1",
     try_again: "Try another app",
@@ -865,117 +895,35 @@ function t(key, vars){
 /* ============================================================
    Challenges data — ES + EN with identical structure
    ============================================================ */
-const CHALLENGES_ALL = {
-  es: [
-    {
-      id: 1,
-      theme: "Gamificación",
-      icon: "fa-gamepad",
-      situation: "Quieres gamificar un repaso con tu clase de 30 estudiantes.",
-      apps: [
-        { name: "KaPlay", desc: "Versión gratuita: admite 6 jugadores." },
-        { name: "QuizMate", desc: "30 jugadores, pero sin ver resultados individuales." },
-        { name: "PlayLearn", desc: "Todo incluido, pero cuesta USD 12/mes." }
-      ],
-      miniType: "students",
-      miniConfig: { limit: 6, total: 30 }
-    },
-    {
-      id: 2,
-      theme: "Comunicación y calificación",
-      icon: "fa-comments",
-      situation: "25 estudiantes te escriben por WhatsApp, correo y el aula virtual preguntando por sus notas.",
-      apps: [
-        { name: "ChatClass", desc: "Mensajería; no registra notas." },
-        { name: "GradeBook Pro", desc: "Notas; sin mensajes." },
-        { name: "CampusHub", desc: "Todo en uno; exportación bloqueada." }
-      ],
-      miniType: "messages",
-      miniConfig: { total: 5 }
-    },
-    {
-      id: 3,
-      theme: "Contextualización",
-      icon: "fa-map-location-dot",
-      situation: "Tu clase es en Manta, Ecuador; tus estudiantes conocen el puerto, la pesca y el turismo.",
-      apps: [
-        { name: "TemplaHub", desc: "Plantillas con nieve y Nueva York; editar contexto es premium." },
-        { name: "EduCards", desc: "Editable pero sin imágenes locales." },
-        { name: "LearnLab", desc: "Contenido ya hecho, no editable." }
-      ],
-      miniType: "context",
-      miniConfig: {}
-    },
-    {
-      id: 4,
-      theme: "Conectividad y datos",
-      icon: "fa-signal",
-      situation: "Tus estudiantes usan datos móviles limitados y te preocupa dónde se guardan sus datos.",
-      apps: [
-        { name: "StreamQuiz", desc: "Video pesado, 80 MB por sesión." },
-        { name: "CloudClass", desc: "Pide cuenta con datos personales; servidores en el extranjero." },
-        { name: "LiteApp", desc: "Liviana, pero sin reportes." }
-      ],
-      miniType: "data",
-      miniConfig: { megabytes: 80 }
-    }
-  ],
-  en: [
-    {
-      id: 1,
-      theme: "Gamification",
-      icon: "fa-gamepad",
-      situation: "You want to gamify a review with your 30-student class.",
-      apps: [
-        { name: "KaPlay", desc: "Free tier: only 6 players." },
-        { name: "QuizMate", desc: "30 players, but no individual results." },
-        { name: "PlayLearn", desc: "Everything included, but USD 12/mo." }
-      ],
-      miniType: "students",
-      miniConfig: { limit: 6, total: 30 }
-    },
-    {
-      id: 2,
-      theme: "Communication and grading",
-      icon: "fa-comments",
-      situation: "25 students message you via WhatsApp, email and the LMS asking about their grades.",
-      apps: [
-        { name: "ChatClass", desc: "Messaging; no grade book." },
-        { name: "GradeBook Pro", desc: "Grades; no messages." },
-        { name: "CampusHub", desc: "All-in-one; export locked." }
-      ],
-      miniType: "messages",
-      miniConfig: { total: 5 }
-    },
-    {
-      id: 3,
-      theme: "Contextualization",
-      icon: "fa-map-location-dot",
-      situation: "Your class is in Manta, Ecuador; your students know the port, fishing and tourism.",
-      apps: [
-        { name: "TemplaHub", desc: "Templates with snow and New York; editing context is premium." },
-        { name: "EduCards", desc: "Editable but no local images." },
-        { name: "LearnLab", desc: "Ready-made content, not editable." }
-      ],
-      miniType: "context",
-      miniConfig: {}
-    },
-    {
-      id: 4,
-      theme: "Connectivity and data",
-      icon: "fa-signal",
-      situation: "Your students use limited mobile data and you worry where their data is stored.",
-      apps: [
-        { name: "StreamQuiz", desc: "Heavy video, 80 MB per session." },
-        { name: "CloudClass", desc: "Requires account with personal data; servers abroad." },
-        { name: "LiteApp", desc: "Lightweight, but no reports." }
-      ],
-      miniType: "data",
-      miniConfig: { megabytes: 80 }
-    }
-  ]
+const PHASE1_ALL = {
+  es: {
+    needs: [
+      { icon: "👥", label: "30 estudiantes" },
+      { icon: "📊", label: "Nota por alumno" },
+      { icon: "📍", label: "Contexto de Manta" },
+      { icon: "💲", label: "Gratis" }
+    ],
+    apps: [
+      { name: "KaPlay",    results: [ {ok:false, why:"máx. 6"}, {ok:true}, {ok:false, why:"nieve / NY"}, {ok:true} ] },
+      { name: "QuizMate",  results: [ {ok:true}, {ok:false, why:"solo promedio"}, {ok:false, why:"nieve / NY"}, {ok:true} ] },
+      { name: "PlayLearn", results: [ {ok:true}, {ok:true}, {ok:false, why:"nieve / NY"}, {ok:false, why:"USD 12/mes"} ] }
+    ]
+  },
+  en: {
+    needs: [
+      { icon: "👥", label: "30 students" },
+      { icon: "📊", label: "Grade per student" },
+      { icon: "📍", label: "Local context (Manta)" },
+      { icon: "💲", label: "Free" }
+    ],
+    apps: [
+      { name: "KaPlay",    results: [ {ok:false, why:"max. 6"}, {ok:true}, {ok:false, why:"snow / NY"}, {ok:true} ] },
+      { name: "QuizMate",  results: [ {ok:true}, {ok:false, why:"average only"}, {ok:false, why:"snow / NY"}, {ok:true} ] },
+      { name: "PlayLearn", results: [ {ok:true}, {ok:true}, {ok:false, why:"snow / NY"}, {ok:false, why:"USD 12/mo"} ] }
+    ]
+  }
 };
-const CHALLENGES = CHALLENGES_ALL[LANG];
+const PHASE1 = PHASE1_ALL[LANG];
 
 /* ============================================================
    Global state
@@ -986,12 +934,8 @@ const state = {
   safeName: "",
   appName: "",
   phase1: {
-    challengeIndex: 0,
-    scores: [0, 0, 0, 0],
-    triedApps: [[false,false,false],[false,false,false],[false,false,false],[false,false,false]],
-    selectedApps: [-1, -1, -1, -1],
-    frustration: 0,
-    miniState: {}
+    revealed: [false, false, false],
+    frustration: 0
   },
   phase2: {
     what: null,
@@ -1126,246 +1070,78 @@ function startGame(){
 }
 
 /* ============================================================
-   PHASE 1 — generic apps
+   PHASE 1 — generic apps (one visual screen, almost no text)
    ============================================================ */
 function startPhase1(){
   state.phase = 1;
   setProgress(1);
-  state.phase1.challengeIndex = 0;
-  state.phase1.scores = [0, 0, 0, 0];
-  state.phase1.triedApps = [[false,false,false],[false,false,false],[false,false,false],[false,false,false]];
-  state.phase1.selectedApps = [-1, -1, -1, -1];
+  state.phase1.revealed = [false, false, false];
   state.phase1.frustration = 0;
-  state.phase1.miniState = {};
-  renderChallenge();
+  renderPhase1();
 }
 
-function renderChallenge(){
-  const challengeIndex = state.phase1.challengeIndex;
-  const challenge = CHALLENGES[challengeIndex];
-  const tried = state.phase1.triedApps[challengeIndex];
+function countMetNeeds(app){
+  return app.results.filter(result => result.ok).length;
+}
 
-  const appsHtml = challenge.apps.map((app, appIndex) => `
-    <button class="app-card ${tried[appIndex] ? 'tried' : ''} ${state.phase1.selectedApps[challengeIndex] === appIndex ? 'selected' : ''}"
-            onclick="handleAppChoice(${challengeIndex}, ${appIndex})"
-            aria-label="${escapeHtml(app.name)}: ${escapeHtml(app.desc)}">
-      <div class="app-name">${escapeHtml(app.name)}</div>
-      <div class="app-desc">${escapeHtml(app.desc)}</div>
-    </button>
-  `).join('');
+function renderPhase1(){
+  const revealedFlags = state.phase1.revealed;
+  const revealedCount = revealedFlags.filter(Boolean).length;
 
-  const isLast = challengeIndex === CHALLENGES.length - 1;
+  const headerCells = PHASE1.apps.map((app, appIndex) => `
+    <th>
+      <button class="p1-app ${revealedFlags[appIndex] ? 'is-open' : ''}" onclick="handleAppChoice(${appIndex})">${escapeHtml(app.name)}</button>
+    </th>`).join('');
+
+  const rows = PHASE1.needs.map((need, needIndex) => {
+    const cells = PHASE1.apps.map((app, appIndex) => {
+      if (!revealedFlags[appIndex]) return '<td class="p1-cell p1-hidden">?</td>';
+      const result = app.results[needIndex];
+      return `<td class="p1-cell ${result.ok ? 'p1-ok' : 'p1-no'}">
+        <span class="p1-mark">${result.ok ? '✓' : '✗'}</span>
+        ${result.why ? `<span class="p1-why">${escapeHtml(result.why)}</span>` : ''}
+      </td>`;
+    }).join('');
+    return `<tr><th class="p1-need"><span class="p1-need-icon">${need.icon}</span> ${escapeHtml(need.label)}</th>${cells}</tr>`;
+  }).join('');
+
+  const scoreCells = PHASE1.apps.map((app, appIndex) => revealedFlags[appIndex]
+    ? `<td class="p1-score">${countMetNeeds(app)}/${PHASE1.needs.length}</td>`
+    : '<td class="p1-score p1-hidden">–</td>').join('');
 
   render(`
     <div class="screen">
       <div class="card">
-        <div class="row mb-12">
-          <span class="score-badge"><i class="fa-solid ${challenge.icon}"></i> ${t('challenge')} ${challengeIndex + 1} ${t('of')} ${CHALLENGES.length}: ${escapeHtml(challenge.theme)}</span>
-          <div class="spacer"></div>
-          <span class="score-badge"><i class="fa-solid fa-coins"></i> ${t('points')}: ${state.phase1.scores[challengeIndex]}</span>
+        <p class="p1-hint"><i class="fa-regular fa-hand-pointer"></i> ${t('p1_hint')}</p>
+        <div class="p1-table-wrap">
+          <table class="p1-table">
+            <thead><tr><th></th>${headerCells}</tr></thead>
+            <tbody>${rows}<tr><th class="p1-need"></th>${scoreCells}</tr></tbody>
+          </table>
         </div>
-        <p class="card-sub"><strong>${t('situation')}:</strong> ${escapeHtml(challenge.situation)}</p>
-        <div class="app-grid">${appsHtml}</div>
-        <div id="miniArea"></div>
-        <div class="mt-12">
-          <div class="meter-label"><span>${t('frustration')}</span><span>${state.phase1.frustration}/100</span></div>
-          <div class="meter"><div class="meter-fill" style="width:${state.phase1.frustration}%"></div></div>
-        </div>
+        ${revealedCount === PHASE1.apps.length ? `<p class="p1-verdict">${t('p1_verdict')}</p>` : ''}
         <div class="row mt-12">
           <div class="spacer"></div>
-          <button class="btn ${isLast ? 'btn-emerald' : 'btn-primary'}"
-                  onclick="nextChallenge()"
-                  ${state.phase1.selectedApps[challengeIndex] === -1 ? 'disabled' : ''}>
-            ${isLast ? t('finish_phase1') : t('next_challenge')} <i class="fa-solid fa-arrow-right"></i>
+          <button class="btn btn-emerald" onclick="finishPhase1()" ${revealedCount === 0 ? 'disabled' : ''}>
+            ${t('p1_go')} <i class="fa-solid fa-arrow-right"></i>
           </button>
         </div>
       </div>
     </div>
   `);
-
-  // Re-render mini interaction if an app was already selected
-  if (state.phase1.selectedApps[challengeIndex] !== -1) {
-    renderMiniInteraction(challenge, state.phase1.selectedApps[challengeIndex]);
-  }
 }
 
-function handleAppChoice(challengeIndex, appIndex){
-  const challenge = CHALLENGES[challengeIndex];
-  const wasTried = state.phase1.triedApps[challengeIndex][appIndex];
-  if (!wasTried) {
-    state.phase1.triedApps[challengeIndex][appIndex] = true;
-  }
-  state.phase1.selectedApps[challengeIndex] = appIndex;
-
-  // Scoring: base by app, minus penalty for extra tries
-  const scoreMap = [10, 6, 3];
-  const baseScore = scoreMap[appIndex];
-  const triesCount = state.phase1.triedApps[challengeIndex].filter(Boolean).length;
-  const penalty = Math.max(0, triesCount - 1);
-  state.phase1.scores[challengeIndex] = Math.max(0, baseScore - penalty);
-
-  // Frustration rises per attempt
-  state.phase1.frustration = Math.min(100, state.phase1.frustration + 8);
-
-  renderMiniInteraction(challenge, appIndex);
-  renderChallenge();
-}
-
-function renderMiniInteraction(challenge, appIndex){
-  const area = document.getElementById('miniArea');
-  if (!area) return;
-  let html = '<div class="mini-area">';
-  const config = challenge.miniConfig;
-
-  if (challenge.miniType === 'students') {
-    // Add students one by one; on the 7th, KaPlay shows paywall
-    const stateKey = 'students_' + state.phase1.challengeIndex;
-    if (!state.phase1.miniState[stateKey]) {
-      state.phase1.miniState[stateKey] = { count: 0, locked: false };
-    }
-    const miniState = state.phase1.miniState[stateKey];
-
-    html += `<p class="text-muted">${t('students_label')}: <span id="studentCount">${miniState.count}</span> / ${config.total}</p>`;
-    html += '<div class="student-row" id="studentRow">';
-    for (let i = 0; i < miniState.count; i++) {
-      html += `<span class="student-av">${getAvatarEmoji(i)}</span>`;
-    }
-    html += '</div>';
-
-    if (miniState.locked && appIndex === 0) {
-      html += `<div class="paywall"><i class="fa-solid fa-lock"></i> ${t('paywall_msg')}</div>`;
-    } else if (appIndex === 1) {
-      html += `<div class="paywall"><i class="fa-solid fa-eye-slash"></i> ${t('paywall_2')}</div>`;
-    } else if (appIndex === 2) {
-      html += `<div class="paywall"><i class="fa-solid fa-credit-card"></i> ${t('paywall_3')}</div>`;
-    }
-
-    if (!miniState.locked) {
-      html += `<button class="btn btn-ghost mt-12" onclick="addStudent(${state.phase1.challengeIndex}, ${appIndex})"><i class="fa-solid fa-plus"></i> ${t('add_student')}</button>`;
-    }
-  } else if (challenge.miniType === 'messages') {
-    const messages = [t('msg1'), t('msg2'), t('msg3'), t('msg4'), t('msg5')];
-    html += `<p class="text-muted">${t('msg_instruction')}</p>`;
-    html += `<p class="text-gold" id="assignedLabel">${t('assigned', { n: 0 })}</p>`;
-    html += '<div class="msg-stream">';
-    messages.forEach((message, messageIndex) => {
-      html += `<div class="msg-item" onclick="assignMessage(this)">${escapeHtml(message)}</div>`;
-    });
-    html += '</div>';
-    if (appIndex === 0) {
-      html += `<div class="paywall"><i class="fa-solid fa-unlink"></i> ${t('limit_no_grades')}</div>`;
-    } else if (appIndex === 1) {
-      html += `<div class="paywall"><i class="fa-solid fa-message-slash"></i> ${t('paywall_2')}</div>`;
-    } else {
-      html += `<div class="paywall"><i class="fa-solid fa-lock"></i> ${t('paywall_3')}</div>`;
-    }
-  } else if (challenge.miniType === 'context') {
-    html += `<p class="text-muted">${t('situation')}: Manta — puerto, pesca, turismo</p>`;
-    html += `<div style="padding:10px;border:1px solid var(--border);border-radius:8px;margin:6px 0;">
-      <div class="text-muted">📍 Plantilla: "Nueva York en invierno" <span class="text-error">(ajeno)</span></div>
-      <div class="text-muted mt-12">✏️ Intento de cambiar a "Puerto de Manta"</div>
-    </div>`;
-    if (appIndex === 0) {
-      html += `<div class="paywall"><i class="fa-solid fa-lock"></i> ${t('lock_msg')}</div>`;
-    } else if (appIndex === 1) {
-      html += `<div class="paywall"><i class="fa-solid fa-image"></i> ${t('lock_2')}</div>`;
-    } else {
-      html += `<div class="paywall"><i class="fa-solid fa-lock"></i> ${t('lock_3')}</div>`;
-    }
-  } else if (challenge.miniType === 'data') {
-    const megabytes = appIndex === 0 ? 80 : (appIndex === 1 ? 25 : 5);
-    html += `<div class="meter-label"><span>${t('data_meter')}</span><span>${megabytes} MB</span></div>`;
-    html += `<div class="meter"><div class="meter-fill" style="width:${Math.min(100, megabytes)}%"></div></div>`;
-    html += `<p class="text-muted mt-12">${t('data_collect')}:</p>`;
-    const collectedData = appIndex === 0
-      ? ['Ubicación', 'Cookies de terceros', 'Historial de video']
-      : appIndex === 1
-        ? ['Nombre completo', 'Correo', 'Teléfono', 'Ubicación', 'Datos de pago']
-        : ['Solo progreso del quiz'];
-    html += '<ul class="text-muted" style="margin:4px 0 0 18px;padding:0;font-size:.85rem;">';
-    collectedData.forEach(item => { html += `<li>${escapeHtml(item)}</li>`; });
-    html += '</ul>';
-    if (appIndex === 2) {
-      html += `<div class="paywall"><i class="fa-solid fa-chart-simple"></i> ${t('lock_3')}</div>`;
-    }
-  }
-  html += '</div>';
-  area.innerHTML = html;
-}
-
-function getAvatarEmoji(index){
-  const emojis = ['🧑','👩','👨','👧','👦','🧒','👩‍🦱','👨‍🦱','👩‍🦰','👨‍🦰'];
-  return emojis[index % emojis.length];
-}
-
-window.addStudent = function(challengeIndex, appIndex){
-  const challenge = CHALLENGES[challengeIndex];
-  const config = challenge.miniConfig;
-  const stateKey = 'students_' + challengeIndex;
-  if (!state.phase1.miniState[stateKey]) state.phase1.miniState[stateKey] = { count: 0, locked: false };
-  const miniState = state.phase1.miniState[stateKey];
-  if (miniState.locked) return;
-  miniState.count++;
-  // KaPlay: lock at limit (6)
-  if (appIndex === 0 && miniState.count >= config.limit) {
-    miniState.locked = true;
-  }
-  renderMiniInteraction(challenge, appIndex);
-};
-
-window.assignMessage = function(element){
-  element.classList.add('matched');
-  const matched = document.querySelectorAll('.msg-item.matched').length;
-  const label = document.getElementById('assignedLabel');
-  if (label) label.textContent = t('assigned', { n: matched });
-};
-
-function nextChallenge(){
-  const challengeIndex = state.phase1.challengeIndex;
-  if (challengeIndex < CHALLENGES.length - 1) {
-    state.phase1.challengeIndex = challengeIndex + 1;
-    renderChallenge();
-  } else {
-    finishPhase1();
-  }
+function handleAppChoice(appIndex){
+  state.phase1.revealed[appIndex] = true;
+  const revealedCount = state.phase1.revealed.filter(Boolean).length;
+  state.phase1.frustration = Math.min(100, 30 + revealedCount * 25);
+  renderPhase1();
 }
 
 function finishPhase1(){
-  // Tool-need fit: derived from points (max 40), range 30-45
-  const totalScore = state.phase1.scores.reduce((acc, score) => acc + score, 0);
-  const ajuste = Math.round(30 + (totalScore / 40) * 15);
-  state.phase3.ajuste = ajuste;
-
-  render(`
-    <div class="screen">
-      <div class="card">
-        <h2 class="card-title">${t('phase1_summary_title')}</h2>
-        ${avatarBubble(t('phase1_summary_text'))}
-        <div class="mt-12">
-          <div class="meter-label"><span>${t('ajuste_label')}</span><span id="ajusteNum">0/100</span></div>
-          <div class="meter"><div class="meter-fill" id="ajusteBar" style="width:0%"></div></div>
-        </div>
-        <div class="row mt-12">
-          <div class="spacer"></div>
-          <button class="btn btn-primary" onclick="startPhase2()">${t('next_phase')} <i class="fa-solid fa-arrow-right"></i></button>
-        </div>
-      </div>
-    </div>
-  `);
-  // Animate the ajuste bar
-  setTimeout(() => {
-    const bar = document.getElementById('ajusteBar');
-    const num = document.getElementById('ajusteNum');
-    if (bar) bar.style.width = ajuste + '%';
-    if (num) {
-      let current = 0;
-      const interval = setInterval(() => {
-        current += 2;
-        if (current >= ajuste) { current = ajuste; clearInterval(interval); }
-        num.textContent = current + '/100';
-      }, 30);
-    }
-  }, 200);
+  const bestMet = Math.max(...PHASE1.apps.map(countMetNeeds));
+  state.phase3.ajuste = Math.round(30 + (bestMet / PHASE1.needs.length) * 15);
+  startPhase2();
 }
 
 /* ============================================================
@@ -2063,7 +1839,7 @@ window.startPhase2 = startPhase2;
 window.startPhase3 = startPhase3;
 window.endGame = endGame;
 window.handleAppChoice = handleAppChoice;
-window.nextChallenge = nextChallenge;
+window.finishPhase1 = finishPhase1;
 window.renderPromptBuilder = renderPromptBuilder;
 window.generateApp = generateApp;
 window.applyChanges = applyChanges;
