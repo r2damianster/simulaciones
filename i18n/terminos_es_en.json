@@ -269,6 +269,90 @@
       "sims": [
         "disenos"
       ]
+    },
+    "fondo_concursable": {
+      "es": "fondo concursable (convocatoria)",
+      "en": "competitive grant (call for proposals)",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "revision_por_pares": {
+      "es": "revisión por pares",
+      "en": "peer review",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "plagio_autoria_fantasma": {
+      "es": "plagio / autoría fantasma",
+      "en": "plagiarism / ghostwriting",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "valor_p": {
+      "es": "valor p (significancia estadística)",
+      "en": "p-value (statistical significance)",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "resultado_nulo": {
+      "es": "resultado nulo (no significativo)",
+      "en": "null result (non-significant)",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "manipulacion_datos": {
+      "es": "manipulación de datos (fraude científico)",
+      "en": "data manipulation (scientific fraud)",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "datos_crudos": {
+      "es": "datos crudos",
+      "en": "raw data",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "revista_indexada": {
+      "es": "revista indexada (Scopus, DOAJ)",
+      "en": "indexed journal (Scopus, DOAJ)",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "cuartil_q1": {
+      "es": "cuartil Q1",
+      "en": "Q1 quartile",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "revista_depredadora": {
+      "es": "revista depredadora",
+      "en": "predatory journal",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "auditoria": {
+      "es": "auditoría / rendición de cuentas",
+      "en": "audit / accountability",
+      "sims": [
+        "financiamiento_etica"
+      ]
+    },
+    "revision_mayor": {
+      "es": "revisión mayor (correcciones)",
+      "en": "major revision (corrections)",
+      "sims": [
+        "financiamiento_etica"
+      ]
     }
   }
 }

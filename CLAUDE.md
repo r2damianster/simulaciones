@@ -13,7 +13,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 | Archivo | Título | Tema |
 |---|---|---|
 | `observación.html` | Observación en Investigación Social | Metodología cualitativa — tipos de observación, notas de campo, sesgos |
-| `financiamiento_etica.html` | El Dilema del Investigador 2.0 | Ética académica — revistas depredadoras, gestión de fondos ONU/CEDIA |
+| `financiamiento_etica.html` | El Dilema del Investigador | Ética académica para no iniciados — tres capítulos (fondos, datos, publicación) con dilemas sin etiquetar (plagio, manipulación de datos, revista depredadora), medidores Fondos/Tiempo/Reputación, «detective de señales» en fichas de revistas y consecuencias explicadas |
 | `disenos.html` | Laboratorio ACME | Diseños de investigación para no iniciados — receta de 5 ingredientes (sorteo, comparación, todo igual, medir antes/después, evaluador ciego); recorre experimento → cuasiexperimento → pre-experimento quitando ingredientes, con un solo tratamiento (superalimento) y términos «dicho fácil → dicho técnico» |
 | `apa7.html` | Simulación Formato APA 7 | Redacción académica — corrección de manuscrito con errores de formato APA 7.ª ed. |
 | `apa7_2.html` | Editor APA 7 — Cinta de herramientas | Redacción académica — editor estilo Word por fases, ribbon interactivo, desbloqueo secuencial |
@@ -55,7 +55,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 | Simulación | Fondo | Acento | Estilo |
 |---|---|---|---|
 | `observación.html` | `#1C1917` (dark warm) | `#D97706` (amber) | Premium editorial dark |
-| `financiamiento_etica.html` | `#14110d` (dark warm) | `#D4A24E` (gold) + `#7ba7c9` (steel blue) | Despacho del investigador — cartas con membrete, sello de goma, mapa enmarcado como monitor |
+| `financiamiento_etica.html` | `#14110d` (dark warm) | `#D4A24E` (gold) + `#7ba7c9` (steel blue) | Despacho del investigador — cartas con membrete, sello de goma neutro, mapa de 4 habitaciones clicables (sin caminar libre ni reloj en tiempo real) |
 | `disenos.html` | `#060d06` (dark green) | `#34D399` (emerald, ex-matrix `#00ff41`) | Laboratorio guiado (burbujas de diálogo + tablero de ingredientes) — escena 3D con clones, bolsa de sorteo, laberinto; Brain y Pinky solo en cuasi/pre |
 | `apa7.html` | `#141210` (dark warm) | `#D4A853` (gold) | Editorial académico / Tailwind |
 | `apa7_2.html` | `#1E1E1E` (VS Code dark) | `#D4A853` (gold) | Editor de código / Word-like ribbon |

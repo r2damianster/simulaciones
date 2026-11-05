@@ -3,235 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Enjambre de la Ciencia</title>
-    <meta name="description" content="Simulación pedagógica interactiva de ética académica: navega entre revistas depredadoras, gestiona fondos ONU/CEDIA y toma decisiones éticas bajo presión. SimLab ULEAM.">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
+    <title>El Dilema del Investigador - ¿Dónde publicar?</title>
+    <meta name="description" content="Simulación pedagógica de ética académica: consigue fondos, analiza tus datos y decide dónde publicar. Aprende a reconocer plagio, manipulación de datos y revistas depredadoras sin saber nada de investigación. SimLab ULEAM.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9C%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-
-        :root { --bg-dark: #14110d; --panel-bg: #1d1812; --text-main: #d8cdb8; --cyan: #7ba7c9; --gold: #D4A24E; --green: #4a8f5f; --yellow: #d9a441; --red: #c75050; --sim-home-fg: #D4A24E; --sim-home-bg: rgba(212,162,78,0.12); --sim-home-bd: rgba(212,162,78,0.22); --sim-home-hi: #fbbf24; }
+        :root {
+            --bg-dark: #14110d; --panel-bg: #1d1812; --panel-alt: #241f18; --line: #332c22;
+            --text-main: #e3d9c4; --text-dim: #a89878; --cyan: #7ba7c9; --gold: #D4A24E;
+            --green: #4a8f5f; --yellow: #d9a441; --red: #d86a6a;
+            --sim-home-fg: #D4A24E; --sim-home-bg: rgba(212,162,78,0.12); --sim-home-bd: rgba(212,162,78,0.28); --sim-home-hi: #fbbf24;
+            /* alias del modal de nombre */
+            --card: var(--panel-bg); --txt: var(--text-main); --txt-3: var(--text-dim); --accent: var(--gold); --bg: var(--bg-dark); --border: var(--line);
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background: var(--bg-dark);
-            background-image:
-                radial-gradient(ellipse 550px 450px at 8% 0%, rgba(212,162,78,0.06), transparent),
-                radial-gradient(ellipse 450px 400px at 95% 95%, rgba(123,167,201,0.05), transparent);
-            color: var(--text-main); font-family: 'DM Sans', sans-serif; overflow: hidden; height: 100vh; display: flex;
+            background-image: radial-gradient(ellipse 550px 450px at 8% 0%, rgba(212,162,78,0.06), transparent), radial-gradient(ellipse 450px 400px at 95% 95%, rgba(123,167,201,0.05), transparent);
+            color: var(--text-main); font-family: 'DM Sans', sans-serif; font-size: 16px; line-height: 1.55;
+            overflow: hidden; height: 100vh; display: flex;
         }
 
-        /* LAYOUT SPLIT — el mapa vive dentro de un "monitor" de escritorio */
-        #map-container {
-            flex: 2; position: relative; border-right: 1px solid #332c22;
-            padding: 14px; background: #0e0b08;
-        }
-        #map-monitor {
-            position: relative; width: 100%; height: 100%;
-            border: 3px solid #3a3226; border-radius: 10px;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5);
-            background: #010409; overflow: hidden;
-        }
-        #map-monitor::before {
-            content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
-            box-shadow: inset 0 0 60px rgba(0,0,0,0.6);
-            border-radius: 8px;
-        }
-        .monitor-corner {
-            position: absolute; width: 8px; height: 8px; border-radius: 50%;
-            background: #4a4030; z-index: 4;
-        }
-        .monitor-corner.tl { top: 6px; left: 6px; }
-        .monitor-corner.tr { top: 6px; right: 6px; }
-        .monitor-corner.bl { bottom: 6px; left: 6px; }
-        .monitor-corner.br { bottom: 6px; right: 6px; }
-        #canvas { width: 100%; height: 100%; display: block; background: transparent; position: relative; z-index: 2; }
+        /* Botones fijos canónicos */
+        .sim-home { position: fixed; top: 14px; left: 14px; z-index: 200; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; text-decoration: none;
+            color: var(--sim-home-fg); background: var(--sim-home-bg); border: 1px solid var(--sim-home-bd); border-radius: 10px; transition: transform .2s, color .2s; }
+        .sim-home:hover, .sim-home:focus-visible { color: var(--sim-home-hi); transform: scale(1.06); }
+        .sim-lang { position: fixed; top: 14px; right: 14px; z-index: 200; min-width: 40px; height: 40px; padding: 0 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            font-weight: 600; font-size: 13px; letter-spacing: .06em; font-family: inherit; color: var(--sim-home-fg); background: var(--sim-home-bg); border: 1px solid var(--sim-home-bd); border-radius: 10px; transition: transform .2s, color .2s; }
+        .sim-lang:hover, .sim-lang:focus-visible { color: var(--sim-home-hi); transform: scale(1.06); }
 
-        /* ── HABITACIONES ILUSTRADAS (overlay DOM detrás del canvas) ── */
-        #roomOverlay { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-        .room-card {
-            position: absolute; border-radius: 10px; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
-            transition: box-shadow 0.3s, border-color 0.3s;
-        }
-        .room-card.activa { box-shadow: inset 0 0 30px rgba(0,0,0,0.25), 0 0 22px currentColor; }
-        .room-badge {
-            position: absolute; top: 10px; left: 10px; width: 34px; height: 34px; border-radius: 50%;
-            background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; border: 1px solid rgba(255,255,255,0.15);
-        }
-        .room-label {
-            width: 100%; text-align: center; padding: 8px 6px; font-family: 'Share Tech Mono', monospace;
-            font-size: 0.7rem; letter-spacing: 0.5px; text-transform: uppercase;
-            background: rgba(0,0,0,0.5);
-        }
+        /* ── MAPA: monitor con 4 habitaciones clicables ── */
+        #map-container { flex: 3; position: relative; border-right: 1px solid var(--line); padding: 14px; background: #0e0b08; min-width: 0; }
+        #map-monitor { position: relative; width: 100%; height: 100%; border: 3px solid #3a3226; border-radius: 10px; background: #0b0906; overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5); }
+        #roomGrid { position: absolute; inset: 4%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 5%; }
+        .room-card { position: relative; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: default;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.4); transition: box-shadow .3s, opacity .3s, transform .2s; opacity: .55; outline: none; }
+        .room-card.is-target { opacity: 1; cursor: pointer; animation: targetPulse 1.4s ease-in-out infinite; }
+        .room-card.is-target:hover, .room-card.is-target:focus-visible { transform: scale(1.02); }
+        .room-card.is-here { opacity: 1; box-shadow: inset 0 0 30px rgba(0,0,0,0.25), 0 0 22px currentColor; }
+        @keyframes targetPulse { 0%, 100% { box-shadow: inset 0 0 30px rgba(0,0,0,0.4), 0 0 8px currentColor; } 50% { box-shadow: inset 0 0 30px rgba(0,0,0,0.4), 0 0 26px currentColor; } }
+        .room-badge { position: absolute; top: 10px; left: 10px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; border: 1px solid rgba(255,255,255,0.15); }
+        .room-label { width: 100%; text-align: center; padding: 8px 6px; background: rgba(0,0,0,0.55); }
+        .room-label b { display: block; font-size: .92rem; letter-spacing: .3px; }
+        .room-label small { display: block; font-size: .74rem; opacity: .85; font-weight: 400; }
         .room-scene { flex: 1; width: 100%; position: relative; display: flex; align-items: center; justify-content: center; }
         .room-prop { font-size: 2.2rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
-
-        .room-onu { background: linear-gradient(180deg, #141d24 0%, #0d151a 100%); border: 2px solid #7ba7c9; color: #7ba7c9; }
-        .room-onu .room-label { color: #7ba7c9; }
-
-        .room-lab { background: linear-gradient(180deg, #1a1610 0%, #120f0a 100%); border: 2px solid #6b5f47; color: #6b5f47; }
-        .room-lab .room-label { color: #a89878; }
-        .room-bench {
-            position: absolute; bottom: 36px; left: 12%; right: 12%; height: 10px;
-            background: #3a3226; border-radius: 3px; box-shadow: 0 3px 6px rgba(0,0,0,0.5);
-        }
-        .room-beaker { position: absolute; bottom: 44px; font-size: 1.8rem; }
-        .room-beaker.b1 { left: 38%; }
-        .room-beaker.b2 { left: 56%; font-size: 1.5rem; }
-
-        .room-revA { background: linear-gradient(180deg, #141d16 0%, #0d150f 100%); border: 2px solid #4a8f5f; color: #4a8f5f; }
-        .room-revA .room-label { color: #4a8f5f; }
+        .room-onu { background: linear-gradient(180deg, #141d24, #0d151a); border: 2px solid var(--cyan); color: var(--cyan); }
+        .room-lab { background: linear-gradient(180deg, #1a1610, #120f0a); border: 2px solid #8a7a5a; color: #c4b48f; }
+        .room-bench { position: absolute; bottom: 12px; left: 12%; right: 12%; height: 10px; background: #3a3226; border-radius: 3px; box-shadow: 0 3px 6px rgba(0,0,0,0.5); }
+        .room-beaker { position: absolute; bottom: 20px; font-size: 1.8rem; }
+        .room-beaker.b1 { left: 38%; } .room-beaker.b2 { left: 56%; font-size: 1.5rem; }
+        .room-revA { background: linear-gradient(180deg, #141d16, #0d150f); border: 2px solid var(--green); color: #6bb682; }
         .room-shelf { display: flex; gap: 4px; align-items: flex-end; }
         .room-shelf span { display: block; width: 14px; border-radius: 2px 2px 0 0; }
-        .room-shelf span:nth-child(1) { height: 46px; background: #4a8f5f; }
-        .room-shelf span:nth-child(2) { height: 60px; background: #6bb682; }
-        .room-shelf span:nth-child(3) { height: 38px; background: #3a7a4a; }
-        .room-shelf span:nth-child(4) { height: 52px; background: #5a9e6f; }
+        .room-shelf span:nth-child(1) { height: 46px; background: #4a8f5f; } .room-shelf span:nth-child(2) { height: 60px; background: #6bb682; }
+        .room-shelf span:nth-child(3) { height: 38px; background: #3a7a4a; } .room-shelf span:nth-child(4) { height: 52px; background: #5a9e6f; }
+        .room-revB { background: linear-gradient(180deg, #241d10, #18140a); border: 2px solid var(--yellow); color: var(--yellow); }
+        .room-neon { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: .82rem; font-weight: 700; color: var(--yellow); text-shadow: 0 0 8px rgba(217,164,65,0.7); white-space: nowrap; }
+        .mail { position: absolute; font-size: 1.5rem; animation: mailFloat 2.2s ease-in-out infinite; }
+        .mail.m1 { left: 28%; top: 38%; } .mail.m2 { left: 50%; top: 52%; animation-delay: .5s; } .mail.m3 { left: 68%; top: 36%; animation-delay: 1s; }
+        @keyframes mailFloat { 0%, 100% { transform: translateY(0) rotate(-6deg); opacity: .85; } 50% { transform: translateY(-8px) rotate(6deg); opacity: 1; } }
+        #playerToken { position: absolute; z-index: 5; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1.9rem; pointer-events: none;
+            filter: drop-shadow(0 0 10px rgba(212,162,78,.8)); transition: left .9s ease-in-out, top .9s ease-in-out; }
+        .objective { position: absolute; z-index: 6; left: 50%; bottom: 12px; transform: translateX(-50%); max-width: 92%; padding: 8px 16px; border-radius: 100px; text-align: center;
+            background: rgba(20,17,13,.92); border: 1px solid var(--gold); color: var(--text-main); font-size: .9rem; opacity: 0; transition: opacity .3s; pointer-events: none; }
+        .objective.is-visible { opacity: 1; }
 
-        .room-revB {
-            background: linear-gradient(180deg, #241d10 0%, #18140a 100%); border: 2px solid #d9a441; color: #d9a441;
-            animation: neonPulse 1.6s ease-in-out infinite;
-        }
-        @keyframes neonPulse {
-            0%, 100% { box-shadow: inset 0 0 30px rgba(0,0,0,0.4), 0 0 12px rgba(217,164,65,0.25); }
-            50%      { box-shadow: inset 0 0 30px rgba(0,0,0,0.4), 0 0 28px rgba(217,164,65,0.55); }
-        }
-        .room-neon {
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            font-size: 0.82rem; font-weight: 700; color: #d9a441; text-shadow: 0 0 8px rgba(217,164,65,0.7);
-            white-space: nowrap;
-        }
-        .room-revB .room-label { color: #d9a441; }
-        .cash { position: absolute; font-size: 1.5rem; animation: cashFloat 2.2s ease-in-out infinite; }
-        .cash.c1 { left: 30%; top: 40%; animation-delay: 0s; }
-        .cash.c2 { left: 50%; top: 55%; animation-delay: 0.5s; }
-        .cash.c3 { left: 68%; top: 38%; animation-delay: 1s; }
-        @keyframes cashFloat {
-            0%, 100% { transform: translateY(0) rotate(-6deg); opacity: 0.85; }
-            50%      { transform: translateY(-8px) rotate(6deg); opacity: 1; }
-        }
+        /* ── PANEL DERECHO: despacho ── */
+        #desk { flex: 2; min-width: 340px; max-width: 560px; display: flex; flex-direction: column; background: var(--panel-bg); min-height: 0; }
+        #desk-header { padding: 12px 62px 10px 16px; border-bottom: 1px solid var(--line); }
+        #desk-title { font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: var(--gold); line-height: 1.2; }
+        #chapterStrip { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+        .chapter-chip { font-size: .74rem; padding: 3px 10px; border-radius: 100px; border: 1px solid var(--line); color: var(--text-dim); }
+        .chapter-chip.is-current { border-color: var(--gold); color: var(--gold); background: rgba(212,162,78,.1); }
+        .chapter-chip.is-done { color: var(--text-main); border-color: var(--green); }
+        #meters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+        .meter { background: var(--panel-alt); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; position: relative; }
+        .meter-label { font-size: .72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .8px; }
+        .meter-value { font-family: 'Share Tech Mono', monospace; font-size: 1.25rem; color: var(--gold); }
+        .meter-bar { height: 4px; border-radius: 3px; background: rgba(255,255,255,.08); margin-top: 4px; overflow: hidden; }
+        .meter-bar span { display: block; height: 100%; width: 0; background: var(--gold); transition: width .6s ease; }
+        .meter-delta { position: absolute; right: 8px; top: 6px; font-family: 'Share Tech Mono', monospace; font-size: .85rem; opacity: 0; transform: translateY(6px); }
+        .meter-delta.is-up { color: #6bb682; } .meter-delta.is-down { color: var(--red); }
+        .meter-delta.is-show { animation: deltaPop 1.6s ease forwards; }
+        @keyframes deltaPop { 0% { opacity: 0; transform: translateY(6px); } 15% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+        #glossary { border-bottom: 1px solid var(--line); padding: 0 16px; }
+        #glossary summary { cursor: pointer; padding: 8px 0; font-size: .85rem; color: var(--gold); list-style: none; display: flex; justify-content: space-between; }
+        #glossary summary::-webkit-details-marker { display: none; }
+        .glossary-list { list-style: none; padding: 0 0 10px; display: flex; flex-direction: column; gap: 8px; max-height: 170px; overflow-y: auto; }
+        .glossary-item { font-size: .85rem; line-height: 1.35; padding-left: 10px; border-left: 2px solid var(--gold); }
+        .glossary-item b { display: block; font-family: 'Share Tech Mono', monospace; font-weight: 400; color: var(--gold); font-size: .83rem; }
+        .glossary-empty { font-size: .85rem; color: var(--text-dim); padding-bottom: 10px; }
 
-        #terminal-container { flex: 1; display: flex; flex-direction: column; background: var(--panel-bg); }
+        #story { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: var(--line) var(--panel-bg); }
+        .note { max-width: 96%; padding: 10px 14px; border-radius: 12px; background: var(--panel-alt); border: 1px solid var(--line); border-left: 3px solid var(--cyan);
+            opacity: 0; transform: translateY(6px); transition: opacity .35s, transform .35s; }
+        .note.is-visible { opacity: 1; transform: none; }
+        .note strong { color: #fff; }
+        .note-you { align-self: flex-end; border-left: 1px solid var(--gold); border-color: var(--gold); background: rgba(212,162,78,.08); }
+        .note-ok { border-left-color: var(--green); background: rgba(74,143,95,.1); }
+        .note-hint { border-left-color: var(--yellow); background: rgba(217,164,65,.08); }
+        .note-chapter { border-left-color: var(--gold); font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: var(--gold); background: transparent; border-top: 0; border-right: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+        .term-row { align-self: flex-start; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 10px; border: 1px dashed var(--gold); background: rgba(212,162,78,.06); font-size: .86rem; opacity: 0; transition: opacity .4s; }
+        .term-row.is-visible { opacity: 1; }
+        .term-label { font-family: 'Share Tech Mono', monospace; font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); }
+        .term-tech { font-family: 'Share Tech Mono', monospace; color: var(--gold); }
 
-        #terminal-header { padding: 10px 15px; border-bottom: 1px solid #332c22; font-family: 'Share Tech Mono', monospace; color: #8a7d5f; display: flex; justify-content: space-between; font-size: 0.8rem; }
+        .cons-card, .dice-card { align-self: stretch; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-alt); padding: 10px 14px; opacity: 0; transition: opacity .4s; }
+        .cons-card.is-visible, .dice-card.is-visible { opacity: 1; }
+        .cons-title, .dice-title { font-family: 'Share Tech Mono', monospace; font-size: .72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+        .cons-row { display: grid; grid-template-columns: 24px 82px 1fr; gap: 8px; align-items: start; padding: 5px 0; border-top: 1px solid rgba(255,255,255,.05); font-size: .9rem; }
+        .cons-row .delta { font-family: 'Share Tech Mono', monospace; font-weight: 700; }
+        .cons-row .delta.up { color: #6bb682; } .cons-row .delta.down { color: var(--red); }
+        .dice-bar { height: 10px; border-radius: 6px; background: rgba(255,255,255,.08); overflow: hidden; margin: 6px 0; }
+        .dice-bar span { display: block; height: 100%; background: var(--red); width: 0; transition: width 1.1s ease; }
+        .dice-result { font-weight: 700; min-height: 1.5em; }
 
-        #hud { padding: 15px; display: flex; gap: 15px; border-bottom: 1px solid #332c22; flex-wrap: wrap; }
-        .stat { flex: 1; min-width: 110px; background: #241f18; padding: 10px; border-radius: 6px; border: 1px solid #332c22; }
-        .stat-label { font-size: 0.7rem; color: #8a7d5f; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; color: var(--gold); margin-top: 5px; }
+        #actions { padding: 10px 16px 14px; border-top: 1px solid var(--line); background: var(--panel-alt); min-height: 62px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+        .btn-primary { text-decoration: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font: inherit; font-weight: 700; padding: 11px 26px; border-radius: 100px; border: none; background: var(--gold); color: #1a1610; transition: transform .2s; }
+        .btn-primary:hover, .btn-primary:focus-visible { transform: translateY(-2px); }
+        .btn-option { cursor: pointer; font: inherit; text-align: left; width: 100%; padding: 10px 14px; border-radius: 12px; color: var(--text-main); background: var(--panel-bg); border: 1px solid #4a4030; transition: border-color .2s, transform .2s; }
+        .btn-option:hover, .btn-option:focus-visible { border-color: var(--gold); transform: translateX(3px); }
+        .btn-option:disabled { opacity: .5; cursor: default; transform: none; }
 
-        #log-area { flex: 1; padding: 15px; overflow-y: auto; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; line-height: 1.5; scrollbar-width: thin; scrollbar-color: #332c22 var(--panel-bg); }
-        .log-entry { margin-bottom: 8px; opacity: 0.9; animation: fadeIn 0.3s; }
-        .log-sys { color: #8a7d5f; }
-        .log-onu { color: var(--cyan); }
-        .log-a { color: var(--green); font-style: italic; } /* Aburrido */
-        .log-b { color: var(--yellow); font-weight: bold; }
-        .log-warn { color: var(--red); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* ── MODALES: carta y ficha de revista ── */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; justify-content: center; align-items: center; padding: 16px; }
+        .paper { background: #f0e9d8; color: #2a2418; border-radius: 6px; width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); position: relative; }
+        .paper-head { display: flex; align-items: center; gap: 12px; padding: 14px 22px; font-family: 'Share Tech Mono', monospace; font-size: .72rem; letter-spacing: .5px; text-transform: uppercase; background: var(--yellow); color: #2a1d05; position: sticky; top: 0; z-index: 2; }
+        .paper-head.is-cyan { background: var(--cyan); color: #0a1620; }
+        .paper-icon { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; background: rgba(0,0,0,.15); }
+        .paper-body { padding: 20px 26px 26px; font-size: .98rem; }
+        .paper-body h2 { font-family: 'DM Serif Display', serif; font-weight: 400; font-style: italic; font-size: 1.4rem; margin-bottom: 10px; }
+        .paper-body .quote { font-style: italic; margin-bottom: 12px; }
+        .paper-body .ask { font-weight: 700; margin-top: 10px; }
+        .choice-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+        .choice-row button { flex: 1 1 200px; padding: 12px 14px; border-radius: 100px; cursor: pointer; font: inherit; font-weight: 700; color: #2a2418; background: transparent; border: 2px solid #2a2418; transition: background .2s, color .2s; }
+        .choice-row button:hover, .choice-row button:focus-visible { background: #2a2418; color: #f0e9d8; }
+        .seal { position: absolute; top: 50%; left: 50%; z-index: 10; opacity: 0; pointer-events: none; transform: translate(-50%,-50%) scale(2.5) rotate(-18deg);
+            font-family: 'Share Tech Mono', monospace; font-weight: 700; font-size: 1.5rem; letter-spacing: 3px; padding: 10px 26px; border: 5px solid #8a5a1a; color: #8a5a1a; border-radius: 10px; }
+        .seal.is-stamped { animation: stamp .55s cubic-bezier(.2,1.4,.4,1) forwards; }
+        @keyframes stamp { 0% { opacity: 0; transform: translate(-50%,-50%) scale(2.5) rotate(-18deg); } 60% { opacity: .95; transform: translate(-50%,-50%) scale(.92) rotate(-14deg); } 100% { opacity: .9; transform: translate(-50%,-50%) scale(1) rotate(-14deg); } }
 
-        #instructions { padding: 15px; border-top: 1px solid #332c22; background: #241f18; font-size: 0.8rem; color: #a89878; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+        .colleague { margin: 6px 0 12px; padding: 8px 12px; border-left: 3px solid #b08a3a; background: rgba(0,0,0,.05); font-style: italic; font-size: .92rem; }
+        .file-counter { font-family: 'Share Tech Mono', monospace; font-size: .8rem; color: #6a5a3a; margin-bottom: 8px; }
+        .file-item { width: 100%; text-align: left; margin-bottom: 8px; padding: 10px 12px; border-radius: 8px; border: 1px solid #c9bd9f; background: #f7f1e1; cursor: pointer; font: inherit; color: #2a2418; display: block; transition: border-color .2s; }
+        .file-item:hover:not(.is-open), .file-item:focus-visible { border-color: #8a5a1a; }
+        .file-item .q { font-weight: 700; display: flex; justify-content: space-between; gap: 8px; }
+        .file-item .q i { font-weight: 400; color: #8a7a5a; font-size: .8rem; }
+        .file-item .detail { display: none; margin-top: 6px; }
+        .file-item .why { display: none; margin-top: 4px; font-size: .88rem; color: #5a4a2a; font-style: italic; }
+        .file-item.is-open { cursor: default; background: #fffaf0; }
+        .file-item.is-open .detail, .file-item.is-open .why { display: block; }
+        .file-item.is-flag { border-color: #b0443f; background: #fbeceb; }
+        .file-item .tag { display: none; font-size: .72rem; font-weight: 700; padding: 1px 8px; border-radius: 100px; font-family: 'Share Tech Mono', monospace; }
+        .file-item.is-open .tag { display: inline-block; }
+        .file-item.is-flag .tag { background: #b0443f; color: #fff; }
+        .file-item:not(.is-flag) .tag { background: #3f7a53; color: #fff; }
 
-        /* MODAL FINAL */
-        #final-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
-        .modal { background: var(--panel-bg); border: 1px solid var(--red); border-radius: 10px; padding: 40px; max-width: 500px; width: 100%; text-align: center; }
-        .modal h2 { color: var(--red); font-family: 'DM Serif Display', serif; font-weight: 400; margin-bottom: 20px; }
-        .score { font-size: 3em; font-family: 'Share Tech Mono'; margin: 20px 0; }
-        .score-good { color: var(--gold); text-shadow: 0 0 20px rgba(212,162,78,0.4); }
-        .score-bad { color: var(--red); text-shadow: 0 0 20px rgba(199,80,80,0.4); }
+        /* Final */
+        #final-modal .panel { background: var(--panel-bg); border: 1px solid var(--gold); border-radius: 12px; padding: 28px 26px; max-width: 620px; width: 100%; max-height: 94vh; overflow-y: auto; }
+        #final-modal h2 { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 1.6rem; margin-bottom: 8px; text-align: center; }
+        #final-modal.is-win h2 { color: var(--gold); } #final-modal.is-lose h2 { color: var(--red); }
+        #final-message { margin-bottom: 12px; }
+        .final-score { text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 2.4rem; margin: 6px 0 12px; }
+        .final-score small { font-size: .8rem; color: var(--text-dim); display: block; }
+        .final-section { font-family: 'Share Tech Mono', monospace; font-size: .74rem; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); margin: 14px 0 6px; }
+        .recap-list { list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: .92rem; }
+        .recap-list li { padding: 6px 10px; border-left: 3px solid var(--line); background: var(--panel-alt); border-radius: 0 8px 8px 0; }
+        .recap-list li.is-good { border-left-color: var(--green); } .recap-list li.is-bad { border-left-color: var(--red); }
+        .flag-list { padding-left: 20px; font-size: .92rem; } .flag-list li { margin-bottom: 4px; }
+        .final-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 18px; }
+        .btn-secondary { cursor: pointer; font: inherit; font-weight: 700; padding: 11px 24px; border-radius: 100px; color: var(--text-main); background: var(--panel-alt); border: 1px solid #4a4030; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
 
-        /* MODALES DE BRIEFING Y TENTACIÓN — estilo carta / documento con membrete */
-        #briefing-modal, #choice-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 200; justify-content: center; align-items: center; padding: 20px; }
-        .modal-info, .modal-temptation {
-            background: #f0e9d8; color: #2a2418; border-radius: 6px;
-            max-width: 480px; width: 100%; text-align: left; font-size: 0.92rem; line-height: 1.6;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6); position: relative; overflow: hidden;
-        }
-        .carta-membrete {
-            display: flex; align-items: center; gap: 12px; padding: 14px 24px;
-            font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
-            letter-spacing: 0.5px; text-transform: uppercase;
-        }
-        .modal-info .carta-membrete { background: var(--cyan); color: #0a1620; }
-        .modal-temptation .carta-membrete { background: var(--yellow); color: #2a1d05; }
-        .carta-sello {
-            width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center; font-size: 1rem;
-            background: rgba(0,0,0,0.15);
-        }
-        .carta-cuerpo { padding: 24px 28px 28px; }
-        .modal-info h2, .modal-temptation h2 {
-            font-family: 'DM Serif Display', serif; font-weight: 400; font-style: italic;
-            font-size: 1.4rem; margin-bottom: 15px; text-align: left; color: #2a2418;
-        }
-        .modal-info p, .modal-temptation p { font-style: italic; }
-        .modal-btn-row { display:flex; gap:10px; margin-top:20px; }
-        .modal-btn-row button {
-            flex:1; padding: 13px; border:none; border-radius: 100px; cursor:pointer;
-            font-family:'DM Sans', sans-serif; font-weight:700; transition: transform 0.2s;
-        }
-        .modal-btn-row button:hover { transform: translateY(-2px); }
-        .btn-tempt { background: var(--yellow); color:#2a1d05; }
-        .btn-honest { background: var(--green); color:#fff; }
-        .btn-start {
-            background: var(--cyan); color:#0a1620; width:100%; padding:13px; border:none; border-radius: 100px;
-            cursor:pointer; font-family:'DM Sans', sans-serif; font-weight:700; margin-top:15px; transition: transform 0.2s;
-        }
-        .btn-start:hover { transform: translateY(-2px); }
-
-        /* Sello de goma — se estampa sobre la carta al decidir */
-        .sello-goma {
-            position: absolute; top: 50%; left: 50%; z-index: 10;
-            transform: translate(-50%,-50%) scale(2.5) rotate(-18deg);
-            opacity: 0; pointer-events: none;
-            font-family: 'Share Tech Mono', monospace; font-weight: 700;
-            font-size: 1.6rem; letter-spacing: 3px; padding: 10px 26px;
-            border: 5px solid currentColor; border-radius: 10px;
-        }
-        .sello-goma.estampar {
-            animation: estamparSello 0.55s cubic-bezier(0.2,1.4,0.4,1) forwards;
-        }
-        @keyframes estamparSello {
-            0% { opacity: 0; transform: translate(-50%,-50%) scale(2.5) rotate(-18deg); }
-            60% { opacity: 0.95; transform: translate(-50%,-50%) scale(0.92) rotate(-14deg); }
-            100% { opacity: 0.9; transform: translate(-50%,-50%) scale(1) rotate(-14deg); }
-        }
-        .sello-goma.aceptar { color: var(--green); }
-        .sello-goma.rechazar { color: var(--red); }
-        .sim-home{position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;
-          display:flex;align-items:center;justify-content:center;text-decoration:none;
-          font-size:1.2rem;
-          color:var(--sim-home-fg);background:var(--sim-home-bg);
-          border:1px solid var(--sim-home-bd);border-radius:10px;
-          transition:transform .2s, color .2s}
-        .sim-home:hover,.sim-home:focus-visible{color:var(--sim-home-hi);transform:scale(1.06)}
-
-        .sim-lang{position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;
-          display:flex;align-items:center;justify-content:center;cursor:pointer;
-          font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;
-          color:var(--sim-home-fg,#888);background:var(--sim-home-bg,rgba(0,0,0,.35));
-          border:1px solid var(--sim-home-bd,rgba(255,255,255,.15));border-radius:10px;
-          transition:transform .2s,color .2s}
-        .sim-lang:hover,.sim-lang:focus-visible{color:var(--sim-home-hi,#fff);transform:scale(1.06)}
-
-        /* ── RESPONSIVE ── */
         @media (max-width: 900px) {
             body { flex-direction: column; overflow-y: auto; height: auto; min-height: 100vh; }
-            #map-container { flex: none; height: 42vh; padding: 8px; border-right: none; border-bottom: 1px solid #332c22; }
-            #terminal-container { flex: none; min-height: 58vh; }
-            #hud { gap: 8px; padding: 10px; }
-            .stat { min-width: 0; padding: 8px 6px; }
-            .stat-label { font-size: 0.62rem; }
-            .stat-value { font-size: 1rem; }
-            #terminal-header { font-size: 0.7rem; padding: 8px 12px; }
-            #log-area { font-size: 0.78rem; padding: 10px; }
-            #instructions { font-size: 0.72rem; padding: 10px; min-height: 40px; }
-            .modal-info, .modal-temptation, .modal { max-width: 92vw; }
-            .carta-cuerpo { padding: 18px 20px 22px; }
-            .modal-info h2, .modal-temptation h2 { font-size: 1.2rem; }
-            .sello-goma { font-size: 1.1rem; padding: 8px 18px; letter-spacing: 2px; }
+            #map-container { flex: none; height: 44vh; padding: 8px; border-right: none; border-bottom: 1px solid var(--line); }
+            #desk { flex: none; max-width: none; min-width: 0; min-height: 70vh; }
+            #desk-header { padding: 12px 62px 10px 16px; }
+            .room-label small { display: none; }
+            .room-prop { font-size: 1.6rem; }
+            #story { max-height: 46vh; }
+            .cons-row { grid-template-columns: 22px 70px 1fr; }
         }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+
     
     
         /* === Guía de clase (preguntas para debatir) === */
@@ -279,11 +239,8 @@
 </head>
 <body>
 
-    <a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab">
-      <span aria-hidden="true">🏠</span>
-    </a>
-
-    <button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab" data-i18n-title="back_title" data-i18n-aria="back_title"><span aria-hidden="true">🏠</span></a>
+<button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
 <button type="button" class="sim-guide" id="simGuideBtn" aria-expanded="false" aria-controls="guidePanel" aria-label="Guía de clase" title="Guía de clase"><i class="fa-regular fa-comments" aria-hidden="true"></i></button>
 <aside class="guide-panel" id="guidePanel" role="dialog" aria-labelledby="guideTitle">
   <div class="guide-header">
@@ -298,115 +255,87 @@
 </aside>
 <div class="guide-toast" id="guideToast" role="status"></div>
 
-    <div id="map-container">
-        <div id="map-monitor">
-            <div id="roomOverlay">
-                <div class="room-card room-onu" id="room-onu">
-                    <div class="room-badge">🇺🇳</div>
-                    <div class="room-scene">
-                        <div class="room-prop">📬</div>
-                    </div>
-                    <div class="room-label">Convocatoria ONU</div>
-                </div>
-                <div class="room-card room-lab" id="room-lab">
-                    <div class="room-badge">🧪</div>
-                    <div class="room-scene">
-                        <div class="room-bench"></div>
-                        <div class="room-prop room-beaker b1">🧫</div>
-                        <div class="room-prop room-beaker b2">🧪</div>
-                    </div>
-                    <div class="room-label">Laboratorio</div>
-                </div>
-                <div class="room-card room-revA" id="room-revA">
-                    <div class="room-badge">📗</div>
-                    <div class="room-scene">
-                        <div class="room-shelf"><span></span><span></span><span></span><span></span></div>
-                    </div>
-                    <div class="room-label">Revista Q1 (Peer Review)</div>
-                </div>
-                <div class="room-card room-revB" id="room-revB">
-                    <div class="room-neon">⚡ FAST PUBLISH ⚡</div>
-                    <div class="room-scene">
-                        <div class="room-prop cash c1">💸</div>
-                        <div class="room-prop cash c2">💸</div>
-                        <div class="room-prop cash c3">💸</div>
-                    </div>
-                    <div class="room-label">Fast Publish</div>
-                </div>
+<div id="map-container">
+    <div id="map-monitor">
+        <div id="roomGrid">
+            <div class="room-card room-onu" id="room-onu" role="button" tabindex="-1" aria-disabled="true" data-room="onu">
+                <div class="room-badge">🇺🇳</div>
+                <div class="room-scene"><div class="room-prop">📬</div></div>
+                <div class="room-label"><b data-i18n="room_onu">Convocatoria ONU</b><small data-i18n="room_onu_sub">Dan dinero para investigar</small></div>
             </div>
-            <canvas id="canvas"></canvas>
-            <span class="monitor-corner tl"></span>
-            <span class="monitor-corner tr"></span>
-            <span class="monitor-corner bl"></span>
-            <span class="monitor-corner br"></span>
+            <div class="room-card room-revB" id="room-journalB" role="button" tabindex="-1" aria-disabled="true" data-room="journalB">
+                <div class="room-neon" data-i18n="room_b_neon">¡PUBLICA EN 48 H!</div>
+                <div class="room-scene"><div class="mail m1">📧</div><div class="mail m2">📧</div><div class="mail m3">📧</div></div>
+                <div class="room-label"><b data-i18n="room_b">Revista B</b><small data-i18n="room_journal_sub">Para publicar tu artículo</small></div>
+            </div>
+            <div class="room-card room-lab" id="room-lab" role="button" tabindex="-1" aria-disabled="true" data-room="lab">
+                <div class="room-badge">🧪</div>
+                <div class="room-scene"><div class="room-bench"></div><div class="room-prop room-beaker b1">🧫</div><div class="room-prop room-beaker b2">🧪</div></div>
+                <div class="room-label"><b data-i18n="room_lab">Laboratorio</b><small data-i18n="room_lab_sub">Analizar tus datos</small></div>
+            </div>
+            <div class="room-card room-revA" id="room-journalA" role="button" tabindex="-1" aria-disabled="true" data-room="journalA">
+                <div class="room-badge">📗</div>
+                <div class="room-scene"><div class="room-shelf"><span></span><span></span><span></span><span></span></div></div>
+                <div class="room-label"><b data-i18n="room_a">Revista A</b><small data-i18n="room_journal_sub">Para publicar tu artículo</small></div>
+            </div>
         </div>
+        <div id="playerToken" aria-hidden="true">🧑‍🔬</div>
+        <div class="objective" id="objective" aria-live="polite"></div>
     </div>
+</div>
 
-    <div id="terminal-container">
-        <div id="terminal-header">
-            <span>TERMINAL_INVESTIGADOR // NODE_01</span>
-            <span id="clock"></span>
-        </div>
-        <div id="hud">
-            <div class="stat">
-                <div class="stat-label">Financiamiento</div>
-                <div class="stat-value" id="credits">0.00</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">Prestigio</div>
-                <div class="stat-value" id="prestige">0.00</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">Estado</div>
-                <div class="stat-value" id="status" style="font-size: 0.9rem; color: #a89878;">EXPLORANDO</div>
-            </div>
-            <div class="stat" id="deadline-stat" style="display:none;">
-                <div class="stat-label">Plazo Publicación</div>
-                <div class="stat-value" id="deadline" style="color: var(--yellow);">--:--</div>
-            </div>
-        </div>
-        <div id="log-area"></div>
-        <div id="instructions">Haz clic en el mapa para mover a tu investigador hacia las zonas.</div>
+<section id="desk" aria-label="Despacho del investigador">
+    <div id="desk-header">
+        <div id="desk-title" data-i18n="desk_title">El Dilema del Investigador</div>
+        <div id="chapterStrip"></div>
     </div>
+    <div id="meters"></div>
+    <details id="glossary"></details>
+    <div id="story" aria-live="polite"></div>
+    <div id="actions"></div>
+</section>
 
-    <div id="final-modal">
-        <div class="modal">
-            <h2>Simulación Terminada</h2>
-            <div id="revelation-text" style="font-size: 0.9rem; line-height: 1.6; color: #d97a7a; margin-bottom: 20px;"></div>
-            <div class="score" id="final-score-text"></div>
-            <div id="breakdown" style="text-align: left; font-size: 0.8rem; color: #a89878; margin: 20px 0;"></div>
-            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
-                <button style="background: var(--red); color: white; border: none; border-radius:100px; padding: 12px 26px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight:700;" onclick="location.reload()">↺ Reiniciar</button>
-                <a href="index.html" style="background: var(--panel-bg); color: var(--text-main); border: 1px solid #332c22; border-radius:100px; padding: 12px 26px; text-decoration:none; font-family: 'DM Sans', sans-serif; font-weight:700; display:inline-flex; align-items:center;">← Volver al inicio</a>
-            </div>
+<!-- Carta de decisión -->
+<div class="overlay" id="letterOverlay">
+    <div class="paper" role="dialog" aria-modal="true" aria-labelledby="letterTitle">
+        <div class="seal" id="letterSeal"></div>
+        <div class="paper-head"><span class="paper-icon" id="letterIcon"></span><span id="letterKicker"></span></div>
+        <div class="paper-body">
+            <h2 id="letterTitle"></h2>
+            <div class="quote" id="letterQuote"></div>
+            <div class="ask" id="letterAsk"></div>
+            <div class="choice-row" id="letterChoices"></div>
         </div>
     </div>
+</div>
 
-    <div id="briefing-modal">
-        <div class="modal-info">
-            <div class="carta-membrete"><span class="carta-sello">🏛️</span> Oficina de Coordinación de Investigación — Memo Interno</div>
-            <div class="carta-cuerpo">
-                <h2>Briefing de misión</h2>
-                <div id="briefing-text"></div>
-                <button class="btn-start" id="btnComenzar">COMENZAR SIMULACIÓN</button>
-            </div>
+<!-- Ficha de revista (detective de señales) -->
+<div class="overlay" id="journalOverlay">
+    <div class="paper" role="dialog" aria-modal="true" aria-labelledby="journalTitle">
+        <div class="paper-head is-cyan"><span class="paper-icon">📄</span><span id="journalKicker"></span></div>
+        <div class="paper-body">
+            <h2 id="journalTitle"></h2>
+            <div class="colleague" id="journalColleague" style="display:none;"></div>
+            <div class="file-counter" id="journalCounter"></div>
+            <div id="journalItems"></div>
+            <div class="choice-row" id="journalChoices"></div>
         </div>
     </div>
+</div>
 
-    <div id="choice-modal">
-        <div class="modal-temptation" id="choice-box">
-            <div class="sello-goma" id="selloGoma"></div>
-            <div class="carta-membrete"><span class="carta-sello">✉️</span> Mensaje recibido</div>
-            <div class="carta-cuerpo">
-                <h2 id="choice-title"></h2>
-                <div id="choice-text" style="margin-bottom:10px;"></div>
-                <div class="modal-btn-row">
-                    <button class="btn-tempt" id="choice-accept"></button>
-                    <button class="btn-honest" id="choice-reject"></button>
-                </div>
-            </div>
-        </div>
+<!-- Final -->
+<div class="overlay" id="final-modal">
+    <div class="panel">
+        <h2 id="final-title"></h2>
+        <p id="final-message"></p>
+        <div class="final-score" id="final-score"></div>
+        <div class="final-section" id="final-recap-title"></div>
+        <ul class="recap-list" id="final-recap"></ul>
+        <div class="final-section" id="final-flags-title"></div>
+        <ul class="flag-list" id="final-flags"></ul>
+        <div class="final-actions" id="final-actions"></div>
     </div>
+</div>
 
 <script>
 /* === i18n === */
@@ -414,682 +343,977 @@ function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' :
 function setLang(l){ localStorage.setItem('simlab_lang', l); }
 const LANG = getLang();
 document.documentElement.lang = LANG;
+
 const I18N = {
-  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?', name_q:'¿Cómo te llamas?', name_ph:'Tu nombre', name_note:'No te preguntaremos otra vez en esta sesión.', name_btn:'Continuar', name_default:'Estudiante' },
-  en: { confirm_switch:'Switching language will restart the simulation. Continue?', name_q:'What is your name?', name_ph:'Your name', name_note:'We will not ask again during this session.', name_btn:'Continue', name_default:'Student' }
+  es: {
+    confirm_switch: 'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+    name_q: '¿Cómo te llamas?', name_ph: 'Ingresa tu nombre',
+    name_note: 'No te preguntaremos otra vez en esta sesión.', name_btn: 'Continuar', name_default: 'Estudiante',
+
+    meter_funds: 'Fondos', meter_time: 'Tiempo', meter_reputation: 'Reputación',
+    unit_months: 'meses', unit_month: 'mes',
+    glossary_title: 'Palabras que ya conoces', glossary_count: '{count} de {total}',
+    glossary_empty: 'Aún ninguna. Avanza y las irás coleccionando.',
+    term_label: 'Dicho técnico',
+    next: 'Siguiente', begin: 'Empezar', see_result: 'Ver mi resultado',
+    chapter_0: 'La pregunta', chapter_1: 'Conseguir fondos', chapter_2: 'Analizar datos', chapter_3: 'Publicar',
+    stamp_decided: 'DECIDIDO',
+    letter_kicker: 'Mensaje recibido',
+    consequence_title: 'Consecuencias',
+    dice_title: 'Probabilidad de que lo detecten', dice_rolling: 'Revisando…', dice_detected: 'Lo detectaron', dice_clear: 'Esta vez no lo detectaron',
+    journal_kicker: 'Ficha de la revista', journal_counter: 'Señales de alerta encontradas: {found} · Ítems revisados: {opened} de {total}',
+    journal_tap: 'Toca cada ítem para revisarlo. Tú decides cuánto investigar.',
+    journal_submit: 'Enviar mi manuscrito aquí', journal_leave: 'Seguir mirando (volver al mapa)',
+    tag_alert: '🚩 Señal de alerta', tag_normal: '✓ Se ve normal',
+    final_score_label: 'Reputación final',
+    final_recap_title: 'Tus decisiones y lo que significaron',
+    final_flags_title: 'Señales de alerta de una revista depredadora',
+    final_home: 'Volver al inicio', final_again: 'Repetir',
+    final_found_flags: 'Señales de alerta que descubriste en la Revista B: {found} de {total}.',
+    final_debt: 'Aunque el resultado haya sido bueno, aceptaste atajos que dejan una deuda ética: no se medía solo si te descubrían, sino qué hiciste.',
+    objective_prefix: 'Objetivo'
+  },
+  en: {
+    confirm_switch: 'Switching language will restart the simulation. Continue?',
+    name_q: 'What is your name?', name_ph: 'Enter your name',
+    name_note: 'We will not ask again during this session.', name_btn: 'Continue', name_default: 'Student',
+
+    page_title: "The Researcher's Dilemma - Where to publish?",
+    meta_desc: 'Academic ethics simulation: win funding, analyze your data and decide where to publish. Learn to spot plagiarism, data manipulation and predatory journals with no research background. SimLab ULEAM.',
+    back_title: 'Back to home',
+    desk_title: "The Researcher's Dilemma",
+    room_onu: 'UN Call for Proposals', room_onu_sub: 'They give money for research',
+    room_lab: 'Laboratory', room_lab_sub: 'Analyze your data',
+    room_a: 'Journal A', room_b: 'Journal B', room_journal_sub: 'To publish your article',
+    room_b_neon: 'PUBLISH IN 48 H!',
+
+    meter_funds: 'Funds', meter_time: 'Time', meter_reputation: 'Reputation',
+    unit_months: 'months', unit_month: 'month',
+    glossary_title: 'Words you already know', glossary_count: '{count} of {total}',
+    glossary_empty: 'None yet. Keep going and you will collect them.',
+    term_label: 'Technical term',
+    next: 'Next', begin: 'Begin', see_result: 'See my result',
+    chapter_0: 'The question', chapter_1: 'Get funding', chapter_2: 'Analyze data', chapter_3: 'Publish',
+    stamp_decided: 'DECIDED',
+    letter_kicker: 'Message received',
+    consequence_title: 'Consequences',
+    dice_title: 'Chance of being detected', dice_rolling: 'Checking…', dice_detected: 'They caught it', dice_clear: 'This time nobody caught it',
+    journal_kicker: 'Journal file', journal_counter: 'Warning signs found: {found} · Items checked: {opened} of {total}',
+    journal_tap: 'Tap each item to check it. You decide how much to investigate.',
+    journal_submit: 'Submit my manuscript here', journal_leave: 'Keep looking (back to the map)',
+    tag_alert: '🚩 Warning sign', tag_normal: '✓ Looks normal',
+    final_score_label: 'Final reputation',
+    final_recap_title: 'Your decisions and what they meant',
+    final_flags_title: 'Warning signs of a predatory journal',
+    final_home: 'Back to home', final_again: 'Repeat',
+    final_found_flags: 'Warning signs you found in Journal B: {found} of {total}.',
+    final_debt: 'Even if the outcome was good, you took shortcuts that leave an ethical debt: what mattered was not only whether you got caught, but what you did.',
+    objective_prefix: 'Goal'
+  }
 };
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
-const langBtn = document.getElementById('simLangBtn');
-if(langBtn){
-  langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
-  langBtn.addEventListener('click', () => {
-    if (!confirm(t('confirm_switch'))) return;
-    setLang(LANG === 'es' ? 'en' : 'es');
-    location.reload();
+function fmt(template, values){ return template.replace(/\{(\w+)\}/g, (match, name) => (values[name] !== undefined ? values[name] : match)); }
+
+function applyStaticI18n(){
+  if (LANG === 'es') return;
+  document.title = t('page_title');
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription) metaDescription.content = t('meta_desc');
+  document.querySelectorAll('[data-i18n]').forEach(element => { element.innerHTML = t(element.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach(element => { element.title = t(element.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(element => { element.setAttribute('aria-label', t(element.dataset.i18nAria)); });
+}
+applyStaticI18n();
+
+const languageButton = document.getElementById('simLangBtn');
+languageButton.textContent = LANG === 'es' ? 'EN' : 'ES';
+languageButton.addEventListener('click', () => {
+  if (!confirm(t('confirm_switch'))) return;
+  setLang(LANG === 'es' ? 'en' : 'es');
+  location.reload();
+});
+
+/* === Términos: «dicho fácil» → «dicho técnico» === */
+const TERMS_ALL = {
+  es: {
+    grant:       { easy: 'Dinero que se gana presentando un proyecto', tech: 'fondo concursable (convocatoria)' },
+    peerReview:  { easy: 'Que expertos revisen tu trabajo, sin saber quién eres, antes de publicarlo', tech: 'revisión por pares' },
+    ghost:       { easy: 'Presentar como tuyo un texto que escribió otro', tech: 'plagio / autoría fantasma' },
+    pvalue:      { easy: 'Qué tan probable es que el resultado sea pura casualidad', tech: 'valor p (significancia estadística)' },
+    nullResult:  { easy: 'Contar que no se encontró el efecto que esperabas', tech: 'resultado nulo (no significativo)' },
+    dataFraud:   { easy: 'Quitar o cambiar datos para que salga lo que quieres', tech: 'manipulación de datos (fraude científico)' },
+    rawData:     { easy: 'Los datos originales, sin tocar', tech: 'datos crudos' },
+    indexed:     { easy: 'Revista que aparece en listas serias que verifican su calidad', tech: 'revista indexada (Scopus, DOAJ)' },
+    q1:          { easy: 'Entre el 25% de revistas mejor posicionadas de su área', tech: 'cuartil Q1' },
+    predatory:   { easy: 'Revista que cobra por publicar y no revisa de verdad', tech: 'revista depredadora' },
+    audit:       { easy: 'Revisar en qué se gastó el dinero y si se usó bien', tech: 'auditoría / rendición de cuentas' },
+    resilience:  { easy: 'Un «todavía no»: corregir y reenviar tras un rechazo', tech: 'revisión mayor (correcciones)' }
+  },
+  en: {
+    grant:       { easy: 'Money you win by presenting a project', tech: 'competitive grant (call for proposals)' },
+    peerReview:  { easy: 'Experts check your work, without knowing who you are, before it is published', tech: 'peer review' },
+    ghost:       { easy: 'Presenting as yours a text someone else wrote', tech: 'plagiarism / ghostwriting' },
+    pvalue:      { easy: 'How likely it is that the result is pure chance', tech: 'p-value (statistical significance)' },
+    nullResult:  { easy: 'Reporting that the effect you expected was not found', tech: 'null result (non-significant)' },
+    dataFraud:   { easy: 'Removing or changing data so you get what you want', tech: 'data manipulation (scientific fraud)' },
+    rawData:     { easy: 'The original data, untouched', tech: 'raw data' },
+    indexed:     { easy: 'A journal listed in serious directories that check its quality', tech: 'indexed journal (Scopus, DOAJ)' },
+    q1:          { easy: 'Among the top 25% of journals in its field', tech: 'Q1 quartile' },
+    predatory:   { easy: 'A journal that charges to publish and does not really review', tech: 'predatory journal' },
+    audit:       { easy: 'Checking what the money was spent on and whether it was used properly', tech: 'audit / accountability' },
+    resilience:  { easy: 'A «not yet»: correcting and resubmitting after a rejection', tech: 'major revision (corrections)' }
+  }
+};
+const TERMS = TERMS_ALL[LANG];
+const TERM_KEYS = Object.keys(TERMS_ALL.es);
+
+/* === Textos pedagógicos por idioma (misma estructura en ES y EN) === */
+const TEXT_ALL = {
+  es: {
+    hookIntro: [
+      'Eres <strong>investigador/a junior</strong>. Tu tesis está a medias y el dinero del laboratorio se acabó.',
+      'Para terminarla necesitas tres cosas: <strong>conseguir dinero</strong>, <strong>hacer tu estudio</strong> y <strong>publicar los resultados</strong> donde la gente pueda confiar en ellos.' ],
+    hookQuestion: 'Antes de empezar, una pregunta cotidiana: <strong>cuando lees algo en internet, ¿cómo decides si es confiable?</strong>',
+    hookOptions: [
+      { text: 'Miro quién lo escribió', feedback: 'Buen reflejo. Pero un título no basta: cualquiera puede escribir con seguridad sobre algo que no sabe.' },
+      { text: 'Veo si alguien lo revisó antes de publicarlo', feedback: 'Eso mismo hace la ciencia: antes de publicar, <strong>otros expertos revisan el trabajo</strong> sin saber quién lo escribió. Lleva tiempo, pero es lo que da confianza.' },
+      { text: 'Si suena convincente', feedback: 'Cuidado: lo que suena bien no siempre es cierto. Mucha información falsa suena muy convincente.' } ],
+    hookRules: [
+      'En esta simulación tomarás <strong>decisiones reales de un investigador</strong>. Habrá ofertas tentadoras: unas son ayuda legítima y otras son atajos. <strong>Nadie te dirá cuál es cuál</strong>: tendrás que fijarte.',
+      'Cada decisión mueve tres medidores: <strong>Fondos</strong>, <strong>Tiempo</strong> (tienes 11 meses para publicar) y <strong>Reputación</strong>.' ],
+    chapter1Title: 'Capítulo 1 · Conseguir fondos',
+    chapter1Goto: 'Ve a la <strong>Convocatoria ONU</strong> (arriba a la izquierda)',
+    chapter1Intro: [
+      'La ONU abrió una <strong>convocatoria</strong>: una competencia en la que presentas tu proyecto y, si es de los mejores, te dan dinero para investigar.',
+      'Para participar tienes que escribir una <strong>propuesta</strong>: qué vas a investigar, cómo y para qué.' ],
+    ghostLetter: {
+      title: 'Un «consultor académico» te escribe',
+      quote: '«Te redacto la propuesta completa en 5 minutos. Ya fue aprobada en 3 convocatorias parecidas; solo le cambio lo cosmético. Cobro el 15% de tu financiamiento si ganas.»',
+      ask: '¿Qué haces?',
+      shortcut: 'Aceptar su ayuda',
+      honest: 'Escribirla yo' },
+    ghostHonest: [ 'Escribes la propuesta tú, con tus ideas y tus palabras. Cuesta más tiempo, pero es tuya.' ],
+    ghostHonestRows: {
+      time: 'Escribir una buena propuesta toma tiempo.',
+      reputation: 'Es tu trabajo: tus ideas, tus palabras.',
+      funds: 'Tu propuesta ganó el concurso.' },
+    ghostShortcut: [ 'Aceptas el texto del consultor y lo envías con tu nombre. Ahorras tiempo.',
+      'La ONU, como casi todos los organismos, pasa las propuestas por un <strong>software antiplagio</strong> que compara el texto con miles de propuestas anteriores.' ],
+    ghostDetected: [ 'Resultado: <strong>62% de coincidencia</strong> con otra propuesta. Está claro que no la escribiste tú.',
+      'La ONU te da una única segunda oportunidad: <strong>reescribirla tú mismo/a</strong>.' ],
+    ghostDetectedRows: {
+      reputation: 'Presentar un texto ajeno como propio es plagio, y quedó registrado.',
+      time: 'Tienes que reescribir la propuesta desde cero.',
+      funds: 'Esta vez sí ganas el fondo, con tu propio texto.' },
+    ghostClear: [ 'Esta vez nadie lo notó, y la propuesta ganó.',
+      'Pero la propuesta <strong>no es tuya</strong>, y eso sigue siendo plagio aunque no te descubran: que el riesgo sea bajo no cambia lo que hiciste.' ],
+    ghostClearRows: {
+      time: 'Ahorraste tiempo: no escribiste la propuesta.',
+      funds: 'Ganaste el fondo, pero el consultor cobra su 15%.' },
+    chapter2Title: 'Capítulo 2 · Analizar datos',
+    chapter2Goto: 'Ve al <strong>Laboratorio</strong> (abajo a la izquierda)',
+    chapter2Intro: [
+      'Con el dinero, haces tu estudio: probaste si un método nuevo de enseñanza mejora las notas. Tu hipótesis era que sí.',
+      'Los números dicen: <strong>p = 0.08</strong>.',
+      'Dicho fácil: hay un 8% de probabilidad de que lo que viste sea <strong>pura casualidad</strong>. La costumbre científica pide menos de 5% para llamarlo «significativo». Quedaste cerca, pero no llegaste.' ],
+    dataLetter: {
+      title: 'Tu asistente te susurra',
+      quote: '«Si quitamos estos 3 datos que se ven raros, el valor p baja a 0.03 y el resultado queda significativo. Nadie revisa los datos originales.»',
+      ask: '¿Qué haces?',
+      shortcut: 'Quitar esos 3 datos',
+      honest: 'Reportar los datos tal como salieron' },
+    dataHonest: [ 'Reportas el resultado tal como salió: <strong>no es concluyente</strong>, y explicas sus límites con honestidad.' ],
+    dataHonestRows: {
+      time: 'Escribir con cuidado un resultado no concluyente y sus límites lleva más tiempo.',
+      reputation: 'Un resultado nulo también es ciencia: avisa a otros que ese camino no funcionó y les ahorra tiempo.' },
+    dataShortcut: [ 'Quitas los 3 datos y el resultado queda «significativo». Parece un buen negocio.',
+      'Pero quitaste datos <strong>solo porque no te convenían</strong>. Eso es manipulación de datos, y es fraude científico aunque nadie lo vea todavía.' ],
+    dataShortcutRows: {
+      time: 'Te ahorras explicar un resultado incómodo.',
+      reputation: 'Por ahora, tus resultados parecen mejores de lo que son.' },
+    chapter3Title: 'Capítulo 3 · Publicar',
+    chapter3Goto: 'Visita la <strong>Revista A</strong> o la <strong>Revista B</strong> (a la derecha)',
+    chapter3Intro: [
+      'Tu manuscrito está listo. Ahora hay que <strong>publicarlo</strong>: así otros investigadores pueden leerlo y confiar en él.',
+      'Hay dos revistas interesadas. <strong>Visita cada una y revisa su ficha con calma</strong> antes de decidir. Fíjate en las señales.' ],
+    chapter3OnlyB: 'Decidiste no seguir con la Revista A. Queda la <strong>Revista B</strong>.',
+    chapter3Back: 'Vuelves al mapa. Puedes visitar la otra revista o regresar a esta.',
+    journals: {
+      A: {
+        name: 'Journal of Educational Research',
+        sub: 'Revista A',
+        colleague: '',
+        items: [
+          { question: '¿Cómo llegaste a ella?', detail: 'La encontraste tú, buscando en el índice Scopus.', flag: false, why: 'Buscarla tú, en una lista seria, es buena señal. Las revistas serias casi nunca mandan correos pidiendo artículos.' },
+          { question: '¿Cuánto tarda en publicar?', detail: 'De 3 a 5 meses, con revisión de expertos.', flag: false, why: 'Revisar bien lleva tiempo. Que tarde es normal.' },
+          { question: '¿Quién la dirige?', detail: 'Un comité de 12 personas con universidad y perfil público verificable.', flag: false, why: 'Puedes comprobar que existen y que son especialistas.' },
+          { question: '¿Cuánto cobra?', detail: 'Nada por publicar.', flag: false, why: 'Muchas revistas serias no cobran al autor, o cobran solo después de aceptar el texto, nunca antes de revisarlo.' },
+          { question: '¿Dónde aparece listada?', detail: 'En Scopus y DOAJ.', flag: false, why: 'Los índices verifican que la revista cumple estándares: revisión real, ética y transparencia.' },
+          { question: '¿Qué te promete?', detail: 'Nada: «tu artículo será evaluado».', flag: false, why: 'Una revista seria no puede prometerte que te aceptará antes de leer tu trabajo.' } ] },
+      B: {
+        name: 'Global Science Fast Publishing',
+        sub: 'Revista B',
+        colleague: '«A mí esta revista me publicó ayer. Sin revisores, sin demoras. ¿Para qué esperar meses?» — Marco, un colega',
+        items: [
+          { question: '¿Cómo llegaste a ella?', short: 'Te contactó por correo sin que la buscaras', detail: 'Te escribió un correo que no pediste, con tu nombre mal escrito.', flag: true, why: 'Las revistas serias rara vez piden artículos por correo masivo. Es una señal clásica.' },
+          { question: '¿Cuánto tarda en publicar?', short: 'Promete publicar en horas, sin revisores', detail: 'Publicación en 48 horas, «sin revisores».', flag: true, why: 'Sin revisión por pares no hay control de calidad: cualquiera puede publicar cualquier cosa.' },
+          { question: '¿Quién la dirige?', short: 'Comité con fotos de archivo y sin universidad real', detail: 'Fotos de archivo y nombres sin universidad real.', flag: true, why: 'Un comité falso busca dar apariencia de seriedad.' },
+          { question: '¿Cuánto cobra?', short: 'Cobra antes de que alguien lea tu texto', detail: '$900 por adelantado, antes de que alguien lea tu texto.', flag: true, why: 'Cobrar antes de revisar convierte la publicación en negocio, no en control de calidad.' },
+          { question: '¿Dónde aparece listada?', short: 'No está en Scopus/DOAJ; factor de impacto inventado', detail: 'No aparece en Scopus ni en DOAJ. Su «factor de impacto 9.8» no se puede comprobar.', flag: true, why: 'Un factor de impacto inventado es una táctica común para parecer prestigiosa.' },
+          { question: '¿Qué te promete?', short: 'Garantiza que te aceptará', detail: '«Aceptación garantizada».', flag: true, why: 'Si aceptan todo, publicar ahí no vale como evidencia de nada.' } ] }
+    },
+    submitA: [ 'Envías tu manuscrito a la Revista A. Ahora entra a <strong>revisión por pares</strong>: expertos que no saben quién eres lo leen con lupa.' ],
+    submitARows: { time: 'La primera ronda de revisión por pares toma unos 3 meses.' },
+    rawDataRequest: [ 'Los revisores, como cada vez más revistas, piden tus <strong>datos originales</strong> (datos crudos) para comprobar el análisis.' ],
+    fraudCaught: [ 'Los datos originales <strong>no coinciden</strong> con los que reportaste: faltan 3 casos justo los que hacían ruido.' ],
+    fraudClear: [ 'Esta vez los revisores no lo notaron. Pero sigues cargando con un dato manipulado: el riesgo de que lo descubran nunca desaparece.' ],
+    revisionLetter: {
+      title: 'Decisión editorial: correcciones mayores',
+      quote: '«Los revisores ven potencial, pero piden más detalle en el análisis y declarar las limitaciones del estudio. No es un “no”: es un “todavía no”. Reenvía cuando corrijas.»',
+      ask: '¿Qué haces?',
+      honest: 'Corregir y reenviar a esta revista (unos 3 meses más)',
+      shortcut: 'Buscar otra revista que publique más rápido' },
+    revisionRows: { time: 'Corregir y pasar por una segunda revisión lleva unos 3 meses.', reputation: 'Tu artículo, ahora más sólido, es aceptado.' },
+    gaveUp: [ 'Decides que es demasiado lento y buscas una alternativa más rápida.' ],
+    acceptedA: [ '¡<strong>Aceptado</strong>! Tu artículo se publica en una revista indexada, con revisión por pares: nadie puede decir que no se examinó.' ],
+    submitB: [ 'Envías tu manuscrito y pagas. En 48 horas está «publicado»: nadie lo leyó antes de salir.' ],
+    submitBRows: { funds: 'Pagaste con dinero del fondo de la ONU, que era para investigar.', time: 'Publicación casi instantánea.' },
+    auditB: [ 'Al cierre del plazo, la ONU hace una <strong>auditoría</strong>: revisa en qué se gastó el dinero.',
+      'Ven un pago de $900 a una revista que no está en ningún índice y que no revisó tu trabajo.' ],
+    auditBRows: { reputation: 'Sanción pública: tu grupo queda vetado por mal uso de fondos.', funds: 'Debes devolver el pago.' },
+    outcomes: {
+      legit: { title: 'Artículo publicado', message: 'Resististe los atajos importantes, aceptaste un «todavía no» y publicaste en una revista seria, con revisión por pares. Tardó más, pero tu publicación tiene respaldo.' },
+      predatory: { title: 'Publicaste en una revista depredadora', message: 'Para ganar tiempo pagaste una publicación sin revisión. Cuando la ONU auditó el gasto, el engaño quedó expuesto: perdiste fondos y reputación.' },
+      fraudCaught: { title: 'Tu manipulación quedó expuesta', message: 'La revisión por pares pidió tus datos originales y no coincidían. El artículo fue rechazado y tu universidad fue informada.' }
+    },
+    recap: {
+      ghostHonest: 'Escribiste tu propia propuesta: tomó más tiempo, pero es tuya.',
+      ghostCaught: 'Aceptaste una propuesta escrita por otro y el antiplagio la detectó.',
+      ghostClear: 'Aceptaste una propuesta escrita por otro. No te detectaron, pero sigue siendo plagio.',
+      dataHonest: 'Reportaste el resultado no concluyente tal como salió.',
+      dataCaught: 'Quitaste datos que no te convenían y los revisores lo descubrieron.',
+      dataClear: 'Quitaste datos que no te convenían. Nadie lo descubrió, pero fue fraude.',
+      journalA: 'Publicaste en una revista seria, con revisión por pares.',
+      journalB: 'Publicaste en una revista depredadora, pagando con dinero del fondo.',
+      gaveUpOnA: 'Tras un «todavía no», buscaste un atajo en vez de corregir.',
+      resilience: 'Aceptaste un «todavía no», corregiste y reenviaste.'
+    }
+  },
+  en: {
+    hookIntro: [
+      'You are a <strong>junior researcher</strong>. Your thesis is half done and the lab money has run out.',
+      'To finish it you need three things: <strong>win funding</strong>, <strong>run your study</strong> and <strong>publish the results</strong> where people can trust them.' ],
+    hookQuestion: 'Before starting, an everyday question: <strong>when you read something online, how do you decide whether it is reliable?</strong>',
+    hookOptions: [
+      { text: 'I look at who wrote it', feedback: 'Good reflex. But a title is not enough: anyone can write confidently about something they do not know.' },
+      { text: 'I check whether someone reviewed it before it was published', feedback: 'That is exactly what science does: before publishing, <strong>other experts review the work</strong> without knowing who wrote it. It takes time, but it is what builds trust.' },
+      { text: 'If it sounds convincing', feedback: 'Careful: what sounds good is not always true. A lot of false information sounds very convincing.' } ],
+    hookRules: [
+      'In this simulation you will make <strong>real decisions of a researcher</strong>. There will be tempting offers: some are legitimate help and others are shortcuts. <strong>Nobody will tell you which is which</strong>: you will have to look closely.',
+      'Each decision moves three meters: <strong>Funds</strong>, <strong>Time</strong> (you have 11 months to publish) and <strong>Reputation</strong>.' ],
+    chapter1Title: 'Chapter 1 · Get funding',
+    chapter1Goto: 'Go to the <strong>UN Call for Proposals</strong> (top left)',
+    chapter1Intro: [
+      'The UN opened a <strong>call for proposals</strong>: a competition where you present your project and, if it is among the best, they give you money to do research.',
+      'To take part you must write a <strong>proposal</strong>: what you will investigate, how and why.' ],
+    ghostLetter: {
+      title: 'An «academic consultant» writes to you',
+      quote: '«I will write your whole proposal in 5 minutes. It was already approved in 3 similar calls; I only change the cosmetics. I charge 15% of your funding if you win.»',
+      ask: 'What do you do?',
+      shortcut: 'Accept their help',
+      honest: 'Write it myself' },
+    ghostHonest: [ 'You write the proposal yourself, with your own ideas and words. It takes more time, but it is yours.' ],
+    ghostHonestRows: {
+      time: 'Writing a good proposal takes time.',
+      reputation: 'It is your work: your ideas, your words.',
+      funds: 'Your proposal won the competition.' },
+    ghostShortcut: [ 'You accept the consultant\'s text and submit it under your name. You save time.',
+      'The UN, like almost every funding body, runs proposals through <strong>plagiarism-detection software</strong> that compares the text with thousands of earlier proposals.' ],
+    ghostDetected: [ 'Result: <strong>62% overlap</strong> with another proposal. It is clear you did not write it.',
+      'The UN gives you one single second chance: <strong>rewrite it yourself</strong>.' ],
+    ghostDetectedRows: {
+      reputation: 'Presenting someone else\'s text as your own is plagiarism, and it is on record.',
+      time: 'You have to rewrite the proposal from scratch.',
+      funds: 'This time you do win the grant, with your own text.' },
+    ghostClear: [ 'This time nobody noticed, and the proposal won.',
+      'But the proposal is <strong>not yours</strong>, and that is still plagiarism even if you are not caught: a low risk does not change what you did.' ],
+    ghostClearRows: {
+      time: 'You saved time: you did not write the proposal.',
+      funds: 'You won the grant, but the consultant takes their 15%.' },
+    chapter2Title: 'Chapter 2 · Analyze data',
+    chapter2Goto: 'Go to the <strong>Laboratory</strong> (bottom left)',
+    chapter2Intro: [
+      'With the money, you run your study: you tested whether a new teaching method improves grades. Your hypothesis was that it does.',
+      'The numbers say: <strong>p = 0.08</strong>.',
+      'In plain words: there is an 8% chance that what you saw is <strong>pure chance</strong>. Scientific custom asks for under 5% to call it «significant». You came close, but did not make it.' ],
+    dataLetter: {
+      title: 'Your assistant whispers',
+      quote: '«If we remove these 3 odd-looking data points, the p-value drops to 0.03 and the result becomes significant. Nobody checks the original data.»',
+      ask: 'What do you do?',
+      shortcut: 'Remove those 3 data points',
+      honest: 'Report the data as they came out' },
+    dataHonest: [ 'You report the result as it came out: <strong>it is inconclusive</strong>, and you honestly explain its limits.' ],
+    dataHonestRows: {
+      time: 'Carefully writing up an inconclusive result and its limits takes longer.',
+      reputation: 'A null result is science too: it tells others that path did not work and saves them time.' },
+    dataShortcut: [ 'You remove the 3 points and the result becomes «significant». It looks like a good deal.',
+      'But you removed data <strong>only because it did not suit you</strong>. That is data manipulation, and it is scientific fraud even if nobody sees it yet.' ],
+    dataShortcutRows: {
+      time: 'You skip explaining an uncomfortable result.',
+      reputation: 'For now, your results look better than they really are.' },
+    chapter3Title: 'Chapter 3 · Publish',
+    chapter3Goto: 'Visit <strong>Journal A</strong> or <strong>Journal B</strong> (on the right)',
+    chapter3Intro: [
+      'Your manuscript is ready. Now it must be <strong>published</strong>: that way other researchers can read it and trust it.',
+      'Two journals are interested. <strong>Visit each one and check its file carefully</strong> before deciding. Watch for the signs.' ],
+    chapter3OnlyB: 'You decided not to continue with Journal A. Only <strong>Journal B</strong> remains.',
+    chapter3Back: 'Back on the map. You can visit the other journal or return to this one.',
+    journals: {
+      A: {
+        name: 'Journal of Educational Research',
+        sub: 'Journal A',
+        colleague: '',
+        items: [
+          { question: 'How did you find it?', detail: 'You found it yourself, searching the Scopus index.', flag: false, why: 'Finding it yourself, in a serious list, is a good sign. Serious journals almost never email asking for articles.' },
+          { question: 'How long does it take to publish?', detail: '3 to 5 months, with expert review.', flag: false, why: 'Good review takes time. Being slow is normal.' },
+          { question: 'Who runs it?', detail: 'A board of 12 people with a university and a verifiable public profile.', flag: false, why: 'You can check that they exist and are specialists.' },
+          { question: 'What does it charge?', detail: 'Nothing to publish.', flag: false, why: 'Many serious journals do not charge authors, or charge only after accepting the text, never before reviewing it.' },
+          { question: 'Where is it listed?', detail: 'In Scopus and DOAJ.', flag: false, why: 'Indexes check that the journal meets standards: real review, ethics and transparency.' },
+          { question: 'What does it promise you?', detail: 'Nothing: «your article will be evaluated».', flag: false, why: 'A serious journal cannot promise to accept you before reading your work.' } ] },
+      B: {
+        name: 'Global Science Fast Publishing',
+        sub: 'Journal B',
+        colleague: '«This journal published me yesterday. No reviewers, no delays. Why wait months?» — Marco, a colleague',
+        items: [
+          { question: 'How did you find it?', short: 'It contacted you by email though you never looked for it', detail: 'It sent you an unrequested email, with your name misspelled.', flag: true, why: 'Serious journals rarely request articles through mass email. It is a classic sign.' },
+          { question: 'How long does it take to publish?', short: 'It promises publication in hours, with no reviewers', detail: 'Publication in 48 hours, «no reviewers».', flag: true, why: 'Without peer review there is no quality control: anyone can publish anything.' },
+          { question: 'Who runs it?', short: 'Board with stock photos and no real university', detail: 'Stock photos and names with no real university.', flag: true, why: 'A fake board tries to look serious.' },
+          { question: 'What does it charge?', short: 'It charges before anyone reads your text', detail: '$900 upfront, before anyone reads your text.', flag: true, why: 'Charging before reviewing turns publishing into a business, not quality control.' },
+          { question: 'Where is it listed?', short: 'Not in Scopus/DOAJ; invented impact factor', detail: 'Not in Scopus or DOAJ. Its «impact factor 9.8» cannot be verified.', flag: true, why: 'An invented impact factor is a common tactic to look prestigious.' },
+          { question: 'What does it promise you?', short: 'It guarantees acceptance', detail: '«Guaranteed acceptance».', flag: true, why: 'If they accept everything, publishing there is no evidence of anything.' } ] }
+    },
+    submitA: [ 'You send your manuscript to Journal A. It now goes into <strong>peer review</strong>: experts who do not know who you are read it closely.' ],
+    submitARows: { time: 'The first round of peer review takes about 3 months.' },
+    rawDataRequest: [ 'The reviewers, like more and more journals, ask for your <strong>original data</strong> (raw data) to check the analysis.' ],
+    fraudCaught: [ 'The original data <strong>do not match</strong> what you reported: 3 cases are missing, exactly the ones that were noisy.' ],
+    fraudClear: [ 'This time the reviewers did not notice. But you still carry a manipulated data set: the risk of being found out never disappears.' ],
+    revisionLetter: {
+      title: 'Editorial decision: major revision',
+      quote: '«The reviewers see potential, but ask for more detail in the analysis and for the study limitations to be stated. It is not a “no”: it is a “not yet”. Resubmit when you have corrected it.»',
+      ask: 'What do you do?',
+      honest: 'Correct and resubmit to this journal (about 3 more months)',
+      shortcut: 'Look for another journal that publishes faster' },
+    revisionRows: { time: 'Correcting and going through a second review takes about 3 months.', reputation: 'Your article, now stronger, is accepted.' },
+    gaveUp: [ 'You decide it is too slow and look for a faster alternative.' ],
+    acceptedA: [ '<strong>Accepted</strong>! Your article is published in an indexed journal, with peer review: nobody can say it was not examined.' ],
+    submitB: [ 'You send your manuscript and pay. In 48 hours it is «published»: nobody read it before it went out.' ],
+    submitBRows: { funds: 'You paid with the UN grant money, which was meant for research.', time: 'Almost instant publication.' },
+    auditB: [ 'When the deadline closes, the UN runs an <strong>audit</strong>: it checks what the money was spent on.',
+      'They see a $900 payment to a journal that is in no index and did not review your work.' ],
+    auditBRows: { reputation: 'Public sanction: your group is banned for misuse of funds.', funds: 'You must pay it back.' },
+    outcomes: {
+      legit: { title: 'Article published', message: 'You resisted the important shortcuts, accepted a «not yet» and published in a serious journal with peer review. It took longer, but your publication is backed.' },
+      predatory: { title: 'You published in a predatory journal', message: 'To save time you paid for a publication with no review. When the UN audited the spending, the deception was exposed: you lost funds and reputation.' },
+      fraudCaught: { title: 'Your manipulation was exposed', message: 'Peer review asked for your original data and it did not match. The article was rejected and your university was informed.' }
+    },
+    recap: {
+      ghostHonest: 'You wrote your own proposal: it took longer, but it is yours.',
+      ghostCaught: 'You accepted a proposal written by someone else and the plagiarism check caught it.',
+      ghostClear: 'You accepted a proposal written by someone else. You were not caught, but it is still plagiarism.',
+      dataHonest: 'You reported the inconclusive result as it came out.',
+      dataCaught: 'You removed data that did not suit you and the reviewers found out.',
+      dataClear: 'You removed data that did not suit you. Nobody found out, but it was fraud.',
+      journalA: 'You published in a serious journal, with peer review.',
+      journalB: 'You published in a predatory journal, paying with grant money.',
+      gaveUpOnA: 'After a «not yet», you looked for a shortcut instead of correcting.',
+      resilience: 'You accepted a «not yet», corrected and resubmitted.'
+    }
+  }
+};
+const TEXT = TEXT_ALL[LANG];
+
+/* === Estado === */
+const INITIAL_TIME_MONTHS = 11;
+const state = {
+  funds: 0,
+  timeMonths: INITIAL_TIME_MONTHS,
+  reputation: 50,
+  discoveredTerms: new Set(),
+  allowedRooms: [],
+  onRoomChosen: null,
+  currentRoom: null,
+  ghostChoice: null, ghostDetected: false,
+  dataChoice: null, fraudDetected: false,
+  journal: null, gaveUpOnA: false, resubmitted: false,
+  openedItems: { A: new Set(), B: new Set() },
+  ended: false
+};
+const CHAPTER_KEYS = ['chapter_0', 'chapter_1', 'chapter_2', 'chapter_3'];
+
+/* === Utilidades de interfaz === */
+function delay(milliseconds){ return new Promise(resolve => setTimeout(resolve, milliseconds)); }
+function createElement(tagName, className, htmlContent){
+  const element = document.createElement(tagName);
+  if (className) element.className = className;
+  if (htmlContent !== undefined) element.innerHTML = htmlContent;
+  return element;
+}
+function scrollBehavior(){ return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'; }
+function shuffled(items){ return items.slice().sort(() => Math.random() - 0.5); }
+
+const storyElement = document.getElementById('story');
+const actionsElement = document.getElementById('actions');
+const objectiveElement = document.getElementById('objective');
+
+function keepInView(element){ element.scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' }); }
+function revealElement(element, visibleClass){ requestAnimationFrame(() => requestAnimationFrame(() => element.classList.add(visibleClass))); }
+function clearActions(){ actionsElement.replaceChildren(); }
+
+/* Diálogos y botones (patrón del proyecto) */
+function addDialog(html, cssClass){
+  const note = createElement('div', 'note' + (cssClass ? ' ' + cssClass : ''), html);
+  storyElement.appendChild(note);
+  revealElement(note, 'is-visible');
+  keepInView(note);
+  return note;
+}
+async function say(lines, cssClass){
+  for (const line of [].concat(lines)) { addDialog(line, cssClass); await delay(520); }
+}
+function addButton(label){
+  return new Promise(resolve => {
+    clearActions();
+    const button = createElement('button', 'btn-primary');
+    button.type = 'button';
+    button.textContent = label;
+    button.addEventListener('click', () => { clearActions(); resolve(); }, { once: true });
+    actionsElement.appendChild(button);
+    button.focus({ preventScroll: true });
+  });
+}
+function askInline(options){
+  return new Promise(resolve => {
+    clearActions();
+    options.forEach((option, optionIndex) => {
+      const button = createElement('button', 'btn-option');
+      button.type = 'button';
+      button.textContent = option.text;
+      button.addEventListener('click', () => { clearActions(); resolve(optionIndex); }, { once: true });
+      actionsElement.appendChild(button);
+    });
+    actionsElement.style.flexDirection = 'column';
+    actionsElement.style.alignItems = 'stretch';
+  }).finally(() => { actionsElement.style.flexDirection = ''; actionsElement.style.alignItems = ''; });
+}
+function setObjective(html){
+  objectiveElement.innerHTML = html ? '<strong>' + t('objective_prefix') + ':</strong> ' + html : '';
+  objectiveElement.classList.toggle('is-visible', Boolean(html));
+}
+
+/* Medidores */
+function buildMeters(){
+  const meters = document.getElementById('meters');
+  meters.replaceChildren();
+  ['funds', 'time', 'reputation'].forEach(meterKey => {
+    const meter = createElement('div', 'meter');
+    meter.id = 'meter-' + meterKey;
+    meter.appendChild(createElement('div', 'meter-label', t('meter_' + meterKey)));
+    meter.appendChild(createElement('div', 'meter-value'));
+    const bar = createElement('div', 'meter-bar'); bar.appendChild(document.createElement('span')); meter.appendChild(bar);
+    meter.appendChild(createElement('div', 'meter-delta'));
+    meters.appendChild(meter);
+  });
+  renderMeters();
+}
+function formatNumber(value){ return Number.isInteger(value) ? String(value) : value.toFixed(1); }
+function formatTime(months){ return formatNumber(months) + ' ' + (months === 1 ? t('unit_month') : t('unit_months')); }
+function formatFunds(amount){ return '$' + Math.round(amount).toLocaleString('en-US'); }
+function renderMeters(){
+  state.reputation = Math.max(0, Math.min(100, state.reputation));
+  document.querySelector('#meter-funds .meter-value').textContent = formatFunds(state.funds);
+  document.querySelector('#meter-time .meter-value').textContent = formatTime(Math.max(0, state.timeMonths));
+  document.querySelector('#meter-reputation .meter-value').textContent = formatNumber(state.reputation);
+  document.querySelector('#meter-funds .meter-bar span').style.width = Math.max(0, Math.min(100, state.funds / 50)) + '%';
+  document.querySelector('#meter-time .meter-bar span').style.width = Math.max(0, state.timeMonths / INITIAL_TIME_MONTHS * 100) + '%';
+  document.querySelector('#meter-reputation .meter-bar span').style.width = state.reputation + '%';
+}
+function applyDelta(meterKey, amount){
+  if (!amount) return;
+  if (meterKey === 'funds') state.funds += amount;
+  if (meterKey === 'time') state.timeMonths += amount;
+  if (meterKey === 'reputation') state.reputation += amount;
+  renderMeters();
+  const deltaElement = document.querySelector('#meter-' + meterKey + ' .meter-delta');
+  deltaElement.textContent = (amount > 0 ? '+' : '−') + (meterKey === 'funds' ? '$' + Math.abs(amount).toLocaleString('en-US') : formatNumber(Math.abs(amount)));
+  deltaElement.className = 'meter-delta ' + (amount > 0 ? 'is-up' : 'is-down');
+  void deltaElement.offsetWidth;
+  deltaElement.classList.add('is-show');
+}
+const METER_ICONS = { funds: '💰', time: '⏳', reputation: '⭐' };
+/* Tarjeta de consecuencias: aplica los cambios y explica cada uno */
+async function showConsequences(rows){
+  const card = createElement('div', 'cons-card');
+  card.appendChild(createElement('div', 'cons-title', t('consequence_title')));
+  rows.forEach(row => {
+    const rowElement = createElement('div', 'cons-row');
+    rowElement.appendChild(createElement('span', '', METER_ICONS[row.meter]));
+    const deltaText = (row.amount > 0 ? '+' : '−') + (row.meter === 'funds' ? '$' + Math.abs(row.amount).toLocaleString('en-US') : row.meter === 'time' ? formatTime(Math.abs(row.amount)) : formatNumber(Math.abs(row.amount)));
+    const goodForPlayer = row.meter === 'time' ? row.amount > 0 : row.amount > 0;
+    rowElement.appendChild(createElement('span', 'delta ' + (goodForPlayer ? 'up' : 'down'), deltaText));
+    rowElement.appendChild(createElement('span', '', row.text));
+    card.appendChild(rowElement);
+  });
+  storyElement.appendChild(card);
+  revealElement(card, 'is-visible');
+  keepInView(card);
+  rows.forEach(row => applyDelta(row.meter, row.amount));
+  await delay(900);
+}
+/* Dado visible: la detección no es magia, tiene una probabilidad explícita */
+async function rollDetection(probabilityPercent){
+  const card = createElement('div', 'dice-card');
+  card.appendChild(createElement('div', 'dice-title', t('dice_title') + ': ' + probabilityPercent + '%'));
+  const bar = createElement('div', 'dice-bar'); const fill = document.createElement('span'); bar.appendChild(fill);
+  const result = createElement('div', 'dice-result', t('dice_rolling'));
+  card.append(bar, result);
+  storyElement.appendChild(card);
+  revealElement(card, 'is-visible');
+  keepInView(card);
+  await delay(250);
+  fill.style.width = probabilityPercent + '%';
+  await delay(1500);
+  const wasDetected = Math.random() * 100 < probabilityPercent;
+  result.textContent = wasDetected ? t('dice_detected') : t('dice_clear');
+  result.style.color = wasDetected ? 'var(--red)' : 'var(--yellow)';
+  await delay(500);
+  return wasDetected;
+}
+
+/* Glosario */
+function renderGlossary(){
+  const glossary = document.getElementById('glossary');
+  glossary.replaceChildren();
+  const summary = createElement('summary');
+  summary.appendChild(createElement('span', '', t('glossary_title')));
+  summary.appendChild(createElement('span', '', fmt(t('glossary_count'), { count: state.discoveredTerms.size, total: TERM_KEYS.length })));
+  glossary.appendChild(summary);
+  if (state.discoveredTerms.size === 0) { glossary.appendChild(createElement('p', 'glossary-empty', t('glossary_empty'))); return; }
+  const list = createElement('ul', 'glossary-list');
+  TERM_KEYS.filter(termKey => state.discoveredTerms.has(termKey)).forEach(termKey => {
+    const item = createElement('li', 'glossary-item');
+    item.appendChild(createElement('b', '', TERMS[termKey].tech));
+    item.appendChild(document.createTextNode(TERMS[termKey].easy));
+    list.appendChild(item);
+  });
+  glossary.appendChild(list);
+}
+function addTermChips(termKeys){
+  termKeys.forEach(termKey => {
+    const row = createElement('div', 'term-row');
+    row.appendChild(createElement('span', 'term-label', t('term_label')));
+    row.appendChild(createElement('span', '', TERMS[termKey].easy));
+    row.appendChild(createElement('i', 'fa-solid fa-arrow-right'));
+    row.appendChild(createElement('span', 'term-tech', TERMS[termKey].tech));
+    storyElement.appendChild(row);
+    revealElement(row, 'is-visible');
+    state.discoveredTerms.add(termKey);
+  });
+  renderGlossary();
+}
+
+/* Capítulos */
+function buildChapterStrip(){
+  const strip = document.getElementById('chapterStrip');
+  strip.replaceChildren();
+  CHAPTER_KEYS.forEach((chapterKey, chapterIndex) => {
+    const chip = createElement('span', 'chapter-chip', t(chapterKey));
+    chip.dataset.chapter = chapterIndex;
+    strip.appendChild(chip);
+  });
+}
+function setChapter(chapterIndex){
+  document.querySelectorAll('#chapterStrip .chapter-chip').forEach(chip => {
+    const index = Number(chip.dataset.chapter);
+    chip.classList.toggle('is-current', index === chapterIndex);
+    chip.classList.toggle('is-done', index < chapterIndex);
   });
 }
 
-    // --- PERSONALIZACIÓN: NOMBRE DEL USUARIO ---
-    // (solo en esta sesión del navegador, no se guarda permanentemente)
-    function obtenerNombreUsuario(callback) {
-        const guardado = sessionStorage.getItem('nombreEstudianteSim');
-        if (guardado) { callback(guardado); return; }
-        const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
-        overlay.innerHTML = `
-            <div style="background:#1d1812;color:#d8cdb8;padding:32px;border-radius:14px;max-width:380px;width:90%;text-align:center;border:1px solid var(--gold, #D4A24E);font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,.5)">
-                <h3 style="margin:0 0 12px;color:var(--gold, #D4A24E);font-family:'DM Serif Display',serif;font-weight:400">¿Cómo te llamas?</h3>
-                <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesión del navegador y no se guarda ni se envía a ningún servidor.</p>
-                <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:6px;border:1px solid #4a4030;background:rgba(255,255,255,.05);color:inherit;margin-bottom:16px;box-sizing:border-box;font-size:1rem">
-                <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:100px;background:var(--gold, #D4A24E);color:#1a1610;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
-            </div>`;
-        document.body.appendChild(overlay);
-        const input = overlay.querySelector('#inputNombreUsuario');
-        input.focus();
-        const confirmar = () => {
-            const nombre = input.value.trim() || 'Estudiante';
-            sessionStorage.setItem('nombreEstudianteSim', nombre);
-            overlay.remove();
-            callback(nombre);
-        };
-        overlay.querySelector('#btnConfirmarNombre').addEventListener('click', confirmar);
-        input.addEventListener('keydown', e => { if (e.key === 'Enter') confirmar(); });
-    }
-
-    // --- SETUP DEL CANVAS ---
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    let zonesListas = false; // evita referenciar `zones` antes de su declaración (TDZ)
-    function resize() {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
-        if (zonesListas) positionRoomOverlays();
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // --- ESTADO DEL JUEGO ---
-    let state = {
-        credits: 0, prestige: 0,
-        phase: 1, // 1: ONU, 2: Lab/Auditoria, 3: Publicacion, 4: Fin
-        timer: 30, // Segundos para ONU
-        timerActive: false,
-        inZone: null,
-        choseTrap: false,
-        sanctioned: false,
-        rejectedByA: false,
-        ended: false,
-        started: false,   // true tras cerrar el briefing
-        paused: false,    // true mientras hay un modal de elección abierto
-        // --- TENTACIONES Y DEUDA ÉTICA ---
-        plagio: false,        // T1: aceptó propuesta "fantasma" para la ONU
-        dataFraud: false,     // T2: aceptó "ajustar" datos en el laboratorio
-        offeredONU: false,
-        offeredLab: false,
-        // --- VENTANA DE PUBLICACIÓN (FASE 3) ---
-        pubTimer: 120,        // 2 minutos totales para publicar
-        pubTimerActive: false,
-        enteredQ1Early: false, // entró a Q1 dentro del primer minuto
-        publishedFast: false,  // publicó en FAST PUBLISH
-        temptedFast: false     // ya recibió la oferta del tentador en FAST PUBLISH
+/* Mapa: habitaciones clicables y ficha del investigador */
+const roomElements = {};
+document.querySelectorAll('.room-card').forEach(roomElement => {
+  roomElements[roomElement.dataset.room] = roomElement;
+  const activate = () => { if (state.allowedRooms.includes(roomElement.dataset.room) && state.onRoomChosen) state.onRoomChosen(roomElement.dataset.room); };
+  roomElement.addEventListener('click', activate);
+  roomElement.addEventListener('keydown', keyEvent => { if (keyEvent.key === 'Enter' || keyEvent.key === ' ') { keyEvent.preventDefault(); activate(); } });
+});
+function markRooms(){
+  Object.entries(roomElements).forEach(([roomId, roomElement]) => {
+    const isTarget = state.allowedRooms.includes(roomId);
+    roomElement.classList.toggle('is-target', isTarget);
+    roomElement.classList.toggle('is-here', state.currentRoom === roomId);
+    roomElement.setAttribute('aria-disabled', String(!isTarget));
+    roomElement.tabIndex = isTarget ? 0 : -1;
+  });
+}
+function moveTokenTo(roomId){
+  const roomElement = roomElements[roomId];
+  const monitorRect = document.getElementById('map-monitor').getBoundingClientRect();
+  const roomRect = roomElement.getBoundingClientRect();
+  const token = document.getElementById('playerToken');
+  token.style.left = (roomRect.left - monitorRect.left + roomRect.width / 2) + 'px';
+  token.style.top = (roomRect.top - monitorRect.top + roomRect.height * 0.5) + 'px';
+  state.currentRoom = roomId;
+  markRooms();
+  return delay(1000);
+}
+function travelToRoom(roomIds, objectiveHtml){
+  return new Promise(resolve => {
+    clearActions();
+    state.allowedRooms = roomIds;
+    markRooms();
+    setObjective(objectiveHtml);
+    state.onRoomChosen = async roomId => {
+      state.onRoomChosen = null;
+      state.allowedRooms = [];
+      setObjective('');
+      await moveTokenTo(roomId);
+      resolve(roomId);
     };
+  });
+}
+window.addEventListener('resize', () => { if (state.currentRoom) { const token = document.getElementById('playerToken'); const keepTransition = token.style.transition; token.style.transition = 'none'; moveTokenTo(state.currentRoom); token.style.transition = keepTransition; } });
 
-    // --- DEFINICIÓN DE ZONAS (Porcentaje del canvas para que sea responsive) ---
-    const zones = [
-        { id: 'onu', name: 'CONVOCATORIA ONU', icon: '🇺🇳', x: 0.05, y: 0.05, w: 0.4, h: 0.4, color: '#141d24', borderColor: '#7ba7c9', slow: 1 },
-        { id: 'lab', name: 'LABORATORIO', icon: '🧪', x: 0.05, y: 0.55, w: 0.4, h: 0.4, color: '#1a1610', borderColor: '#6b5f47', slow: 1 },
-        { id: 'revistaA', name: 'REVISTA Q1 (Peer Review)', icon: '📗', x: 0.55, y: 0.55, w: 0.4, h: 0.4, color: '#141d16', borderColor: '#4a8f5f', slow: 0.3 }, // Zona LENTA
-        { id: 'revistaB', name: '⚡ FAST PUBLISH ⚡', icon: '💸', x: 0.55, y: 0.05, w: 0.4, h: 0.4, color: '#241d10', borderColor: '#d9a441', slow: 2 } // Zona RÁPIDA
-    ];
-
-    function getZoneRect(z) {
-        return { x: z.x * canvas.width, y: z.y * canvas.height, w: z.w * canvas.width, h: z.h * canvas.height };
-    }
-
-    // Mapea el id de zona al id del elemento de habitación ilustrada correspondiente
-    const roomElementId = { onu: 'room-onu', lab: 'room-lab', revistaA: 'room-revA', revistaB: 'room-revB' };
-
-    // Posiciona las habitaciones ilustradas (DOM) exactamente sobre el rect de cada zona del canvas
-    function positionRoomOverlays() {
-        zones.forEach(z => {
-            const el = document.getElementById(roomElementId[z.id]);
-            if (!el) return;
-            const r = getZoneRect(z);
-            el.style.left = r.x + 'px';
-            el.style.top = r.y + 'px';
-            el.style.width = r.w + 'px';
-            el.style.height = r.h + 'px';
-        });
-    }
-    zonesListas = true;
-    positionRoomOverlays();
-
-    // --- ENTIDADES (PLAYER Y NPCS) ---
-    class Entity {
-        constructor(x, y, isPlayer = false) {
-            this.x = x; this.y = y;
-            this.targetX = x; this.targetY = y;
-            this.isPlayer = isPlayer;
-            this.baseSpeed = isPlayer ? 3 : 1.5;
-            this.speed = this.baseSpeed;
-            this.radius = isPlayer ? 8 : 5;
-            this.state = 'idle'; // idle, moving, trapped, success
-            this.currentZone = null;
-            this.waitTime = 0;
-        }
-
-        update() {
-            if (!state.started || state.paused) return;
-            // Verificar zona actual
-            let inNewZone = null;
-            for (let z of zones) {
-                let r = getZoneRect(z);
-                if (this.x > r.x && this.x < r.x + r.w && this.y > r.y && this.y < r.y + r.h) {
-                    inNewZone = z.id;
-                    this.speed = this.baseSpeed * z.slow; // Efecto de ralentización/velocidad
-                    break;
-                }
-            }
-            
-            if (inNewZone !== this.currentZone) {
-                this.currentZone = inNewZone;
-                if (this.isPlayer) onPlayerEnterZone(inNewZone);
-            }
-
-            // Movimiento
-            if (this.waitTime > 0) {
-                this.waitTime--;
-                return;
-            }
-
-            let dx = this.targetX - this.x;
-            let dy = this.targetY - this.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-
-            if (dist > 5) {
-                this.x += (dx / dist) * this.speed;
-                this.y += (dy / dist) * this.speed;
-                this.state = 'moving';
-            } else {
-                this.state = 'idle';
-                if (!this.isPlayer) this.npcThink();
-            }
-        }
-
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            
-            if (this.isPlayer) {
-                ctx.fillStyle = '#D4A24E';
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#D4A24E';
-            } else if (this.state === 'trapped') {
-                ctx.fillStyle = '#ffeb3b';
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#ffeb3b';
-            } else if (this.state === 'success') {
-                ctx.fillStyle = '#4a8f5f';
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#4a8f5f';
-            } else {
-                ctx.fillStyle = '#6b5f47';
-                ctx.shadowBlur = 0;
-            }
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-            if (this.isPlayer) {
-                ctx.font = '14px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('🧑‍🔬', this.x, this.y - 1);
-                ctx.textBaseline = 'alphabetic';
-            }
-        }
-
-        npcThink() {
-            if (state.ended) return;
-            // IA estúpida: mucha probabilidad de ir a la trampa por la velocidad
-            let rand = Math.random();
-            if (rand < 0.6) { // 60% va a la trampa
-                let r = getZoneRect(zones[3]);
-                this.targetX = r.x + Math.random() * r.w;
-                this.targetY = r.y + Math.random() * r.h;
-            } else if (rand < 0.8) { // 20% va a la buena
-                let r = getZoneRect(zones[2]);
-                this.targetX = r.x + Math.random() * r.w;
-                this.targetY = r.y + Math.random() * r.h;
-            } else { // 20% da vueltas
-                this.targetX = Math.random() * canvas.width;
-                this.targetY = Math.random() * canvas.height;
-            }
-        }
-    }
-
-    // Iniciar jugador en el centro
-    const player = new Entity(canvas.width / 2, canvas.height / 2, true);
-    
-    // Iniciar 15 NPCs dispersos
-    const npcs = [];
-    for(let i=0; i<15; i++) {
-        npcs.push(new Entity(Math.random() * canvas.width, Math.random() * canvas.height));
-    }
-
-    // Tentador: NPC especial que aparece en Fase 3 cerca de FAST PUBLISH
-    let tempter = null;
-
-    // Control del ratón
-    canvas.addEventListener('click', (e) => {
-        if (state.ended || !state.started || state.paused) return;
-        const rect = canvas.getBoundingClientRect();
-        player.targetX = e.clientX - rect.left;
-        player.targetY = e.clientY - rect.top;
+/* Carta de decisión: los dos botones no están etiquetados como «bueno» o «malo» y su orden es aleatorio */
+function showLetter(letterData, icon){
+  return new Promise(resolve => {
+    const overlay = document.getElementById('letterOverlay');
+    const seal = document.getElementById('letterSeal');
+    seal.className = 'seal'; seal.textContent = '';
+    document.getElementById('letterIcon').textContent = icon;
+    document.getElementById('letterKicker').textContent = t('letter_kicker');
+    document.getElementById('letterTitle').textContent = letterData.title;
+    document.getElementById('letterQuote').textContent = letterData.quote;
+    document.getElementById('letterAsk').textContent = letterData.ask;
+    const choices = document.getElementById('letterChoices');
+    choices.replaceChildren();
+    shuffled(['shortcut', 'honest']).forEach(choiceKey => {
+      const button = createElement('button');
+      button.type = 'button';
+      button.textContent = letterData[choiceKey];
+      button.addEventListener('click', () => {
+        choices.querySelectorAll('button').forEach(other => { other.disabled = true; });
+        seal.textContent = t('stamp_decided');
+        seal.className = 'seal is-stamped';
+        setTimeout(() => { overlay.style.display = 'none'; resolve(choiceKey); }, 750);
+      }, { once: true });
+      choices.appendChild(button);
     });
+    overlay.style.display = 'flex';
+    choices.querySelector('button').focus();
+  });
+}
 
-    // --- LÓGICA DE INTERFAZ ---
-    const dom = {
-        credits: document.getElementById('credits'),
-        prestige: document.getElementById('prestige'),
-        status: document.getElementById('status'),
-        log: document.getElementById('log-area'),
-        instructions: document.getElementById('instructions'),
-        deadline: document.getElementById('deadline'),
-        deadlineStat: document.getElementById('deadline-stat')
+/* Ficha de revista: el estudiante inspecciona ítem por ítem y descubre las señales */
+function showJournalFile(journalKey){
+  return new Promise(resolve => {
+    const journal = TEXT.journals[journalKey];
+    const overlay = document.getElementById('journalOverlay');
+    document.getElementById('journalKicker').textContent = t('journal_kicker') + ' · ' + journal.sub;
+    document.getElementById('journalTitle').textContent = journal.name;
+    const colleague = document.getElementById('journalColleague');
+    colleague.style.display = journal.colleague ? '' : 'none';
+    colleague.textContent = journal.colleague;
+    const counter = document.getElementById('journalCounter');
+    const itemsContainer = document.getElementById('journalItems');
+    itemsContainer.replaceChildren();
+    const updateCounter = () => {
+      const flagsFound = [...state.openedItems[journalKey]].filter(itemIndex => journal.items[itemIndex].flag).length;
+      counter.textContent = fmt(t('journal_counter'), { found: flagsFound, opened: state.openedItems[journalKey].size, total: journal.items.length });
     };
-
-    function updateHUD() {
-        dom.credits.textContent = state.credits.toFixed(2);
-        dom.prestige.textContent = state.prestige.toFixed(2);
-    }
-
-    function updateDeadlineDisplay() {
-        const m = Math.floor(state.pubTimer / 60);
-        const s = state.pubTimer % 60;
-        dom.deadline.textContent = `${m}:${s.toString().padStart(2,'0')}`;
-        dom.deadline.style.color = state.pubTimer <= 20 ? 'var(--red)' : 'var(--yellow)';
-    }
-
-    function log(text, type = 'sys') {
-        const div = document.createElement('div');
-        div.className = `log-entry log-${type}`;
-        div.innerHTML = text;
-        dom.log.appendChild(div);
-        dom.log.scrollTop = dom.log.scrollHeight;
-    }
-
-    function setInstructions(text) { dom.instructions.innerHTML = text; }
-
-    // --- MODAL DE ELECCIÓN (TENTACIONES) ---
-    function showChoiceModal({ title, text, acceptLabel, rejectLabel, onAccept, onReject }) {
-        state.paused = true;
-        const modal = document.getElementById('choice-modal');
-        document.getElementById('choice-title').textContent = title;
-        document.getElementById('choice-text').innerHTML = text;
-        const btnA = document.getElementById('choice-accept');
-        const btnR = document.getElementById('choice-reject');
-        const sello = document.getElementById('selloGoma');
-        btnA.textContent = acceptLabel;
-        btnR.textContent = rejectLabel;
-        sello.className = 'sello-goma';
-        sello.textContent = '';
-        modal.style.display = 'flex';
-
-        // Estampa un sello de goma sobre la carta antes de cerrarla y resolver la decisión
-        const estamparYCerrar = (texto, claseColor, callback) => {
-            sello.textContent = texto;
-            sello.className = `sello-goma estampar ${claseColor}`;
-            setTimeout(() => {
-                modal.style.display = 'none';
-                state.paused = false;
-                btnA.replaceWith(btnA.cloneNode(true));
-                btnR.replaceWith(btnR.cloneNode(true));
-                callback();
-            }, 650);
-        };
-        document.getElementById('choice-accept').addEventListener('click', () => estamparYCerrar('ACEPTADO', 'aceptar', onAccept));
-        document.getElementById('choice-reject').addEventListener('click', () => estamparYCerrar('RECHAZADO', 'rechazar', onReject));
-    }
-
-    // --- BRIEFING INICIAL ---
-    function showBriefing(nombre) {
-        const modal = document.getElementById('briefing-modal');
-        document.getElementById('briefing-text').innerHTML = `
-            <p>Bienvenido/a, <strong>${nombre}</strong>. Eres un/a investigador/a junior con la tesis a medio camino y el presupuesto del laboratorio agotado.</p>
-            <p style="margin-top:10px;">Tu objetivo: conseguir financiamiento, producir evidencia y publicar tus resultados en una <strong>revista indexada legítima</strong>.</p>
-            <p style="margin-top:10px;">Durante el camino recibirás <strong style="color:var(--yellow)">ofertas tentadoras</strong> que prometen atajos. Cada una tiene un costo ético, visible o invisible.</p>
-            <p style="margin-top:10px;">Mueve a tu personaje haciendo clic en el mapa. Presta atención a los avisos del terminal: el reloj no se detiene.</p>
-        `;
-        modal.style.display = 'flex';
-        document.getElementById('btnComenzar').addEventListener('click', () => {
-            modal.style.display = 'none';
-            state.started = true;
-            log('> SISTEMA DE GESTIÓN DE INVESTIGACIÓN INICIADO.', 'sys');
-            log('> AVISO: La convocatoria de la ONU está abierta. Diríjase a la zona azul.', 'onu');
-            // Forzar transición a fase 3 si llega a fase 2 sin elegir
-            setTimeout(() => {
-                if (state.phase === 2 && !state.choseTrap && !state.ended) {
-                    advanceToPhase3();
-                }
-            }, 15000);
-        }, { once: true });
-    }
-
-    // --- LÓGICA DE ZONAS (TRIGGERS) ---
-    let onuTimerInterval;
-    
-    function onPlayerEnterZone(zoneId) {
-        // Resalta la habitación ilustrada en la que está parado el jugador
-        document.querySelectorAll('.room-card').forEach(c => c.classList.remove('activa'));
-        if (zoneId && roomElementId[zoneId]) {
-            const el = document.getElementById(roomElementId[zoneId]);
-            if (el) el.classList.add('activa');
-        }
-
-        if (zoneId === null) {
-            if(state.phase === 1 && state.timerActive) setInstructions('<span style="color:#ff3d5a">⚠️ ADVERTENCIA: FUERA DE LA ZONA DE CONVOCATORIA. EL TIEMPO SIGUE CORRIENDO.</span>');
-            return;
-        }
-
-        if (zoneId === 'onu' && state.phase === 1) {
-            if (!state.timerActive) {
-                state.timerActive = true;
-                log('> CONVOCATORIA INICIADA. TIENE 30 SEGUNDOS PARA MANTENERSE EN LA ZONA Y REDACTAR.', 'onu');
-                setInstructions('Manténgase dentro del cuadro azul. No se salga.');
-                startOnuTimer();
-                offerGhostwriter();
-            } else {
-                setInstructions('Redactando propuesta... Tiempo restante: ' + state.timer + 's');
-            }
-        }
-
-        if (zoneId === 'lab' && state.phase === 2) {
-            triggerLab();
-        }
-
-        if (state.phase === 3) {
-            if (zoneId === 'revistaB') triggerFastPublishOffer();
-            if (zoneId === 'revistaA') triggerQ1Entry();
-        }
-    }
-
-    function startOnuTimer() {
-        onuTimerInterval = setInterval(() => {
-            if (state.paused || state.ended) return;
-            state.timer--;
-            if (state.timer <= 0) {
-                clearInterval(onuTimerInterval);
-                if (state.phase === 1) failONU();
-            }
-        }, 1000);
-    }
-
-    function failONU() {
-        log('> ERROR: TIEMPO AGOTADO O ABANDONO DE ZONA. CONVOCATORIA CERRADA.', 'warn');
-        setInstructions('Has fallado.');
-        endGame(false, "Abandonó la convocatoria de la ONU. En la ciencia real, las oportunidades de financiamiento no esperan a que te decidas.");
-    }
-
-    function successONU() {
-        clearInterval(onuTimerInterval);
-        state.credits += 3;
-        state.phase = 2;
-        updateHUD();
-        dom.status.textContent = 'FINANCIADO';
-        dom.status.style.color = '#3fb950';
-        log('> PROPUESTA ACEPTADA. +3.00 CRÉDITOS DEPOSITADOS.', 'onu');
-        log('> FASE 2: VAYA AL LABORATORIO O BUSQUE DÓNDE PUBLICAR.', 'sys');
-        setInstructions('Investigue en el Laboratorio (abajo izquierda) o busque publicar (derecha).');
-        // Avanza a fase 3 a los 15s si no eligió aún
-        setTimeout(() => {
-            if (state.phase === 2 && !state.ended) advanceToPhase3();
-        }, 15000);
-    }
-
-    // --- T1: oferta de "consultor académico" (plagio / propuesta fantasma) ---
-    function offerGhostwriter() {
-        if (state.offeredONU) return;
-        state.offeredONU = true;
-        setTimeout(() => {
-            if (state.ended || state.phase !== 1) return;
-            showChoiceModal({
-                title: '📩 Mensaje cifrado recibido',
-                text: `Un "consultor académico" te escribe:<br><em>"Te redacto la propuesta completa en 5 minutos. Ya fue aprobada en 3 convocatorias similares, solo con cambios cosméticos. Cobro el 15% de tu financiamiento si ganas."</em><br><br>¿Aceptas el atajo?`,
-                acceptLabel: 'Aceptar atajo',
-                rejectLabel: 'Redactar yo mismo',
-                onAccept: () => {
-                    state.plagio = true;
-                    log('> Aceptaste una propuesta "fantasma" preescrita por un tercero.', 'b');
-                    successONU();
-                },
-                onReject: () => {
-                    state.prestige += 5;
-                    updateHUD();
-                    log('> Decides redactar tu propia propuesta. Más esfuerzo, pero es tuya.', 'a');
-                }
-            });
-        }, 2000);
-    }
-
-    function triggerLab() {
-        if (state.phase !== 2) return;
-        log('> Ejecutando análisis de datos en laboratorio...', 'sys');
-        // Simular auditoría aleatoria
-        if (Math.random() > 0.7) {
-            log('> ¡ALERTA! AUDITORÍA DE LA ONU EN CURSO. NO SE MUEVA A REVISTAS DUDOSAS.', 'warn');
-        }
-        offerDataFraud();
-    }
-
-    // --- T2: oferta de "ajustar" datos (manipulación de resultados) ---
-    function offerDataFraud() {
-        if (state.offeredLab) return;
-        state.offeredLab = true;
-        setTimeout(() => {
-            if (state.ended || state.phase < 2) return;
-            showChoiceModal({
-                title: '🧪 Tu asistente te susurra',
-                text: `<em>"Los datos no dan significancia... pero si ajustamos estos 3 valores atípicos, el p-valor baja de .08 a .03. Nadie revisa los datos crudos."</em><br><br>¿Ajustas los datos?`,
-                acceptLabel: 'Ajustar datos',
-                rejectLabel: 'Reportar datos reales',
-                onAccept: () => {
-                    state.dataFraud = true;
-                    state.prestige += 15;
-                    updateHUD();
-                    log('> Datos "ajustados". Los resultados ahora son significativos... en apariencia.', 'b');
-                },
-                onReject: () => {
-                    state.prestige += 10;
-                    updateHUD();
-                    log('> Reportas los resultados reales, incluido el hallazgo no significativo.', 'a');
-                }
-            });
-        }, 1500);
-    }
-
-    // --- FASE 3: ventana de publicación de 2 minutos ---
-    let pubTimerInterval;
-
-    function advanceToPhase3() {
-        if (state.phase >= 3 || state.ended) return;
-        state.phase = 3;
-        log('> FASE 3: MANUSCRITO LISTO. TIENES 2 MINUTOS PARA PUBLICAR.', 'sys');
-        log('> Q1 (verde) solo acepta manuscritos en su primera ronda durante el primer minuto. FAST PUBLISH (amarillo) publica al instante, cuando sea.', 'sys');
-        setInstructions('Plazo de 2:00. Verde = revisión Q1 (entra en el primer minuto). Amarillo = FAST PUBLISH (instantáneo, riesgoso).');
-        dom.status.textContent = 'PLAZO ACTIVO';
-        dom.status.style.color = '#d29922';
-        dom.deadlineStat.style.display = '';
-        startPubTimer();
-        spawnTempter();
-    }
-
-    function startPubTimer() {
-        state.pubTimerActive = true;
-        updateDeadlineDisplay();
-        pubTimerInterval = setInterval(() => {
-            if (state.paused || state.ended) return;
-            state.pubTimer--;
-            updateDeadlineDisplay();
-            if (state.pubTimer === 60) {
-                log('> [NOTICIA DEL SISTEMA] La primera ronda de revisión de Q1 está por cerrar.', 'warn');
-            }
-            if (state.pubTimer <= 0) {
-                clearInterval(pubTimerInterval);
-                resolvePhase3();
-            }
-        }, 1000);
-    }
-
-    function spawnTempter() {
-        let r = getZoneRect(zones[3]); // FAST PUBLISH
-        tempter = { x: r.x + r.w / 2, y: r.y + r.h / 2, active: true };
-    }
-
-    function triggerQ1Entry() {
-        if (state.enteredQ1Early || state.publishedFast || state.ended) return;
-        if (state.pubTimer >= 60) {
-            state.enteredQ1Early = true;
-            log('> Manuscrito enviado a Revista Q1. Entró en cola de primera revisión.', 'a');
-            log('> (Proceso riguroso: espera el veredicto de la ONU al cierre del plazo.)', 'a');
-            setInstructions('Manuscrito en revisión Q1. Espera el cierre del plazo de publicación.');
-        } else {
-            log('> Llegaste a Q1, pero la primera ronda de revisión ya cerró (pasó el primer minuto).', 'warn');
-            setInstructions('Q1 ya cerró su primera ronda. El plazo sigue corriendo.');
-        }
-    }
-
-    // --- T3: el tentador ofrece FAST PUBLISH ---
-    function triggerFastPublishOffer() {
-        if (state.publishedFast || state.enteredQ1Early || state.ended || state.temptedFast) return;
-        state.temptedFast = true;
-        showChoiceModal({
-            title: '😈 Un colega se acerca sonriendo',
-            text: `<em>"¿Para qué esperar meses de revisión por pares? A mí esta revista me publicó ayer. Sin revisores, sin demoras... solo necesitas tu tarjeta."</em><br><br>¿Publicas en FAST PUBLISH ahora mismo?`,
-            acceptLabel: 'Publicar ya',
-            rejectLabel: 'Rechazar la oferta',
-            onAccept: () => {
-                state.publishedFast = true;
-                state.choseTrap = true;
-                state.credits -= 2;
-                updateHUD();
-                dom.status.textContent = 'PUBLICADO (FAST)';
-                dom.status.style.color = '#ffeb3b';
-                log('> ⚡ CONEXIÓN A FAST PUBLISH ESTABLECIDA.', 'b');
-                log('> Publicación procesada en 0.1 segundos. -2.00 créditos.', 'b');
-                log('> FIRMASTE DIGITALMENTE CLÁUSULA DE CONFIDENCIALIDAD.', 'b');
-                log('> La ONU revisará tu rendición de cuentas al cierre del plazo.', 'sys');
-                if (tempter) tempter.active = false;
-            },
-            onReject: () => {
-                state.prestige += 5;
-                updateHUD();
-                log('> Le agradeces pero declinas. Se aleja decepcionado.', 'a');
-                if (tempter) tempter.active = false;
-            }
-        });
-    }
-
-    // --- VEREDICTO FINAL DE LA ONU AL CERRAR EL PLAZO ---
-    function resolvePhase3() {
-        if (state.ended) return;
-        state.phase = 4;
-        dom.deadlineStat.style.display = 'none';
-
-        if (state.publishedFast) {
-            dom.status.textContent = 'AUDITORÍA ONU';
-            dom.status.style.color = '#ff3d5a';
-            log('> [NOTICIA DEL SISTEMA] La ONU solicita rendición de cuentas: ¿en qué revista publicaste?', 'warn');
-            setTimeout(() => {
-                state.sanctioned = true;
-                state.prestige -= 50;
-                updateHUD();
-                log('> [NOTICIA DEL SISTEMA] SANCIÓN PÚBLICA: tu grupo ha sido vetado por mal uso de fondos. -50 Prestigio.', 'warn');
-                endGame(false, "Publicaste en una revista depredadora para ganar tiempo. Cuando la ONU pidió cuentas, el engaño quedó expuesto y perdiste tu reputación científica.");
-            }, 2500);
-        } else if (state.enteredQ1Early) {
-            dom.status.textContent = 'EN REVISIÓN...';
-            dom.status.style.color = '#3fb950';
-            log('> [NOTICIA DEL SISTEMA] La ONU revisa tu expediente: manuscrito en revisión por pares en Q1.', 'onu');
-            setTimeout(() => {
-                log('> [NOTICIA DEL SISTEMA] La ONU te FELICITA por seguir el proceso editorial correcto.', 'onu');
-            }, 1500);
-            setTimeout(() => {
-                state.prestige += 100;
-                updateHUD();
-                log('> REVISIÓN COMPLETADA: "Su artículo requiere correcciones menores, pero el rigor es excelente."', 'a');
-                log('> ¡PUBLICACIÓN ACEPTADA EN REVISTA Q1! +100 PRESTIGIO.', 'a');
-                endGame(true, "Resististe la tentación del atajo, completaste el proceso editorial de la Revista Q1 y obtuviste una publicación legítima.");
-            }, 3500);
-        } else {
-            dom.status.textContent = 'PLAZO VENCIDO';
-            dom.status.style.color = '#ff3d5a';
-            log('> ERROR: el plazo expiró sin publicación. El financiamiento se reasigna a otro equipo.', 'warn');
-            endGame(false, "El plazo de publicación expiró. Ni te arriesgaste con FAST PUBLISH ni llegaste a tiempo a la revisión de Q1: tu investigación quedó sin publicar.");
-        }
-    }
-
-    function endGame(win, msg) {
-        if(state.ended) return;
-        state.ended = true;
-        clearInterval(onuTimerInterval);
-        clearInterval(pubTimerInterval);
-
-        localStorage.setItem('simlab_done_simlab_fin', Date.now());
-        obtenerNombreUsuario(nombre => {
-            document.getElementById('final-modal').style.display = 'flex';
-
-            let ethicsNote = '';
-            if (state.plagio || state.dataFraud) {
-                ethicsNote = `<br><br><span style="color:var(--yellow)">Nota: aunque el resultado fue "${win ? 'exitoso' : 'fallido'}", aceptaste atajos que dejan una deuda ética en tu carrera.</span>`;
-            }
-            document.getElementById('revelation-text').innerHTML = `${nombre}, ${msg}${ethicsNote}`;
-
-            let scoreClass = win ? 'score-good' : 'score-bad';
-            document.getElementById('final-score-text').innerHTML = `<span class="${scoreClass}">${state.prestige.toFixed(2)} PTS</span>`;
-
-            document.getElementById('breakdown').innerHTML = `
-                Créditos restantes: ${state.credits.toFixed(2)}<br>
-                Publicación Q1 (+100): ${state.enteredQ1Early && !state.publishedFast ? 'SÍ' : 'NO'}<br>
-                Publicó en FAST PUBLISH: ${state.publishedFast ? 'SÍ' : 'NO'}<br>
-                Sanción ONU (-50): ${state.sanctioned ? 'SÍ' : 'NO'}<br>
-                Propuesta "fantasma" (plagio): ${state.plagio ? 'SÍ' : 'NO'}<br>
-                Datos "ajustados" (fraude): ${state.dataFraud ? 'SÍ' : 'NO'}
-            `;
-        });
-    }
-
-    // --- GAME LOOP PRINCIPAL ---
-    let frameCount = 0;
-
-    function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Dibujar Grid de fondo
-        ctx.strokeStyle = '#241f18';
-        ctx.lineWidth = 1;
-        for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
-        for(let i=0; i<canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
-
-        // Las zonas ya no se dibujan en canvas: las habitaciones ilustradas (DOM, #roomOverlay)
-        // se posicionan sobre los mismos rects vía positionRoomOverlays().
-
-        // Tentador (NPC especial, fase 3, zona FAST PUBLISH)
-        if (tempter && tempter.active) {
-            ctx.font = '32px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.shadowBlur = 12 + Math.sin(frameCount * 0.2) * 6;
-            ctx.shadowColor = '#ff3d5a';
-            ctx.fillText('😈', tempter.x, tempter.y);
-            ctx.shadowBlur = 0;
-        }
-
-        // Actualizar y dibujar NPCs
-        for (let npc of npcs) {
-            npc.update();
-            
-            // Lógica de comportamiento visual de NPCs
-            if (npc.currentZone === 'revistaB' && npc.state !== 'trapped') {
-                npc.state = 'trapped';
-                log('> Un compañero investigador publicó rápidamente en FAST PUBLISH.', 'b');
-            }
-            
-            npc.draw();
-        }
-
-        // Actualizar y dibujar Player
-        player.update();
-        player.draw();
-
-        // Tentador: se acerca al jugador en Fase 3
-        if (tempter && tempter.active && state.started && !state.paused) {
-            let dx = player.x - tempter.x, dy = player.y - tempter.y;
-            let dist = Math.hypot(dx, dy);
-            if (dist > 25) {
-                tempter.x += (dx / dist) * 1.2;
-                tempter.y += (dy / dist) * 1.2;
-            }
-        }
-
-        // Check de éxito ONU (si pasa 3 segundos dentro de la zona sin salir)
-        if (state.started && !state.paused && state.phase === 1 && state.timerActive && player.currentZone === 'onu' && state.timer < 27) {
-             successONU();
-        }
-
-        frameCount++;
-        requestAnimationFrame(gameLoop);
-    }
-
-    // Reloj
-    setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
-
-    // Inicio
-    gameLoop();
-    obtenerNombreUsuario(nombre => {
-        state.userName = nombre;
-        showBriefing(nombre);
+    journal.items.forEach((item, itemIndex) => {
+      const button = createElement('button', 'file-item');
+      button.type = 'button';
+      const question = createElement('div', 'q');
+      question.appendChild(createElement('span', '', item.question));
+      question.appendChild(createElement('i', 'fa-solid fa-magnifying-glass'));
+      button.appendChild(question);
+      const detail = createElement('div', 'detail', item.detail + ' ');
+      detail.appendChild(createElement('span', 'tag', item.flag ? t('tag_alert') : t('tag_normal')));
+      button.appendChild(detail);
+      button.appendChild(createElement('div', 'why', item.why));
+      if (item.flag) button.classList.add('is-flag');
+      if (state.openedItems[journalKey].has(itemIndex)) button.classList.add('is-open');
+      button.addEventListener('click', () => {
+        button.classList.add('is-open');
+        state.openedItems[journalKey].add(itemIndex);
+        updateCounter();
+      });
+      itemsContainer.appendChild(button);
     });
+    updateCounter();
+    const choices = document.getElementById('journalChoices');
+    choices.replaceChildren();
+    const closeWith = decision => { overlay.style.display = 'none'; resolve(decision); };
+    const submitButton = createElement('button'); submitButton.type = 'button'; submitButton.textContent = t('journal_submit');
+    const leaveButton = createElement('button'); leaveButton.type = 'button'; leaveButton.textContent = t('journal_leave');
+    submitButton.addEventListener('click', () => closeWith('submit'), { once: true });
+    leaveButton.addEventListener('click', () => closeWith('leave'), { once: true });
+    choices.append(leaveButton, submitButton);
+    const tapHint = createElement('div', 'file-counter', t('journal_tap'));
+    itemsContainer.before(tapHint);
+    overlay.querySelector('.paper').scrollTop = 0;
+    overlay.style.display = 'flex';
+    // la pista se elimina al cerrar para no duplicarse la próxima vez
+    const cleanupHint = () => tapHint.remove();
+    submitButton.addEventListener('click', cleanupHint, { once: true });
+    leaveButton.addEventListener('click', cleanupHint, { once: true });
+  });
+}
 
+/* === Guion de la simulación === */
+async function chapterHook(){
+  setChapter(0);
+  await say(TEXT.hookIntro);
+  addDialog(TEXT.hookQuestion);
+  const optionIndex = await askInline(TEXT.hookOptions);
+  addDialog(TEXT.hookOptions[optionIndex].text, 'note-you');
+  await delay(300);
+  addDialog(TEXT.hookOptions[optionIndex].feedback, 'note-ok');
+  await delay(700);
+  if (optionIndex === 1) addTermChips(['peerReview']);
+  await say(TEXT.hookRules);
+  await addButton(t('begin'));
+  if (!state.discoveredTerms.has('peerReview')) addTermChips(['peerReview']);
+}
+
+async function chapterFunding(){
+  setChapter(1);
+  addDialog(TEXT.chapter1Title, 'note-chapter');
+  await travelToRoom(['onu'], TEXT.chapter1Goto);
+  await say(TEXT.chapter1Intro);
+  addTermChips(['grant']);
+  await delay(500);
+  const choice = await showLetter(TEXT.ghostLetter, '📩');
+  state.ghostChoice = choice;
+  if (choice === 'honest') {
+    await say(TEXT.ghostHonest);
+    await showConsequences([
+      { meter: 'time', amount: -2, text: TEXT.ghostHonestRows.time },
+      { meter: 'reputation', amount: 5, text: TEXT.ghostHonestRows.reputation },
+      { meter: 'funds', amount: 5000, text: TEXT.ghostHonestRows.funds } ]);
+  } else {
+    await say(TEXT.ghostShortcut);
+    state.ghostDetected = await rollDetection(50);
+    addTermChips(['ghost']);
+    if (state.ghostDetected) {
+      await say(TEXT.ghostDetected);
+      await showConsequences([
+        { meter: 'reputation', amount: -20, text: TEXT.ghostDetectedRows.reputation },
+        { meter: 'time', amount: -2.5, text: TEXT.ghostDetectedRows.time },
+        { meter: 'funds', amount: 5000, text: TEXT.ghostDetectedRows.funds } ]);
+    } else {
+      await say(TEXT.ghostClear);
+      await showConsequences([
+        { meter: 'time', amount: -0.5, text: TEXT.ghostClearRows.time },
+        { meter: 'funds', amount: 4250, text: TEXT.ghostClearRows.funds } ]);
+    }
+  }
+  await addButton(t('next'));
+}
+
+async function chapterData(){
+  setChapter(2);
+  addDialog(TEXT.chapter2Title, 'note-chapter');
+  await travelToRoom(['lab'], TEXT.chapter2Goto);
+  await say(TEXT.chapter2Intro);
+  addTermChips(['pvalue']);
+  await delay(500);
+  const choice = await showLetter(TEXT.dataLetter, '🧪');
+  state.dataChoice = choice;
+  if (choice === 'honest') {
+    await say(TEXT.dataHonest);
+    await showConsequences([
+      { meter: 'time', amount: -1.5, text: TEXT.dataHonestRows.time },
+      { meter: 'reputation', amount: 10, text: TEXT.dataHonestRows.reputation } ]);
+    addTermChips(['nullResult']);
+  } else {
+    await say(TEXT.dataShortcut);
+    await showConsequences([
+      { meter: 'time', amount: -1, text: TEXT.dataShortcutRows.time },
+      { meter: 'reputation', amount: 10, text: TEXT.dataShortcutRows.reputation } ]);
+    addTermChips(['dataFraud']);
+  }
+  await addButton(t('next'));
+}
+
+/* Envío a la Revista A: revisión por pares, posible descubrimiento de manipulación y «todavía no» */
+async function submitToJournalA(){
+  state.journal = 'A';
+  await say(TEXT.submitA);
+  addTermChips(['peerReview', 'indexed']);
+  await showConsequences([{ meter: 'time', amount: -3, text: TEXT.submitARows.time }]);
+  if (state.dataChoice === 'shortcut') {
+    await say(TEXT.rawDataRequest);
+    addTermChips(['rawData']);
+    state.fraudDetected = await rollDetection(70);
+    if (state.fraudDetected) {
+      await say(TEXT.fraudCaught);
+      await showConsequences([{ meter: 'reputation', amount: -45, text: TEXT.outcomes.fraudCaught.message }]);
+      return endGame('fraudCaught');
+    }
+    await say(TEXT.fraudClear);
+  }
+  const choice = await showLetter(TEXT.revisionLetter, '✉️');
+  addTermChips(['resilience']);
+  if (choice === 'honest') {
+    state.resubmitted = true;
+    await showConsequences([
+      { meter: 'time', amount: -3, text: TEXT.revisionRows.time },
+      { meter: 'reputation', amount: 35, text: TEXT.revisionRows.reputation } ]);
+    await say(TEXT.acceptedA);
+    addTermChips(['q1']);
+    return endGame('legit');
+  }
+  state.gaveUpOnA = true;
+  await say(TEXT.gaveUp);
+  return 'abandon';
+}
+
+async function submitToJournalB(){
+  state.journal = 'B';
+  await say(TEXT.submitB);
+  await showConsequences([
+    { meter: 'funds', amount: -900, text: TEXT.submitBRows.funds },
+    { meter: 'time', amount: -0.1, text: TEXT.submitBRows.time } ]);
+  addTermChips(['predatory']);
+  await delay(500);
+  await say(TEXT.auditB);
+  addTermChips(['audit']);
+  await showConsequences([{ meter: 'reputation', amount: -50, text: TEXT.auditBRows.reputation }]);
+  return endGame('predatory');
+}
+
+async function chapterPublish(){
+  setChapter(3);
+  addDialog(TEXT.chapter3Title, 'note-chapter');
+  await say(TEXT.chapter3Intro);
+  while (!state.ended) {
+    const rooms = state.gaveUpOnA ? ['journalB'] : ['journalA', 'journalB'];
+    if (state.gaveUpOnA) addDialog(TEXT.chapter3OnlyB);
+    const roomId = await travelToRoom(rooms, TEXT.chapter3Goto);
+    const journalKey = roomId === 'journalA' ? 'A' : 'B';
+    const decision = await showJournalFile(journalKey);
+    if (decision === 'leave') { addDialog(TEXT.chapter3Back); continue; }
+    if (journalKey === 'A') {
+      const result = await submitToJournalA();
+      if (result === 'abandon') continue;
+    } else {
+      await submitToJournalB();
+    }
+    return;
+  }
+}
+
+/* Nombre del estudiante (solo sesión) */
+function obtenerNombreUsuario(callback) {
+  const savedName = sessionStorage.getItem('nombreEstudianteSim');
+  if (savedName) { callback(savedName); return; }
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);display:flex;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(5px)';
+  const modal = document.createElement('div');
+  modal.style.cssText = 'background:var(--card, #222);border:1px solid var(--accent, rgba(255,255,255,0.1));border-radius:12px;padding:32px;max-width:400px;width:90%;text-align:center;';
+  modal.innerHTML = `
+    <p style="font-size:16px;color:var(--txt, #fff);margin-bottom:24px;font-weight:600">${t('name_q')}</p>
+    <input type="text" id="input-nombre" style="width:100%;padding:10px 14px;border:1px solid var(--border, rgba(255,255,255,0.2));
+      border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg, #111);color:var(--txt, #fff);margin-bottom:16px"
+      placeholder="${t('name_ph')}" autocomplete="off">
+    <p style="font-size:12px;color:var(--txt-3, #999);margin-bottom:20px">${t('name_note')}</p>
+    <button id="btn-continuar" style="background:var(--accent, #818cf8);color:var(--bg, #000);border:none;
+      padding:10px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">${t('name_btn')}</button>
+  `;
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  const nameInput = modal.querySelector('#input-nombre');
+  const continueButton = modal.querySelector('#btn-continuar');
+  const submit = () => {
+    const studentName = nameInput.value.trim() || t('name_default');
+    sessionStorage.setItem('nombreEstudianteSim', studentName);
+    overlay.remove();
+    callback(studentName);
+  };
+  continueButton.addEventListener('click', submit);
+  nameInput.addEventListener('keypress', keyEvent => keyEvent.key === 'Enter' && submit());
+  nameInput.focus();
+}
+
+/* === Pantalla final === */
+function buildRecap(outcomeKey){
+  const items = [];
+  const R = TEXT.recap;
+  if (state.ghostChoice === 'honest') items.push({ text: R.ghostHonest, good: true });
+  else items.push({ text: state.ghostDetected ? R.ghostCaught : R.ghostClear, good: false });
+  if (state.dataChoice === 'honest') items.push({ text: R.dataHonest, good: true });
+  else items.push({ text: state.fraudDetected ? R.dataCaught : R.dataClear, good: false });
+  if (state.gaveUpOnA) items.push({ text: R.gaveUpOnA, good: false });
+  if (state.resubmitted) items.push({ text: R.resilience, good: true });
+  if (outcomeKey === 'legit') items.push({ text: R.journalA, good: true });
+  if (outcomeKey === 'predatory') items.push({ text: R.journalB, good: false });
+  return items;
+}
+function endGame(outcomeKey){
+  if (state.ended) return;
+  state.ended = true;
+  clearActions();
+  setObjective('');
+  localStorage.setItem('simlab_done_simlab_fin', Date.now());
+  const wins = outcomeKey === 'legit';
+  const outcome = TEXT.outcomes[outcomeKey];
+  return addButton(t('see_result')).then(() => new Promise(resolve => {
+    obtenerNombreUsuario(studentName => {
+      const modal = document.getElementById('final-modal');
+      modal.classList.toggle('is-win', wins);
+      modal.classList.toggle('is-lose', !wins);
+      document.getElementById('final-title').textContent = outcome.title;
+      let message = studentName + ', ' + outcome.message.charAt(0).toLowerCase() + outcome.message.slice(1);
+      if (wins && (state.ghostChoice === 'shortcut' || state.dataChoice === 'shortcut')) message += '<br><br><span style="color:var(--yellow)">' + t('final_debt') + '</span>';
+      document.getElementById('final-message').innerHTML = message;
+      state.reputation = Math.max(0, Math.min(100, state.reputation));
+      document.getElementById('final-score').innerHTML = formatNumber(state.reputation) + '<small>' + t('final_score_label') + '</small>';
+      document.getElementById('final-recap-title').textContent = t('final_recap_title');
+      const recapList = document.getElementById('final-recap');
+      recapList.replaceChildren();
+      buildRecap(outcomeKey).forEach(item => recapList.appendChild(createElement('li', item.good ? 'is-good' : 'is-bad', item.text)));
+      document.getElementById('final-flags-title').textContent = t('final_flags_title');
+      const flagList = document.getElementById('final-flags');
+      flagList.replaceChildren();
+      TEXT.journals.B.items.forEach(item => flagList.appendChild(createElement('li', '', item.short)));
+      const foundCount = [...state.openedItems.B].length;
+      if (foundCount > 0) flagList.appendChild(createElement('li', '', '<strong>' + fmt(t('final_found_flags'), { found: foundCount, total: TEXT.journals.B.items.length }) + '</strong>'));
+      const actions = document.getElementById('final-actions');
+      actions.replaceChildren();
+      const homeLink = createElement('a', 'btn-primary', '<i class="fa-solid fa-house"></i> ' + t('final_home'));
+      homeLink.href = 'index.html';
+      const repeatButton = createElement('button', 'btn-secondary', '<i class="fa-solid fa-rotate-left"></i> ' + t('final_again'));
+      repeatButton.type = 'button';
+      repeatButton.addEventListener('click', () => location.reload());
+      actions.append(homeLink, repeatButton);
+      modal.style.display = 'flex';
+      resolve();
+    });
+  }));
+}
+
+/* === Inicio === */
+buildMeters();
+buildChapterStrip();
+renderGlossary();
+(async function runSimulation(){
+  await chapterHook();
+  await chapterFunding();
+  await chapterData();
+  await chapterPublish();
+})();
 </script>
 
 <script>
@@ -1109,40 +1333,40 @@ if(langBtn){
   const GUIDE_ALL = {
   "es": {
     "before": [
-      "¿Qué señales hacen sospechar que una revista es depredadora? ¿Cuál es la más difícil de detectar?",
-      "¿Por qué un investigador con presión por publicar puede caer en prácticas éticamente dudosas aun sin mala intención?",
-      "¿Qué debería exigirse a quien administra fondos de investigación de un organismo externo?"
+      "Cuando buscas información en internet, ¿qué te hace confiar en una fuente y no en otra? ¿Cómo se aplicaría eso a un artículo científico?",
+      "¿Por qué crees que alguien aceptaría pagar para publicar rápido, aun sospechando que quizá no sea una revista seria?",
+      "¿Qué presiones (tiempo, dinero, competencia) puede sentir un estudiante o docente para publicar? ¿Cuáles has sentido tú?"
     ],
     "during": [
-      "¿Qué criterio usaste para decidir y qué información te habría gustado tener antes de elegir?",
-      "¿Qué costo de corto plazo aceptaste para evitar un daño de largo plazo (o al revés)?",
-      "¿Cómo cambia tu decisión si el plazo del financiamiento está por vencer?",
-      "¿A quién afecta tu decisión además de ti: coautores, estudiantes, la institución, los participantes?"
+      "¿Qué señales de alerta encontraste en cada revista? ¿Cuál te pareció más difícil de notar?",
+      "Cuando el consultor ofreció escribir tu propuesta, ¿qué te hizo dudar o aceptar? ¿Dónde está la línea entre ayuda legítima y plagio?",
+      "Quitar 3 datos «raros» puede parecer un detalle técnico. ¿Cuándo es legítimo excluir un dato atípico y cuándo es manipulación?",
+      "Tras el rechazo con correcciones, ¿qué sentiste? ¿Qué diferencia hay entre un «no» y un «todavía no»?"
     ],
     "after": [
-      "¿Dónde termina la presión institucional y empieza la responsabilidad individual del investigador?",
-      "¿Qué políticas de una universidad reducirían la tentación de publicar en revistas depredadoras?",
-      "¿Qué diferencia hay entre un error de gestión de fondos y una conducta antiética? ¿Cómo se distingue en la práctica?",
-      "Redacten un breve código de conducta de 5 puntos para un equipo que administra fondos externos. ¿Qué punto sería el más difícil de cumplir?"
+      "¿Qué consecuencias tiene para la ciencia que las revistas depredadoras publiquen cualquier cosa? ¿Y para quien las usa?",
+      "Si un resultado no es significativo, ¿vale la pena publicarlo? ¿Qué se pierde cuando solo se publican resultados «exitosos»?",
+      "Un colega te dice «a mí me publicaron ayer». ¿Cómo responderías sin romper la relación y sin dejarte presionar?",
+      "Escriban una lista breve de 5 pasos que revisarían antes de enviar un artículo a una revista que no conocen."
     ]
   },
   "en": {
     "before": [
-      "Which signs make you suspect a journal is predatory? Which one is hardest to detect?",
-      "Why can a researcher under pressure to publish fall into ethically doubtful practices even without bad intent?",
-      "What should be required of someone who manages research funds from an external body?"
+      "When you look for information online, what makes you trust one source and not another? How would that apply to a scientific article?",
+      "Why do you think someone would pay to publish fast, even suspecting it may not be a serious journal?",
+      "What pressures (time, money, competition) can a student or teacher feel to publish? Which have you felt?"
     ],
     "during": [
-      "What criterion did you use to decide, and what information would you have liked before choosing?",
-      "What short-term cost did you accept to avoid a long-term harm (or the other way around)?",
-      "How does your decision change when the funding deadline is about to expire?",
-      "Besides you, who is affected by your decision: co-authors, students, the institution, participants?"
+      "What warning signs did you find in each journal? Which one was hardest to notice?",
+      "When the consultant offered to write your proposal, what made you hesitate or accept? Where is the line between legitimate help and plagiarism?",
+      "Removing 3 «odd» data points may seem like a technical detail. When is it legitimate to exclude an outlier and when is it manipulation?",
+      "After the rejection with corrections, how did you feel? What is the difference between a «no» and a «not yet»?"
     ],
     "after": [
-      "Where does institutional pressure end and individual responsibility begin?",
-      "Which university policies would reduce the temptation to publish in predatory journals?",
-      "What is the difference between a fund-management mistake and unethical conduct? How do you tell them apart in practice?",
-      "Write a short 5-point code of conduct for a team that manages external funds. Which point would be the hardest to keep?"
+      "What are the consequences for science when predatory journals publish anything? And for those who use them?",
+      "If a result is not significant, is it worth publishing? What is lost when only «successful» results are published?",
+      "A colleague tells you «they published me yesterday». How would you answer without hurting the relationship and without giving in to pressure?",
+      "Write a short 5-step checklist you would apply before sending an article to a journal you do not know."
     ]
   }
 };
