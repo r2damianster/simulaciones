@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratorio ACME - Investigación Conductual</title>
-    <meta name="description" content="Simulación pedagógica interactiva de diseños experimentales: diseña y ejecuta experimentos conductuales en un laboratorio virtual cyberpunk. SimLab ULEAM.">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Laboratorio ACME - ¿Cómo sabemos que algo funciona?</title>
+    <meta name="description" content="Simulación pedagógica: descubre qué ingredientes hacen confiable una investigación (experimento, cuasiexperimento y pre-experimento) con un laboratorio de ratones. Sin saber nada de investigación. SimLab ULEAM.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%AA%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Share+Tech+Mono&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script type="importmap">
     {
@@ -21,547 +21,211 @@
         :root {
             --bg: #060d06;
             --bg-card: #0c1a0c;
-            --bg-card-alt: #0f200f;
-            --fg: #b8e8b8;
+            --bg-card-alt: #102210;
+            --fg: #d4efd4;
             --fg-bright: #34D399;
-            --fg-dim: #4a7a4a;
-            --accent: #ffb800;
-            --danger: #ff3344;
-            --success: #34D399;
-            --partial: #ffb800;
-            --na: #555;
-            --border: #1a3a1a;
-            --border-bright: #2a5a2a;
-            --pre-color: #ff4444;
-            --quasi-color: #ffaa00;
+            --fg-dim: #86ae86;
+            --border: #1d3d1d;
+            --border-bright: #2f6a2f;
+            --pre-color: #ff6b6b;
+            --quasi-color: #ffb800;
             --pure-color: #34D399;
+            --group-a: #ffb800;
+            --group-b: #4da3ff;
             --sim-home-fg: #34D399;
             --sim-home-bg: rgba(52,211,153,0.1);
-            --sim-home-bd: rgba(52,211,153,0.2);
-            --sim-home-hi: #34D399;
+            --sim-home-bd: rgba(52,211,153,0.25);
+            --sim-home-hi: #6ee7b7;
+            /* alias usados por el modal de nombre */
+            --card: var(--bg-card);
+            --txt: var(--fg);
+            --txt-3: var(--fg-dim);
+            --accent: var(--fg-bright);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        .home-btn {
-            position: fixed; top: 14px; left: 14px; z-index: 50;
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            border: 1px solid var(--sim-home-bd); border-radius: 10px;
-            color: var(--sim-home-fg); background: var(--sim-home-bg);
-            text-decoration: none; font-size: 16px; transition: transform .2s, color .2s;
-        }
-        .home-btn:hover { color: var(--sim-home-hi); transform: scale(1.06); }
-
+        html { scroll-behavior: smooth; }
         body {
-            font-family: 'Share Tech Mono', monospace;
-            background: var(--bg);
-            color: var(--fg);
-            overflow-x: hidden;
-            line-height: 1.6;
+            font-family: 'Source Sans 3', system-ui, sans-serif;
+            font-size: 17px; line-height: 1.6;
+            background: var(--bg); color: var(--fg); overflow-x: hidden;
         }
+        .grid-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image: linear-gradient(rgba(52,211,153,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(52,211,153,0.035) 1px, transparent 1px);
+            background-size: 40px 40px; }
+        #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        main { position: relative; z-index: 2; max-width: 1180px; margin: 0 auto; padding: 24px 16px 48px; }
 
-        /* Fondo de grilla */
-        .grid-bg {
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(52,211,153,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(52,211,153,0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            z-index: 0;
-            pointer-events: none;
-        }
+        /* Botones fijos canónicos */
+        .sim-home { position: fixed; top: 14px; left: 14px; z-index: 200; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
+            color: var(--sim-home-fg); background: var(--sim-home-bg); border: 1px solid var(--sim-home-bd);
+            border-radius: 10px; transition: transform .2s, color .2s; }
+        .sim-home:hover, .sim-home:focus-visible { color: var(--sim-home-hi); transform: scale(1.06); }
+        .sim-lang { position: fixed; top: 14px; right: 14px; z-index: 200; min-width: 40px; height: 40px; padding: 0 10px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 600; font-size: 13px;
+            letter-spacing: .06em; font-family: inherit; color: var(--sim-home-fg); background: var(--sim-home-bg);
+            border: 1px solid var(--sim-home-bd); border-radius: 10px; transition: transform .2s, color .2s; }
+        .sim-lang:hover, .sim-lang:focus-visible { color: var(--sim-home-hi); transform: scale(1.06); }
 
-        /* Scanlines */
-        .scanlines {
-            position: fixed;
-            inset: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0,0,0,0.08) 2px,
-                rgba(0,0,0,0.08) 4px
-            );
-            z-index: 1;
-            pointer-events: none;
-        }
+        /* Cabecera */
+        .lab-header { text-align: center; padding: 36px 8px 22px; }
+        .lab-kicker { font-family: 'Share Tech Mono', monospace; font-size: .8rem; letter-spacing: 2px; color: var(--fg-dim); text-transform: uppercase; }
+        .lab-header h1 { font-family: 'Orbitron', sans-serif; font-weight: 900; color: var(--fg-bright);
+            font-size: clamp(1.7rem, 5vw, 2.9rem); letter-spacing: 3px; margin: 6px 0 10px;
+            text-shadow: 0 0 24px rgba(52,211,153,.35); }
+        .lab-sub { max-width: 640px; margin: 0 auto 14px; color: var(--fg-dim); }
+        .lab-question { display: inline-block; max-width: 640px; padding: 10px 18px; border: 1px solid var(--border-bright);
+            border-radius: 12px; background: rgba(52,211,153,.07); font-weight: 600; color: var(--fg); }
 
-        #particles {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-        }
+        /* Escalera de fases */
+        .ladder { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0 22px; }
+        .ladder-step { flex: 1 1 150px; max-width: 220px; display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer;
+            padding: 9px 12px; font: inherit; color: var(--fg-dim); background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; transition: border-color .2s, color .2s, transform .2s; }
+        .ladder-step:not(:disabled):hover { transform: translateY(-2px); border-color: var(--border-bright); }
+        .ladder-step:disabled { opacity: .45; cursor: not-allowed; }
+        .ladder-number { flex: none; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%;
+            font-family: 'Share Tech Mono', monospace; font-size: .85rem; border: 1px solid currentColor; }
+        .ladder-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+        .ladder-name { font-weight: 700; font-size: .95rem; }
+        .ladder-tag { font-size: .78rem; opacity: .85; }
+        .ladder-step.is-current { color: var(--phase-color, var(--fg-bright)); border-color: var(--phase-color, var(--fg-bright)); background: var(--bg-card-alt); }
+        .ladder-step.is-done .ladder-number { background: var(--phase-color, var(--fg-bright)); color: #04120a; border-color: transparent; }
+        .ladder-step.is-done { color: var(--fg); }
 
-        main { position: relative; z-index: 2; }
-
-        /* Header */
-        .lab-header {
-            border-bottom: 2px solid var(--border-bright);
-            background: linear-gradient(180deg, rgba(52,211,153,0.05) 0%, transparent 100%);
-        }
-        .lab-header h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            color: var(--fg-bright);
-            text-shadow: 0 0 20px rgba(52,211,153,0.4), 0 0 60px rgba(52,211,153,0.1);
-            letter-spacing: 3px;
-        }
-        .lab-header .subtitle {
-            color: var(--fg-dim);
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-        }
-        .blink {
-            animation: blink 1s step-end infinite;
-        }
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-
-        /* Tipos de experimento badges */
-        .badge-pre {
-            background: rgba(255,68,68,0.15);
-            border: 1px solid var(--pre-color);
-            color: var(--pre-color);
-        }
-        .badge-quasi {
-            background: rgba(255,170,0,0.15);
-            border: 1px solid var(--quasi-color);
-            color: var(--quasi-color);
-        }
-        .badge-pure {
-            background: rgba(52,211,153,0.15);
-            border: 1px solid var(--pure-color);
-            color: var(--pure-color);
-        }
-
-        /* Tarjetas de experimento */
-        .exp-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            transition: border-color 0.3s;
-        }
-        .exp-card:hover {
-            border-color: var(--border-bright);
-        }
-        .exp-card.pre-card { border-left: 4px solid var(--pre-color); }
-        .exp-card.quasi-card { border-left: 4px solid var(--quasi-color); }
-        .exp-card.pure-card { border-left: 4px solid var(--pure-color); }
-
-        /* Criterios */
-        .criterion {
-            background: var(--bg-card-alt);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 12px 14px;
-            transition: all 0.3s;
-            cursor: default;
-            position: relative;
-        }
-        .criterion:hover {
-            border-color: var(--border-bright);
-            transform: translateX(4px);
-        }
-        .criterion .status-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            flex-shrink: 0;
-        }
-        .status-yes {
-            background: rgba(52,211,153,0.15);
-            color: var(--success);
-            border: 1px solid rgba(52,211,153,0.3);
-        }
-        .status-no {
-            background: rgba(255,51,68,0.15);
-            color: var(--danger);
-            border: 1px solid rgba(255,51,68,0.3);
-        }
-        .status-partial {
-            background: rgba(255,184,0,0.15);
-            color: var(--partial);
-            border: 1px solid rgba(255,184,0,0.3);
-        }
-        .status-na {
-            background: rgba(85,85,85,0.2);
-            color: var(--na);
-            border: 1px solid rgba(85,85,85,0.3);
-        }
-
-        /* Tooltip */
-        .criterion .tooltip-text {
-            position: absolute;
-            bottom: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%) scale(0.9);
-            background: #1a2a1a;
-            border: 1px solid var(--border-bright);
-            color: var(--fg);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            width: 280px;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.2s;
-            z-index: 100;
-            text-align: center;
-            line-height: 1.5;
-        }
-        .criterion .tooltip-text::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: var(--border-bright);
-        }
-        .criterion:hover .tooltip-text {
-            opacity: 1;
-            transform: translateX(-50%) scale(1);
-        }
-
-        /* Botón ejecutar */
-        .btn-run {
-            font-family: 'Share Tech Mono', monospace;
-            background: rgba(52,211,153,0.08);
-            border: 1px solid rgba(52,211,153,0.3);
-            color: var(--fg-bright);
-            padding: 10px 24px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-run:hover:not(:disabled) {
-            background: rgba(52,211,153,0.18);
-            border-color: var(--fg-bright);
-            box-shadow: 0 0 20px rgba(52,211,153,0.15);
-        }
-        .btn-run:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .btn-run.running {
-            animation: pulse-border 1s ease-in-out infinite;
-        }
-        @keyframes pulse-border {
-            0%, 100% { border-color: rgba(52,211,153,0.3); }
-            50% { border-color: var(--fg-bright); }
-        }
-
-        /* Panel de resultados */
-        .results-panel {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            min-height: 80px;
-            overflow: hidden;
-        }
-        .result-line {
-            padding: 3px 14px;
-            font-size: 0.8rem;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.3s;
-        }
-        .result-line.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .result-line.success { color: var(--success); }
-        .result-line.warning { color: var(--partial); }
-        .result-line.error { color: var(--danger); }
-        .result-line.info { color: var(--fg-dim); }
-
-        /* Barras de datos */
-        .data-bar-container {
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-            height: 100px;
-            padding: 0 14px 8px;
-        }
-        .data-bar-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            flex: 1;
-        }
-        .data-bar {
-            width: 100%;
-            max-width: 50px;
-            border-radius: 3px 3px 0 0;
-            transition: height 1s ease-out;
-            position: relative;
-        }
-        .data-bar-label {
-            font-size: 0.65rem;
-            color: var(--fg-dim);
-            text-align: center;
-            white-space: nowrap;
-        }
-        .data-bar-value {
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-
-        /* Callout boxes */
-        .callout {
-            border-radius: 6px;
-            padding: 12px 16px;
-            font-size: 0.82rem;
-            line-height: 1.6;
-        }
-        .callout-warning {
-            background: rgba(255,170,0,0.08);
-            border: 1px solid rgba(255,170,0,0.3);
-            color: var(--partial);
-        }
-        .callout-success {
-            background: rgba(52,211,153,0.06);
-            border: 1px solid rgba(52,211,153,0.25);
-            color: var(--fg);
-        }
-        .callout-danger {
-            background: rgba(255,51,68,0.06);
-            border: 1px solid rgba(255,51,68,0.25);
-            color: #ff8888;
-        }
-
-        /* Tabla comparativa */
-        .comparison-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-size: 0.82rem;
-        }
-        .comparison-table th {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-            padding: 14px 12px;
-            text-align: center;
-            border-bottom: 2px solid var(--border-bright);
-        }
-        .comparison-table td {
-            padding: 12px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-        .comparison-table tr:last-child td {
-            border-bottom: none;
-        }
-        .comparison-table .criterion-name {
-            text-align: left;
-            color: var(--fg);
-            font-weight: normal;
-        }
-        .comparison-table .cell-yes {
-            color: var(--success);
-        }
-        .comparison-table .cell-no {
-            color: var(--danger);
-        }
-        .comparison-table .cell-partial {
-            color: var(--partial);
-        }
-        .comparison-table .cell-na {
-            color: var(--na);
-        }
-
-        /* Rigor meter */
-        .rigor-meter {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .rigor-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 1.5s ease-out;
-        }
-
-        /* Cabecera de personaje dentro de la tarjeta de info (ya no hay SVG 2D) */
-        .character-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        /* ── ESCENA 3D COMPARTIDA (BRAIN y PINKY) ── */
-        .lab3d-wrap { position: relative; padding: 0; overflow: hidden; }
-        #lab3d-container { width: 100%; height: 300px; position: relative; cursor: grab; }
-        #lab3d-container:active { cursor: grabbing; }
+        /* Distribución */
+        .lab-layout { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 22px; align-items: start; }
+        .lab-side { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 2px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; }
+        .scene-card { position: relative; overflow: hidden; }
+        #lab3d-container { width: 100%; height: 340px; cursor: grab; }
         #lab3d-container canvas { display: block; }
-        .lab3d-hint {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            font-size: 0.68rem; color: var(--fg-dim); background: rgba(0,0,0,0.55);
-            padding: 5px 14px; border-radius: 20px; pointer-events: none; white-space: nowrap;
-            border: 1px solid var(--border);
-        }
-        .lab3d-tooltip {
-            position: absolute; pointer-events: none; z-index: 20;
-            background: rgba(6,16,6,0.94); border: 1px solid var(--border-bright);
-            color: var(--fg-bright); font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
-            padding: 6px 12px; border-radius: 6px; white-space: nowrap; transform: translate(-50%, -140%);
-        }
+        .lab3d-tooltip { position: absolute; z-index: 5; transform: translate(-50%, -130%); pointer-events: none; white-space: nowrap;
+            padding: 4px 10px; font-size: .8rem; color: #fff; background: rgba(6,13,6,.92); border: 1px solid var(--border-bright); border-radius: 8px; }
+        .scene-hint { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: .72rem; color: var(--fg-dim); pointer-events: none; }
+        .scene-caption { min-height: 1.6em; padding: 0 4px; text-align: center; font-size: .92rem; color: var(--fg-dim); font-style: italic; }
+        .scene-fallback { padding: 40px 16px; text-align: center; color: var(--fg-dim); }
 
-        .cage-status {
-            font-size: 0.62rem;
-            letter-spacing: 0.5px;
-            color: var(--fg-dim);
-            min-height: 14px;
-            text-align: center;
-        }
-        .cage-status.status-warning { color: var(--danger); }
-        .cage-status.status-success { color: var(--success); }
+        /* Glosario */
+        .glossary { padding: 12px 14px; }
+        .side-title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px;
+            font-family: 'Orbitron', sans-serif; font-size: .72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--fg-bright); }
+        .side-title small { font-family: 'Share Tech Mono', monospace; font-size: .8rem; color: var(--fg-dim); letter-spacing: 0; }
+        .glossary-list { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 210px; overflow-y: auto; overflow-x: hidden; }
+        .glossary-item { font-size: .86rem; line-height: 1.35; padding-left: 10px; border-left: 2px solid var(--fg-bright); animation: popIn .5s ease; }
+        .glossary-item b { display: block; font-family: 'Share Tech Mono', monospace; font-weight: 400; color: var(--fg-bright); font-size: .84rem; }
+        .glossary-empty { font-size: .85rem; color: var(--fg-dim); }
 
-        /* ── LAYOUT: sidebar 3D fija + pestañas de experimento ── */
-        .lab-layout {
-            display: flex;
-            gap: 28px;
-            align-items: flex-start;
-        }
-        .lab-sidebar-3d {
-            width: 340px;
-            flex-shrink: 0;
-            position: sticky;
-            top: 20px;
-        }
-        .lab-main-tabs {
-            flex: 1;
-            min-width: 0;
-        }
+        /* Tablero de ingredientes */
+        .board { padding: 12px 14px 14px; margin-bottom: 16px; }
+        .board-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 8px; }
+        .ingredient { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border);
+            background: var(--bg); transition: border-color .4s, background .4s; }
+        .ingredient-head { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: .86rem; line-height: 1.2; }
+        .ingredient-tech { font-family: 'Share Tech Mono', monospace; font-size: .72rem; color: var(--fg-dim); }
+        .ingredient-state { font-size: .78rem; font-weight: 700; }
+        .ingredient[data-status="yes"] { border-color: var(--pure-color); background: rgba(52,211,153,.1); }
+        .ingredient[data-status="yes"] .ingredient-state { color: var(--pure-color); }
+        .ingredient[data-status="partial"], .ingredient[data-status="maybe"] { border-color: var(--quasi-color); background: rgba(255,184,0,.09); }
+        .ingredient[data-status="partial"] .ingredient-state, .ingredient[data-status="maybe"] .ingredient-state { color: var(--quasi-color); }
+        .ingredient[data-status="no"] { border-color: var(--pre-color); background: rgba(255,107,107,.08); }
+        .ingredient[data-status="no"] .ingredient-state { color: var(--pre-color); }
+        .ingredient[data-status="unknown"] .ingredient-state { color: var(--fg-dim); }
+        .ingredient.is-changed { animation: popIn .5s ease; }
+        .causal-row { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+        .causal-row .ingredient { flex: 1 1 100%; flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+        .board-note { margin-top: 8px; font-size: .78rem; color: var(--fg-dim); }
 
-        .exp-tabs {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 24px;
-            border-bottom: 2px solid var(--border);
-            flex-wrap: wrap;
-        }
-        .exp-tab {
-            background: none;
-            border: none;
-            color: var(--fg-dim);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            padding: 12px 18px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-            text-transform: uppercase;
-        }
-        .exp-tab:hover { color: var(--fg); }
-        .exp-tab.active { color: var(--fg-bright); border-bottom-color: var(--fg-bright); }
-        .exp-tab.completado { color: var(--success); }
-        .exp-tab.completado::after { content: ' ✓'; }
+        /* Conversación */
+        .phase-divider { margin: 6px 0 14px; padding: 12px 16px; border-left: 4px solid var(--phase-color, var(--fg-bright));
+            background: linear-gradient(90deg, rgba(255,255,255,.04), transparent); border-radius: 0 12px 12px 0; }
+        .phase-divider h2 { font-family: 'Orbitron', sans-serif; font-size: 1.05rem; letter-spacing: 1px; color: var(--phase-color, var(--fg-bright)); }
+        .phase-divider p { font-size: .92rem; color: var(--fg-dim); }
+        .story-log { display: flex; flex-direction: column; gap: 10px; }
+        .bubble { max-width: 94%; padding: 11px 15px; border-radius: 14px; background: var(--bg-card); border: 1px solid var(--border);
+            opacity: 0; transform: translateY(8px); transition: opacity .35s ease, transform .35s ease; }
+        .bubble.is-visible { opacity: 1; transform: none; }
+        .bubble-speaker { font-family: 'Share Tech Mono', monospace; font-size: .72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--fg-dim); margin-bottom: 2px; }
+        .bubble-lab { align-self: flex-start; border-left: 3px solid var(--fg-bright); }
+        .bubble-you { align-self: flex-end; border-color: var(--quasi-color); background: rgba(255,184,0,.08); }
+        .bubble-ok { background: rgba(52,211,153,.1); border-color: var(--pure-color); }
+        .bubble-hint { background: rgba(255,184,0,.08); border-color: var(--quasi-color); border-left-color: var(--quasi-color); }
+        .bubble-note { background: var(--bg-card-alt); font-size: .94rem; border-left-color: var(--fg-dim); }
+        .bubble-case { background: var(--bg-card-alt); border-left-color: var(--quasi-color); font-size: 1.05rem; }
+        .bubble strong { color: #fff; }
+        .term-row { align-self: flex-start; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 10px;
+            border: 1px dashed var(--fg-bright); background: rgba(52,211,153,.06); font-size: .88rem; opacity: 0; transition: opacity .4s; }
+        .term-row.is-visible { opacity: 1; }
+        .term-label { font-family: 'Share Tech Mono', monospace; font-size: .7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--fg-dim); }
+        .term-tech { font-family: 'Share Tech Mono', monospace; color: var(--fg-bright); font-size: .92rem; }
+        .term-easy { color: var(--fg); }
 
-        .exp-tab-panel { display: none; }
-        .exp-tab-panel.active { display: block; }
+        /* Gráfico de barras horizontal */
+        .chart-card { align-self: stretch; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card-alt); }
+        .chart-title { font-size: .82rem; color: var(--fg-dim); margin-bottom: 8px; }
+        .chart-row { display: grid; grid-template-columns: minmax(120px, 190px) 1fr 62px; align-items: center; gap: 8px; margin-bottom: 6px; font-size: .88rem; }
+        .chart-track { height: 16px; border-radius: 8px; background: rgba(255,255,255,.06); overflow: hidden; }
+        .chart-fill { height: 100%; width: 0; border-radius: 8px; transition: width .9s cubic-bezier(.2,.8,.2,1); }
+        .chart-row.is-before .chart-fill { opacity: .5; }
+        .chart-value { font-family: 'Share Tech Mono', monospace; text-align: right; }
+        .chart-row.is-ghost .chart-track { background: transparent; border: 1px dashed var(--fg-dim); }
+        .chart-row.is-ghost .chart-value { color: var(--pre-color); font-size: 1.1rem; }
 
-        @media (max-width: 1024px) {
-            .lab-layout { flex-direction: column; }
-            .lab-sidebar-3d { width: 100%; position: static; }
-        }
-        .character-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            letter-spacing: 2px;
-        }
+        /* Acciones */
+        .story-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; align-items: flex-start; min-height: 20px; }
+        .btn-primary { cursor: pointer; font: inherit; font-weight: 700; padding: 10px 22px; border-radius: 10px; color: #04120a;
+            background: var(--fg-bright); border: none; transition: transform .2s, box-shadow .2s; }
+        .btn-primary:hover, .btn-primary:focus-visible { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(52,211,153,.3); }
+        .btn-secondary { cursor: pointer; font: inherit; padding: 9px 18px; border-radius: 10px; color: var(--fg); background: transparent; border: 1px solid var(--border-bright); }
+        .btn-secondary:hover { border-color: var(--fg-bright); }
+        .option-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .option-btn { cursor: pointer; font: inherit; text-align: left; width: 100%; padding: 11px 15px; border-radius: 12px; color: var(--fg);
+            background: var(--bg-card); border: 1px solid var(--border-bright); transition: border-color .2s, background .2s, transform .2s; }
+        .option-btn:not(:disabled):hover, .option-btn:not(:disabled):focus-visible { border-color: var(--fg-bright); background: var(--bg-card-alt); transform: translateX(3px); }
+        .option-btn:disabled { opacity: .5; cursor: default; }
+        .option-btn.is-wrong { border-color: var(--quasi-color); }
+        .option-btn.is-right { border-color: var(--pure-color); background: rgba(52,211,153,.12); opacity: 1; }
+        .check-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; width: 100%; }
+        .check-item { cursor: pointer; font: inherit; text-align: left; display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+            border-radius: 12px; color: var(--fg); background: var(--bg-card); border: 1px solid var(--border-bright); transition: border-color .2s, background .2s; }
+        .check-item i { flex: none; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--fg-dim); font-size: .7rem; color: transparent; }
+        .check-item:not(.is-done):hover { border-color: var(--fg-bright); }
+        .check-item.is-done { border-color: var(--pure-color); background: rgba(52,211,153,.1); cursor: default; }
+        .check-item.is-done i { background: var(--pure-color); border-color: transparent; color: #04120a; }
+        .checklist-hint { font-size: .85rem; color: var(--fg-dim); }
 
-        /* Grupo indicator */
-        .group-tag {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 3px;
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-        .group-exp {
-            background: rgba(52,211,153,0.1);
-            border: 1px solid rgba(52,211,153,0.3);
-            color: var(--success);
-        }
-        .group-ctrl {
-            background: rgba(100,150,255,0.1);
-            border: 1px solid rgba(100,150,255,0.3);
-            color: #88aaff;
-        }
-        .group-none {
-            background: rgba(85,85,85,0.1);
-            border: 1px solid rgba(85,85,85,0.3);
-            color: var(--na);
-        }
+        /* Pantalla final */
+        .final-card { align-self: stretch; padding: 26px 22px; text-align: center; border: 1px solid var(--fg-bright); border-radius: 16px; background: var(--bg-card-alt); }
+        .final-card h2 { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--fg-bright); margin-bottom: 10px; }
+        .final-card p { max-width: 620px; margin: 0 auto 14px; }
+        .takeaways { max-width: 620px; margin: 14px auto; padding-left: 22px; text-align: left; }
+        .takeaways li { margin-bottom: 8px; }
+        .matrix-wrap { overflow-x: auto; margin: 16px 0; }
+        .matrix { width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 520px; }
+        .matrix th, .matrix td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: center; }
+        .matrix th:first-child, .matrix td:first-child { text-align: left; }
+        .matrix thead th { font-family: 'Share Tech Mono', monospace; font-weight: 400; }
+        .matrix .cell-yes { color: var(--pure-color); font-weight: 700; }
+        .matrix .cell-partial, .matrix .cell-maybe { color: var(--quasi-color); font-weight: 700; }
+        .matrix .cell-no { color: var(--pre-color); font-weight: 700; }
+        .matrix .row-tech { display: block; font-family: 'Share Tech Mono', monospace; font-size: .72rem; color: var(--fg-dim); font-weight: 400; }
+        .final-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 12px; }
+        .final-actions a { text-decoration: none; display: inline-block; }
 
-        /* Sección título */
-        .section-title {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            letter-spacing: 2px;
-        }
+        @keyframes popIn { 0% { transform: scale(.94); opacity: .4; } 60% { transform: scale(1.03); } 100% { transform: scale(1); opacity: 1; } }
 
-        /* Animación de entrada */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        @media (max-width: 960px) {
+            .lab-layout { grid-template-columns: 1fr; }
+            .lab-side { position: static; max-height: none; overflow: visible; }
+            #lab3d-container { height: 270px; }
+            .chart-row { grid-template-columns: minmax(96px, 130px) 1fr 54px; font-size: .82rem; }
+            .bubble { max-width: 100%; }
         }
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Glow decorativo */
-        .glow-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            opacity: 0.15;
-        }
-
-        /* Responsivo */
-        @media (max-width: 768px) {
-            .lab-header h1 { font-size: 1.2rem !important; letter-spacing: 1px; }
-            .comparison-table { font-size: 0.7rem; }
-            .comparison-table .criterion-name { font-size: 0.65rem; }
-            .criterion .tooltip-text { width: 220px; font-size: 0.7rem; }
-        }
-
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
-
         @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
+
     
     
         /* === Guía de clase (preguntas para debatir) === */
@@ -609,8 +273,8 @@
 </head>
 <body>
 
-<a href="index.html" class="home-btn" title="Volver al inicio"><i class="fa-solid fa-house"></i></a>
-<button type="button" id="simLangBtn" style="position:fixed;top:14px;right:14px;z-index:200;min-width:40px;height:40px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;font-size:13px;letter-spacing:.06em;font-family:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;transition:transform .2s" aria-label="Cambiar idioma / Switch language"></button>
+<a href="index.html" class="sim-home" title="Volver al inicio" aria-label="Volver al inicio del SimLab" data-i18n-title="back_title" data-i18n-aria="back_title"><i class="fa-solid fa-house" aria-hidden="true"></i></a>
+<button type="button" class="sim-lang" id="simLangBtn" aria-label="Cambiar idioma / Switch language"></button>
 <button type="button" class="sim-guide" id="simGuideBtn" aria-expanded="false" aria-controls="guidePanel" aria-label="Guía de clase" title="Guía de clase"><i class="fa-regular fa-comments" aria-hidden="true"></i></button>
 <aside class="guide-panel" id="guidePanel" role="dialog" aria-labelledby="guideTitle">
   <div class="guide-header">
@@ -626,470 +290,35 @@
 <div class="guide-toast" id="guideToast" role="status"></div>
 
 <div class="grid-bg"></div>
-<div class="scanlines"></div>
 <canvas id="particles"></canvas>
 
-<main class="max-w-6xl mx-auto px-4 py-8">
-
-    <!-- HEADER -->
-    <header class="lab-header text-center py-10 mb-12">
-        <div class="flex items-center justify-center gap-3 mb-3">
-            <i class="fa-solid fa-flask text-[var(--fg-dim)] text-xl"></i>
-            <span class="subtitle">ACME CORPORATION // DIVISION DE INVESTIGACION CONDUCTUAL</span>
-            <i class="fa-solid fa-flask text-[var(--fg-dim)] text-xl"></i>
-        </div>
-        <h1 class="text-3xl md:text-5xl mb-4">LABORATORIO ACME</h1>
-        <p class="text-[var(--fg-dim)] text-sm max-w-2xl mx-auto leading-relaxed">
-            Simulación interactiva de diseños experimentales con sujetos de prueba BRAIN (Sujeto A) y PINKY (Sujeto B).
-            Identifica los criterios metodológicos en cada tipo de investigación.
-        </p>
-        <div class="mt-4 text-[var(--fg-dim)] text-xs">
-            SISTEMA ACTIVO <span class="blink text-[var(--fg-bright)]">_</span>
-        </div>
+<main>
+    <header class="lab-header">
+        <div class="lab-kicker" data-i18n="hero_kicker">ACME Corporation · División de Investigación Conductual</div>
+        <h1 data-i18n="hero_title">LABORATORIO ACME</h1>
+        <p class="lab-sub" data-i18n="hero_sub">Descubre qué hace confiable a una investigación. No necesitas saber nada de metodología: lo vemos paso a paso, con ratones y con ejemplos de todos los días.</p>
+        <div class="lab-question" data-i18n="hero_question">¿El Superalimento ACME vuelve más listos a los ratones?</div>
     </header>
 
-    <div class="lab-layout">
-        <!-- SIDEBAR 3D FIJA: sigue el scroll, siempre visible junto al experimento activo -->
-        <aside class="lab-sidebar-3d fade-in">
-            <div class="flex items-center gap-2 mb-4">
-                <i class="fa-solid fa-microscope text-[var(--fg-dim)]"></i>
-                <h2 class="section-title text-sm text-[var(--fg-dim)]">SUJETOS DE PRUEBA</h2>
-            </div>
+    <nav class="ladder" id="ladder" aria-label="Fases"></nav>
 
-            <!-- Recinto 3D compartido: BRAIN y PINKY, separados por una mampara -->
-            <div class="exp-card lab3d-wrap mb-4">
+    <div class="lab-layout">
+        <aside class="lab-side">
+            <div class="card scene-card">
                 <div id="lab3d-container"></div>
                 <div class="lab3d-tooltip" id="lab3d-tooltip" style="display:none;"></div>
-                <div class="lab3d-hint">🖱️ Arrastra · rueda zoom · clic inspecciona</div>
+                <div class="scene-hint" data-i18n="scene_hint">🖱️ Arrastra para girar · rueda para acercar</div>
             </div>
-
-            <div class="grid grid-cols-1 gap-4">
-                <!-- Brain -->
-                <div class="exp-card p-4">
-                    <div class="character-container mb-2">
-                        <span class="character-name text-[var(--pre-color)]">BRAIN</span>
-                        <span class="group-tag group-exp">Sujeto A</span>
-                        <span class="cage-status" id="status-brain"></span>
-                    </div>
-                    <div class="text-xs">
-                        <p class="text-[var(--fg)] mb-1"><strong>Especie:</strong> Mus musculus (geneticamente modificado)</p>
-                        <p class="text-[var(--fg-dim)] mb-1"><strong>CI estimado:</strong> Muy superior al promedio</p>
-                        <p class="text-[var(--fg-dim)]"><strong>Objetivo:</strong> "Conquistar el mundo"</p>
-                    </div>
-                </div>
-                <!-- Pinky -->
-                <div class="exp-card p-4">
-                    <div class="character-container mb-2">
-                        <span class="character-name text-[#88aaff]">PINKY</span>
-                        <span class="group-tag group-ctrl">Sujeto B</span>
-                        <span class="cage-status" id="status-pinky"></span>
-                    </div>
-                    <div class="text-xs">
-                        <p class="text-[var(--fg)] mb-1"><strong>Especie:</strong> Mus musculus (sin modificacion)</p>
-                        <p class="text-[var(--fg-dim)] mb-1"><strong>CI estimado:</strong> Significativamente bajo el promedio</p>
-                        <p class="text-[var(--fg-dim)]"><strong>Objetivo:</strong> "¿Que vamos a hacer esta noche, Brain?"</p>
-                    </div>
-                </div>
-            </div>
+            <p class="scene-caption" id="sceneCaption" aria-live="polite"></p>
+            <div class="card glossary" id="glossary"></div>
         </aside>
 
-        <!-- COLUMNA PRINCIPAL: los 3 experimentos como pestañas -->
-        <div class="lab-main-tabs">
-            <div class="exp-tabs" role="tablist">
-                <button class="exp-tab active" data-tab="pre" id="tab-btn-pre">PRE-EXPERIMENTO</button>
-                <button class="exp-tab" data-tab="quasi" id="tab-btn-quasi">CUASIEXPERIMENTO</button>
-                <button class="exp-tab" data-tab="pure" id="tab-btn-pure">EXPERIMENTO PURO</button>
-            </div>
-
-            <div class="exp-tab-panel active" id="tabpanel-pre">
-    <!-- ============================================ -->
-    <!-- EXPERIMENTO 1: PRE-EXPERIMENTO -->
-    <!-- ============================================ -->
-    <section class="fade-in mb-16" id="sec-pre">
-        <div class="flex flex-wrap items-center gap-3 mb-6">
-            <span class="badge-pre px-3 py-1 rounded text-xs font-bold tracking-wider">PRE-EXPERIMENTO</span>
-            <h2 class="section-title text-lg text-[var(--fg)]">Rayo de Inteligencia ACME Mk-III</h2>
-        </div>
-
-        <div class="exp-card pre-card p-6 mb-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Columna izquierda: descripcion y criterios -->
-                <div>
-                    <h3 class="text-[var(--pre-color)] text-xs tracking-widest mb-3">DISENO: UN SOLO GRUPO CON POST-TEST UNICAMENTE</h3>
-                    <p class="text-sm text-[var(--fg)] mb-4 leading-relaxed">
-                        Brain se expone al <strong>Rayo de Inteligencia ACME Mk-III</strong>. Tras la exposicion, se le aplica un test estandarizado de CI para ratones. No existe medicion previa ni grupo de comparacion.
-                    </p>
-
-                    <div class="space-y-3">
-                        <!-- Criterio 1: VI -->
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>1. Manipulacion de VI</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Se aplica el rayo al sujeto (si/no)</div>
-                            </div>
-                            <span class="tooltip-text">La variable independiente (exposicion al rayo) SI es manipulada deliberadamente por el investigador.</span>
-                        </div>
-                        <!-- Criterio 2: VD -->
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>2. Medicion de VD</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Test de CI estandarizado post-exposicion</div>
-                            </div>
-                            <span class="tooltip-text">La variable dependiente (puntuacion CI) SI es medida con instrumento estandarizado tras la exposicion.</span>
-                        </div>
-                        <!-- Criterio 3: Control -->
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-no"><i class="fa-solid fa-xmark"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>3. Control y Validez Interna</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Sin control de variables extrañas</div>
-                            </div>
-                            <span class="tooltip-text">NO hay control de variables confusas (fatiga, practica, efecto placebo, condiciones ambientales). La validez interna es minima.</span>
-                        </div>
-                        <!-- Criterio 4: Aleatorizacion -->
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-na"><i class="fa-solid fa-minus"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>4. Aleatorizacion</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">No aplica: solo un sujeto</div>
-                            </div>
-                            <span class="tooltip-text">NO APLICA. Con un solo sujeto no es posible asignar aleatoriamente a condiciones. No hay grupos que formar.</span>
-                        </div>
-                        <!-- Criterio 5: Grupos -->
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-no"><i class="fa-solid fa-xmark"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>5. Comparacion de Grupos</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]"><span class="group-tag group-none">SIN GRUPO CONTROL</span> Un solo grupo</div>
-                            </div>
-                            <span class="tooltip-text">NO HAY grupo control ni grupo experimental como tales. Es un unico grupo sin comparacion. No se puede determinar si el resultado se debe al rayo.</span>
-                        </div>
-                    </div>
-
-                    <!-- Medidor de rigor -->
-                    <div class="mt-5">
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-[var(--fg-dim)]">NIVEL DE RIGOR CIENTIFICO</span>
-                            <span class="text-[var(--pre-color)]">BAJO</span>
-                        </div>
-                        <div class="rigor-meter">
-                            <div class="rigor-fill" style="width:0%; background: var(--pre-color);" data-target="20"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Columna derecha: ejecucion y resultados -->
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-xs text-[var(--fg-dim)]">PANEL DE EJECUCION</span>
-                        <button class="btn-run" id="btn-pre" onclick="runExperiment('pre')">
-                            <i class="fa-solid fa-play mr-2"></i>EJECUTAR
-                        </button>
-                    </div>
-                    <div class="results-panel" id="results-pre">
-                        <div class="p-4 text-center text-xs text-[var(--fg-dim)]">
-                            <i class="fa-solid fa-terminal mr-1"></i> Esperando ejecucion del protocolo...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Callout de conclusion -->
-        <div class="callout callout-danger" id="conclusion-pre" style="display:none;">
-            <i class="fa-solid fa-triangle-exclamation mr-2"></i>
-            <strong>Conclusion:</strong> Brain obtuvo CI=245, pero sin grupo de comparacion ni medicion previa, es IMPOSIBLE saber si el rayo causo algun efecto. Brain ya tenia un CI alto de base. Este diseno NO permite inferir causalidad.
-        </div>
-    </section>
-
-            </div><!-- /tabpanel-pre -->
-
-            <div class="exp-tab-panel" id="tabpanel-quasi" style="display:none;">
-    <!-- ============================================ -->
-    <!-- EXPERIMENTO 2: CUASIEXPERIMENTO -->
-    <!-- ============================================ -->
-    <section class="fade-in mb-16" id="sec-quasi">
-        <div class="flex flex-wrap items-center gap-3 mb-6">
-            <span class="badge-quasi px-3 py-1 rounded text-xs font-bold tracking-wider">CUASIEXPERIMENTO</span>
-            <h2 class="section-title text-lg text-[var(--fg)]">Dieta de Superalimento ACME</h2>
-        </div>
-
-        <div class="exp-card quasi-card p-6 mb-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-[var(--quasi-color)] text-xs tracking-widest mb-3">DISENO: GRUPO CONTROL NO EQUIVALENTE CON PRE-TEST Y POST-TEST</h3>
-                    <p class="text-sm text-[var(--fg)] mb-4 leading-relaxed">
-                        Brain recibe la <strong>Dieta de Superalimento ACME</strong> (grupo experimental). Pinky recibe dieta normal de laboratorio (grupo control). Ambos son evaluados antes y despues con un test de resolucion de problemas (0-100).
-                    </p>
-
-                    <div class="space-y-3">
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>1. Manipulacion de VI</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Tipo de dieta: superalimento vs normal</div>
-                            </div>
-                            <span class="tooltip-text">La VI (tipo de dieta) SI es manipulada: un grupo recibe superalimento y otro dieta normal.</span>
-                        </div>
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>2. Medicion de VD</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Test resolucion de problemas (pre y post)</div>
-                            </div>
-                            <span class="tooltip-text">La VD (puntuacion en test) SI se mide en dos momentos: antes y despues de la intervencion.</span>
-                        </div>
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-partial"><i class="fa-solid fa-exclamation"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>3. Control y Validez Interna</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Parcial: misma sala, mismo horario, pero grupos no equivalentes</div>
-                            </div>
-                            <span class="tooltip-text">PARCIAL. Se controlan algunas variables (ambiente, horario), pero la NO equivalencia de los grupos amenaza seriamente la validez interna. La diferencia basal entre Brain y Pinky es una variable confusa.</span>
-                        </div>
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-no"><i class="fa-solid fa-xmark"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>4. Aleatorizacion</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">No hay asignacion aleatoria</div>
-                            </div>
-                            <span class="tooltip-text">NO hay aleatorizacion. Brain y Pinky son sujetos preexistentes con diferencias innatas. No se asignaron al azar a los grupos; simplemente se uso quien estaba disponible.</span>
-                        </div>
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-partial"><i class="fa-solid fa-exclamation"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>5. Comparacion de Grupos</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">
-                                    <span class="group-tag group-exp mr-1">Exp: Brain</span>
-                                    <span class="group-tag group-ctrl">Ctrl: Pinky</span>
-                                    <span class="text-[var(--quasi-color)] ml-1">NO EQUIVALENTES</span>
-                                </div>
-                            </div>
-                            <span class="tooltip-text">EXISTEN grupos (experimental y control), PERO NO SON EQUIVALENTES. Brain y Pinky parten de niveles muy distintos (78 vs 25). Cualquier diferencia en el post-test podria deberse a sus diferencias basales, no a la dieta.</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-5">
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-[var(--fg-dim)]">NIVEL DE RIGOR CIENTIFICO</span>
-                            <span class="text-[var(--quasi-color)]">MEDIO</span>
-                        </div>
-                        <div class="rigor-meter">
-                            <div class="rigor-fill" style="width:0%; background: var(--quasi-color);" data-target="55"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-xs text-[var(--fg-dim)]">PANEL DE EJECUCION</span>
-                        <button class="btn-run" id="btn-quasi" onclick="runExperiment('quasi')">
-                            <i class="fa-solid fa-play mr-2"></i>EJECUTAR
-                        </button>
-                    </div>
-                    <div class="results-panel" id="results-quasi">
-                        <div class="p-4 text-center text-xs text-[var(--fg-dim)]">
-                            <i class="fa-solid fa-terminal mr-1"></i> Esperando ejecucion del protocolo...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="callout callout-warning" id="conclusion-quasi" style="display:none;">
-            <i class="fa-solid fa-triangle-exclamation mr-2"></i>
-            <strong>Atencion:</strong> Brain mejoro +14 puntos y Pinky solo +3. PARECE que la dieta funciona, pero los grupos NO eran equivalentes al inicio (78 vs 25). La diferencia podria deberse a que Brain, siendo mas inteligente, aprovecha mejor cualquier cambio. Este diseno mejora el pre-experimento pero aun NO garantiza causalidad.
-        </div>
-    </section>
-
-            </div><!-- /tabpanel-quasi -->
-
-            <div class="exp-tab-panel" id="tabpanel-pure" style="display:none;">
-    <!-- ============================================ -->
-    <!-- EXPERIMENTO 3: EXPERIMENTO PURO -->
-    <!-- ============================================ -->
-    <section class="fade-in mb-16" id="sec-pure">
-        <div class="flex flex-wrap items-center gap-3 mb-6">
-            <span class="badge-pure px-3 py-1 rounded text-xs font-bold tracking-wider">EXPERIMENTO PURO</span>
-            <h2 class="section-title text-lg text-[var(--fg)]">Suero Cognitivo ACME (Doble Ciego)</h2>
-        </div>
-
-        <div class="exp-card pure-card p-6 mb-6 relative overflow-hidden">
-            <div class="glow-orb" style="width:200px;height:200px;background:var(--pure-color);top:-60px;right:-60px;"></div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
-                <div>
-                    <h3 class="text-[var(--pure-color)] text-xs tracking-widest mb-3">DISENO: PRE-TEST/POST-TEST CON GRUPO CONTROL ALEATORIZADO (DOBLE CIEGO)</h3>
-                    <p class="text-sm text-[var(--fg)] mb-4 leading-relaxed">
-                        Se clonan <strong>40 ratones geneticamente identicos</strong>. Se asignan aleatoriamente: 20 al grupo experimental (Suero Cognitivo ACME) y 20 al grupo control (placebo salino con colorante). El investigador NO sabe quien recibe que. Se mide tiempo en laberinto antes y despues.
-                    </p>
-
-                    <div class="space-y-3">
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>1. Manipulacion de VI</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Suero cognitivo vs placebo (doble ciego)</div>
-                            </div>
-                            <span class="tooltip-text">La VI (tipo de sustancia) SI es manipulada con rigurosidad: suero real vs placebo identico en apariencia. El doble ciego evita sesgos del investigador y los sujetos.</span>
-                        </div>
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>2. Medicion de VD</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Tiempo en laberinto (segundos), pre y post</div>
-                            </div>
-                            <span class="tooltip-text">La VD (tiempo en laberinto) se mide con precision cronometrica en dos momentos. Es una medida objetiva y cuantitativa.</span>
-                        </div>
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>3. Control y Validez Interna</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Doble ciego, condiciones estandarizadas, mismos genes</div>
-                            </div>
-                            <span class="tooltip-text">CONTROL ESTRICTO. Doble ciego elimina sesgos. Sujetos geneticamente identicos eliminan variables individuales. Condiciones ambientales controladas (misma sala, temperatura, horario). Alta validez interna.</span>
-                        </div>
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>4. Aleatorizacion</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">Asignacion aleatoria de 40 sujetos a 2 grupos</div>
-                            </div>
-                            <span class="tooltip-text">SI hay aleatorizacion. Los 40 ratones clonados se asignan AL AZAR (ej: tabla de numeros aleatorios) a grupo experimental o control. Esto garantiza que ambos grupos sean estadisticamente equivalentes al inicio.</span>
-                        </div>
-                        <div class="criterion flex items-start gap-3">
-                            <div class="status-icon status-yes"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-[var(--fg)]"><strong>5. Comparacion de Grupos</strong></div>
-                                <div class="text-xs text-[var(--fg-dim)]">
-                                    <span class="group-tag group-exp mr-1">Exp: n=20</span>
-                                    <span class="group-tag group-ctrl">Ctrl: n=20</span>
-                                    <span class="text-[var(--pure-color)] ml-1">EQUIVALENTES</span>
-                                </div>
-                            </div>
-                            <span class="tooltip-text">EXISTEN grupos experimental y control que SON EQUIVALENTES gracias a la aleatorizacion. Ambos parten de tiempos similares (52.3s vs 51.8s). La unica diferencia sistematica entre ellos es la VI (suero vs placebo). Cualquier diferencia en el post-test puede atribuirse causalmente al suero.</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-5">
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-[var(--fg-dim)]">NIVEL DE RIGOR CIENTIFICO</span>
-                            <span class="text-[var(--pure-color)]">ALTO</span>
-                        </div>
-                        <div class="rigor-meter">
-                            <div class="rigor-fill" style="width:0%; background: var(--pure-color);" data-target="95"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-xs text-[var(--fg-dim)]">PANEL DE EJECUCION</span>
-                        <button class="btn-run" id="btn-pure" onclick="runExperiment('pure')">
-                            <i class="fa-solid fa-play mr-2"></i>EJECUTAR
-                        </button>
-                    </div>
-                    <div class="results-panel" id="results-pure">
-                        <div class="p-4 text-center text-xs text-[var(--fg-dim)]">
-                            <i class="fa-solid fa-terminal mr-1"></i> Esperando ejecucion del protocolo...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="callout callout-success" id="conclusion-pure" style="display:none;">
-            <i class="fa-solid fa-check-circle mr-2 text-[var(--pure-color)]"></i>
-            <strong>Conclusion:</strong> El grupo experimental reduzco su tiempo en 18.2s vs solo 2.1s del control (p &lt; 0.01). Al ser los grupos equivalentes por aleatorizacion y controlarse variables confusas con doble ciego, la diferencia SE PUEDE ATRIBUIR CAUSALMENTE al Suero Cognitivo ACME. Este es el unico diseno que permite inferencia causal robusta.
-        </div>
-    </section>
-
-            </div><!-- /tabpanel-pure -->
-        </div><!-- /lab-main-tabs -->
-    </div><!-- /lab-layout -->
-
-    <!-- ============================================ -->
-    <!-- TABLA COMPARATIVA -->
-    <!-- ============================================ -->
-    <section class="fade-in mb-16" id="sec-comparison">
-        <div class="flex items-center gap-2 mb-6">
-            <i class="fa-solid fa-table-columns text-[var(--fg-dim)]"></i>
-            <h2 class="section-title text-sm text-[var(--fg-dim)]">MATRIZ COMPARATIVA DE DISENOS</h2>
-        </div>
-
-        <div class="exp-card p-0 overflow-x-auto">
-            <table class="comparison-table">
-                <thead>
-                    <tr>
-                        <th class="text-left" style="min-width:200px;">CRITERIO</th>
-                        <th style="min-width:160px; color:var(--pre-color);">PRE-EXPERIMENTO</th>
-                        <th style="min-width:160px; color:var(--quasi-color);">CUASIEXPERIMENTO</th>
-                        <th style="min-width:160px; color:var(--pure-color);">EXPERIMENTO PURO</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="criterion-name">1. Manipulacion de VI</td>
-                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente</td>
-                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente</td>
-                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente (doble ciego)</td>
-                    </tr>
-                    <tr>
-                        <td class="criterion-name">2. Medicion de VD</td>
-                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente</td>
-                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente (pre/post)</td>
-                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente (pre/post)</td>
-                    </tr>
-                    <tr>
-                        <td class="criterion-name">3. Control y Validez Interna</td>
-                        <td class="cell-no"><i class="fa-solid fa-xmark mr-1"></i> Ausente</td>
-                        <td class="cell-partial"><i class="fa-solid fa-exclamation mr-1"></i> Parcial</td>
-                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Estricto</td>
-                    </tr>
-                    <tr>
-                        <td class="criterion-name">4. Aleatorizacion</td>
-                        <td class="cell-na"><i class="fa-solid fa-minus mr-1"></i> No aplica</td>
-                        <td class="cell-no"><i class="fa-solid fa-xmark mr-1"></i> Ausente</td>
-                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Presente</td>
-                    </tr>
-                    <tr>
-                        <td class="criterion-name">5. Comparacion de Grupos</td>
-                        <td class="cell-no"><i class="fa-solid fa-xmark mr-1"></i> Sin grupos</td>
-                        <td class="cell-partial"><i class="fa-solid fa-exclamation mr-1"></i> No equivalentes</td>
-                        <td class="cell-yes"><i class="fa-solid fa-check mr-1"></i> Equivalentes</td>
-                    </tr>
-                    <tr style="background: rgba(255,255,255,0.02);">
-                        <td class="criterion-name" style="font-family:'Orbitron',sans-serif; font-size:0.7rem; letter-spacing:1px;">INFERENCIA CAUSAL</td>
-                        <td class="cell-no" style="font-weight:bold;">NO</td>
-                        <td class="cell-partial" style="font-weight:bold;">LIMITADA</td>
-                        <td class="cell-yes" style="font-weight:bold;">SI</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section class="fade-in mb-16" id="sec-final" style="display:none;">
-        <div class="exp-card text-center" style="border-color:var(--fg-bright); padding:40px;">
-            <i class="fa-solid fa-flask-vial" style="font-size:2.5rem;color:var(--fg-bright);margin-bottom:16px;"></i>
-            <h2 id="final-titulo" style="font-family:'Orbitron',sans-serif;color:var(--fg-bright);font-size:1.4rem;margin-bottom:12px;letter-spacing:1px;">PROTOCOLO COMPLETADO</h2>
-            <p style="color:var(--fg);max-width:560px;margin:0 auto;line-height:1.7;">Has ejecutado los tres diseños y comparado su capacidad de inferencia causal. Solo el experimento puro, con asignación aleatoria y grupo control equivalente, permite atribuir causalidad.</p>
-            <a href="index.html" class="home-btn" style="display:inline-flex;margin-top:24px;"><i class="fa-solid fa-house mr-2"></i>Volver al inicio</a>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="text-center py-8 border-t border-[var(--border)]">
-        <p class="text-xs text-[var(--fg-dim)]">
-            <i class="fa-solid fa-flask-vial mr-1"></i>
-            LABORATORIO ACME // PROTOCOLO DE INVESTIGACION v3.7.1 // TODOS LOS SUJETOS SON VOLUNTARIOS (presuntamente)
-        </p>
-        <p class="text-xs text-[var(--fg-dim)] mt-2 opacity-50">
-            "¿Y ahora que hacemos, Brain?" // "Lo mismo de siempre, Pinky: intentar publicar en Nature."
-        </p>
-    </footer>
-
+        <section class="story" aria-label="Simulación">
+            <div class="card board" id="ingredientBoard"></div>
+            <div class="story-log" id="storyLog" aria-live="polite"></div>
+            <div class="story-actions" id="storyActions"></div>
+        </section>
+    </div>
 </main>
 
 <script>
@@ -1098,781 +327,1476 @@ function getLang(){ return localStorage.getItem('simlab_lang') === 'en' ? 'en' :
 function setLang(l){ localStorage.setItem('simlab_lang', l); }
 const LANG = getLang();
 document.documentElement.lang = LANG;
+
 const I18N = {
-  es: { confirm_switch:'Cambiar el idioma reiniciará la simulación. ¿Continuar?' },
-  en: { confirm_switch:'Switching language will restart the simulation. Continue?' }
+  es: {
+    confirm_switch: 'Cambiar el idioma reiniciará la simulación. ¿Continuar?',
+    name_q: '¿Cómo te llamas?', name_ph: 'Ingresa tu nombre',
+    name_note: 'No te preguntaremos otra vez en esta sesión.', name_btn: 'Continuar', name_default: 'Estudiante',
+
+    next: 'Siguiente', speaker_lab: 'Laboratorio ACME', speaker_you: 'Tú',
+    term_label: 'Dicho técnico',
+    glossary_title: 'Palabras que ya conoces', glossary_count: '{count} de {total}',
+    glossary_empty: 'Aún ninguna. Avanza y las irás coleccionando.',
+    board_title: 'Ingredientes de la receta',
+    board_note: 'Se van encendiendo según lo que tenga cada diseño.',
+    status_unknown: 'Aún no', status_yes: 'Sí', status_partial: 'A medias', status_no: 'No',
+
+    ing_compare: 'Un grupo con quien comparar', ing_compare_tech: 'grupo control',
+    ing_beforeAfter: 'Medir antes y después', ing_beforeAfter_tech: 'pre-test y post-test',
+    ing_draw: 'Sorteo de quién va a cada grupo', ing_draw_tech: 'asignación aleatoria',
+    ing_same: 'Todo lo demás, igual', ing_same_tech: 'control de variables extrañas',
+    ing_blind: 'Quien mide no sabe quién comió qué', ing_blind_tech: 'evaluador ciego',
+    causal_title: '¿Podemos decir que la comida CAUSÓ el cambio?', causal_tech: 'inferencia causal',
+    causal_unknown: 'Aún no lo sabemos', causal_yes: 'Sí', causal_maybe: 'Quizá, con mucho cuidado', causal_no: 'No',
+
+    phase0_name: 'La pregunta', phase0_tag: 'punto de partida',
+    phase1_name: 'Experimento', phase1_tag: 'la receta completa',
+    phase2_name: 'Cuasiexperimento', phase2_tag: 'sin sorteo',
+    phase3_name: 'Pre-experimento', phase3_tag: 'sin comparar',
+    phase4_name: 'Tú decides', phase4_tag: 'casos reales',
+    phase0_intro: 'Antes de entrar al laboratorio.',
+    phase1_intro: 'Los 5 ingredientes, uno por uno. Con todos puestos, se puede hablar de causa.',
+    phase2_intro: 'Quitamos el sorteo y vemos qué se rompe.',
+    phase3_intro: 'Quitamos también la comparación.',
+    phase4_intro: 'Aplica lo aprendido a la vida real.',
+
+    start_experiment: 'Empezar el experimento',
+    go_quasi: 'Siguiente: ¿y si no se puede sortear?',
+    go_pre: 'Siguiente: ¿y si tampoco comparamos?',
+    go_decide: 'Ahora tú decides',
+    go_final: 'Ver mi resultado',
+    checklist_hint: 'Toca cada cosa para igualarla en los dos grupos.',
+    unit_seconds: 's',
+    chart_caption: 'Segundos para salir del laberinto (menos segundos = más hábil)',
+    chart_a: 'Grupo A (Superalimento)', chart_b: 'Grupo B (comida normal)', chart_brain: 'Brain', chart_pinky: 'Pinky',
+    chart_before: 'antes', chart_after: 'después',
+    chart_unknown_before: 'antes: ¿?', chart_unknown_without: 'sin la comida: ¿?',
+
+    case_label: 'Caso {number} de {total}',
+    design_pure: 'Experimento (con sorteo)', design_quasi: 'Cuasiexperimento (sin sorteo)', design_pre: 'Pre-experimento (sin comparar)',
+    matrix_title: 'Tu mapa de diseños',
+    matrix_ingredient: 'Ingrediente', matrix_causal: '¿La comida causó el cambio?',
+    col_pure: 'Experimento', col_quasi: 'Cuasi', col_pre: 'Pre',
+    final_title: '¡Receta completa, {name}!',
+    final_text: 'Ahora sabes por qué cada ingrediente importa. Cuantos más ingredientes faltan, menos podemos decir que la comida <em>causó</em> el cambio.',
+    takeaway_1: 'Para hablar de <strong>causa</strong> hace falta comparar y que los grupos partan parejos.',
+    takeaway_2: 'Sin sorteo, siempre queda una «otra explicación» posible.',
+    takeaway_3: 'Un resultado solitario, sin comparación, solo sirve para explorar ideas.',
+    final_home: 'Volver al inicio', final_again: 'Repetir la simulación',
+
+    tip_clone: 'Ratón clon', tip_group_a: 'Grupo A · Superalimento', tip_group_b: 'Grupo B · Comida normal', tip_brain: 'BRAIN', tip_pinky: 'PINKY',
+    label_super: 'Superalimento', label_normal: 'Comida normal', label_maze: 'Laberinto', label_bag: 'Sorteo',
+    scene_unavailable: 'No se pudo cargar el laboratorio 3D. La simulación funciona igual con el texto.'
+  },
+  en: {
+    confirm_switch: 'Switching language will restart the simulation. Continue?',
+    name_q: 'What is your name?', name_ph: 'Enter your name',
+    name_note: 'We will not ask again during this session.', name_btn: 'Continue', name_default: 'Student',
+
+    page_title: 'ACME Lab - How do we know something works?',
+    meta_desc: 'Teaching simulation: discover which ingredients make research trustworthy (experiment, quasi-experiment and pre-experiment) in a mouse lab. No research background needed. SimLab ULEAM.',
+    back_title: 'Back to home',
+    hero_kicker: 'ACME Corporation · Behavioral Research Division',
+    hero_title: 'ACME LAB',
+    hero_sub: 'Discover what makes research trustworthy. You need no methodology background: we go step by step, with mice and everyday examples.',
+    hero_question: 'Does the ACME Superfood make mice smarter?',
+    scene_hint: '🖱️ Drag to rotate · scroll to zoom',
+
+    next: 'Next', speaker_lab: 'ACME Lab', speaker_you: 'You',
+    term_label: 'Technical term',
+    glossary_title: 'Words you already know', glossary_count: '{count} of {total}',
+    glossary_empty: 'None yet. Keep going and you will collect them.',
+    board_title: 'Recipe ingredients',
+    board_note: 'They light up according to what each design has.',
+    status_unknown: 'Not yet', status_yes: 'Yes', status_partial: 'Half', status_no: 'No',
+
+    ing_compare: 'A group to compare with', ing_compare_tech: 'control group',
+    ing_beforeAfter: 'Measure before and after', ing_beforeAfter_tech: 'pre-test and post-test',
+    ing_draw: 'Draw lots for who goes where', ing_draw_tech: 'random assignment',
+    ing_same: 'Everything else, equal', ing_same_tech: 'control of extraneous variables',
+    ing_blind: 'Whoever measures does not know who ate what', ing_blind_tech: 'blinded assessor',
+    causal_title: 'Can we say the food CAUSED the change?', causal_tech: 'causal inference',
+    causal_unknown: 'We do not know yet', causal_yes: 'Yes', causal_maybe: 'Maybe, very carefully', causal_no: 'No',
+
+    phase0_name: 'The question', phase0_tag: 'starting point',
+    phase1_name: 'Experiment', phase1_tag: 'the full recipe',
+    phase2_name: 'Quasi-experiment', phase2_tag: 'no draw',
+    phase3_name: 'Pre-experiment', phase3_tag: 'no comparison',
+    phase4_name: 'You decide', phase4_tag: 'real cases',
+    phase0_intro: 'Before entering the lab.',
+    phase1_intro: 'The 5 ingredients, one by one. With all of them in place, we can talk about cause.',
+    phase2_intro: 'We remove the draw and see what breaks.',
+    phase3_intro: 'We remove the comparison too.',
+    phase4_intro: 'Apply what you learned to real life.',
+
+    start_experiment: 'Start the experiment',
+    go_quasi: 'Next: what if we cannot draw lots?',
+    go_pre: 'Next: what if we do not compare either?',
+    go_decide: 'Now you decide',
+    go_final: 'See my result',
+    checklist_hint: 'Tap each item to make it equal in both groups.',
+    unit_seconds: 's',
+    chart_caption: 'Seconds to get out of the maze (fewer seconds = more skilled)',
+    chart_a: 'Group A (Superfood)', chart_b: 'Group B (normal food)', chart_brain: 'Brain', chart_pinky: 'Pinky',
+    chart_before: 'before', chart_after: 'after',
+    chart_unknown_before: 'before: ?', chart_unknown_without: 'without the food: ?',
+
+    case_label: 'Case {number} of {total}',
+    design_pure: 'Experiment (with a draw)', design_quasi: 'Quasi-experiment (no draw)', design_pre: 'Pre-experiment (no comparison)',
+    matrix_title: 'Your design map',
+    matrix_ingredient: 'Ingredient', matrix_causal: 'Did the food cause the change?',
+    col_pure: 'Experiment', col_quasi: 'Quasi', col_pre: 'Pre',
+    final_title: 'Full recipe, {name}!',
+    final_text: 'Now you know why each ingredient matters. The more ingredients are missing, the less we can say the food <em>caused</em> the change.',
+    takeaway_1: 'To talk about <strong>cause</strong> you need to compare, and the groups must start out alike.',
+    takeaway_2: 'Without a random draw, there is always another possible explanation.',
+    takeaway_3: 'A lone result, with nothing to compare it to, is only good for exploring ideas.',
+    final_home: 'Back to home', final_again: 'Repeat the simulation',
+
+    tip_clone: 'Clone mouse', tip_group_a: 'Group A · Superfood', tip_group_b: 'Group B · Normal food', tip_brain: 'BRAIN', tip_pinky: 'PINKY',
+    label_super: 'Superfood', label_normal: 'Normal food', label_maze: 'Maze', label_bag: 'Draw',
+    scene_unavailable: 'The 3D lab could not load. The simulation works the same with text.'
+  }
 };
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.es[k] || k; }
-const langBtn = document.getElementById('simLangBtn');
-if(langBtn){
-  langBtn.textContent = LANG === 'es' ? 'EN' : 'ES';
-  langBtn.addEventListener('click', () => {
-    if (!confirm(t('confirm_switch'))) return;
-    setLang(LANG === 'es' ? 'en' : 'es');
-    location.reload();
+function fmt(template, values){ return template.replace(/\{(\w+)\}/g, (match, name) => (values[name] !== undefined ? values[name] : match)); }
+
+function applyStaticI18n(){
+  if (LANG === 'es') return;
+  document.title = t('page_title');
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription) metaDescription.content = t('meta_desc');
+  document.querySelectorAll('[data-i18n]').forEach(element => { element.innerHTML = t(element.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach(element => { element.title = t(element.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(element => { element.setAttribute('aria-label', t(element.dataset.i18nAria)); });
+}
+applyStaticI18n();
+
+const languageButton = document.getElementById('simLangBtn');
+languageButton.textContent = LANG === 'es' ? 'EN' : 'ES';
+languageButton.addEventListener('click', () => {
+  if (!confirm(t('confirm_switch'))) return;
+  setLang(LANG === 'es' ? 'en' : 'es');
+  location.reload();
+});
+
+/* === Términos: «dicho fácil» → «dicho técnico» === */
+const TERMS_ALL = {
+  es: {
+    vi:           { easy: 'Lo que cambiamos a propósito (la comida)', tech: 'variable independiente' },
+    vd:           { easy: 'Lo que medimos para ver si algo cambió (segundos en el laberinto)', tech: 'variable dependiente' },
+    controlGroup: { easy: 'El grupo con el que comparamos (come lo normal)', tech: 'grupo control' },
+    random:       { easy: 'Sorteo: todos tienen la misma oportunidad de caer en cualquier grupo', tech: 'asignación aleatoria' },
+    pretest:      { easy: 'Medir antes y después de la comida', tech: 'pre-test y post-test' },
+    controls:     { easy: 'Todo lo demás igual: lo que comen, beben, la sala, la hora', tech: 'control de variables extrañas (validez interna)' },
+    blind:        { easy: 'Quien mide no sabe quién recibió qué', tech: 'evaluador ciego (doble ciego si son personas)' },
+    causal:       { easy: 'Poder decir que la comida CAUSÓ el cambio', tech: 'inferencia causal' },
+    equivalent:   { easy: 'Grupos parejos desde el inicio', tech: 'grupos equivalentes' },
+    confound:     { easy: 'Otra explicación que se cuela y confunde el resultado', tech: 'variable confusa' },
+    quasi:        { easy: 'Casi un experimento: hay comparación, pero sin sorteo', tech: 'cuasiexperimento' },
+    preexp:       { easy: 'Probar sin comparar con nada', tech: 'pre-experimento' }
+  },
+  en: {
+    vi:           { easy: 'What we change on purpose (the food)', tech: 'independent variable' },
+    vd:           { easy: 'What we measure to see if something changed (seconds in the maze)', tech: 'dependent variable' },
+    controlGroup: { easy: 'The group we compare with (eats the usual food)', tech: 'control group' },
+    random:       { easy: 'A draw: everyone has the same chance of landing in any group', tech: 'random assignment' },
+    pretest:      { easy: 'Measuring before and after the food', tech: 'pre-test and post-test' },
+    controls:     { easy: 'Everything else equal: what they eat, drink, the room, the time', tech: 'control of extraneous variables (internal validity)' },
+    blind:        { easy: 'Whoever measures does not know who got what', tech: 'blinded assessor (double-blind with people)' },
+    causal:       { easy: 'Being able to say the food CAUSED the change', tech: 'causal inference' },
+    equivalent:   { easy: 'Groups that start out alike', tech: 'equivalent groups' },
+    confound:     { easy: 'Another explanation that sneaks in and muddles the result', tech: 'confounding variable' },
+    quasi:        { easy: 'Almost an experiment: there is a comparison, but no draw', tech: 'quasi-experiment' },
+    preexp:       { easy: 'Testing without comparing to anything', tech: 'pre-experiment' }
+  }
+};
+const TERMS = TERMS_ALL[LANG];
+const TERM_KEYS = Object.keys(TERMS_ALL.es);
+
+/* === Estructura del recorrido (igual en ambos idiomas) ===
+   kind: say | choice | action | checklist | case | finale
+   lights: ingredientes que se encienden al entrar al paso
+   cue: instrucción para la escena 3D */
+const INGREDIENT_KEYS = ['compare', 'beforeAfter', 'draw', 'same', 'blind'];
+
+const PHASE_FLOW = [
+  { key: 'question', color: '#34D399', startCue: 'empty', steps: [
+    { id: 'q1', kind: 'say' },
+    { id: 'q2', kind: 'say' },
+    { id: 'q3', kind: 'choice', correct: [true, true, true] },
+    { id: 'q4', kind: 'say', nextLabelKey: 'start_experiment' }
+  ]},
+  { key: 'pure', color: '#34D399', startCue: 'empty', steps: [
+    { id: 'p1', kind: 'say', cue: 'clones' },
+    { id: 'p2', kind: 'say', cue: 'maze', terms: ['vd', 'pretest'], lights: { beforeAfter: 'yes' } },
+    { id: 'p3', kind: 'action', cue: 'draw', cueMilliseconds: 3400, terms: ['random', 'equivalent'], lights: { draw: 'yes' }, chart: 'pureBefore' },
+    { id: 'p4', kind: 'say', cue: 'feed', terms: ['vi', 'controlGroup'], lights: { compare: 'yes' } },
+    { id: 'p5', kind: 'checklist', cue: 'equalize', itemCount: 5, terms: ['controls'], lights: { same: 'yes' } },
+    { id: 'p6', kind: 'say', terms: ['blind'], lights: { blind: 'yes' } },
+    { id: 'p7', kind: 'say', cue: 'maze', chart: 'pureAfter' },
+    { id: 'p8', kind: 'choice', correct: [false, true, false], terms: ['causal'] },
+    { id: 'p9', kind: 'say', lights: { causal: 'yes' }, nextLabelKey: 'go_quasi' }
+  ]},
+  { key: 'quasi', color: '#ffb800', startCue: 'prev_pure', steps: [
+    { id: 'c1', kind: 'say', cue: 'quasi_enter', terms: ['quasi'], lights: { draw: 'no' } },
+    { id: 'c2', kind: 'say', chart: 'quasiBefore', lights: { beforeAfter: 'yes' } },
+    { id: 'c3', kind: 'say', cue: 'quasi_feed', lights: { compare: 'yes', same: 'partial', blind: 'no' } },
+    { id: 'c4', kind: 'say', chart: 'quasiAfter' },
+    { id: 'c5', kind: 'choice', correct: [false, false, true], terms: ['confound'], lights: { causal: 'maybe' } },
+    { id: 'c6', kind: 'say', nextLabelKey: 'go_pre' }
+  ]},
+  { key: 'pre', color: '#ff6b6b', startCue: 'prev_quasi', steps: [
+    { id: 'r1', kind: 'say', cue: 'pre_enter', terms: ['preexp'], lights: { compare: 'no', beforeAfter: 'no', draw: 'no', same: 'no', blind: 'no' } },
+    { id: 'r2', kind: 'say', chart: 'preResult' },
+    { id: 'r3', kind: 'choice', correct: [false, false, true], lights: { causal: 'no' } },
+    { id: 'r4', kind: 'say', nextLabelKey: 'go_decide' }
+  ]},
+  { key: 'decide', color: '#34D399', startCue: 'empty', steps: [
+    { id: 'd0', kind: 'say' },
+    { id: 'd1', kind: 'case', answer: 'pre' },
+    { id: 'd2', kind: 'case', answer: 'quasi' },
+    { id: 'd3', kind: 'case', answer: 'pure' },
+    { id: 'd4', kind: 'case', answer: 'quasi' },
+    { id: 'd5', kind: 'finale' }
+  ]}
+];
+
+const DESIGN_KEYS = ['pure', 'quasi', 'pre'];
+const DESIGN_STATUS = {
+  pure:  { compare: 'yes', beforeAfter: 'yes', draw: 'yes', same: 'yes', blind: 'yes', causal: 'yes' },
+  quasi: { compare: 'yes', beforeAfter: 'yes', draw: 'no', same: 'partial', blind: 'no', causal: 'maybe' },
+  pre:   { compare: 'no', beforeAfter: 'no', draw: 'no', same: 'no', blind: 'no', causal: 'no' }
+};
+
+const COLOR_GROUP_A = '#ffb800';
+const COLOR_GROUP_B = '#4da3ff';
+const CHARTS = {
+  pureBefore: [
+    { who: 'chart_a', when: 'chart_before', value: 52.3, max: 65, color: COLOR_GROUP_A, isBefore: true },
+    { who: 'chart_b', when: 'chart_before', value: 51.8, max: 65, color: COLOR_GROUP_B, isBefore: true }
+  ],
+  pureAfter: [
+    { who: 'chart_a', when: 'chart_before', value: 52.3, max: 65, color: COLOR_GROUP_A, isBefore: true },
+    { who: 'chart_a', when: 'chart_after', value: 34.1, max: 65, color: COLOR_GROUP_A },
+    { who: 'chart_b', when: 'chart_before', value: 51.8, max: 65, color: COLOR_GROUP_B, isBefore: true },
+    { who: 'chart_b', when: 'chart_after', value: 49.7, max: 65, color: COLOR_GROUP_B }
+  ],
+  quasiBefore: [
+    { who: 'chart_brain', when: 'chart_before', value: 30, max: 80, color: COLOR_GROUP_A, isBefore: true },
+    { who: 'chart_pinky', when: 'chart_before', value: 75, max: 80, color: COLOR_GROUP_B, isBefore: true }
+  ],
+  quasiAfter: [
+    { who: 'chart_brain', when: 'chart_before', value: 30, max: 80, color: COLOR_GROUP_A, isBefore: true },
+    { who: 'chart_brain', when: 'chart_after', value: 20, max: 80, color: COLOR_GROUP_A },
+    { who: 'chart_pinky', when: 'chart_before', value: 75, max: 80, color: COLOR_GROUP_B, isBefore: true },
+    { who: 'chart_pinky', when: 'chart_after', value: 72, max: 80, color: COLOR_GROUP_B }
+  ],
+  preResult: [
+    { who: 'chart_brain', when: 'chart_after', value: 18, max: 80, color: '#ff6b6b' },
+    { who: 'chart_brain', when: 'chart_unknown_before', isGhost: true },
+    { who: 'chart_brain', when: 'chart_unknown_without', isGhost: true }
+  ]
+};
+
+/* === Textos pedagógicos por idioma (misma estructura en ES y EN) === */
+const TEXT_ALL = {
+  es: {
+    q1: { caption: 'El laboratorio está vacío. Por ahora.', say: [
+      'Bienvenido al <strong>Laboratorio ACME</strong>. Hoy tenemos una duda: <strong>¿el Superalimento ACME vuelve más listos a los ratones?</strong>',
+      'No necesitas saber nada de investigación. Vamos paso a paso, con ejemplos de todos los días.' ] },
+    q2: { say: [
+      'Antes de entrar, piensa en algo que te haya pasado: empezaste a tomar algo, o a estudiar con una técnica nueva, y <em>sentiste</em> que te funcionó.' ] },
+    q3: { say: [ '¿Cómo podrías saber de verdad que mejoraste por eso y no por otra cosa?' ], options: [
+      { text: 'Lo noté yo mismo', feedback: 'Es un buen punto de partida, pero la intuición engaña: quizá mejoraste por otra cosa (dormiste mejor, ya tenías práctica…).' },
+      { text: 'Comparándome con alguien que no lo hizo', feedback: '¡Ese es el instinto del investigador! Comparar es la base de todo. Veremos cómo hacerlo bien.' },
+      { text: 'Probándolo con muchísima gente', feedback: 'Ayuda, pero más gente no basta si no hay con quién comparar ni cuidado en cómo se arman los grupos.' } ] },
+    q4: { say: [
+      'Hay tres maneras de investigar esto, de la más sólida a la más débil. Empezamos por la más sólida: el <strong>experimento</strong>.',
+      'Piénsalo como una <strong>receta con ingredientes</strong>. Mira el tablero «Ingredientes de la receta»: se irá encendiendo. Después quitaremos ingredientes uno a uno para ver qué se rompe.' ] },
+
+    p1: { caption: '40 ratones idénticos (se muestran 10: cada uno representa a 4).', say: [
+      'Empezamos con <strong>40 ratones clones</strong>: son idénticos de nacimiento, así que ninguno parte con ventaja.',
+      'En pantalla ves 10; cada uno representa a 4.' ] },
+    p2: { caption: 'Cronometrando el laberinto antes de dar nada.', say: [
+      'Primero, <strong>lo que vamos a mirar</strong>: cuánto tarda cada ratón en salir de un laberinto. Menos segundos significa más hábil.',
+      'Lo medimos <strong>antes</strong> de dar nada. Es el punto de partida.' ] },
+    p3: { caption: 'Sorteo: nadie escoge a dedo.', say: [
+      'Ahora viene lo más importante. Metemos los 40 nombres en una bolsa y sacamos <strong>al azar</strong>. Nadie escoge a dedo.' ],
+      actionLabel: 'Sortear', after: [
+      'Listo: 20 ratones al grupo A (collar ámbar) y 20 al grupo B (collar azul). En pantalla ves 5 y 5.',
+      'Promedio de partida: grupo A <strong>52.3 s</strong>, grupo B <strong>51.8 s</strong>. Casi iguales: gracias al sorteo, ningún grupo parte con ventaja.' ] },
+    p4: { caption: 'Ámbar: Superalimento. Azul: comida normal.', say: [
+      'Ahora, <strong>lo único que cambia a propósito: la comida</strong>. El grupo A recibe Superalimento ACME. El grupo B recibe comida normal, que se ve igual.',
+      'Todo lo demás debería ser idéntico. Veamos cómo.' ] },
+    p5: { caption: 'Mismas condiciones para los dos grupos.', say: [
+      'Cambiar la comida no basta. <strong>Todo lo demás tiene que ser igual</strong> para los dos grupos: lo que comen, lo que beben, dónde viven y cuándo duermen.' ],
+      items: [
+        { label: 'Misma sala y misma temperatura', why: 'Si un grupo viviera en una sala más ruidosa, ¿mejoraría por la comida o por el ruido?' },
+        { label: 'Misma agua, a la misma hora', why: 'Si un grupo bebiera menos, tendría menos energía. Ya no sabríamos qué pesó más.' },
+        { label: 'Misma cantidad de comida base', why: 'Un grupo mejor alimentado en general mejoraría aunque el superalimento no hiciera nada.' },
+        { label: 'Mismas horas de luz y de sueño', why: 'Un ratón que duerme mejor resuelve mejor el laberinto. Eso no sería mérito de la comida.' },
+        { label: 'Mismo cuidador, mismo trato', why: 'Si a un grupo se le habla más o se le acaricia, podría rendir mejor por cariño, no por la comida.' } ],
+      after: [ 'Todo igual, menos la comida. Así, si algo cambia, ya sabemos dónde mirar.' ] },
+    p6: { caption: 'Las bolsas de comida solo tienen un código.', say: [
+      'Un detalle más: quien cuida a los ratones y toma los tiempos <strong>no sabe quién comió qué</strong>. Las bolsas de comida solo tienen un código.',
+      'Así nadie trata distinto a un grupo sin darse cuenta. (Con personas, ellas tampoco saben qué reciben: eso se llama doble ciego. Un ratón no entiende, así que solo se «ciega» a quien mide.)' ] },
+    p7: { caption: 'Pasaron 14 días. Se vuelve a cronometrar.', say: [
+      'Pasan 14 días. Volvemos a cronometrar el laberinto.',
+      'El grupo A bajó <strong>18.2 s</strong>. El grupo B bajó apenas <strong>2.1 s</strong>: solo por haber practicado el laberinto.' ] },
+    p8: { say: [ 'Ahora tú: <strong>¿por qué mejoró tanto el grupo A?</strong>' ], options: [
+      { text: 'Porque ya eran más listos desde el principio', feedback: 'Pero los dos grupos partían casi iguales (52.3 s y 51.8 s). Gracias al sorteo, eso no explica la diferencia.' },
+      { text: 'Por la comida', feedback: 'Exacto. Como todo era igual menos la comida, la diferencia se debe a la comida: podemos decir que la comida <strong>causó</strong> la mejora.' },
+      { text: 'Por pura suerte', feedback: 'Con tantos ratones y una diferencia tan grande, que sea casualidad es menos de 1 entre 100. (Para curiosos: p &lt; 0.01.)' } ] },
+    p9: { say: [
+      'Tienes la <strong>receta completa</strong>: sorteo, comparación, todo igual, medir antes y después, y quien mide no sabe. Con ella se puede hablar de <strong>causa</strong>.',
+      'Pero en la vida real no siempre se puede cumplir la receta. ¿Qué pasa si quitamos un ingrediente?' ] },
+
+    c1: { caption: 'Sin sorteo: trabajamos con quienes ya están.', say: [
+      'Imagina que no hay clones ni bolsa. Solo están <strong>Brain</strong> y <strong>Pinky</strong>, dos ratones que ya vivían aquí.',
+      'En la vida real pasa todo el tiempo: los grupos <em>ya existen</em> (dos salones, dos hospitales, dos barrios) y no se pueden sortear.' ] },
+    c2: { caption: 'Brain y Pinky no partían parejos.', say: [
+      'Primero medimos el laberinto, como antes. Brain tarda <strong>30 s</strong>; Pinky, <strong>75 s</strong>.',
+      'Ojo: <strong>ya eran muy distintos antes de empezar</strong>. Con el sorteo esto no pasaba.' ] },
+    c3: { caption: 'Brain eligió primero. Nadie sorteó.', say: [
+      'Brain se ofreció primero, así que come Superalimento. Pinky come comida normal. Nadie los sorteó.',
+      'Lo que sí podemos hacer: misma sala, misma agua, misma hora. Pero no podemos igualar lo que ya los hacía distintos.' ] },
+    c4: { caption: 'Pasaron 14 días.', say: [
+      'Pasan 14 días y volvemos a medir.',
+      'Brain bajó <strong>10 s</strong> (30 → 20). Pinky bajó <strong>3 s</strong> (75 → 72).' ] },
+    c5: { say: [ '¿Podemos decir que fue por la comida?' ], options: [
+      { text: 'Sí: mejoró más quien comió Superalimento', feedback: 'Es una pista, pero no una prueba. ¿Y si Brain, que ya era más hábil, aprovecha mejor cualquier práctica?' },
+      { text: 'No, la comida no hizo nada', feedback: 'Tampoco: quizá sí ayudó. Con estos grupos no podemos separarlo.' },
+      { text: 'No se puede asegurar: pudo ser la comida o que Brain ya era más hábil', feedback: 'Eso es. A esa «otra explicación que se cuela» se le llama <strong>variable confusa</strong>. Sin sorteo, no hay forma de descartarla.' } ] },
+    c6: { say: [
+      'El <strong>cuasiexperimento</strong> es mejor que nada: compara y mide antes y después.',
+      'A veces es la única opción honesta: no puedes sortear a personas para que fumen, ni a escuelas para que tengan menos recursos. Se usa con cuidado y con conclusiones prudentes.' ] },
+
+    r1: { caption: 'Un solo ratón. Pinky ya no está.', say: [
+      'Quitamos todavía más. Ahora solo está <strong>Brain</strong>. Le damos Superalimento durante 14 días y lo cronometramos al final.',
+      'No hay medición de antes. No hay nadie con quien compararlo.' ] },
+    r2: { say: [ 'Resultado: Brain sale del laberinto en <strong>18 s</strong>.' ] },
+    r3: { say: [ '¿Sirvió el Superalimento?' ], options: [
+      { text: 'Sí: ¡18 segundos es rapidísimo!', feedback: '¿Rapidísimo comparado con qué? No sabemos cuánto tardaba antes ni cuánto tardan otros ratones.' },
+      { text: 'No, no sirvió', feedback: 'Tampoco podemos decir eso: quizá sí ayudó.' },
+      { text: 'No se puede saber', feedback: 'Exacto. Un número solo no dice nada si no hay con qué compararlo.' } ] },
+    r4: { say: [
+      'Otras explicaciones que no podemos descartar: Brain ya era rapidísimo; Brain practicó el laberinto (en el experimento, el grupo B mejoró 2 s solo por eso); o fue la comida.',
+      'El <strong>pre-experimento</strong> sirve para explorar ideas («¿vale la pena investigar esto?»), no para probar causas.' ] },
+
+    d0: { caption: 'Hora de aplicar lo aprendido.', say: [
+      'Ahora tú. Te cuento 4 casos de la vida real. Clasifica cada uno según los ingredientes que tiene.' ] },
+    d1: { say: [ 'Una influencer toma un suplemento durante un mes y cuenta que ahora se concentra mejor.' ],
+      hint: 'Revisa el tablero: ¿hay con quién comparar? ¿Se midió antes?',
+      explain: 'Es un <strong>pre-experimento</strong>: una sola persona, sin comparación y sin medición previa.' },
+    d2: { say: [ 'Un colegio prueba una app de lectura en 5.º A y compara con 5.º B, que no la usa. Midieron la lectura al inicio y al final.' ],
+      hint: 'Hay comparación y medición antes y después. ¿Qué ingrediente podría faltar?',
+      explain: 'Es un <strong>cuasiexperimento</strong>: hay comparación y doble medición, pero los salones ya existían: nadie los sorteó.' },
+    d3: { say: [ 'Una universidad sortea a 200 estudiantes: 100 usan un método de estudio nuevo y 100 el de siempre. Todos hacen el mismo examen y estudian en condiciones parecidas.' ],
+      hint: 'Piensa: ¿hubo sorteo? ¿Hubo comparación y condiciones parecidas?',
+      explain: 'Es un <strong>experimento</strong>: tiene sorteo, comparación y condiciones parecidas. La receta completa.' },
+    d4: { say: [ 'Un hospital compara a los pacientes que <em>eligieron</em> un tratamiento nuevo con los que prefirieron el de siempre.' ],
+      hint: 'Fíjate en quién decidió el grupo de cada paciente.',
+      explain: 'Es un <strong>cuasiexperimento</strong>: los pacientes se eligieron a sí mismos. Quien elige un tratamiento suele ser distinto de quien no lo elige (más motivado, con otra salud…).' },
+    d5: { say: [ '¡Último paso! Para cerrar, dime cómo te llamas y te muestro tu mapa de diseños.' ] }
+  },
+  en: {
+    q1: { caption: 'The lab is empty. For now.', say: [
+      'Welcome to the <strong>ACME Lab</strong>. Today we have a question: <strong>does the ACME Superfood make mice smarter?</strong>',
+      'You need no research background. We go step by step, with everyday examples.' ] },
+    q2: { say: [
+      'Before going in, think of something that happened to you: you started taking something, or studying with a new technique, and you <em>felt</em> it worked.' ] },
+    q3: { say: [ 'How could you really know you improved because of that and not because of something else?' ], options: [
+      { text: 'I noticed it myself', feedback: 'A good starting point, but intuition can fool us: maybe you improved for another reason (you slept better, you already had practice...).' },
+      { text: 'By comparing myself with someone who did not do it', feedback: 'That is the researcher instinct! Comparing is the basis of everything. We will see how to do it well.' },
+      { text: 'By trying it with lots of people', feedback: 'It helps, but more people is not enough if there is nobody to compare with, or no care in how the groups are formed.' } ] },
+    q4: { say: [
+      'There are three ways to investigate this, from the strongest to the weakest. We start with the strongest: the <strong>experiment</strong>.',
+      'Think of it as a <strong>recipe with ingredients</strong>. Watch the «Recipe ingredients» board: it will light up. Later we will remove ingredients one by one to see what breaks.' ] },
+
+    p1: { caption: '40 identical mice (10 shown: each one stands for 4).', say: [
+      'We start with <strong>40 clone mice</strong>: identical from birth, so none starts with an advantage.',
+      'On screen you see 10; each one stands for 4.' ] },
+    p2: { caption: 'Timing the maze before giving anything.', say: [
+      'First, <strong>what we will look at</strong>: how long each mouse takes to get out of a maze. Fewer seconds means more skilled.',
+      'We measure it <strong>before</strong> giving anything. It is the starting point.' ] },
+    p3: { caption: 'The draw: nobody picks by hand.', say: [
+      'Now the most important part. We put the 40 names in a bag and draw <strong>at random</strong>. Nobody picks by hand.' ],
+      actionLabel: 'Draw lots', after: [
+      'Done: 20 mice to group A (amber collar) and 20 to group B (blue collar). On screen you see 5 and 5.',
+      'Starting average: group A <strong>52.3 s</strong>, group B <strong>51.8 s</strong>. Almost equal: thanks to the draw, neither group starts with an advantage.' ] },
+    p4: { caption: 'Amber: Superfood. Blue: normal food.', say: [
+      'Now, <strong>the only thing that changes on purpose: the food</strong>. Group A gets ACME Superfood. Group B gets normal food that looks the same.',
+      'Everything else should be identical. Let us see how.' ] },
+    p5: { caption: 'Same conditions for both groups.', say: [
+      'Changing the food is not enough. <strong>Everything else must be equal</strong> for both groups: what they eat, what they drink, where they live and when they sleep.' ],
+      items: [
+        { label: 'Same room and same temperature', why: 'If one group lived in a noisier room, would it improve because of the food or because of the noise?' },
+        { label: 'Same water, at the same time', why: 'If one group drank less, it would have less energy. We could no longer tell what mattered more.' },
+        { label: 'Same amount of base food', why: 'A group that is better fed overall would improve even if the superfood did nothing.' },
+        { label: 'Same hours of light and sleep', why: 'A mouse that sleeps better solves the maze better. That would not be credit to the food.' },
+        { label: 'Same caretaker, same treatment', why: 'If one group is talked to or petted more, it could do better because of affection, not the food.' } ],
+      after: [ 'Everything equal except the food. So if something changes, we know where to look.' ] },
+    p6: { caption: 'The food bags only carry a code.', say: [
+      'One more detail: whoever looks after the mice and takes the times <strong>does not know who ate what</strong>. The food bags only carry a code.',
+      'That way nobody treats a group differently without noticing. (With people, they do not know what they get either: that is called double-blind. A mouse does not understand, so only the person measuring is «blinded».)' ] },
+    p7: { caption: '14 days went by. Timing again.', say: [
+      '14 days go by. We time the maze again.',
+      'Group A dropped <strong>18.2 s</strong>. Group B dropped only <strong>2.1 s</strong>: just from having practiced the maze.' ] },
+    p8: { say: [ 'Your turn: <strong>why did group A improve so much?</strong>' ], options: [
+      { text: 'Because they were smarter from the start', feedback: 'But both groups started almost equal (52.3 s and 51.8 s). Thanks to the draw, that does not explain the difference.' },
+      { text: 'Because of the food', feedback: 'Exactly. Since everything was equal except the food, the difference is due to the food: we can say the food <strong>caused</strong> the improvement.' },
+      { text: 'Pure luck', feedback: 'With this many mice and such a big difference, the chance it is coincidence is under 1 in 100. (For the curious: p &lt; 0.01.)' } ] },
+    p9: { say: [
+      'You have the <strong>full recipe</strong>: draw, comparison, everything equal, measuring before and after, and whoever measures does not know. With it we can talk about <strong>cause</strong>.',
+      'But in real life the recipe cannot always be followed. What happens if we remove an ingredient?' ] },
+
+    c1: { caption: 'No draw: we work with whoever is already there.', say: [
+      'Imagine there are no clones and no bag. There are only <strong>Brain</strong> and <strong>Pinky</strong>, two mice that already lived here.',
+      'In real life this happens all the time: the groups <em>already exist</em> (two classrooms, two hospitals, two neighborhoods) and cannot be drawn.' ] },
+    c2: { caption: 'Brain and Pinky did not start alike.', say: [
+      'First we measure the maze, as before. Brain takes <strong>30 s</strong>; Pinky, <strong>75 s</strong>.',
+      'Careful: <strong>they were already very different before starting</strong>. With the draw this did not happen.' ] },
+    c3: { caption: 'Brain volunteered first. Nobody drew lots.', say: [
+      'Brain volunteered first, so he eats Superfood. Pinky eats normal food. Nobody drew lots.',
+      'What we can do: same room, same water, same schedule. But we cannot equalize what already made them different.' ] },
+    c4: { caption: '14 days went by.', say: [
+      '14 days go by and we measure again.',
+      'Brain dropped <strong>10 s</strong> (30 → 20). Pinky dropped <strong>3 s</strong> (75 → 72).' ] },
+    c5: { say: [ 'Can we say it was because of the food?' ], options: [
+      { text: 'Yes: whoever ate Superfood improved more', feedback: 'It is a clue, not proof. What if Brain, already more skilled, makes better use of any practice?' },
+      { text: 'No, the food did nothing', feedback: 'Not that either: maybe it did help. With these groups we cannot tell them apart.' },
+      { text: 'We cannot be sure: it could be the food or that Brain was already more skilled', feedback: 'Right. That «other explanation that sneaks in» is called a <strong>confounding variable</strong>. Without a draw, there is no way to rule it out.' } ] },
+    c6: { say: [
+      'The <strong>quasi-experiment</strong> is better than nothing: it compares and measures before and after.',
+      'Sometimes it is the only honest option: you cannot draw lots to make people smoke, or to give schools fewer resources. It is used carefully, with cautious conclusions.' ] },
+
+    r1: { caption: 'Just one mouse. Pinky is gone.', say: [
+      'We remove even more. Now there is only <strong>Brain</strong>. We give him Superfood for 14 days and time him at the end.',
+      'There is no earlier measurement. There is nobody to compare him with.' ] },
+    r2: { say: [ 'Result: Brain gets out of the maze in <strong>18 s</strong>.' ] },
+    r3: { say: [ 'Did the Superfood work?' ], options: [
+      { text: 'Yes: 18 seconds is super fast!', feedback: 'Super fast compared to what? We do not know how long he took before, or how long other mice take.' },
+      { text: 'No, it did not work', feedback: 'We cannot say that either: maybe it did help.' },
+      { text: 'We cannot know', feedback: 'Exactly. A lone number says nothing if there is nothing to compare it with.' } ] },
+    r4: { say: [
+      'Other explanations we cannot rule out: Brain was already super fast; Brain practiced the maze (in the experiment, group B improved 2 s just from that); or it was the food.',
+      'The <strong>pre-experiment</strong> is useful to explore ideas («is this worth investigating?»), not to prove causes.' ] },
+
+    d0: { caption: 'Time to apply what you learned.', say: [
+      'Your turn. I will describe 4 real-life cases. Classify each one by the ingredients it has.' ] },
+    d1: { say: [ 'An influencer takes a supplement for a month and says she now concentrates better.' ],
+      hint: 'Check the board: is there anyone to compare with? Was there an earlier measurement?',
+      explain: 'It is a <strong>pre-experiment</strong>: one person, no comparison and no earlier measurement.' },
+    d2: { say: [ 'A school tests a reading app in class 5A and compares it with class 5B, which does not use it. They measured reading at the start and at the end.' ],
+      hint: 'There is a comparison and a before-and-after measurement. Which ingredient could be missing?',
+      explain: 'It is a <strong>quasi-experiment</strong>: there is a comparison and two measurements, but the classes already existed: nobody drew lots.' },
+    d3: { say: [ 'A university draws lots among 200 students: 100 use a new study method and 100 the usual one. Everyone takes the same exam and studies in similar conditions.' ],
+      hint: 'Think: was there a draw? Was there a comparison and similar conditions?',
+      explain: 'It is an <strong>experiment</strong>: it has a draw, a comparison and similar conditions. The full recipe.' },
+    d4: { say: [ 'A hospital compares patients who <em>chose</em> a new treatment with those who preferred the usual one.' ],
+      hint: 'Notice who decided each patient\'s group.',
+      explain: 'It is a <strong>quasi-experiment</strong>: patients chose for themselves. People who pick a treatment tend to differ from those who do not (more motivated, different health...).' },
+    d5: { say: [ 'Last step! To wrap up, tell me your name and I will show you your design map.' ] }
+  }
+};
+const TEXT = TEXT_ALL[LANG];
+
+/* === Estado === */
+const state = {
+  currentPhase: -1,
+  highestUnlocked: 0,
+  completedPhases: new Set(),
+  discoveredTerms: new Set(),
+  runToken: 0,
+  lights: {}
+};
+
+/* === Utilidades === */
+window.pendingSceneCues = [];
+function sceneCue(cueName){
+  if (window.lab3D) window.lab3D.cue(cueName); else window.pendingSceneCues.push(cueName);
+}
+function delay(milliseconds){ return new Promise(resolve => setTimeout(resolve, milliseconds)); }
+function scrollBehavior(){ return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'; }
+function createElement(tagName, className, htmlContent){
+  const element = document.createElement(tagName);
+  if (className) element.className = className;
+  if (htmlContent !== undefined) element.innerHTML = htmlContent;
+  return element;
+}
+const storyLog = document.getElementById('storyLog');
+const storyActions = document.getElementById('storyActions');
+const sceneCaption = document.getElementById('sceneCaption');
+
+function setCaption(captionText){ sceneCaption.textContent = captionText || ''; }
+function clearLog(){ storyLog.replaceChildren(); }
+function clearActions(){ storyActions.replaceChildren(); }
+function revealElement(element, visibleClass){
+  requestAnimationFrame(() => requestAnimationFrame(() => element.classList.add(visibleClass)));
+}
+function keepInView(element){ element.scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' }); }
+
+/* Diálogos y botones (patrón del proyecto) */
+function addDialog(speaker, text, cssClass){
+  const bubble = createElement('div', 'bubble ' + (speaker === 'you' ? 'bubble-you' : 'bubble-lab') + (cssClass ? ' ' + cssClass : ''));
+  bubble.appendChild(createElement('div', 'bubble-speaker', t('speaker_' + speaker)));
+  bubble.appendChild(createElement('div', 'bubble-body', text));
+  storyLog.appendChild(bubble);
+  revealElement(bubble, 'is-visible');
+  keepInView(bubble);
+  return bubble;
+}
+function addButton(label, callback, cssClass){
+  const button = createElement('button', cssClass || 'btn-primary');
+  button.type = 'button';
+  button.textContent = label;
+  button.addEventListener('click', callback, { once: true });
+  storyActions.appendChild(button);
+  keepInView(button);
+  return button;
+}
+
+/* Glosario: términos descubiertos */
+function renderGlossary(){
+  const glossary = document.getElementById('glossary');
+  glossary.replaceChildren();
+  const title = createElement('div', 'side-title');
+  title.appendChild(createElement('span', '', t('glossary_title')));
+  title.appendChild(createElement('small', '', fmt(t('glossary_count'), { count: state.discoveredTerms.size, total: TERM_KEYS.length })));
+  glossary.appendChild(title);
+  if (state.discoveredTerms.size === 0) {
+    glossary.appendChild(createElement('p', 'glossary-empty', t('glossary_empty')));
+    return;
+  }
+  const list = createElement('ul', 'glossary-list');
+  TERM_KEYS.filter(termKey => state.discoveredTerms.has(termKey)).forEach(termKey => {
+    const item = createElement('li', 'glossary-item');
+    item.appendChild(createElement('b', '', TERMS[termKey].tech));
+    item.appendChild(document.createTextNode(TERMS[termKey].easy));
+    list.appendChild(item);
+  });
+  glossary.appendChild(list);
+}
+function addTermChips(termKeys){
+  (termKeys || []).forEach(termKey => {
+    const termRow = createElement('div', 'term-row');
+    termRow.appendChild(createElement('span', 'term-label', t('term_label')));
+    termRow.appendChild(createElement('span', 'term-easy', TERMS[termKey].easy));
+    termRow.appendChild(createElement('i', 'fa-solid fa-arrow-right'));
+    termRow.appendChild(createElement('span', 'term-tech', TERMS[termKey].tech));
+    storyLog.appendChild(termRow);
+    revealElement(termRow, 'is-visible');
+    state.discoveredTerms.add(termKey);
+  });
+  if (termKeys && termKeys.length) renderGlossary();
+}
+
+/* Tablero de ingredientes */
+const STATUS_ICONS = { unknown: 'fa-regular fa-circle', yes: 'fa-solid fa-circle-check', partial: 'fa-solid fa-circle-exclamation', maybe: 'fa-solid fa-circle-exclamation', no: 'fa-solid fa-circle-xmark' };
+function buildBoard(){
+  const board = document.getElementById('ingredientBoard');
+  board.replaceChildren();
+  const title = createElement('div', 'side-title');
+  title.appendChild(createElement('span', '', t('board_title')));
+  board.appendChild(title);
+  const grid = createElement('div', 'board-grid');
+  INGREDIENT_KEYS.forEach(ingredientKey => {
+    const chip = createElement('div', 'ingredient');
+    chip.dataset.ingredient = ingredientKey;
+    const head = createElement('div', 'ingredient-head');
+    head.appendChild(createElement('i'));
+    head.appendChild(createElement('span', '', t('ing_' + ingredientKey)));
+    chip.appendChild(head);
+    chip.appendChild(createElement('div', 'ingredient-tech', t('ing_' + ingredientKey + '_tech')));
+    chip.appendChild(createElement('div', 'ingredient-state'));
+    grid.appendChild(chip);
+  });
+  board.appendChild(grid);
+  const causalRow = createElement('div', 'causal-row');
+  const causalChip = createElement('div', 'ingredient');
+  causalChip.dataset.ingredient = 'causal';
+  const causalHead = createElement('div', 'ingredient-head');
+  causalHead.appendChild(createElement('i'));
+  causalHead.appendChild(createElement('span', '', t('causal_title')));
+  causalChip.appendChild(causalHead);
+  causalChip.appendChild(createElement('div', 'ingredient-tech', t('causal_tech')));
+  causalChip.appendChild(createElement('div', 'ingredient-state'));
+  causalRow.appendChild(causalChip);
+  board.appendChild(causalRow);
+  board.appendChild(createElement('p', 'board-note', t('board_note')));
+}
+function updateBoard(changedKeys){
+  document.querySelectorAll('#ingredientBoard .ingredient').forEach(chip => {
+    const ingredientKey = chip.dataset.ingredient;
+    const status = state.lights[ingredientKey] || 'unknown';
+    chip.dataset.status = status;
+    chip.querySelector('i').className = STATUS_ICONS[status];
+    const stateLabel = ingredientKey === 'causal' ? t('causal_' + status) : t('status_' + status);
+    chip.querySelector('.ingredient-state').textContent = stateLabel;
+    if (changedKeys && changedKeys.includes(ingredientKey)) {
+      chip.classList.remove('is-changed');
+      void chip.offsetWidth;
+      chip.classList.add('is-changed');
+    }
   });
 }
-// =============================================
-// PARTICULAS DE FONDO
-// =============================================
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-let particlesArray = [];
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+function resetBoard(){
+  state.lights = {};
+  INGREDIENT_KEYS.concat('causal').forEach(ingredientKey => { state.lights[ingredientKey] = 'unknown'; });
+  updateBoard();
 }
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+function applyLights(lights){
+  if (!lights) return;
+  Object.assign(state.lights, lights);
+  updateBoard(Object.keys(lights));
+}
 
-class Particle {
-    constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.3;
-        this.speedY = (Math.random() - 0.5) * 0.3;
-        this.opacity = Math.random() * 0.4 + 0.1;
+/* Gráfico de barras horizontal */
+function addChart(chartKey){
+  const card = createElement('div', 'chart-card');
+  card.appendChild(createElement('div', 'chart-title', t('chart_caption')));
+  const fills = [];
+  CHARTS[chartKey].forEach(rowData => {
+    const row = createElement('div', 'chart-row' + (rowData.isBefore ? ' is-before' : '') + (rowData.isGhost ? ' is-ghost' : ''));
+    row.appendChild(createElement('span', 'chart-label', t(rowData.who) + ' · ' + t(rowData.when)));
+    const track = createElement('div', 'chart-track');
+    const fill = createElement('div', 'chart-fill');
+    if (!rowData.isGhost) { fill.style.background = rowData.color; fills.push({ fill, percent: (rowData.value / rowData.max) * 100 }); }
+    track.appendChild(fill);
+    row.appendChild(track);
+    const valueText = rowData.isGhost ? '?' : (Number.isInteger(rowData.value) ? rowData.value : rowData.value.toFixed(1)) + ' ' + t('unit_seconds');
+    row.appendChild(createElement('span', 'chart-value', valueText));
+    card.appendChild(row);
+  });
+  storyLog.appendChild(card);
+  keepInView(card);
+  setTimeout(() => fills.forEach(entry => { entry.fill.style.width = entry.percent + '%'; }), 120);
+}
+
+/* Escalera de fases */
+function buildLadder(){
+  const ladder = document.getElementById('ladder');
+  ladder.replaceChildren();
+  PHASE_FLOW.forEach((phase, phaseIndex) => {
+    const stepButton = createElement('button', 'ladder-step');
+    stepButton.type = 'button';
+    stepButton.dataset.phase = phaseIndex;
+    stepButton.style.setProperty('--phase-color', phase.color);
+    stepButton.appendChild(createElement('span', 'ladder-number', String(phaseIndex === 0 ? '?' : phaseIndex)));
+    const textBox = createElement('span', 'ladder-text');
+    textBox.appendChild(createElement('span', 'ladder-name', t('phase' + phaseIndex + '_name')));
+    textBox.appendChild(createElement('span', 'ladder-tag', t('phase' + phaseIndex + '_tag')));
+    stepButton.appendChild(textBox);
+    stepButton.addEventListener('click', () => startPhase(phaseIndex));
+    ladder.appendChild(stepButton);
+  });
+}
+function refreshLadder(){
+  document.querySelectorAll('#ladder .ladder-step').forEach(stepButton => {
+    const phaseIndex = Number(stepButton.dataset.phase);
+    stepButton.disabled = phaseIndex > state.highestUnlocked;
+    stepButton.classList.toggle('is-current', phaseIndex === state.currentPhase);
+    stepButton.classList.toggle('is-done', state.completedPhases.has(phaseIndex));
+    if (phaseIndex === state.currentPhase) stepButton.setAttribute('aria-current', 'step'); else stepButton.removeAttribute('aria-current');
+  });
+}
+
+/* === Motor del recorrido === */
+function startPhase(phaseIndex){
+  state.runToken += 1;
+  state.currentPhase = phaseIndex;
+  state.highestUnlocked = Math.max(state.highestUnlocked, phaseIndex);
+  const phase = PHASE_FLOW[phaseIndex];
+  document.documentElement.style.setProperty('--phase-color', phase.color);
+  resetBoard();
+  clearLog();
+  clearActions();
+  refreshLadder();
+  sceneCue(phase.startCue);
+  setCaption('');
+  const divider = createElement('div', 'phase-divider');
+  divider.style.setProperty('--phase-color', phase.color);
+  divider.appendChild(createElement('h2', '', t('phase' + phaseIndex + '_name') + ' — ' + t('phase' + phaseIndex + '_tag')));
+  divider.appendChild(createElement('p', '', t('phase' + phaseIndex + '_intro')));
+  storyLog.appendChild(divider);
+  if (phaseIndex > 0 || state.completedPhases.size > 0) document.getElementById('ladder').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+  playStep(phaseIndex, 0, state.runToken);
+}
+function finishPhase(phaseIndex){
+  state.completedPhases.add(phaseIndex);
+  if (phaseIndex < PHASE_FLOW.length - 1) startPhase(phaseIndex + 1);
+}
+
+async function playStep(phaseIndex, stepIndex, runToken){
+  const step = PHASE_FLOW[phaseIndex].steps[stepIndex];
+  const stepText = TEXT[step.id];
+  const isCancelled = () => runToken !== state.runToken;
+  const isLastStep = stepIndex === PHASE_FLOW[phaseIndex].steps.length - 1;
+  const nextLabel = step.nextLabelKey ? t(step.nextLabelKey) : t('next');
+  const goToNext = () => {
+    clearActions();
+    if (isLastStep) finishPhase(phaseIndex); else playStep(phaseIndex, stepIndex + 1, runToken);
+  };
+  async function sayLines(lines, cssClass){
+    for (const line of lines) {
+      addDialog('lab', line, cssClass);
+      await delay(480);
+      if (isCancelled()) return false;
     }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-    }
-    draw() {
-        ctx.fillStyle = `rgba(52, 211, 153, ${this.opacity})`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, Math.max(0.5, this.size), 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
+    return true;
+  }
+  async function showChartAndTerms(){
+    if (step.chart) { addChart(step.chart); await delay(900); if (isCancelled()) return false; }
+    return true;
+  }
 
-for (let i = 0; i < 60; i++) {
-    particlesArray.push(new Particle());
-}
+  applyLights(step.lights);
+  if (stepText.caption) setCaption(stepText.caption);
+  if (step.cue && step.kind !== 'action') sceneCue(step.cue);
 
-function animateParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particlesArray.forEach(p => { p.update(); p.draw(); });
-    requestAnimationFrame(animateParticles);
-}
-animateParticles();
+  if (step.kind === 'say') {
+    if (!(await sayLines(stepText.say))) return;
+    if (!(await showChartAndTerms())) return;
+    addTermChips(step.terms);
+    addButton(nextLabel, goToNext);
 
-// =============================================
-// OBSERVADOR DE SCROLL PARA ANIMACIONES
-// =============================================
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            // Animar barras de rigor dentro de la seccion visible
-            entry.target.querySelectorAll('.rigor-fill').forEach(bar => {
-                const target = bar.getAttribute('data-target');
-                if (target) bar.style.width = target + '%';
-            });
-        }
+  } else if (step.kind === 'action') {
+    if (!(await sayLines(stepText.say))) return;
+    addButton(stepText.actionLabel, async () => {
+      clearActions();
+      sceneCue(step.cue);
+      await delay(step.cueMilliseconds || 2500);
+      if (isCancelled()) return;
+      if (!(await sayLines(stepText.after))) return;
+      if (!(await showChartAndTerms())) return;
+      addTermChips(step.terms);
+      addButton(nextLabel, goToNext);
     });
-}, { threshold: 0.15 });
 
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  } else if (step.kind === 'choice') {
+    if (!(await sayLines(stepText.say))) return;
+    renderChoice(
+      stepText.options.map((option, optionIndex) => ({ text: option.text, feedback: option.feedback, correct: step.correct[optionIndex] })),
+      isCancelled,
+      () => { addTermChips(step.terms); addButton(nextLabel, goToNext); }
+    );
 
-// =============================================
-// FUNCIONES AUXILIARES
-// =============================================
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function createResultLine(text, type = 'info') {
-    const line = document.createElement('div');
-    line.className = `result-line ${type}`;
-    line.textContent = '> ' + text;
-    return line;
-}
-
-function createBarChart(container, data) {
-    // data: [{ label, value, maxValue, color, sublabel }]
-    const wrapper = document.createElement('div');
-    wrapper.className = 'data-bar-container';
-    wrapper.style.opacity = '0';
-    wrapper.style.transition = 'opacity 0.5s';
-
-    data.forEach((item, i) => {
-        const barWrapper = document.createElement('div');
-        barWrapper.className = 'data-bar-wrapper';
-
-        const valueEl = document.createElement('div');
-        valueEl.className = 'data-bar-value';
-        valueEl.style.color = item.color;
-        valueEl.textContent = item.value;
-
-        const bar = document.createElement('div');
-        bar.className = 'data-bar';
-        bar.style.background = item.color;
-        bar.style.height = '0px';
-        const targetHeight = (item.value / item.maxValue) * 85;
-        bar.style.opacity = '0.85';
-
-        const labelEl = document.createElement('div');
-        labelEl.className = 'data-bar-label';
-        labelEl.textContent = item.label;
-
-        const sublabelEl = document.createElement('div');
-        sublabelEl.className = 'data-bar-label';
-        sublabelEl.style.color = item.color;
-        sublabelEl.style.opacity = '0.7';
-        sublabelEl.textContent = item.sublabel || '';
-
-        barWrapper.appendChild(valueEl);
-        barWrapper.appendChild(bar);
-        barWrapper.appendChild(labelEl);
-        barWrapper.appendChild(sublabelEl);
-        wrapper.appendChild(barWrapper);
-
-        // Animar barra con retraso
-        setTimeout(() => {
-            bar.style.height = Math.max(4, targetHeight) + 'px';
-        }, 200 + i * 150);
+  } else if (step.kind === 'checklist') {
+    if (!(await sayLines(stepText.say))) return;
+    const grid = createElement('div', 'check-grid');
+    const hint = createElement('p', 'checklist-hint', t('checklist_hint'));
+    let pendingCount = stepText.items.length;
+    stepText.items.forEach(item => {
+      const itemButton = createElement('button', 'check-item');
+      itemButton.type = 'button';
+      itemButton.appendChild(createElement('i', 'fa-solid fa-check'));
+      itemButton.appendChild(createElement('span', '', item.label));
+      itemButton.addEventListener('click', async () => {
+        if (itemButton.classList.contains('is-done')) return;
+        itemButton.classList.add('is-done');
+        addDialog('lab', item.why, 'bubble-note');
+        pendingCount -= 1;
+        if (pendingCount > 0) return;
+        sceneCue(step.cue);
+        await delay(700);
+        if (isCancelled()) return;
+        clearActions();
+        if (!(await sayLines(stepText.after))) return;
+        addTermChips(step.terms);
+        addButton(nextLabel, goToNext);
+      });
+      grid.appendChild(itemButton);
     });
+    storyActions.append(hint, grid);
+    keepInView(grid);
 
-    container.appendChild(wrapper);
-    setTimeout(() => { wrapper.style.opacity = '1'; }, 100);
+  } else if (step.kind === 'case') {
+    const caseNumber = PHASE_FLOW[phaseIndex].steps.filter((candidate, candidateIndex) => candidate.kind === 'case' && candidateIndex <= stepIndex).length;
+    const caseTotal = PHASE_FLOW[phaseIndex].steps.filter(candidate => candidate.kind === 'case').length;
+    addDialog('lab', '<strong>' + fmt(t('case_label'), { number: caseNumber, total: caseTotal }) + '</strong><br>' + stepText.say[0], 'bubble-case');
+    await delay(500);
+    if (isCancelled()) return;
+    renderChoice(
+      DESIGN_KEYS.map(designKey => ({
+        text: t('design_' + designKey),
+        feedback: designKey === step.answer ? stepText.explain : stepText.hint,
+        correct: designKey === step.answer
+      })),
+      isCancelled,
+      () => addButton(stepIndex === PHASE_FLOW[phaseIndex].steps.length - 2 ? t('go_final') : nextLabel, goToNext)
+    );
+
+  } else if (step.kind === 'finale') {
+    if (!(await sayLines(stepText.say))) return;
+    showFinalScreen();
+  }
 }
 
-// =============================================
-// PERSONALIZACION: NOMBRE DEL USUARIO
-// (solo en esta sesion del navegador, no se guarda permanentemente)
-// =============================================
+/* Opciones con retroalimentación: las incorrectas se tachan y se puede reintentar */
+function renderChoice(options, isCancelled, onResolved){
+  clearActions();
+  const optionList = createElement('div', 'option-list');
+  const optionButtons = options.map(option => {
+    const optionButton = createElement('button', 'option-btn');
+    optionButton.type = 'button';
+    optionButton.textContent = option.text;
+    optionButton.addEventListener('click', () => {
+      if (isCancelled()) return;
+      addDialog('you', option.text);
+      addDialog('lab', option.feedback, option.correct ? 'bubble-ok' : 'bubble-hint');
+      if (!option.correct) {
+        optionButton.disabled = true;
+        optionButton.classList.add('is-wrong');
+        return;
+      }
+      optionButtons.forEach(otherButton => { otherButton.disabled = true; });
+      optionButton.classList.add('is-right');
+      setTimeout(() => { if (isCancelled()) return; clearActions(); onResolved(); }, 900);
+    });
+    optionList.appendChild(optionButton);
+    return optionButton;
+  });
+  storyActions.appendChild(optionList);
+  keepInView(optionList);
+}
+
+/* === Nombre del estudiante (solo sesión) === */
 function obtenerNombreUsuario(callback) {
-    const guardado = sessionStorage.getItem('nombreEstudianteSim');
-    if (guardado) { callback(guardado); return; }
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:99999;';
-    overlay.innerHTML = `
-        <div style="background:var(--bg-card,#0c1a0c);color:var(--fg,#b8e8b8);padding:32px;border-radius:8px;max-width:380px;width:90%;text-align:center;border:1px solid var(--fg-bright,#34D399);font-family:inherit;box-shadow:0 0 30px rgba(52,211,153,.2)">
-            <h3 style="margin:0 0 12px;color:var(--fg-bright,#34D399);font-family:'Orbitron',sans-serif;font-size:1rem;letter-spacing:1px;">IDENTIFIQUESE, SUJETO</h3>
-            <p style="font-size:.85rem;opacity:.8;margin:0 0 16px;line-height:1.5">Para personalizar tu resultado. Tu nombre solo se usa en esta sesion del navegador y no se guarda ni se envia a ningun servidor.</p>
-            <input id="inputNombreUsuario" type="text" placeholder="Tu nombre" style="width:100%;padding:10px;border-radius:4px;border:1px solid var(--border-bright,#2a5a2a);background:var(--bg,#060d06);color:var(--fg,#b8e8b8);margin-bottom:16px;box-sizing:border-box;font-size:1rem">
-            <button id="btnConfirmarNombre" style="padding:10px 28px;border:none;border-radius:4px;background:var(--fg-bright,#34D399);color:#000;font-weight:700;cursor:pointer;font-size:1rem">Continuar</button>
-        </div>`;
-    document.body.appendChild(overlay);
-    const input = overlay.querySelector('#inputNombreUsuario');
-    input.focus();
-    const confirmar = () => {
-        const nombre = input.value.trim() || 'Sujeto';
-        sessionStorage.setItem('nombreEstudianteSim', nombre);
-        overlay.remove();
-        callback(nombre);
-    };
-    overlay.querySelector('#btnConfirmarNombre').addEventListener('click', confirmar);
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') confirmar(); });
+  const savedName = sessionStorage.getItem('nombreEstudianteSim');
+  if (savedName) { callback(savedName); return; }
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);display:flex;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(5px)';
+  const modal = document.createElement('div');
+  modal.style.cssText = 'background:var(--card, #222);border:1px solid var(--accent, rgba(255,255,255,0.1));border-radius:12px;padding:32px;max-width:400px;width:90%;text-align:center;';
+  modal.innerHTML = `
+    <p style="font-size:16px;color:var(--txt, #fff);margin-bottom:24px;font-weight:600">${t('name_q')}</p>
+    <input type="text" id="input-nombre" style="width:100%;padding:10px 14px;border:1px solid var(--border-bright, rgba(255,255,255,0.2));
+      border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg, #111);color:var(--txt, #fff);margin-bottom:16px"
+      placeholder="${t('name_ph')}" autocomplete="off">
+    <p style="font-size:12px;color:var(--txt-3, #999);margin-bottom:20px">${t('name_note')}</p>
+    <button id="btn-continuar" style="background:var(--accent, #818cf8);color:var(--bg, #000);border:none;
+      padding:10px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">${t('name_btn')}</button>
+  `;
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  const nameInput = modal.querySelector('#input-nombre');
+  const continueButton = modal.querySelector('#btn-continuar');
+  const submit = () => {
+    const studentName = nameInput.value.trim() || t('name_default');
+    sessionStorage.setItem('nombreEstudianteSim', studentName);
+    overlay.remove();
+    callback(studentName);
+  };
+  continueButton.addEventListener('click', submit);
+  nameInput.addEventListener('keypress', keyEvent => keyEvent.key === 'Enter' && submit());
+  nameInput.focus();
 }
 
-// =============================================
-// EJECUCION DE EXPERIMENTOS
-// =============================================
-const experimentState = { pre: false, quasi: false, pure: false };
-
-// Reacciona visualmente a BRAIN y PINKY en la escena 3D según el diseño ejecutado
-function animarSujetos(type) {
-    const statusBrain = document.getElementById('status-brain');
-    const statusPinky = document.getElementById('status-pinky');
-    statusBrain.className = 'cage-status';
-    statusPinky.className = 'cage-status';
-
-    if (window.lab3D) window.lab3D.reaccionar(type);
-
-    if (type === 'pre') {
-        // Sin grupo control: Brain camina hacia el rayo y vuelve aturdido; Pinky queda inactiva
-        statusBrain.textContent = '⚡ RAYO ACTIVADO';
-        statusPinky.textContent = '⚠ SIN GRUPO CONTROL';
-        statusPinky.classList.add('status-warning');
-    } else if (type === 'quasi') {
-        // Grupos preexistentes/intactos: cada quien camina hacia su propio comedero, sin sorteo
-        statusBrain.textContent = '🍔 SUPERALIMENTO';
-        statusPinky.textContent = '🥣 DIETA NORMAL';
-    } else if (type === 'pure') {
-        // Asignación aleatoria real: ambos sujetos cruzan posiciones ("sorteo") antes de recibir tratamiento
-        statusBrain.textContent = '🎲 ALEATORIZANDO...';
-        statusPinky.textContent = '🎲 ALEATORIZANDO...';
-        setTimeout(() => {
-            statusBrain.textContent = '✓ ALEATORIZADO';
-            statusPinky.textContent = '✓ ALEATORIZADO';
-            statusBrain.classList.add('status-success');
-            statusPinky.classList.add('status-success');
-        }, 1350);
-    }
-}
-
-async function runExperiment(type) {
-    if (experimentState[type]) return;
-    experimentState[type] = true;
-    animarSujetos(type);
-
-    const btn = document.getElementById(`btn-${type}`);
-    const panel = document.getElementById(`results-${type}`);
-    const conclusion = document.getElementById(`conclusion-${type}`);
-
-    btn.disabled = true;
-    btn.classList.add('running');
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>EJECUTANDO...';
-
-    // Limpiar panel
-    panel.innerHTML = '';
-
-    if (type === 'pre') {
-        await runPreExperiment(panel);
-    } else if (type === 'quasi') {
-        await runQuasiExperiment(panel);
-    } else if (type === 'pure') {
-        await runPureExperiment(panel);
-    }
-
-    // Mostrar conclusion
-    await delay(400);
-    conclusion.style.display = 'block';
-    conclusion.style.opacity = '0';
-    conclusion.style.transform = 'translateY(10px)';
-    conclusion.style.transition = 'all 0.5s';
-    await delay(50);
-    conclusion.style.opacity = '1';
-    conclusion.style.transform = 'translateY(0)';
-
-    btn.classList.remove('running');
-    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>COMPLETADO';
-    document.getElementById(`tab-btn-${type}`)?.classList.add('completado');
-
-    if (experimentState.pre && experimentState.quasi && experimentState.pure) {
-        localStorage.setItem('simlab_done_simlab_des', Date.now());
-        await delay(600);
-        obtenerNombreUsuario(nombre => {
-            const finalSection = document.getElementById('sec-final');
-            document.getElementById('final-titulo').textContent = `PROTOCOLO COMPLETADO, SUJETO ${nombre.toUpperCase()}`;
-            finalSection.style.display = '';
-            finalSection.classList.add('visible');
-            finalSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-    }
-}
-
-async function runPreExperiment(panel) {
-    const lines = [
-        { text: 'Inicializando protocolo PRE-001...', type: 'info', delay: 0 },
-        { text: 'Sujeto: BRAIN (Sujeto A)', type: 'info', delay: 500 },
-        { text: 'Sin medicion previa (pre-test no disponible)', type: 'warning', delay: 1000 },
-        { text: 'Aplicando Rayo de Inteligencia ACME Mk-III...', type: 'info', delay: 1800 },
-        { text: 'ZZZT... RAYO ACTIVADO [3.2 segundos]', type: 'error', delay: 2800 },
-        { text: 'Exposicion completada. Sin efectos adversos observados.', type: 'info', delay: 3800 },
-        { text: 'Administrando test de CI estandarizado...', type: 'info', delay: 4500 },
-        { text: 'RESULTADO: CI = 245', type: 'success', delay: 5500 },
-        { text: 'ADVERTENCIA: Sin punto de comparacion,', type: 'warning', delay: 6500 },
-        { text: 'no se puede determinar si el rayo tuvo efecto.', type: 'warning', delay: 7000 },
-    ];
-
-    for (const line of lines) {
-        await delay(line.delay > 0 ? 500 : 300);
-        const el = createResultLine(line.text, line.type);
-        panel.appendChild(el);
-        await delay(80);
-        el.classList.add('visible');
-    }
-
-    await delay(500);
-    // Grafico simple
-    createBarChart(panel, [
-        { label: 'Brain', value: 245, maxValue: 300, color: '#ff4444', sublabel: 'CI post-rayo' }
-    ]);
-
-    // Nota sobre falta de referencia
-    await delay(800);
-    const note = createResultLine('¿245 es alto o bajo? No hay referencia. ', 'warning');
-    panel.appendChild(note);
-    await delay(80);
-    note.classList.add('visible');
-    const note2 = createResultLine('Brain ya era excepcional de base.', 'warning');
-    panel.appendChild(note2);
-    await delay(80);
-    note2.classList.add('visible');
-}
-
-async function runQuasiExperiment(panel) {
-    const lines = [
-        { text: 'Inicializando protocolo CUASI-002...', type: 'info', delay: 0 },
-        { text: 'Grupo Experimental: BRAIN (Dieta Superalimento)', type: 'info', delay: 500 },
-        { text: 'Grupo Control: PINKY (Dieta normal)', type: 'info', delay: 1000 },
-        { text: 'NOTA: Grupos NO asignados aleatoriamente', type: 'warning', delay: 1500 },
-        { text: 'Fase 1: Pre-test de resolucion de problemas...', type: 'info', delay: 2200 },
-        { text: '  Brain pre-test: 78/100', type: 'success', delay: 3000 },
-        { text: '  Pinky pre-test: 25/100', type: 'info', delay: 3400 },
-        { text: 'Diferencia basal: 53 puntos (!)', type: 'error', delay: 3900 },
-        { text: 'Fase 2: Administrando dietas [14 dias]...', type: 'info', delay: 4600 },
-        { text: '  Brain: Superalimento ACME (3x/dia)', type: 'info', delay: 5200 },
-        { text: '  Pinky: Dieta estandar laboratorio', type: 'info', delay: 5600 },
-        { text: 'Fase 3: Post-test de resolucion de problemas...', type: 'info', delay: 6200 },
-        { text: '  Brain post-test: 92/100 (+14)', type: 'success', delay: 7000 },
-        { text: '  Pinky post-test: 28/100 (+3)', type: 'info', delay: 7400 },
-    ];
-
-    for (const line of lines) {
-        await delay(450);
-        const el = createResultLine(line.text, line.type);
-        panel.appendChild(el);
-        await delay(80);
-        el.classList.add('visible');
-    }
-
-    await delay(500);
-    // Grafico con 4 barras
-    createBarChart(panel, [
-        { label: 'Brain', value: 78, maxValue: 100, color: '#ffaa00', sublabel: 'Pre' },
-        { label: 'Brain', value: 92, maxValue: 100, color: '#ffcc00', sublabel: 'Post' },
-        { label: 'Pinky', value: 25, maxValue: 100, color: '#88aaff', sublabel: 'Pre' },
-        { label: 'Pinky', value: 28, maxValue: 100, color: '#aaccff', sublabel: 'Post' },
-    ]);
-
-    await delay(800);
-    const w = createResultLine('La mejora de Brain (+14) vs Pinky (+3) parece', 'warning');
-    panel.appendChild(w);
-    await delay(80);
-    w.classList.add('visible');
-    await delay(300);
-    const w2 = createResultLine('significativa, PERO la diferencia basal (78 vs 25)', 'warning');
-    panel.appendChild(w2);
-    await delay(80);
-    w2.classList.add('visible');
-    await delay(300);
-    const w3 = createResultLine('confunde los resultados. No son equivalentes.', 'warning');
-    panel.appendChild(w3);
-    await delay(80);
-    w3.classList.add('visible');
-}
-
-async function runPureExperiment(panel) {
-    const lines = [
-        { text: 'Inicializando protocolo PURE-003...', type: 'info', delay: 0 },
-        { text: 'Clonacion: 40 ratones geneticamente identicos', type: 'info', delay: 500 },
-        { text: 'Protocolo doble ciego activado', type: 'success', delay: 1100 },
-        { text: 'ASIGNACION ALEATORIA (tabla de numeros aleatorios):', type: 'success', delay: 1700 },
-        { text: '  Grupo Experimental: n=20 (Suero Cognitivo)', type: 'info', delay: 2300 },
-        { text: '  Grupo Control: n=20 (Placebo salino + colorante)', type: 'info', delay: 2700 },
-        { text: 'Verificacion de equivalencia inicial:', type: 'info', delay: 3300 },
-        { text: '  Exp pre-test: 52.3s | Ctrl pre-test: 51.8s', type: 'success', delay: 3900 },
-        { text: '  Diferencia NO significativa (p=0.82) -> EQUIVALENTES', type: 'success', delay: 4400 },
-        { text: 'Administrando sustancias [14 dias, doble ciego]...', type: 'info', delay: 5100 },
-        { text: 'Post-test: medicion de tiempo en laberinto...', type: 'info', delay: 5800 },
-        { text: '  Grupo Exp post-test: 34.1s (delta = -18.2s)', type: 'success', delay: 6600 },
-        { text: '  Grupo Ctrl post-test: 49.7s (delta = -2.1s)', type: 'info', delay: 7100 },
-        { text: 'ANALISIS ESTADISTICO: t(38) = 4.87, p < 0.01', type: 'success', delay: 7800 },
-        { text: 'Diferencia ESTADISTICAMENTE SIGNIFICATIVA', type: 'success', delay: 8400 },
-    ];
-
-    for (const line of lines) {
-        await delay(420);
-        const el = createResultLine(line.text, line.type);
-        panel.appendChild(el);
-        await delay(80);
-        el.classList.add('visible');
-    }
-
-    await delay(500);
-    createBarChart(panel, [
-        { label: 'Exp', value: 52.3, maxValue: 65, color: '#34D399', sublabel: 'Pre: 52.3s' },
-        { label: 'Exp', value: 34.1, maxValue: 65, color: '#00cc33', sublabel: 'Post: 34.1s' },
-        { label: 'Ctrl', value: 51.8, maxValue: 65, color: '#88aaff', sublabel: 'Pre: 51.8s' },
-        { label: 'Ctrl', value: 49.7, maxValue: 65, color: '#6688dd', sublabel: 'Post: 49.7s' },
-    ]);
-
-    await delay(800);
-    const s = createResultLine('Grupos equivalentes al inicio + doble ciego =', 'success');
-    panel.appendChild(s);
-    await delay(80);
-    s.classList.add('visible');
-    await delay(300);
-    const s2 = createResultLine('la diferencia (-18.2s vs -2.1s) se atribuye', 'success');
-    panel.appendChild(s2);
-    await delay(80);
-    s2.classList.add('visible');
-    await delay(300);
-    const s3 = createResultLine('CAUSALMENTE al Suero Cognitivo ACME.', 'success');
-    panel.appendChild(s3);
-    await delay(80);
-    s3.classList.add('visible');
-}
-
-// Pestañas de experimento: alterna cuál sección de experimento está visible
-// junto a la escena 3D (siempre visible en su sidebar fija)
-function initTabs() {
-    document.querySelectorAll('.exp-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            const target = tab.dataset.tab;
-            document.querySelectorAll('.exp-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.exp-tab-panel').forEach(p => {
-                p.classList.remove('active');
-                p.style.display = 'none';
-            });
-            tab.classList.add('active');
-            const panel = document.getElementById('tabpanel-' + target);
-            panel.classList.add('active');
-            panel.style.display = 'block';
-        });
+/* === Pantalla final === */
+function buildMatrix(){
+  const wrap = createElement('div', 'matrix-wrap');
+  const table = createElement('table', 'matrix');
+  const headRow = createElement('tr');
+  headRow.appendChild(createElement('th', '', t('matrix_ingredient')));
+  DESIGN_KEYS.forEach(designKey => headRow.appendChild(createElement('th', '', t('col_' + designKey))));
+  table.appendChild(createElement('thead')).appendChild(headRow);
+  const body = createElement('tbody');
+  INGREDIENT_KEYS.concat('causal').forEach(rowKey => {
+    const row = createElement('tr');
+    const labelCell = createElement('td', '', rowKey === 'causal' ? t('matrix_causal') : t('ing_' + rowKey));
+    if (rowKey !== 'causal') labelCell.appendChild(createElement('span', 'row-tech', t('ing_' + rowKey + '_tech')));
+    row.appendChild(labelCell);
+    DESIGN_KEYS.forEach(designKey => {
+      const status = DESIGN_STATUS[designKey][rowKey];
+      const cell = createElement('td', 'cell-' + status);
+      cell.textContent = rowKey === 'causal' ? t('causal_' + status) : t('status_' + status);
+      row.appendChild(cell);
     });
+    body.appendChild(row);
+  });
+  table.appendChild(body);
+  wrap.appendChild(table);
+  return wrap;
+}
+function showFinalScreen(){
+  state.completedPhases.add(PHASE_FLOW.length - 1);
+  localStorage.setItem('simlab_done_simlab_des', Date.now());
+  refreshLadder();
+  obtenerNombreUsuario(studentName => {
+    sceneCue('empty');
+    setCaption('');
+    const card = createElement('div', 'final-card');
+    card.appendChild(createElement('h2', '', fmt(t('final_title'), { name: studentName })));
+    card.appendChild(createElement('p', '', t('final_text')));
+    card.appendChild(createElement('h3', 'side-title', t('matrix_title')));
+    card.appendChild(buildMatrix());
+    const takeaways = createElement('ul', 'takeaways');
+    ['takeaway_1', 'takeaway_2', 'takeaway_3'].forEach(takeawayKey => takeaways.appendChild(createElement('li', '', t(takeawayKey))));
+    card.appendChild(takeaways);
+    const actions = createElement('div', 'final-actions');
+    const homeLink = createElement('a', 'btn-primary', '<i class="fa-solid fa-house"></i> ' + t('final_home'));
+    homeLink.href = 'index.html';
+    const repeatButton = createElement('button', 'btn-secondary', '<i class="fa-solid fa-rotate-left"></i> ' + t('final_again'));
+    repeatButton.type = 'button';
+    repeatButton.addEventListener('click', () => location.reload());
+    actions.append(homeLink, repeatButton);
+    card.appendChild(actions);
+    storyLog.appendChild(card);
+    keepInView(card);
+  });
 }
 
-// =============================================
-// INICIALIZACION
-// =============================================
-document.addEventListener('DOMContentLoaded', () => {
-    initTabs();
-    // Activar secciones visibles al cargar
-    document.querySelectorAll('.fade-in').forEach(el => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
-            el.classList.add('visible');
-            el.querySelectorAll('.rigor-fill').forEach(bar => {
-                const target = bar.getAttribute('data-target');
-                if (target) bar.style.width = target + '%';
-            });
-        }
+/* === Partículas de fondo (decorativas) === */
+(function initParticles(){
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const particleCanvas = document.getElementById('particles');
+  const particleContext = particleCanvas.getContext('2d');
+  const particles = [];
+  function resizeCanvas(){ particleCanvas.width = window.innerWidth; particleCanvas.height = window.innerHeight; }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  for (let particleIndex = 0; particleIndex < 50; particleIndex++) {
+    particles.push({ x: Math.random() * particleCanvas.width, y: Math.random() * particleCanvas.height,
+      size: Math.random() * 2 + 0.5, speedX: (Math.random() - 0.5) * 0.3, speedY: (Math.random() - 0.5) * 0.3, opacity: Math.random() * 0.35 + 0.1 });
+  }
+  function animateParticles(){
+    particleContext.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+    particles.forEach(particle => {
+      particle.x += particle.speedX; particle.y += particle.speedY;
+      if (particle.x < 0 || particle.x > particleCanvas.width) particle.speedX *= -1;
+      if (particle.y < 0 || particle.y > particleCanvas.height) particle.speedY *= -1;
+      particleContext.fillStyle = 'rgba(52, 211, 153, ' + particle.opacity + ')';
+      particleContext.beginPath();
+      particleContext.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      particleContext.fill();
     });
-});
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+})();
+
+/* === Inicio === */
+buildLadder();
+buildBoard();
+renderGlossary();
+startPhase(0);
 </script>
 
-<!-- ESCENA 3D: BRAIN y PINKY en un recinto de laboratorio compartido (three.js, mismo enfoque que observación.html) -->
+<!-- ESCENA 3D: laboratorio de ratones (three.js). Se controla con cues desde el recorrido. -->
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const container = document.getElementById('lab3d-container');
 const tooltip = document.getElementById('lab3d-tooltip');
+const translate = key => window.t(key);
 
-let scene, camera, renderer, controls, clock, raycaster, pointer;
-const mice = {};
-const labProps = {};
-
-const MOUSE_COLORS = {
-    brain: { body: 0xd0d0d0, head: 0xd8d8d8, ear: 0xffaaaa, cape: 0xcc2222 },
-    pinky: { body: 0xe8d8d8, head: 0xf0e0e0, ear: 0xffaacc }
+const COLOR_GROUP_A = 0xffb800;
+const COLOR_GROUP_B = 0x4da3ff;
+const CLONE_COUNT = 10;
+const POSITION = {
+    bowlA: { x: 1.7, z: 1.7 },
+    bowlB: { x: -1.7, z: 1.7 },
+    bag: { x: 0, z: 0.9 },
+    maze: { x: 0, z: -2.4 },
+    brainHome: { x: 1.2, z: -0.3 },
+    pinkyHome: { x: -1.2, z: -0.3 },
+    brainAlone: { x: 0.5, z: -0.2 }
 };
 
-// Posiciones "de reposo" (cada quien en su lado del recinto) y puntos de interés
-const HOME = { brain: { x: 1.2, z: -0.3 }, pinky: { x: -1.2, z: -0.3 } };
-const RAYO_POS = { x: 1.6, z: -1.6 };
-const BOWL = { brain: { x: 1.6, z: 1.6 }, pinky: { x: -1.6, z: 1.6 } };
+let scene, camera, renderer, controls, clock, raycaster, pointer;
+const mouseList = [];
+const props = {};
 
-function initScene() {
+/* ---------- utilidades de animación ---------- */
+function tween(durationMilliseconds, onProgress, onComplete){
+    const startTime = performance.now();
+    function step(){
+        const progress = Math.min((performance.now() - startTime) / durationMilliseconds, 1);
+        onProgress(progress);
+        if (progress < 1) requestAnimationFrame(step); else if (onComplete) onComplete();
+    }
+    requestAnimationFrame(step);
+}
+const easeOutCubic = progress => 1 - Math.pow(1 - progress, 3);
+const randomBetween = (minimum, maximum) => minimum + Math.random() * (maximum - minimum);
+
+function popIn(object3d){
+    object3d.visible = true;
+    object3d.userData.hideToken = (object3d.userData.hideToken || 0) + 1;
+    tween(380, progress => object3d.scale.setScalar(0.01 + 0.99 * easeOutCubic(progress)));
+}
+function popOut(object3d){
+    if (!object3d.visible) return;
+    const token = (object3d.userData.hideToken = (object3d.userData.hideToken || 0) + 1);
+    tween(380, progress => object3d.scale.setScalar(Math.max(0.01, 1 - easeOutCubic(progress))), () => {
+        if (object3d.userData.hideToken === token) object3d.visible = false;
+    });
+}
+function hideInstant(object3d){
+    object3d.userData.hideToken = (object3d.userData.hideToken || 0) + 1;
+    object3d.visible = false;
+    object3d.scale.setScalar(1);
+}
+
+/* ---------- ratones ---------- */
+const MOUSE_PALETTE = {
+    clone: { body: 0xf2f2f2, head: 0xffffff, ear: 0xffb3b3 },
+    brain: { body: 0xd0d0d0, head: 0xd8d8d8, ear: 0xffaaaa },
+    pinky: { body: 0xe8c8d0, head: 0xf0d6dc, ear: 0xff9fc2 }
+};
+
+function createMouseGroup(role){
+    const colors = MOUSE_PALETTE[role];
+    const group = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.22, 4, 8), new THREE.MeshStandardMaterial({ color: colors.body, roughness: 0.7 }));
+    body.rotation.z = Math.PI / 2; body.position.set(0, 0.18, 0); body.castShadow = true; group.add(body);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), new THREE.MeshStandardMaterial({ color: colors.head, roughness: 0.7 }));
+    head.position.set(0.26, 0.22, 0); head.castShadow = true; group.add(head);
+    const earMaterial = new THREE.MeshStandardMaterial({ color: colors.ear, roughness: 0.6 });
+    [-1, 1].forEach(side => {
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 10), earMaterial);
+        ear.position.set(0.32, 0.32, side * 0.09); ear.scale.set(1, 1, 0.4); group.add(ear);
+    });
+    const tailCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(-0.2, 0.15, 0), new THREE.Vector3(-0.4, 0.2, 0.05), new THREE.Vector3(-0.55, 0.1, -0.05)]);
+    group.add(new THREE.Mesh(new THREE.TubeGeometry(tailCurve, 12, 0.015, 6, false), new THREE.MeshStandardMaterial({ color: colors.body })));
+    const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x111111 });
+    [-1, 1].forEach(side => {
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), eyeMaterial);
+        eye.position.set(0.36, 0.24, side * 0.06); group.add(eye);
+    });
+    /* Collar: se enciende al sortear (ámbar = A, azul = B) */
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.03, 8, 20), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x222222 }));
+    collar.rotation.y = Math.PI / 2; collar.position.set(0.17, 0.2, 0); collar.visible = false;
+    group.add(collar);
+    group.userData.collar = collar;
+    if (role === 'brain') {
+        const cape = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.28, 4), new THREE.MeshStandardMaterial({ color: 0xcc2222, side: THREE.DoubleSide }));
+        cape.rotation.x = Math.PI; cape.position.set(-0.15, 0.12, 0); cape.scale.set(1, 1, 0.3); group.add(cape);
+    }
+    return group;
+}
+
+function registerMouse(role, home, baseScale){
+    const group = createMouseGroup(role);
+    group.visible = false;
+    group.position.set(home.x, 0, home.z);
+    const mouse = { group, role, home: { x: home.x, z: home.z }, busy: false, shown: false, baseScale, groupKey: null, blend: 0, moveId: 0, wanderPhase: Math.random() * 6.28 };
+    group.traverse(child => { child.userData.mouseRef = mouse; });
+    scene.add(group);
+    mouseList.push(mouse);
+    return mouse;
+}
+const clonesOf = () => mouseList.filter(mouse => mouse.role === 'clone');
+const mouseByRole = role => mouseList.find(mouse => mouse.role === role);
+
+function setMouseHome(mouse, home, instant){
+    mouse.home = { x: home.x, z: home.z };
+    if (instant) { mouse.group.position.set(home.x, 0, home.z); mouse.busy = false; mouse.moveId += 1; }
+}
+function showMouse(mouse, delayMilliseconds){
+    setTimeout(() => {
+        if (mouse.shown) return;
+        mouse.shown = true;
+        mouse.group.visible = true;
+        tween(450, progress => mouse.group.scale.setScalar(mouse.baseScale * (0.01 + 0.99 * easeOutCubic(progress))));
+    }, delayMilliseconds || 0);
+}
+function showMouseInstant(mouse){
+    mouse.shown = true; mouse.group.visible = true; mouse.group.scale.setScalar(mouse.baseScale);
+}
+function hideMouse(mouse){
+    if (!mouse.shown) return;
+    mouse.shown = false;
+    tween(450, progress => mouse.group.scale.setScalar(Math.max(0.01, mouse.baseScale * (1 - easeOutCubic(progress)))), () => {
+        if (!mouse.shown) mouse.group.visible = false;
+    });
+}
+function hideMouseInstant(mouse){
+    mouse.shown = false; mouse.group.visible = false; mouse.group.scale.setScalar(mouse.baseScale);
+    mouse.groupKey = null; mouse.group.userData.collar.visible = false;
+    mouse.moveId += 1; mouse.busy = false;
+}
+function moveMouse(mouse, target, durationMilliseconds, onArrive){
+    const startX = mouse.group.position.x, startZ = mouse.group.position.z;
+    const deltaX = target.x - startX, deltaZ = target.z - startZ;
+    if (Math.hypot(deltaX, deltaZ) > 0.05) mouse.group.rotation.y = Math.atan2(-deltaZ, deltaX);
+    mouse.moveId += 1;
+    const myMoveId = mouse.moveId;
+    mouse.busy = true; mouse.blend = 0;
+    tween(durationMilliseconds, progress => {
+        if (mouse.moveId !== myMoveId) return;
+        const eased = easeOutCubic(progress);
+        mouse.group.position.x = startX + deltaX * eased;
+        mouse.group.position.z = startZ + deltaZ * eased;
+    }, () => {
+        if (mouse.moveId !== myMoveId) return;
+        mouse.busy = false;
+        if (onArrive) onArrive();
+    });
+}
+function bounceMouse(mouse, factor, durationMilliseconds){
+    tween(durationMilliseconds, progress => {
+        mouse.group.scale.setScalar(mouse.baseScale * (1 + Math.sin(progress * Math.PI) * (factor - 1)));
+    }, () => mouse.group.scale.setScalar(mouse.baseScale));
+}
+
+/* ---------- escenario y utilería ---------- */
+function createLabelSprite(text, colorCss){
+    const canvasElement = document.createElement('canvas');
+    canvasElement.width = 360; canvasElement.height = 88;
+    const context2d = canvasElement.getContext('2d');
+    context2d.fillStyle = 'rgba(6,13,6,0.82)';
+    context2d.fillRect(0, 0, 360, 88);
+    context2d.strokeStyle = colorCss; context2d.lineWidth = 4;
+    context2d.strokeRect(2, 2, 356, 84);
+    context2d.font = 'bold 36px sans-serif'; context2d.fillStyle = colorCss;
+    context2d.textAlign = 'center'; context2d.textBaseline = 'middle';
+    context2d.fillText(text, 180, 46);
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvasElement), transparent: true, depthTest: false }));
+    sprite.scale.set(1.35, 0.33, 1);
+    sprite.renderOrder = 10;
+    return sprite;
+}
+
+function createBowl(position, pelletColor, labelText, labelColor){
+    const bowlGroup = new THREE.Group();
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.15, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.4, roughness: 0.4 }));
+    bowl.position.y = 0.05; bowlGroup.add(bowl);
+    const pelletMaterial = new THREE.MeshStandardMaterial({ color: pelletColor, emissive: pelletColor, emissiveIntensity: pelletColor === 0xffb800 ? 0.35 : 0.05 });
+    for (let pelletIndex = 0; pelletIndex < 7; pelletIndex++) {
+        const pellet = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), pelletMaterial);
+        pellet.position.set(randomBetween(-0.1, 0.1), 0.12 + randomBetween(0, 0.03), randomBetween(-0.1, 0.1));
+        bowlGroup.add(pellet);
+    }
+    const label = createLabelSprite(labelText, labelColor);
+    label.position.set(0, 0.6, 0); bowlGroup.add(label);
+    bowlGroup.position.set(position.x, 0, position.z);
+    bowlGroup.visible = false;
+    scene.add(bowlGroup);
+    return bowlGroup;
+}
+
+function createMaze(){
+    const mazeGroup = new THREE.Group();
+    const floorPlate = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.04, 1.2), new THREE.MeshStandardMaterial({ color: 0x1d3d1d }));
+    floorPlate.position.y = 0.02; mazeGroup.add(floorPlate);
+    const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x6fcf97, roughness: 0.6 });
+    [
+        { x: -0.5, z: 0.15, width: 1.0, depth: 0.06 },
+        { x: 0.5, z: -0.15, width: 1.0, depth: 0.06 },
+        { x: -1.1, z: 0, width: 0.06, depth: 1.2 },
+        { x: 1.1, z: 0, width: 0.06, depth: 1.2 },
+        { x: 0, z: -0.6, width: 2.2, depth: 0.06 },
+        { x: 0, z: 0.6, width: 2.2, depth: 0.06 }
+    ].forEach(wall => {
+        const wallMesh = new THREE.Mesh(new THREE.BoxGeometry(wall.width, 0.28, wall.depth), wallMaterial);
+        wallMesh.position.set(wall.x, 0.16, wall.z); mazeGroup.add(wallMesh);
+    });
+    const label = createLabelSprite(translate('label_maze'), '#6fcf97');
+    label.position.set(0, 0.8, 0); mazeGroup.add(label);
+    mazeGroup.position.set(POSITION.maze.x, 0, POSITION.maze.z);
+    mazeGroup.visible = false;
+    scene.add(mazeGroup);
+    return mazeGroup;
+}
+
+function createBag(){
+    const bagGroup = new THREE.Group();
+    const sack = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshStandardMaterial({ color: 0x9c7a46, roughness: 0.9 }));
+    sack.scale.set(1, 1.1, 1); sack.position.y = 0.33; bagGroup.add(sack);
+    const neck = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.3, 12), new THREE.MeshStandardMaterial({ color: 0x9c7a46, roughness: 0.9 }));
+    neck.position.y = 0.72; bagGroup.add(neck);
+    const tie = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.025, 8, 14), new THREE.MeshStandardMaterial({ color: 0xcc2222 }));
+    tie.rotation.x = Math.PI / 2; tie.position.y = 0.62; bagGroup.add(tie);
+    const label = createLabelSprite(translate('label_bag'), '#ffb800');
+    label.position.set(0, 1.15, 0); bagGroup.add(label);
+    bagGroup.position.set(POSITION.bag.x, 0, POSITION.bag.z);
+    bagGroup.visible = false;
+    scene.add(bagGroup);
+    return bagGroup;
+}
+
+function createRing(centerX){
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.95, 1.05, 48), new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.6, side: THREE.DoubleSide }));
+    ring.rotation.x = -Math.PI / 2; ring.position.set(centerX, 0.03, 0);
+    ring.visible = false;
+    scene.add(ring);
+    return ring;
+}
+
+function createLighting(){
+    scene.add(new THREE.AmbientLight(0x446655, 0.9));
+    scene.add(new THREE.HemisphereLight(0x88ffaa, 0x102010, 0.5));
+    const sun = new THREE.DirectionalLight(0xbfffd5, 1.1);
+    sun.position.set(4, 6, 3); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+    sun.shadow.camera.left = -4; sun.shadow.camera.right = 4; sun.shadow.camera.top = 4; sun.shadow.camera.bottom = -4;
+    scene.add(sun);
+    const fill = new THREE.DirectionalLight(0x224466, 0.3);
+    fill.position.set(-3, 2, -3); scene.add(fill);
+}
+
+function createEnvironment(){
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(4.4, 48), new THREE.MeshStandardMaterial({ color: 0x0c1a0c, roughness: 0.9 }));
+    floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+    const grid = new THREE.GridHelper(8.5, 28, 0x2a5a2a, 0x1a3a1a);
+    grid.position.y = 0.01; scene.add(grid);
+    const barMaterial = new THREE.MeshStandardMaterial({ color: 0x2a5a2a, metalness: 0.4, roughness: 0.5 });
+    for (let barIndex = 0; barIndex < 26; barIndex++) {
+        const angle = (barIndex / 26) * Math.PI * 2;
+        const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.2, 6), barMaterial);
+        bar.position.set(Math.cos(angle) * 4.2, 0.6, Math.sin(angle) * 4.2); scene.add(bar);
+    }
+    props.partition = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.1, 4.6), new THREE.MeshPhysicalMaterial({ color: 0x336655, transparent: true, opacity: 0.25, roughness: 0.2 }));
+    props.partition.position.set(0, 0.55, 0); props.partition.visible = false; scene.add(props.partition);
+    props.bowlA = createBowl(POSITION.bowlA, 0xffb800, translate('label_super'), '#ffb800');
+    props.bowlB = createBowl(POSITION.bowlB, 0xb0a48a, translate('label_normal'), '#4da3ff');
+    props.maze = createMaze();
+    props.bag = createBag();
+    props.ringA = createRing(1.4);
+    props.ringB = createRing(-1.4);
+}
+
+function createMice(){
+    for (let cloneIndex = 0; cloneIndex < CLONE_COUNT; cloneIndex++) registerMouse('clone', { x: 0, z: 0 }, 0.8);
+    registerMouse('brain', POSITION.brainHome, 1);
+    registerMouse('pinky', POSITION.pinkyHome, 1);
+    mouseByRole('brain').group.rotation.y = Math.PI;
+}
+
+/* ---------- posiciones de grupos ---------- */
+function groupHome(groupKey, orderInGroup){
+    const side = groupKey === 'A' ? 1 : -1;
+    return { x: side * (0.9 + (orderInGroup % 3) * 0.5), z: -0.5 + Math.floor(orderInGroup / 3) * 0.9 };
+}
+function clusterHome(cloneIndex){
+    const angle = (cloneIndex / CLONE_COUNT) * Math.PI * 2;
+    return { x: Math.cos(angle) * 0.9, z: 0.2 + Math.sin(angle) * 0.7 };
+}
+function assignGroup(mouse, groupKey, orderInGroup, instant){
+    mouse.groupKey = groupKey;
+    const collar = mouse.group.userData.collar;
+    collar.visible = true;
+    collar.material.color.setHex(groupKey === 'A' ? COLOR_GROUP_A : COLOR_GROUP_B);
+    const home = groupHome(groupKey, orderInGroup);
+    setMouseHome(mouse, home, instant);
+    return home;
+}
+
+/* ---------- cues (lo que el recorrido le pide a la escena) ---------- */
+function runMazeWith(mice){
+    mice.forEach((mouse, mouseIndex) => {
+        setTimeout(() => {
+            const entry = { x: POSITION.maze.x + randomBetween(-0.5, 0.5), z: POSITION.maze.z + 0.8 };
+            moveMouse(mouse, entry, 800, () => setTimeout(() => moveMouse(mouse, mouse.home, 900), 300));
+        }, mouseIndex * 140);
+    });
+}
+function feedWith(mice, bowlPosition){
+    mice.forEach((mouse, mouseIndex) => {
+        setTimeout(() => {
+            const nearBowl = { x: bowlPosition.x + randomBetween(-0.3, 0.3), z: bowlPosition.z - 0.45 };
+            moveMouse(mouse, nearBowl, 900, () => setTimeout(() => moveMouse(mouse, mouse.home, 900), 700));
+        }, mouseIndex * 120);
+    });
+}
+function resetEverythingInstant(){
+    mouseList.forEach(hideMouseInstant);
+    [props.partition, props.bowlA, props.bowlB, props.maze, props.bag, props.ringA, props.ringB].forEach(hideInstant);
+    props.ringA.visible = false; props.ringB.visible = false;
+}
+function setupPureGroupsInstant(){
+    resetEverythingInstant();
+    props.maze.visible = true; props.partition.visible = true;
+    const shuffledClones = clonesOf().slice();
+    shuffledClones.forEach((mouse, cloneIndex) => {
+        const groupKey = cloneIndex < CLONE_COUNT / 2 ? 'A' : 'B';
+        assignGroup(mouse, groupKey, groupKey === 'A' ? cloneIndex : cloneIndex - CLONE_COUNT / 2, true);
+        showMouseInstant(mouse);
+    });
+}
+function setupQuasiInstant(){
+    resetEverythingInstant();
+    props.maze.visible = true; props.partition.visible = true;
+    props.bowlA.visible = true; props.bowlB.visible = true;
+    const brain = mouseByRole('brain'), pinky = mouseByRole('pinky');
+    setMouseHome(brain, POSITION.brainHome, true); setMouseHome(pinky, POSITION.pinkyHome, true);
+    brain.group.rotation.y = Math.PI; pinky.group.rotation.y = 0;
+    showMouseInstant(brain); showMouseInstant(pinky);
+}
+
+const CUES = {
+    empty(){ resetEverythingInstant(); },
+    prev_pure(){ setupPureGroupsInstant(); },
+    prev_quasi(){ setupQuasiInstant(); },
+
+    clones(){
+        resetEverythingInstant();
+        popIn(props.maze);
+        clonesOf().forEach((mouse, cloneIndex) => {
+            setMouseHome(mouse, clusterHome(cloneIndex), true);
+            showMouse(mouse, cloneIndex * 70);
+        });
+    },
+    maze(){ runMazeWith(clonesOf().filter(mouse => mouse.shown)); },
+    draw(){
+        const clones = clonesOf().filter(mouse => mouse.shown);
+        if (!clones.length) return;
+        popIn(props.bag);
+        clones.forEach(mouse => moveMouse(mouse, { x: randomBetween(-0.35, 0.35), z: POSITION.bag.z + randomBetween(-0.3, 0.3) }, 700));
+        setTimeout(() => clones.forEach(mouse => {
+            moveMouse(mouse, { x: randomBetween(-0.6, 0.6), z: POSITION.bag.z + randomBetween(-0.5, 0.5) }, 350);
+            bounceMouse(mouse, 1.2, 350);
+        }), 850);
+        setTimeout(() => {
+            const shuffled = clones.slice().sort(() => Math.random() - 0.5);
+            shuffled.forEach((mouse, drawIndex) => {
+                const groupKey = drawIndex < shuffled.length / 2 ? 'A' : 'B';
+                const orderInGroup = groupKey === 'A' ? drawIndex : drawIndex - shuffled.length / 2;
+                moveMouse(mouse, assignGroup(mouse, groupKey, orderInGroup, false), 1000);
+            });
+        }, 1400);
+        setTimeout(() => { popOut(props.bag); popIn(props.partition); }, 2600);
+    },
+    feed(){
+        popIn(props.bowlA); popIn(props.bowlB);
+        setTimeout(() => {
+            const clones = clonesOf().filter(mouse => mouse.shown);
+            feedWith(clones.filter(mouse => mouse.groupKey === 'A'), POSITION.bowlA);
+            feedWith(clones.filter(mouse => mouse.groupKey === 'B'), POSITION.bowlB);
+        }, 500);
+    },
+    equalize(){
+        [props.ringA, props.ringB].forEach(ring => {
+            ring.visible = true;
+            tween(1500, progress => {
+                ring.scale.setScalar(0.6 + 0.7 * Math.sin(progress * Math.PI) + 0.4 * progress);
+                ring.material.opacity = 0.9 - 0.5 * progress;
+            });
+        });
+    },
+
+    quasi_enter(){
+        clonesOf().forEach(hideMouse);
+        popOut(props.ringA); popOut(props.ringB);
+        props.maze.visible = true; props.partition.visible = true;
+        const brain = mouseByRole('brain'), pinky = mouseByRole('pinky');
+        setMouseHome(brain, POSITION.brainHome, true); setMouseHome(pinky, POSITION.pinkyHome, true);
+        brain.group.rotation.y = Math.PI; pinky.group.rotation.y = 0;
+        showMouse(brain, 350); showMouse(pinky, 500);
+    },
+    quasi_feed(){
+        popIn(props.bowlA); popIn(props.bowlB);
+        setTimeout(() => {
+            feedWith([mouseByRole('brain')], POSITION.bowlA);
+            feedWith([mouseByRole('pinky')], POSITION.bowlB);
+        }, 500);
+    },
+    pre_enter(){
+        hideMouse(mouseByRole('pinky'));
+        popOut(props.partition); popOut(props.bowlB);
+        props.maze.visible = true;
+        if (!props.bowlA.visible) popIn(props.bowlA);
+        const brain = mouseByRole('brain');
+        showMouse(brain, 0);
+        moveMouse(brain, POSITION.brainAlone, 900, () => feedWith([brain], POSITION.bowlA));
+        setMouseHome(brain, POSITION.brainAlone, false);
+    }
+};
+function cue(cueName){ const handler = CUES[cueName]; if (handler) handler(); }
+
+/* ---------- interacción ---------- */
+function mouseLabel(mouse){
+    if (mouse.role === 'brain') return translate('tip_brain');
+    if (mouse.role === 'pinky') return translate('tip_pinky');
+    if (mouse.groupKey === 'A') return translate('tip_clone') + ' · ' + translate('tip_group_a');
+    if (mouse.groupKey === 'B') return translate('tip_clone') + ' · ' + translate('tip_group_b');
+    return translate('tip_clone');
+}
+function pickMouse(event){
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const hits = raycaster.intersectObjects(mouseList.filter(mouse => mouse.shown).map(mouse => mouse.group), true);
+    return { hit: hits.length ? hits[0].object.userData.mouseRef : null, rect };
+}
+function onPointerMove(event){
+    const { hit, rect } = pickMouse(event);
+    if (hit) {
+        tooltip.textContent = mouseLabel(hit);
+        tooltip.style.left = (event.clientX - rect.left) + 'px';
+        tooltip.style.top = (event.clientY - rect.top) + 'px';
+        tooltip.style.display = 'block';
+        container.style.cursor = 'pointer';
+    } else { tooltip.style.display = 'none'; container.style.cursor = 'grab'; }
+}
+function onClick(event){
+    const { hit } = pickMouse(event);
+    if (hit) bounceMouse(hit, 1.25, 320);
+}
+function onResize(){
+    const width = container.clientWidth, height = container.clientHeight || 340;
+    camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height);
+}
+
+function updateMice(elapsed){
+    mouseList.forEach((mouse, mouseIndex) => {
+        if (!mouse.shown) return;
+        if (mouse.busy) { mouse.group.position.y = Math.abs(Math.sin(elapsed * 14 + mouseIndex)) * 0.04; return; }
+        mouse.blend += (1 - mouse.blend) * 0.04;
+        mouse.group.position.y = Math.sin(elapsed * 2 + mouseIndex) * 0.01;
+        mouse.group.position.x = mouse.home.x + Math.sin(elapsed * 0.5 + mouse.wanderPhase) * 0.12 * mouse.blend;
+        mouse.group.position.z = mouse.home.z + Math.cos(elapsed * 0.4 + mouse.wanderPhase) * 0.12 * mouse.blend;
+    });
+}
+function animate(){
+    requestAnimationFrame(animate);
+    controls.update();
+    updateMice(clock.getElapsedTime());
+    renderer.render(scene, camera);
+}
+
+function initScene(){
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a1a0a);
-    scene.fog = new THREE.Fog(0x0a1a0a, 6, 15);
-
-    const w = container.clientWidth, h = container.clientHeight || 380;
-    camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
-    camera.position.set(3.2, 2.6, 4.2);
-
+    scene.fog = new THREE.Fog(0x0a1a0a, 7, 16);
+    const width = container.clientWidth, height = container.clientHeight || 340;
+    camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    camera.position.set(3.4, 3.2, 5.2);
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(w, h);
+    renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
-
     controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.minDistance = 2.2;
-    controls.maxDistance = 7;
-    controls.maxPolarAngle = Math.PI * 0.49;
-    controls.target.set(0, 0.3, 0);
-
-    clock = new THREE.Clock();
-    raycaster = new THREE.Raycaster();
-    pointer = new THREE.Vector2();
-
-    createLighting();
-    createLabEnvironment();
-    createMice();
-
+    controls.enableDamping = true; controls.dampingFactor = 0.08;
+    controls.minDistance = 2.6; controls.maxDistance = 8.5; controls.maxPolarAngle = Math.PI * 0.49;
+    controls.target.set(0, 0.2, 0);
+    clock = new THREE.Clock(); raycaster = new THREE.Raycaster(); pointer = new THREE.Vector2();
+    createLighting(); createEnvironment(); createMice();
     window.addEventListener('resize', onResize);
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerleave', () => { tooltip.style.display = 'none'; });
     renderer.domElement.addEventListener('click', onClick);
 }
 
-function createLighting() {
-    scene.add(new THREE.AmbientLight(0x335544, 0.8));
-    scene.add(new THREE.HemisphereLight(0x88ffaa, 0x102010, 0.5));
-
-    const sun = new THREE.DirectionalLight(0x9fffbf, 1.1);
-    sun.position.set(4, 6, 3);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(1024, 1024);
-    sun.shadow.camera.left = -4; sun.shadow.camera.right = 4;
-    sun.shadow.camera.top = 4; sun.shadow.camera.bottom = -4;
-    scene.add(sun);
-
-    const fill = new THREE.DirectionalLight(0x224466, 0.3);
-    fill.position.set(-3, 2, -3);
-    scene.add(fill);
+try {
+    initScene();
+    animate();
+    window.lab3D = { cue };
+    (window.pendingSceneCues || []).forEach(cue);
+    window.pendingSceneCues = [];
+} catch (sceneError) {
+    console.error('Escena 3D no disponible:', sceneError);
+    container.replaceChildren();
+    const fallback = document.createElement('div');
+    fallback.className = 'scene-fallback';
+    fallback.textContent = translate('scene_unavailable');
+    container.appendChild(fallback);
 }
-
-function createLabEnvironment() {
-    // Piso circular
-    const floor = new THREE.Mesh(
-        new THREE.CircleGeometry(4.4, 48),
-        new THREE.MeshStandardMaterial({ color: 0x0c1a0c, roughness: 0.9 })
-    );
-    floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = true;
-    scene.add(floor);
-
-    const grid = new THREE.GridHelper(8.5, 28, 0x2a5a2a, 0x1a3a1a);
-    grid.position.y = 0.01;
-    scene.add(grid);
-
-    // Mampara divisoria (grupo experimental | grupo control)
-    const glass = new THREE.Mesh(
-        new THREE.BoxGeometry(0.06, 1.1, 4.6),
-        new THREE.MeshPhysicalMaterial({ color: 0x224433, transparent: true, opacity: 0.2, roughness: 0.2 })
-    );
-    glass.position.set(0, 0.55, 0);
-    scene.add(glass);
-
-    // Barrotes perimetrales
-    const barMat = new THREE.MeshStandardMaterial({ color: 0x2a5a2a, metalness: 0.4, roughness: 0.5 });
-    const radius = 4.2;
-    for (let i = 0; i < 26; i++) {
-        const a = (i / 26) * Math.PI * 2;
-        const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.2, 6), barMat);
-        bar.position.set(Math.cos(a) * radius, 0.6, Math.sin(a) * radius);
-        scene.add(bar);
-    }
-
-    // Prop: Rayo de Inteligencia ACME (lado de Brain)
-    const rayoBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.18, 0.22, 0.4, 8),
-        new THREE.MeshStandardMaterial({ color: 0x552222, metalness: 0.6, roughness: 0.3 })
-    );
-    rayoBase.position.set(RAYO_POS.x, 0.2, RAYO_POS.z);
-    scene.add(rayoBase);
-    const rayoBeam = new THREE.Mesh(
-        new THREE.ConeGeometry(0.12, 0.5, 8),
-        new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x881111, emissiveIntensity: 0.6 })
-    );
-    rayoBeam.position.set(RAYO_POS.x, 0.55, RAYO_POS.z);
-    scene.add(rayoBeam);
-    labProps.rayo = rayoBeam;
-
-    // Comederos (uno por sujeto)
-    function crearComedero(pos, color) {
-        const bowl = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.14, 0.1, 0.08, 12),
-            new THREE.MeshStandardMaterial({ color, metalness: 0.3, roughness: 0.4 })
-        );
-        bowl.position.set(pos.x, 0.05, pos.z);
-        scene.add(bowl);
-        return bowl;
-    }
-    labProps.bowlBrain = crearComedero(BOWL.brain, 0xffaa33);
-    labProps.bowlPinky = crearComedero(BOWL.pinky, 0x66aaff);
-}
-
-function createMouseGroup(key) {
-    const colors = MOUSE_COLORS[key];
-    const g = new THREE.Group();
-
-    const body = new THREE.Mesh(
-        new THREE.CapsuleGeometry(0.16, 0.22, 4, 8),
-        new THREE.MeshStandardMaterial({ color: colors.body, roughness: 0.7 })
-    );
-    body.rotation.z = Math.PI / 2;
-    body.position.set(0, 0.18, 0);
-    body.castShadow = true;
-    g.add(body);
-
-    const head = new THREE.Mesh(
-        new THREE.SphereGeometry(0.14, 16, 16),
-        new THREE.MeshStandardMaterial({ color: colors.head, roughness: 0.7 })
-    );
-    head.position.set(0.26, 0.22, 0);
-    head.castShadow = true;
-    g.add(head);
-
-    const earMat = new THREE.MeshStandardMaterial({ color: colors.ear, roughness: 0.6 });
-    [-1, 1].forEach(side => {
-        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 10), earMat);
-        ear.position.set(0.32, 0.32, side * 0.09);
-        ear.scale.set(1, 1, 0.4);
-        g.add(ear);
-    });
-
-    // Cola
-    const tailCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-0.2, 0.15, 0), new THREE.Vector3(-0.4, 0.2, 0.05), new THREE.Vector3(-0.55, 0.1, -0.05)
-    ]);
-    const tail = new THREE.Mesh(
-        new THREE.TubeGeometry(tailCurve, 12, 0.015, 6, false),
-        new THREE.MeshStandardMaterial({ color: colors.body })
-    );
-    g.add(tail);
-
-    // Ojos
-    const eyeMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
-    [-1, 1].forEach(side => {
-        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), eyeMat);
-        eye.position.set(0.36, 0.24, side * 0.06);
-        g.add(eye);
-    });
-
-    if (key === 'brain') {
-        // Capa roja icónica
-        const cape = new THREE.Mesh(
-            new THREE.ConeGeometry(0.14, 0.28, 4),
-            new THREE.MeshStandardMaterial({ color: colors.cape, side: THREE.DoubleSide })
-        );
-        cape.rotation.x = Math.PI;
-        cape.position.set(-0.15, 0.12, 0);
-        cape.scale.set(1, 1, 0.3);
-        g.add(cape);
-    }
-
-    return g;
-}
-
-function createMice() {
-    const brainGroup = createMouseGroup('brain');
-    brainGroup.position.set(HOME.brain.x, 0, HOME.brain.z);
-    brainGroup.rotation.y = Math.PI;
-    brainGroup.traverse(o => { o.userData.ownerKey = 'brain'; });
-    scene.add(brainGroup);
-    mice.brain = { group: brainGroup, busy: false };
-
-    const pinkyGroup = createMouseGroup('pinky');
-    pinkyGroup.position.set(HOME.pinky.x, 0, HOME.pinky.z);
-    pinkyGroup.traverse(o => { o.userData.ownerKey = 'pinky'; });
-    scene.add(pinkyGroup);
-    mice.pinky = { group: pinkyGroup, busy: false };
-}
-
-// Interpolación manual (sin libería de tweening) para mover un ratón a un punto XZ
-function animateTo(mouseObj, target, duration, onComplete) {
-    const obj = mouseObj.group;
-    const startX = obj.position.x, startZ = obj.position.z;
-    const t0 = performance.now();
-    mouseObj.busy = true;
-    function step() {
-        const p = Math.min((performance.now() - t0) / duration, 1);
-        const e = 1 - Math.pow(1 - p, 3);
-        obj.position.x = startX + (target.x - startX) * e;
-        obj.position.z = startZ + (target.z - startZ) * e;
-        if (p < 1) requestAnimationFrame(step);
-        else { mouseObj.busy = false; if (onComplete) onComplete(); }
-    }
-    step();
-}
-
-function bounceScale(mouseObj, factor, duration) {
-    const obj = mouseObj.group;
-    const t0 = performance.now();
-    function step() {
-        const p = Math.min((performance.now() - t0) / duration, 1);
-        const s = 1 + Math.sin(p * Math.PI) * (factor - 1);
-        obj.scale.set(s, s, s);
-        if (p < 1) requestAnimationFrame(step); else obj.scale.set(1, 1, 1);
-    }
-    step();
-}
-
-// Reacciona según el diseño experimental ejecutado (llamado desde animarSujetos() en el script clásico)
-function reaccionar(type) {
-    const b = mice.brain, p = mice.pinky;
-
-    if (type === 'pre') {
-        animateTo(b, RAYO_POS, 700, () => {
-            bounceScale(b, 1.3, 400);
-            setTimeout(() => animateTo(b, HOME.brain, 700), 450);
-        });
-    } else if (type === 'quasi') {
-        animateTo(b, BOWL.brain, 800, () => {
-            setTimeout(() => animateTo(b, HOME.brain, 800), 500);
-        });
-        setTimeout(() => {
-            animateTo(p, BOWL.pinky, 800, () => {
-                setTimeout(() => animateTo(p, HOME.pinky, 800), 500);
-            });
-        }, 250);
-    } else if (type === 'pure') {
-        // Sorteo: cruzan posiciones hacia el centro y regresan a su lado
-        animateTo(b, { x: -0.3, z: 0 }, 650, () => animateTo(b, HOME.brain, 650));
-        animateTo(p, { x: 0.3, z: 0 }, 650, () => animateTo(p, HOME.pinky, 650));
-    }
-}
-
-function updateMice(elapsed) {
-    ['brain', 'pinky'].forEach((key, i) => {
-        const m = mice[key];
-        m.group.position.y = Math.sin(elapsed * 2 + i) * 0.01;
-        if (!m.busy) {
-            // Deambular lento en reposo dentro de su lado del recinto
-            const home = HOME[key];
-            m.group.position.x = home.x + Math.sin(elapsed * 0.4 + i * 2) * 0.25;
-            m.group.position.z = home.z + Math.cos(elapsed * 0.3 + i * 2) * 0.25;
-        }
-    });
-}
-
-function onPointerMove(e) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects([mice.brain.group, mice.pinky.group], true);
-    if (hits.length) {
-        const key = hits[0].object.userData.ownerKey;
-        const label = key === 'brain' ? 'BRAIN — Sujeto A' : 'PINKY — Sujeto B';
-        const estado = document.getElementById('status-' + key)?.textContent || '';
-        tooltip.textContent = label + (estado ? ' · ' + estado : '');
-        tooltip.style.left = (e.clientX - rect.left) + 'px';
-        tooltip.style.top = (e.clientY - rect.top) + 'px';
-        tooltip.style.display = 'block';
-        container.style.cursor = 'pointer';
-    } else {
-        tooltip.style.display = 'none';
-        container.style.cursor = 'grab';
-    }
-}
-
-function onClick(e) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects([mice.brain.group, mice.pinky.group], true);
-    if (hits.length) {
-        const key = hits[0].object.userData.ownerKey;
-        bounceScale(mice[key], 1.15, 300);
-    }
-}
-
-function onResize() {
-    const w = container.clientWidth, h = container.clientHeight || 380;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    const elapsed = clock.getElapsedTime();
-    controls.update();
-    updateMice(elapsed);
-    renderer.render(scene, camera);
-}
-
-initScene();
-animate();
-
-window.lab3D = { reaccionar };
 </script>
 
 <script>
@@ -1892,40 +1816,40 @@ window.lab3D = { reaccionar };
   const GUIDE_ALL = {
   "es": {
     "before": [
-      "¿Qué diferencia a un experimento de una simple observación? ¿Qué debe hacer el investigador que en la observación no hace?",
-      "¿Por qué no siempre podemos asignar personas al azar a un tratamiento? Den ejemplos de su área donde sea imposible o poco ético.",
-      "¿Qué significa que un estudio tenga «validez interna»? ¿Qué cosas podrían hacernos creer que un tratamiento funcionó cuando no fue así?"
+      "Piensa en algo que empezaste a hacer (una dieta, una técnica de estudio) y que sentiste que te funcionó. ¿Cómo sabrías de verdad que fue por eso?",
+      "Si quisieras saber si una app de estudio realmente funciona, ¿con quién compararías a sus usuarios? ¿Qué tendría que ser igual en ambos grupos?",
+      "¿Por qué no siempre se puede sortear a las personas para que reciban o no un tratamiento? Den ejemplos de su carrera."
     ],
     "during": [
-      "¿Qué otra explicación, además del tratamiento, podría haber producido el cambio que observas en BRAIN y PINKY?",
-      "En el preexperimento, ¿qué te falta para saber qué habría pasado sin el tratamiento?",
-      "En el cuasiexperimento, ¿qué ganó el diseño al añadir un grupo de comparación? ¿Qué sigue sin estar garantizado?",
-      "Si los grupos ya eran distintos antes del tratamiento, ¿cómo cambia la interpretación de la diferencia final?"
+      "En el experimento, ¿qué ingrediente de la receta te parece más fácil de olvidar? ¿Qué pasaría si se olvidara?",
+      "¿Por qué el sorteo hace que los grupos partan parejos? ¿Qué habría pasado si cada ratón hubiera elegido su propio grupo?",
+      "En el cuasiexperimento, ¿qué otra explicación, además de la comida, pudo producir la mejora de Brain?",
+      "En el pre-experimento, ¿qué datos te faltan para saber si el Superalimento sirvió?"
     ],
     "after": [
-      "¿Qué hace la asignación aleatoria que ningún otro control puede hacer por sí solo?",
       "¿Es el cuasiexperimento un «experimento de segunda clase»? Argumenten a favor y en contra.",
-      "Una autoridad aplica un programa en escuelas voluntarias y lo compara con las no voluntarias. ¿Qué diseño es, qué amenazas tiene y cómo las corregirían?",
-      "Describan una investigación de su carrera donde solo sería viable un cuasiexperimento. ¿Qué precauciones tomarían para sostener sus conclusiones?"
+      "Una autoridad aplica un programa en escuelas voluntarias y lo compara con las que no se ofrecieron. ¿Qué diseño es, qué amenazas tiene y cómo las corregirían?",
+      "Describan un estudio de su carrera donde solo sería viable un cuasiexperimento. ¿Qué precauciones tomarían para sostener sus conclusiones?",
+      "¿Qué conclusiones se pueden sacar de un pre-experimento y cuáles no? ¿Para qué serviría igual?"
     ]
   },
   "en": {
     "before": [
-      "What sets an experiment apart from plain observation? What must the researcher do that observation does not require?",
-      "Why can we not always assign people to a treatment at random? Give examples from your field where it is impossible or unethical.",
-      "What does it mean for a study to have «internal validity»? What could make us believe a treatment worked when it did not?"
+      "Think of something you started doing (a diet, a study technique) that you felt worked. How could you really know it was because of that?",
+      "If you wanted to know whether a study app really works, who would you compare its users with? What would have to be equal in both groups?",
+      "Why can people not always be drawn at random to receive a treatment or not? Give examples from your field."
     ],
     "during": [
-      "Besides the treatment, what other explanation could have produced the change you see in BRAIN and PINKY?",
-      "In the pre-experiment, what is missing to know what would have happened without the treatment?",
-      "In the quasi-experiment, what did the design gain by adding a comparison group? What is still not guaranteed?",
-      "If the groups already differed before the treatment, how does that change the way you read the final difference?"
+      "In the experiment, which ingredient of the recipe do you think is easiest to forget? What would happen if it were forgotten?",
+      "Why does the draw make the groups start out alike? What would have happened if each mouse had picked its own group?",
+      "In the quasi-experiment, what other explanation, besides the food, could have produced Brain's improvement?",
+      "In the pre-experiment, what data are you missing to know whether the Superfood worked?"
     ],
     "after": [
-      "What does random assignment do that no other control can do on its own?",
       "Is the quasi-experiment a «second-class experiment»? Argue for and against.",
-      "An authority runs a program in volunteer schools and compares it with non-volunteer ones. Which design is this, what threats does it carry and how would you correct them?",
-      "Describe a study from your degree where only a quasi-experiment would be feasible. What precautions would you take to support your conclusions?"
+      "An authority runs a program in volunteer schools and compares it with schools that did not volunteer. Which design is this, what threats does it carry and how would you correct them?",
+      "Describe a study from your degree where only a quasi-experiment would be feasible. What precautions would you take to support your conclusions?",
+      "What conclusions can be drawn from a pre-experiment, and which cannot? What is it still useful for?"
     ]
   }
 };

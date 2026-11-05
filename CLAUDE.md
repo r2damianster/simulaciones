@@ -14,7 +14,7 @@ Cada simulación es un archivo HTML autónomo (SPA) con HTML5 + CSS3 + Vanilla J
 |---|---|---|
 | `observación.html` | Observación en Investigación Social | Metodología cualitativa — tipos de observación, notas de campo, sesgos |
 | `financiamiento_etica.html` | El Dilema del Investigador 2.0 | Ética académica — revistas depredadoras, gestión de fondos ONU/CEDIA |
-| `disenos.html` | Laboratorio ACME | Diseños experimentales — investigación conductual |
+| `disenos.html` | Laboratorio ACME | Diseños de investigación para no iniciados — receta de 5 ingredientes (sorteo, comparación, todo igual, medir antes/después, evaluador ciego); recorre experimento → cuasiexperimento → pre-experimento quitando ingredientes, con un solo tratamiento (superalimento) y términos «dicho fácil → dicho técnico» |
 | `apa7.html` | Simulación Formato APA 7 | Redacción académica — corrección de manuscrito con errores de formato APA 7.ª ed. |
 | `apa7_2.html` | Editor APA 7 — Cinta de herramientas | Redacción académica — editor estilo Word por fases, ribbon interactivo, desbloqueo secuencial |
 | `peel.html` | Constructor PEEL - Drag & Drop | Redacción argumentativa — estructura PEEL (Punto, Evidencia, Explicación, Link), arrastrar frases a slots correctos |
@@ -38,7 +38,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 - **JavaScript** Vanilla (sin frameworks)
 - **Fuentes CDN**: Google Fonts (Playfair Display, Source Sans 3, Orbitron, Share Tech Mono)
 - **Iconos CDN**: Font Awesome 6.5
-- **CSS framework opcional**: Tailwind CDN (en `disenos.html` y `apa7.html`)
+- **CSS framework opcional**: Tailwind CDN (en `apa7.html`)
 
 ### Index.html — Contadores dinámicos
 
@@ -56,7 +56,7 @@ Documentación de contexto de cada simulación: `.claude/Simulaciones/`
 |---|---|---|---|
 | `observación.html` | `#1C1917` (dark warm) | `#D97706` (amber) | Premium editorial dark |
 | `financiamiento_etica.html` | `#14110d` (dark warm) | `#D4A24E` (gold) + `#7ba7c9` (steel blue) | Despacho del investigador — cartas con membrete, sello de goma, mapa enmarcado como monitor |
-| `disenos.html` | `#060d06` (dark green) | `#34D399` (emerald, ex-matrix `#00ff41`) | Terminal/lab elegante — BRAIN y PINKY en jaulas animadas que reaccionan al diseño ejecutado |
+| `disenos.html` | `#060d06` (dark green) | `#34D399` (emerald, ex-matrix `#00ff41`) | Laboratorio guiado (burbujas de diálogo + tablero de ingredientes) — escena 3D con clones, bolsa de sorteo, laberinto; Brain y Pinky solo en cuasi/pre |
 | `apa7.html` | `#141210` (dark warm) | `#D4A853` (gold) | Editorial académico / Tailwind |
 | `apa7_2.html` | `#1E1E1E` (VS Code dark) | `#D4A853` (gold) | Editor de código / Word-like ribbon |
 | `evaluaciones_lectura.html` | `#0d0f12` (dark slate) | `#D4A24E` (gold) | Editorial caligráfico / papel manuscrito, Tailwind |

@@ -185,6 +185,90 @@
       "sims": [
         "constructos_ia"
       ]
+    },
+    "variable_independiente": {
+      "es": "variable independiente",
+      "en": "independent variable",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "variable_dependiente": {
+      "es": "variable dependiente",
+      "en": "dependent variable",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "grupo_control": {
+      "es": "grupo control",
+      "en": "control group",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "asignacion_aleatoria": {
+      "es": "asignación aleatoria (sorteo)",
+      "en": "random assignment (draw)",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "pretest_postest": {
+      "es": "pre-test y post-test",
+      "en": "pre-test and post-test",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "control_variables_extranas": {
+      "es": "control de variables extrañas (validez interna)",
+      "en": "control of extraneous variables (internal validity)",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "evaluador_ciego": {
+      "es": "evaluador ciego (doble ciego con personas)",
+      "en": "blinded assessor (double-blind with people)",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "inferencia_causal": {
+      "es": "inferencia causal",
+      "en": "causal inference",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "grupos_equivalentes": {
+      "es": "grupos equivalentes",
+      "en": "equivalent groups",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "variable_confusa": {
+      "es": "variable confusa",
+      "en": "confounding variable",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "cuasiexperimento": {
+      "es": "cuasiexperimento",
+      "en": "quasi-experiment",
+      "sims": [
+        "disenos"
+      ]
+    },
+    "preexperimento": {
+      "es": "pre-experimento",
+      "en": "pre-experiment",
+      "sims": [
+        "disenos"
+      ]
     }
   }
 }
